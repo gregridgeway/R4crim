@@ -1,0 +1,1010 @@
+---
+title: "Introduction to R"
+author: "Greg Ridgeway and Ruth Moyer"
+date: "September 20, 2017"
+output: html_document
+fontsize: 11pt
+---
+
+<style type="text/css">
+  
+  body{ /* Normal  */
+      font-size: 11px;
+      font-family: "Times New Roman", Times, serif;
+  }
+
+</style>
+
+
+
+##Setting the Path
+
+Before you do anything else in R, **it's important that you set the path** - namely, the file directory or folder from which you'll be working. This step is absolutely necessary anytime you're working with a dataset (e.g., a .csv or .txt file) that is stored on your computer, Google Drive, or some other file storage location. Otherwise, R will not be able to find the file - and you won't be able to use the dataset. 
+
+Here is how you set the path:
+
+First, before doing anything else in R, type 
+
+```{r comment=""}
+getwd()    
+
+```
+
+This `getwd()` command gets the working directory, the name of the folder where it will look for any data you want to load and save any objects you want to save. The result of `getwd()` shown here probably does not exist on your computer and you probably have a different name for the place where you wish to store your data and results. Note that for all platforms, Windows, Macs, and Linux, the working directory only uses forward slashes. So Windows users be careful... most Windows applications use backslashes, but in an effort to make R scripts work across all platforms, R requires forward slashes. Backslashes have a different use in R that you will meet later.
+
+Let's say you keep all your Crim 602 work in one folder called "Crim602" and you keep that folder on your Google Drive. To figure out what the path is for this folder, do the following. Without opening it, right click on the folder that you keep all your Crim 602 material in.  Click on "Properties" and you'll see "Location:" for the folder.  For "Location:", it should give you something like, e.g., "C:/Users/ramoyer/Google Drive". This information says what the location is for the "CRIM602" folder. On a Mac, it might look something like "~/Google Drive/CRIM602".
+
+Next, in R, using the command setwd, type in the correct file location. For example, to access my "CRIM602" folder, I'd type `setwd("C:/Users/ramoyer/Google Drive/CRIM602")`. Note that I had to change the slashes from backwards to forwards.
+
+After that, I can try to load in any dataset files that I have stored in the CRIM602 folder. If I've done my `setwd()`, correctly, I shouldn't get any errors because R will know exactly what file I'm talking about. If the path that I've given in the `setwd()` isn't right, R will think the file doesn't even exist. For example, if you give the path for, say, your Crim 600 folder, R won't be able to load the Chicago crime file because the Chicago crime file isn't stored in your Crim 600 folder. 
+
+We'll talk more about loading dataset files later. 
+
+##Help 
+
+R sometimes provides useful help as to how to do something (e.g., choosing the right command or figuring what the syntax of a line of code should be). Let's say we're stumped as to what the `sqrt()` command does:
+
+```
+?sqrt()
+
+```
+R has over 7,000 commands and an often seemingly inconsistent syntax. As you do more complex work with R (such as using new packages), the Help tab can be useful. 
+
+##Basic Math and Functions in R
+
+R, on a very unsophisticated level, is like a calculator. 
+
+```{r comment="", results='hold'}
+2+2
+1*2*3
+(1+2+3-4)/(5*7)
+sqrt(2)
+(1+sqrt(5))/2 # golden ratio
+2^3
+log(2.718281828)
+round(2.718281828,3)
+12^2 
+factorial(4)
+abs(-4)
+```
+##What Does NA mean in R?
+
+In R, `NA` means a missing value. We'll do more exercises later using data containing some `NA` values. In any dataset, you're virtually guaranteed to find some NAs. The function `is.na()` helps determine whether there are any missing values (any NAs).
+
+In some of the problems below, we'll use `is.na()`.
+
+## Making Vectors in R
+
+We will use the `c()` function a lot. `c()` *c*ombines elements, like numbers and text to form a vector or a collection of values. If we wanted to combine the numbers 1 to 5 we could do
+```{r comment=""}
+c(1,2,3,4,5)
+```
+With the `c()` function, it's important to separate all of the items with commas. 
+
+Conveniently, if you want to add 1 to each item in this collection, there's no need to add 1 like `c(1+1,2+1,3+1,4+1,5+1)`... that's a lot of typing. Instead R offers the shortcut
+```{r comment=""}
+c(1,2,3,4,5)+1
+```
+In fact, you can apply any mathematical operation to each value in the same way.
+```{r comment="", results='hold'}
+c(1,2,3,4,5)*2
+sqrt(c(1,2,3,4,5))
+(c(1,2,3,4,5)-3)^2
+abs(c(-1,1,-2,2,-3,3))
+```
+
+Note in the examples below that you can also have a collection of non-numerical items. When combining text items, remember to use quotes around each item.
+```{r comment="", results='hold'}
+c("CRIM600","CRIM601","CRIM602","CRIM603")
+c("yes","no","no",NA,NA,"yes")
+```
+
+You can use double quotes or single quotes in R as long as you are consistent. When you have quotes inside the text you need to be particularly careful.
+```{r comment="", results='hold'}
+"Lou Gehrig's disease"
+'The officer shouted "halt!"'
+```
+The backslashes in the above text "protect" the double quote, communicated to you and to R that the next double quote is not the end of the text, but a character that is actually part of the text the user wants to keep.
+
+The `c()` function isn't the only way to make a list in R. For example, placing a `:` between two numbers can return a list of numbers in sequence. The functions `rep()` and `seq()` produce repeated values or sequences.
+```{r comment="", results='hold'}
+1:10
+5:-5
+c(1,1,1,1,1,1,1,1,1,1)
+rep(1,10)
+rep(c(1,2),each=5)
+seq(1, 5)
+seq(1, 5, 2)
+```
+
+R will also do arithmetic with two vectors, doing the calculation pairwise. This following will compute 1+11 and 2+12 up to 10+20.
+```{r comment=""}
+1:10 + 11:20
+```
+Yet, other functions operate on the whole collection of values in a vector. See the following examples:
+```{r comment="", results='hold'}
+sum(c(1,10,3,6,2,5,8,4,7,9)) # sum
+length(c(1,10,3,6,2,5,8,4,7,9)) # how many?
+cumsum(c(1,10,3,6,2,5,8,4,7,9)) # cumulative sum
+mean(c(1,10,3,6,2,5,8,4,7,9)) # mean of collection of 10 numbers
+median(c(1,10,3,6,2,5,8,4,7,9)) # median of same population
+```
+There are also some commands in R that help us find the biggest and smallest values. For example:
+```{r comment="", results='hold'}
+max(c(1,10,3,6,2,5,8,4,7,9)) # what is the biggest value in vector?
+which.max(c(1,10,3,6,2,5,8,4,7,9)) # in which "spot" would we find it?
+min(c(1,10,3,6,2,5,8,4,7,9)) # what is the smallest value in vector?
+which.min(c(1,10,3,6,2,5,8,4,7,9)) # in which "spot" would we find it?
+```
+A lot of commands in R are to help you see and understand what's in a dataset. For example, we can rearrange a collection of values in ascending or descending order. Note the `order()` command.  How is it similar to the `which.max()` or `which.min()` command?  Note the `sort()` command. How is it similar to the `max()` or `min()` command?
+```{r comment="", results='asis'}
+sort(c(1,10,3,6,2,5,8,4,7,9))
+rev(c(1,10,3,6,2,5,8,4,7,9))
+rev(sort(c(1,10,3,6,2,5,8,4,7,9)))
+sort(c(1,10,3,6,2,5,8,4,7,9),decreasing=TRUE)
+order(c(1,10,3,6,2,5,8,4,7,9))#   where is the ith biggest number?
+rank(c(1,100,3,20)) #how do I rank compared to others?
+```
+The above examples have involved mostly numerical values in a vector. Here are some examples involving non-numerical "character" values. Let's create an object called `my.states` (a name I made up) that will contain the postal codes of places in which I've lived or worked.
+```{r comment="", results='hold'}
+my.states <- c("WA","DC","CA","PA","MD","VA","OH")
+```
+Take a look at the arrow `<-`.  What does it seem to do? We're going to talk more about this arrow soon. Now let's run some new functions on this collection of postal codes.
+```{r comment="", results='hold'}
+nchar(my.states)
+paste(my.states, ", USA")
+paste(my.states, ", USA", sep="")
+paste(my.states, collapse=",")
+paste0(my.states)
+```
+What does the `nchar()` command do?  The `paste()` command?  Does it make a difference to use `sep=""` or `collapse=","`? What about `paste0()`?
+
+##Class Exercises #1 (Answers Below)
+1. Print all even numbers less than 100
+2. What is the standard deviation of even numbers less than 100
+3. Have R put in alphabetical order
+`c("WA","DC","CA","PA","MD","VA","OH")`
+
+##Assignment of Variable Names
+
+The left-facing arrow symbol is an extremely important tool in R. Try the following:
+```
+a <- 1
+```
+Now type:
+```
+a
+```
+
+R has assigned a the value of "1" - here are more examples:
+```
+b <- 2+2
+a <- a+b
+a <- 1:10
+b <- 2*a
+a+b
+sd(a)
+state.names <- c("WV","OH","OK","NV","CA","IN","MA","MI","IL","IA","SC","NH",
+                 "LA","GA","CT","WI","CO","NY","UT","AK","MS","AL","OR","MT",
+                 "ND","WY","FL","ME","AZ","TN","PA","MN","NM","SD","MO","RI",
+                 "HI","WA","DE","NJ","NE","KY","AR","TX","NC","MD","VA","VT",
+                 "KS","ID","DC")
+```
+##Indexing 
+
+We can extract items from a vector, matrix, or dataframe using indexing. In R, we use square brackets to index. 
+
+```
+state.names[1]
+state.names[1:3]
+state.names[c(1,5,9)]
+state.names[2*(1:25)]
+```
+
+We can also use index to remove an item. 
+```
+state.names[-51]
+```
+
+Let's combine the sort and order commands from above (along with variable assignment) with the concept of indexing. 
+
+```
+sort(state.names)[1]
+i <- order(state.names)
+i[1:3]
+state.names[i[1:3]]
+```
+
+## Class Exercises #2 (Answers Below)
+1. What's the last state in the list?
+2. Pick out states that begin with "M" using their indices
+3. Pick out states where you have lived.
+4. What's the last state in alphabetical order?
+5. What are the last three states in alphabetical order?
+
+
+##Boolean Operators
+Boolean operators are simple words (TRUE, FALSE, equal to, and, or, not, any, greater than, less than) that can logically be used to combine or exclude items when searching data.
+```
+TRUE
+FALSE
+c(TRUE,FALSE,TRUE,FALSE)
+
+TRUE  && TRUE
+FALSE && TRUE
+FALSE || TRUE
+FALSE || FALSE
+```
+Sometimes, the syntax in R can require either single or double vertical bars; likewise, sometimes you will need to use a single ampersand instead of a double ampersand.
+
+The greater than or less than symbols are very useful. We can also express "greater than or equal to" or "less than or equal to"
+```
+6>5
+6<5
+6>=5
+5<=5
+```
+We can combine Boolean operators to test whether something is true or false:
+```
+(6>5) || (100<3)
+(6>5) && (100<3)
+```
+
+Here are some additional examples.  Note that we use a double equal sign. 
+```
+a <- 1:10
+a==5
+a!=5  # ! means "not"
+a<5
+a>=5
+13 %% 5  # = 3, 13/5 = 2 with remainder 3
+a%%2==0
+
+a>5 & a<8  # & means "and"   IMPORTANT use single & or | for vectors
+a<3 | a>=7 # | means "or"    otherwise just compares the first values
+
+#  all/any checks whether all/any are TRUE
+all(a<11)
+all(a>5 & a<8)
+any(a>5 & a<8)
+
+#   use booleans for indexing too
+i <- a%%2==0
+a[i]
+#   ! means "not"
+a[!i]
+
+i <- state.names!="DC"
+state.names[i]
+state.names[state.names!="DC"]
+
+#  %in% tests whether something is in a set
+a %in% c(3,7,10)
+
+my.states <- c("MD","OH","VA","CA","WA","DC")
+i <- state.names %in% my.states
+sum(i)
+sum(i)==length(my.states)
+```
+
+##Classroom Exercises #3 (Answers Below)
+1. Report TRUE or FALSE for each state depending on if you have lived there
+2. With a<-1:100, pick out odd numbers between 50 and 75
+3. Use greater than less than signs to get all state names that begin with M
+
+## Conditionals
+We can use the functions if(){} to test conditions. 
+
+```
+if(state.names[1]=="WV")
+{
+   print("The Mountain State")
+}
+
+if(state.names[1] < state.names[2])
+{
+   cat(state.names[1],"comes before",state.names[2],"in alphabetical order\n")
+} else
+{
+   cat(state.names[2],"comes before",state.names[1],"in alphabetical order\n")
+}
+
+```
+
+## Sampling in R
+The command sample() randomly shuffles a vector
+```
+sample(1:10)
+sample(1:10)
+sample(1:10)
+a <- sample(1:1000,size=10)
+a <- sample(1:6,size=1000,replace=TRUE)
+```
+## Table Command
+
+The table command tables the values in R. For example, we had set "a" above. The table command
+helps us see how many times each value appears. Per the Law of Large Numbers, what do you think will happen the larger the value that we assign to "size"?  
+```
+table(a)
+max(table(a))
+order(table(a))
+```
+##Classroom Exercises #4 (Answers Below)
+1. Use sample() to estimate the probability of rolling a 6
+2. Use sample() to estimate the probability that the sum of two die equal 7
+3. Use sample() to select randomly five states without replacement
+4a. Use sample() to select randomly 1000 states with replacement
+4b. Tabulate how often each state was selected
+4c. Which state was selected the least? Make R do this for you
+
+
+## Lists 
+
+The lapply() function lets us apply a given function to every item in a list and obtain a list in return. The sapply() function works in a manner quite similar to lapply(), but it makes the output look a lot more user-friendly; the "s" stands for simplify. The list() command enables us to have different value types in the same list (e.g., numerical and character).
+```
+a <- list(1:3,5:1,1:10)
+a[[1]]
+a[[1]][1]
+a[c(1,3)]
+#  lapply() can apply a function to each component of the list
+lapply(a,sort)
+#  sapply() is like lapply() but will convert from a list to vector
+sapply(a,sort)
+sapply(a,length)
+i <- which.max(sapply(a,length))
+a[[i]]
+sapply(a,mean)
+
+#   lists can mix different types
+b <- list(0:9, c("A","B","C"),c(TRUE,FALSE,NA))
+
+state.list <- list(
+   west=c("AK","HI","WA","NV","CA","CO","UT","OR","AZ","NM","ID"),
+   east=c("KY","RI","PA","DE","DC","NJ","WV","MA","SC","NH","GA","CT","NY","IN",
+          "MS","AL","OH","NC","MD","VA","VT","FL","ME","TN"),
+   central=c("SD","MO","MN","ND","WY","OK","MI","IL","IA","LA","WI","MT","NE",
+             "AR","TX","KS"))
+names(state.list)
+state.list[[1]]
+state.list[["west"]]
+
+lapply(state.list,sort)
+lapply(state.list,sample,size=3,replace=FALSE)
+sapply(state.list,length)
+
+```
+Note the use of brackets - especially the double brackets. Why do we use double brackets versus single brackets? 
+
+##  The Dollar Sign Symbol
+
+The dollar sign in R is going to be extremely important. We use it to extract named components from lists:
+```
+state.list$west
+
+```
+
+You can use it to add new components to a list (or a dataset).
+```
+state.list$other <- c("AS","GU","MP","PR","VI","UM","FM","MH","PW")
+
+```
+
+What do you think would happen if we ran just the following?
+
+```
+other <- c("AS","GU","MP","PR","VI","UM","FM","MH","PW")
+```
+
+The dollar sign makes sure that our new vector (other) is part of our dataset (state.list).
+
+##Classroom Exercises #5 (Answers Below)
+1. Fix state.list so that "DC" is in "other" rather than "east"
+2. Print out east and central states together sorted
+
+
+##Functions
+A lot of the commands in R are actually "functions."  For example, the is.na() command is a function that tells us whether a missing value exists. Functions help us avoid writing the same thing over and over again. You can write your own functions. For example, 
+```
+give.first.and.last <- function(x)
+{
+   i <- c(1,length(x))
+   return(x[i])
+}
+give.first.and.last(1:100)
+```
+What does this function that you wrote do? What's the benefit of the function? What would happen if we wanted to find the first and last numbers for 50 different sequences besides "1:100" but didn't write this function? Let's try this same function with non-numerical data.
+
+```
+lapply(state.list,give.first.and.last)
+sapply(state.list,give.first.and.last)
+sapply(lapply(state.list,sort),give.first.and.last)
+```
+
+
+##Classroom Exercises #6 (Answers Below)
+1. Make a function "is.island(x)" returns TRUE if x is an island. Islands are "HI","FM","MH","PW","AS","GU","MP","PR","VI","UM"
+2. Count how many islands within each region
+3. Which components of "b" having missing values? Use is.na()
+
+##Matrices and apply()
+
+Matrices look much like a dataset.  It's a collection of one or more rows, and one or more columns. 
+
+First let's create a matrix. Next, we'll test the apply() command on it. 
+```
+a <- matrix(sample(1:5,size=12,replace=TRUE),nrow=4)
+```
+The apply command lets us manipulate data more efficiently by applying a function to all rows or to all columns. Incidentally, note the use of summary.  What does summary do?
+```
+#all rows
+apply(a,1,sum) 
+apply(a,1,mean) 
+apply(a,1,summary)
+apply(a,1,function(x) {c(min(x),max(x))}) 
+apply(a,1,function(x) {all(x>1)})
+#   all columns
+apply(a,2,sum)
+```
+Incidentally, note the use of summary.  What does summary do?
+```
+summary(c(1, 5, 5, 9, 10, 100))
+```
+##Dataframes
+A dataframe is a special kind of list with an equal number of elements. Note that how we load a dataset in R is very dependent on the type of datafile. For example, if it's an .RData file, we'll load it with the load() command.  However, a .csv file requires us to use the command, read.csv().
+
+```
+load("chicago crime.RData")
+is(data)
+#   look up the names of the variables
+names(data)
+#   look at the first three rows
+data[1:3,]
+#   look at the first three rows and first three columns
+data[1:3,1:3]
+#   look up by name
+data[1:3,c("Latitude","Longitude")]
+#   look at the types of each variable
+sapply(data,is)
+sapply(data,function(x) is(x)[1])
+#   tabulate crimes
+sort(table(data$Primary.Type))
+sort(table(data$Description))
+
+sort(table(data$Primary.Type[data$District==10]))
+```
+We've used some of the commands we've covered before (e.g., table(), sapply()) to figure out what's in the dataset. The with command is also very useful. 
+```
+with(data, sort(table(Primary.Type[District==10])))
+```
+
+##Classroom Exercises #7 (Answers Below)
+1. Display 3 randomly selected rows
+2. Count NAs in each column
+3. Look up Location.Description, Block, Beat, and Ward for those missing Latitude
+
+
+## Use Google Maps "What's here?" https://www.google.com/maps/place/8150+S+Throop+St,+Chicago,+IL
+
+Later on, google maps will be useful for filling in missing map data or for making maps in R.
+
+##For-Loops
+For loops are slow, but more flexible.
+```
+for(i in 1:10)
+{
+   print(i)
+}
+```
+Or, using the state.names non-numerical data, 
+```
+for(i.state in 1:length(state.names))
+{
+   print(c(i.state,state.names[i.state]))
+}
+```
+Another example...Note that cat means to print your output to the screen. It functions in much the same way as print. 
+```
+for(letter in c("A","B","C","D","E","F","G","H","I","J","K","L","M","N","O",
+                "P","Q","R","S","T","U","V","W","X","Y","Z"))
+{
+   print(letter)
+   if(letter %in% c("G","R","E"))
+      cat("The letter",letter,"is in your name\n")
+}
+```
+And another example...
+```
+for(nm.state in state.names)
+{
+   print(nm.state)
+   if(is.island(nm.state))
+      cat(nm.state," is an island\n")
+}
+
+```
+Another example using google maps 
+```
+data$google.maps.url <- ""
+system.time( # system.time() gives program execution time
+for(i in 1:nrow(data))
+{
+   a <- gsub("([0-9]{3})XX","\\150",data$Block[i])
+   data$google.maps.url[i] <- paste("https://www.google.com/maps/place/",
+                                     a,",+Chicago,+IL",sep="")
+}
+)
+```
+However, we could do accomplish the same task without the for-loop - and it's much quicker. 
+```
+system.time(
+{
+a <- gsub("([0-9]{3})XX","\\150",data$Block)
+data$google.maps.url <- paste("https://www.google.com/maps/place/",
+                                  a,",+Chicago,+IL",sep="")
+}
+)
+```
+##Classroom Exercises #8 (Answers Below)
+1. Compute the first 30 Fibonacci numbers
+0 1 1 2 3 5 8 13 ...
+2. If I give you $0.01 on Feb 1, $0.02 on Feb 2, $0.04 on Feb 3, ... how much
+   money will I have given you by the end of the month 
+3. Use a for-loop to create a variable Coordinates of the form (X.Coordinate,Y.Coordinate)
+4. Redo it without a for-loop and compare computation time
+
+##Extremely Valuable Tools for Selecting Data
+
+The with() command helps avoid so many "data$"
+```
+with(data, paste(X.Coordinate, Y.Coordinate,sep=","))
+with(data, table(Arrest,Domestic))
+with(data, table(Arrest,Ward))
+```
+The by() command can be used with with() - it summarizes "by" some other feature.
+```
+a <- with(data, by(Arrest=="true",Ward,mean))
+a <- sort(a)
+barplot(a)
+```
+And R also enables us to subset data. 
+```
+with(subset(data,Primary.Type=="ASSAULT"), table(Arrest,Ward))
+with(subset(data,Primary.Type=="ASSAULT"), 
+     barplot(sort(by(Arrest=="true",Ward,mean))))
+```
+##Class Exercises #9 (Answers Below)
+1. How many assaults occurred in the street? (Location.Description=="STREET")
+   (Try using subset even though there are other ways)
+2. What percentage of assaults occurred in the street, by Ward
+
+##Plotting Data
+
+R enables us to plot points. The points we plotted form the shape of Chicago - which makes total sense because we're using Chicago crime data. 
+```
+plot(data$Longitude,data$Latitude)
+```
+We can also plot the district with the most crime.
+```
+max.district <- names(rev(sort(table(data$District)))[1])
+i <- data$District==max.district
+plot(data$Longitude[!i],data$Latitude[!i],pch=".",
+     xlab="Longitude",ylab="Latitude")
+points(data$Longitude[i],data$Latitude[i],pch=".",col="red")
+```
+We can also make a bar plot. What does the below barplot show?
+```
+barplot(table(data$Primary.Type))
+```
+Here is another example of a bar plot showing the frequency of crimes. 
+```
+tab <- table(data$Primary.Type)
+par(pin=c(6.5,6),mai=c(1.02,2.5,0,0.3))
+a <- barplot(tab,col="salmon",horiz=TRUE,
+             names.arg=rep("",nrow(tab)))
+axis(2,at=a[,1],cex.axis=0.7,
+     labels=names(tab),las=1,tick=FALSE)
+
+text(a[,1],tab+50,tab)
+
+```
+
+##Class Exercises #10 (Answers Below)
+1. Make a barplot indicating how many states are in each region. Use state.list
+2. Identify the beat with the most crimes
+3. Identify the beat with the most domestic violence incidents
+4. Part 1 crimes are homicide, robbery, assault, arson, burglary, theft, rape, 
+      motor vehicle theft. Calculate the number of Part 1 crimes in Chicago
+
+
+
+
+
+# dates and times
+#   there is no default date and time type
+#   can be simple or complex
+#   what date is one month after January 31st?
+#   Excel - days since 01/00/1900
+#   Unix  - days since 01/01/1970
+#   Timezones, daylight savings time
+#   See lubridate, http://www.jstatsoft.org/v40/i03/paper
+library(lubridate)
+textDate <- substring(data$Date[1:10],1,10)
+b <- mdy(textDate)
+
+# extract information from the date
+year(b)
+month(b)
+month(b,label=TRUE)
+month(b,label=TRUE,abbr=FALSE)
+wday(b,label=TRUE)
+
+# time since Dec 1, 2014
+b-mdy("12/01/2014")
+# time since now
+now()-b
+
+# adding time to a date
+b + dyears(1) # adds 365 days, does not increase year by 1
+b + ddays(31)
+
+# combine date and time
+data$date <- mdy_hms(data$Date) # will detect the AM/PM
+
+# set timezone
+#   default is UTC - Coordinated Universal Time
+data$date <- force_tz(data$date, "America/Chicago")
+# note that it will correctly track for DST
+force_tz(mdy("8/1/2014"), "America/Chicago")
+
+Class exercise
+1. Thanksgiving occurs on the fourth month in November. On what date will 
+   Thanksgiving fall in 2020?
+
+
+
+
+
+
+
+##Class Exercises #1 (Answers)
+1. Print all even numbers less than 100
+```
+(1:50)*2
+```
+2. What is the standard deviation of even numbers less than 100
+
+```
+sd(((1:49)*2))
+```
+
+3. Have R put in alphabetical order
+c("WA","DC","CA","PA","MD","VA","OH")
+```
+sort(c("WA","DC","CA","PA","MD","VA","OH"))
+```
+
+## Class Exercises #2 (Answers)
+1. What's the last state in the list?
+```
+state.names[50]
+```
+2. Pick out states that begin with "M" using their indices
+```
+sort(state.names)[20:27]
+```
+Here's another possible answer that uses substring (which we haven't covered yet):
+```
+state.names[substring(state.names, 1, 1)=="M"]
+```
+
+3. Pick out states where you have lived.
+```
+sort(state.names)[c(1, 4, 10, 26)]
+```
+
+4. What's the last state in alphabetical order?
+```
+(sort(state.names))[51]
+```
+
+5. What are the last three states in alphabetical order?
+
+```
+rev(sort(state.names))[1:3]
+```
+
+##Classroom Exercises #3 (Answers)
+1. Report TRUE or FALSE for each state depending on if you have lived there
+```
+my.states <- c("PA", "NJ", "NY", "MD", "DE", "MA", "RI", "CT", "ME", "LA", "IN", "IL", "OH", "VA", "FL")
+i <- state.names %in% my.states
+```
+2. With a<-1:100, pick out odd numbers between 50 and 75
+```
+a <- 1:100
+oddnum <- (((25:36)*2)+1)
+i <- a %in% oddnum
+a[i]
+```
+Or, you could try
+```
+a <- 1:100
+oddnum <- seq(51, 73, 2)
+i <- a %in% oddnum
+a[i]
+```
+3. Use greater than less than signs to get all state names that begin with M
+```
+state.names[state.names>"LZ" & state.names<"N"]
+```
+
+##Classroom Exercises #4 (Answers)
+1. Use sample() to estimate the probability of rolling a 6
+```
+a <- sample(1:6, size=100000, replace=TRUE)
+table(a)
+table(a)[6]/100000
+```
+Or, we could try 
+```
+sum(a==6)
+sum(a==6)/100000
+```
+Or, we could also try
+```
+mean(a==6)
+```
+
+2. Use sample() to estimate the probability that the sum of two die equal 7
+```
+dice1 <- sample(1:6, size=1000, replace=TRUE)
+dice2 <- sample(1:6, size=1000, replace=TRUE)
+doubleroll <- dice1 + dice2
+mean(doubleroll==7)
+```
+
+3. Use sample() to select randomly five states without replacement
+```
+sample(state.names, size=5, replace=FALSE)
+```
+4a. Use sample() to select randomly 1000 states with replacement
+```
+a <- sample(state.names, size=1000, replace=TRUE)
+a
+```
+
+4b. Tabulate how often each state was selected
+```
+table(a)
+```
+4c. Which state was selected the least? Make R do this for you
+```
+sort(table(a))[1]
+```
+
+##Classroom Exercises #5 (Answers)
+1. Fix state.list so that "DC" is in "other" rather than "east"
+```
+state.list$east <- state.list$east[state.list$east!="DC"]
+state.list$other <- c(state.list$other, "DC")
+```
+
+2. Print out east and central states together sorted
+```
+lapply(state.list,sort)[c(2,3)]
+```
+
+Or, you could try
+```
+state.EC <- c(state.list$east, state.list$central)
+sort(state.EC)
+```
+Or, you could try
+```
+with(state.list, sort(c(east, central)))
+```
+
+##Classroom Exercises #6 (Answers)
+1. Make a function "is.island(x)" returns TRUE if x is an island. Islands are "HI","FM","MH","PW","AS","GU","MP","PR","VI","UM."
+
+```
+is.island <- function(x)
+{
+islands <- (c("HI", "FM", "MH", "PW", "AS", "GU", "MP", "PR", "VI", "UM"))
+return (x%in% islands)
+}
+```
+
+We'll get to for-loops later. But, you could also try:
+
+```
+
+i <- (c("HI","FM","MH","PW","AS","GU","MP","PR","VI","UM"))
+is.island <- function(x) {
+  if (x %in% i) {
+  result <- "TRUE"
+  }    
+  else {
+  result <- "FALSE"
+  }
+  return(result)
+}
+
+```
+
+2. Count how many islands within each region
+
+```
+lapply(state.list, function(z) sum((z %in% i)))
+```
+Or, you could try, 
+```
+sapply(lapply(state.list, is.island), sum)
+```
+Or, 
+```
+sapply(state.list, is.island)
+```
+Or, 
+
+```
+sapply(sapply(state.list, is.island), sum)
+```
+
+3. Which components of "b" having missing values? Use is.na()
+
+```
+b <- list(0:9, c("A","B","C"),c(TRUE,FALSE,NA))
+sapply(b, function(x) sum(is.na(x)))
+
+```
+Or,
+
+```
+b <- list(0:9, c("A","B","C"),c(TRUE,FALSE,NA))
+lapply(b, function(x) sum(is.na(x)))
+
+```
+Or,
+
+```
+b <- list(0:9, c("A","B","C"),c(TRUE,FALSE,NA))
+sapply(sapply(b, is.na), sum)
+
+```
+Or, 
+
+```
+sapply(sapply(b, is.na), any)
+
+```
+##Classroom Exercises #7 (Answers)
+1. Display 3 randomly selected rows
+
+```
+x<- sample(1:100, size=1)
+y <- (x+2)
+data[x:y,]
+```
+Or, 
+```
+data[sample(1:10000,size=3),]
+```
+Or,
+```
+data[sample(nrow(data),3, replace=FALSE),]
+```
+2. Count NAs in each column
+```
+summary(data)
+```
+Or, 
+```
+sapply(data, function(x) sum(is.na(x)))
+```
+Or, 
+```
+sapply(data, summary)
+```
+
+3. Look up Location.Description, Block, Beat, and Ward for those missing Latitude
+
+```
+i <- is.na(data$Latitude)
+data[i,c("Location.Description","Block","Beat","Ward")]
+```
+##Classroom Exercises #8 (Answers)
+1. Compute the first 30 Fibonacci numbers 0 1 1 2 3 5 8 13 ...
+
+```
+for(i in 0:30)
+{
+  print(i)
+}
+
+number <- 1:30
+number[1] <- 1
+number[2] <- 1
+for (i in 3:30) { 
+  number[i] <- number[i-1]+number[i-2]
+}
+```
+2. If I give you $0.01 on Feb 1, $0.02 on Feb 2, $0.04 on Feb 3, ... how much
+   money will I have given you by the end of the month 
+   
+```
+   for(i in 1:29)
+   {
+     print(i)
+   }
+   
+   number <- 1:29 
+   number[1] <- .01
+   number[2] <- .02
+   number[3] <- .04
+   for (i in 4:29) 
+   { 
+     number[i] <- number[i-1]*2
+   }  
+
+```
+3. Use a for-loop to create a variable Coordinates of the form 
+(X.Coordinate,Y.Coordinate)
+
+```
+for (i in 1:nrow(data)) 
+{data$coords[i] <- paste0(data$X.Coordinate[i], ", " , data$Y.Coordinate[i])}
+```
+Or, you could do
+
+```
+for (i in 1:nrow(data)) 
+{data$coords2[i] <- paste("(",data$X.Coordinate[i], ",", data$Y.Coordinate[i],")",sep="")}
+```
+4. Redo it without a for-loop and compare computation time
+```
+data$coords3 <- paste("(", data$X.Coordinate, ",",data$Y.Coordinate,")",sep="")
+```
+
+##Class Exercises #9 (Answers)
+1. How many assaults occurred in the street? (Location.Description=="STREET")
+   (Try using subset even though there are other ways)
+```
+with(subset(data,Location.Description=="STREET"), table(data$Primary.Type=="ASSAULT"))
+```
+Or, 
+```
+with(subset(data,Primary.Type=="ASSAULT"), table(data$Location.Description=="STREET"))
+```
+2. What percentage of assaults occurred in the street, by Ward
+```
+with(subset(data,Primary.Type=="ASSAULT"), by(Location.Description==
+    "STREET", Ward, mean))
+```
+##Class Exercises #10 (Answers)
+1. Make a barplot indicating how many states are in each region. Use state.list
+
+```
+a <- sapply(state.list, length)
+  barplot(a)
+```
+2. Identify the beat with the most crimes
+```
+sort(table(data$Beat))
+```
+
+3. Identify the beat with the most domestic violence incidents
+```
+a <- subset(data,Description=="DOMESTIC BATTERY SIMPLE")
+  sort(table(a$Beat))
+```
+4. Part 1 crimes are homicide, robbery, assault, arson, burglary, theft, rape, 
+      motor vehicle theft. Calculate the number of Part 1 crimes in Chicago.
+      
+```
+part1 <- subset(data, Primary.Type %in% c("HOMICIDE", "ROBBERY", "ASSAULT", "ARSON", "BURGLARY", "THEFT", "SEX OFFENSE", "MOTOR VEHICLE THEFT"))
+
+table(part1$Primary.Type)
+
+```
+Note that you can subset data by using c() and %in% to grab multiple types.  
