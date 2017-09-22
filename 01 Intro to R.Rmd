@@ -19,6 +19,10 @@ fontsize: 11pt
 
 <!-- </style> -->
 
+```{r echo=FALSE}
+counterExercise <- 0
+exNum <- function() {counterExercise <<- counterExercise+1; counterExercise}
+```
 
 
 # Help 
@@ -130,10 +134,10 @@ paste0(my.states)
 ```
 What does the `nchar()` function do?  The `paste()` function?  Does it make a difference to use `sep=""` or `collapse=","`? What about `paste0()`?
 
-# Class Exercises #1 (Answers Below)
-1. Print all even numbers less than 100
-2. What is the mean of even numbers less than 100
-3. Have R put in alphabetical order
+# Exercises
+`r exNum()`. Print all even numbers less than 100
+`r exNum()`. What is the mean of even numbers less than 100
+`r exNum()`. Have R put in alphabetical order
 `c("WA","DC","CA","PA","MD","VA","OH")`
 
 # Assignment of values to variables
@@ -189,12 +193,12 @@ state.names[i[1:3]]     # show me those three states
 ```
 Note that in the last example we used square brackets within square brackets. First, we asked R to give us the indices of the first three states in alphabetical order and that was `r i[1:3]`. Then R took those three values and plugged them into the second set of square brackets to show you the state names in those positions in the collection.
 
-# Class Exercises #2 (Answers Below)
-1. What's the last state in the list?
-2. Pick out states that begin with "M" using their indices.
-3. Pick out states where you have lived.
-4. What's the last state in alphabetical order?
-5. What are the last three states in alphabetical order?
+# Exercises
+`r exNum()`. What's the last state in the list?
+`r exNum()`. Pick out states that begin with "M" using their indices.
+`r exNum()`. Pick out states where you have lived.
+`r exNum()`. What's the last state in alphabetical order?
+`r exNum()`. What are the last three states in alphabetical order?
 
 
 # Logical values and operations
@@ -279,10 +283,10 @@ sum(my.states %in% c("CA","OR","WA","AK","HI"))
 ```
 Note in the last line we used `sum()` to count for how many of `my.states` did `%in%` evaluate to `TRUE`.
 
-# Classroom Exercises #3 (Answers Below)
-1. Report `TRUE` or `FALSE` for each state depending on if you have lived there
-2. With `a <- 1:100`, pick out odd numbers between 50 and 75
-3. Use greater than less than signs to get all state names that begin with M
+# Exercises
+`r exNum()`. Report `TRUE` or `FALSE` for each state depending on if you have lived there
+`r exNum()`. With `a <- 1:100`, pick out odd numbers between 50 and 75
+`r exNum()`. Use greater than less than signs to get all state names that begin with M
 
 # Sampling
 The function `sample()` randomly shuffles a collection of values.
@@ -302,11 +306,11 @@ The `table()` function counts how many of each value appear in a collection. We 
 table(a)
 max(table(a)) # find out which value appears most frequently
 ```
-# Classroom Exercises #4 (Answers Below)
-1. Use `sample()` to estimate the probability of rolling a 6
-2. Use `sample()` to estimate the probability that the sum of two die equal 7
-3. Use `sample()` to select randomly five states without replacement
-4. Use `sample()` to select randomly 1000 states with replacement
+# Exercises
+`r exNum()`. Use `sample()` to estimate the probability of rolling a 6
+`r exNum()`. Use `sample()` to estimate the probability that the sum of two die equal 7
+`r exNum()`. Use `sample()` to select randomly five states without replacement
+`r exNum()`. Use `sample()` to select randomly 1000 states with replacement
     + Tabulate how often each state was selected
     + Which state was selected the least? Make R do this for you
 
@@ -413,13 +417,13 @@ ls()
 ```
 Assuming you are using RStudio, you can also see the objects stored in memory by clicking on the Environment tab.
 
-# Classroom Exercises #5 (Answers Below)
-1. Fix `state.list` so that "DC" is in "other" rather than "east". Here are a few hints.
+# Exercises
+`r exNum()`. Fix `state.list` so that "DC" is in "other" rather than "east". Here are a few hints.
      + access "other" using `$`
      + combine things using `c()`
      + assign values using `<-`
      + remove values using `[]` with a negative index or using a logical statement
-2. Print out east and central states together sorted
+`r exNum()`. Print out east and central states together sorted
 
 
 # Functions
@@ -490,29 +494,21 @@ apply(a, 1, function(x) {all(x>1)})
 
 
 # Setting the working directory
-
 Now that we have covered a lot of fundamental R features, it is time to load in a real dataset. However, before we do that, R needs to know where to find the data file. So we first need to talk about "the working directory". When you start R it has a default folder or directory on your computer where it will retrieve or save any files. You can run `getwd()` to get the current working directory. Here's our current working directory, which will not be the same as yours.
 ```{r comment=""}
 getwd()    
 ```
-Almost certainly this default directory is *not* where you plan to have all of your datasets and files stored. Instead, you probably have an "analysis" or "project" or "R4criminology" folder somewhere on you computer where you would like to store your data and work.
+Almost certainly this default directory is *not* where you plan to have all of your datasets and files stored. Instead, you probably have an "analysis" or "project" or "R4crim" folder somewhere on you computer where you would like to store your data and work.
 
-Before you do anything else in R, **it's important that you set the path** - namely, the file directory or folder from which you'll be working. This step is absolutely necessary anytime you're working with a dataset (e.g., a .csv or .txt file) that is stored on your computer, Google Drive, or some other file storage location. Otherwise, R will not be able to find the file - and you won't be able to use the dataset. 
+Use `setwd()` to tell R what folder you want it to use as the working directory. If you do not set the working directory R will not know where to find the data you wish to import and will save your results in a location in which you would probably never look. Make it a habit to have `setwd()` as the first line of every script your write. If know the working directory you want to use, then you can just put inside the `setwd()` function.
+```
+setwd("C:\Users\gridge\Google Drive\R4crim")    
+```
+Note that for all platforms, Windows, Macs, and Linux, the working directory only uses forward slashes. So Windows users be careful... most Windows applications use backslashes, but in an effort to make R scripts work across all platforms, R requires forward slashes. Backslashes have a different use in R that you will meet later.
 
-Here is how you set the path:
+If you do not know how to write your working directory, here comes R Studio to the rescue. In R Studio click Session -> Set Working Directory -> Choose Directory. Then click through to navigate to the working directory that you want to use. When you find it click "Select Folder". Then look over at the console. R Studio will construct the right `setwd()` syntax for you. Copy and paste that into your script for use later. No need to have to click through the Session menu again now that you have your `setwd()` set up.
 
-First, before doing anything else in R, type 
-
-
-
-This `getwd()` function gets the working directory, the name of the folder where it will look for any data you want to load and save any objects you want to save. The result of `getwd()` shown here probably does not exist on your computer and you probably have a different name for the place where you wish to store your data and results. Note that for all platforms, Windows, Macs, and Linux, the working directory only uses forward slashes. So Windows users be careful... most Windows applications use backslashes, but in an effort to make R scripts work across all platforms, R requires forward slashes. Backslashes have a different use in R that you will meet later.
-
-Let's say you keep all your Crim 602 work in one folder called "Crim602" and you keep that folder on your Google Drive. To figure out what the path is for this folder, do the following. Without opening it, right click on the folder that you keep all your Crim 602 material in.  Click on "Properties" and you'll see "Location:" for the folder.  For "Location:", it should give you something like, e.g., "C:/Users/ramoyer/Google Drive". This information says what the location is for the "CRIM602" folder. On a Mac, it might look something like "~/Google Drive/CRIM602".
-
-Next, in R, using the function `setwd()`, type in the correct file location. For example, to access my "CRIM602" folder, I'd type `setwd("C:/Users/ramoyer/Google Drive/CRIM602")`. Note that I had to change the slashes from backwards to forwards.
-
-After that, I can try to load in any dataset files that I have stored in the CRIM602 folder. If I've done my `setwd()`, correctly, I shouldn't get any errors because R will know exactly what file I'm talking about. If the path that I've given in the `setwd()` isn't right, R will think the file doesn't even exist. For example, if you give the path for, say, your Crim 600 folder, R won't be able to load the Chicago crime file because the Chicago crime file isn't stored in your Crim 600 folder. 
-
+Now you can use R functions to load in any datasets that are in your working folder. If you have done your `setwd()` correctly, you shouldn't get any errors because R will know exactly where to look for the data files. If the working directory that you've given in the `setwd()` isn't right, R will think the file doesn't even exist. For example, if you give the path for, say, your R4econ folder, R won't be able to load data because the file isn't stored in what R thinks is your working directory. With that out of the way, let's load a dataset.
 
 # Data frames
 A data frame is a special case of a list where all the components of the list have the same number of elements. Think about each component of the list being a "column" in your dataset. R code load in datasets from numerous sources (plain text, Excel files, databases, websites, etc.) including .RData format, R's unique data format. There is an extensive guide to [importing and exporting datasets](https://cran.r-project.org/doc/manuals/r-release/R-data.pdf).
@@ -521,68 +517,119 @@ To import data in the .RData format use `load()`. A [sample of Chicago crime dat
 ```{r comment="", results='hold'}
 load("chicago crime 20141124-20141209.RData")
 ```
-
+List the objects R now has in memory and you will see that there is a new object, `chicagoCrime`.
+```{r comment="", results='hold'}
+ls()
 ```
-is(data)
-#   look up the names of the variables
-names(data)
+If you did not spell the name of the .RData file exactly correctly, then R will give you an error. A common occurence when downloading the same file from the web multiple times is for you web browser to add numbers to the multiple versions you've downloaded. So check the file name carefully. Here's what happens when I request a file that doesn't exist.
+```{r comment="", results=TRUE, warning=TRUE, error=TRUE}
+load("chicago crime.RData")
+```
+
+Let's check that this is indeed a dataset. You can use the `is()` command on any R object to ask it to identify itself.
+```{r comment="", results='hold'}
+is(chicagoCrime)
+```
+You can see that `chicagoCrime` is of type `data.frame`... and it is also of type `list`. That means that anything that you can do to lists, like `lapply()` and `sapply()`, you can use on `chicagoCrime` too. 
+
+What are the names of the variables in the dataset?
+```{r comment="", results='hold'}
+names(chicagoCrime)
+```
+As expected, the data have information the crime date, crime type, location (including latitude and longitude), whether an arrest occurred, and more.
+
+Let's look at some parts of the dataset.
+```{r comment="", results='markup'}
 #   look at the first three rows
-data[1:3,]
+chicagoCrime[1:3,]
 #   look at the first three rows and first three columns
-data[1:3,1:3]
-#   look up by name
-data[1:3,c("Latitude","Longitude")]
+chicagoCrime[1:3,1:3]
+#   look up by the columns by name
+chicagoCrime[1:3,c("Latitude","Longitude")]
+```
+
+Ask R what types of values each of crime features hold.
+```{r comment="", results='hold'}
 #   look at the types of each variable
-sapply(data,is)
-sapply(data,function(x) is(x)[1])
+sapply(chicagoCrime, is)
+sapply(chicagoCrime, function(x) is(x)[1])
+```
+
+Use `table()` and `sort()` to see what kinds of crimes are in this dataset.
+```{r comment="", results='hold'}
 #   tabulate crimes
-sort(table(data$Primary.Type))
-sort(table(data$Description))
-
-sort(table(data$Primary.Type[data$District==10]))
+sort(table(chicagoCrime$Primary.Type))
+sort(table(chicagoCrime$Description))
 ```
-We've used some of the commands we've covered before (e.g., table(), sapply()) to figure out what's in the dataset. The with command is also very useful. 
+Note how we can use the `$` to extract just the `Primary.Type` and just the `Description` components of the dataset.
+
+What kinds of crimes occur in Chicago's District 10?
+```{r comment="", results='hold'}
+sort(table(chicagoCrime$Primary.Type[chicagoCrime$District==10]))
 ```
-with(data, sort(table(Primary.Type[District==10])))
+All these `chicagoCrime$`s are making our code long and harder to read. But we need to tell R to look inside `chicagoCrime` to find `Primary.Type` and `District`. `with()` can greatly simplify R code. Tell R to sort the table as before, but tell R that it can find all of the variables it is looking for in the `chicagoCrime` data frame.
+```{r comment="", results='hold'}
+with(chicagoCrime, sort(table(Primary.Type[District==10])))
 ```
+Much easier to read and understand!
 
-##Classroom Exercises #7 (Answers Below)
-1. Display 3 randomly selected rows
-2. Count NAs in each column
-3. Look up Location.Description, Block, Beat, and Ward for those missing Latitude
+# Exercises
+`r exNum()`. Display three randomly selected rows
+`r exNum()`. Count `NA`s in each column
+`r exNum()`. Look up `Location.Description`, `Block`, `Beat`, and `Ward` for those missing `Latitude`
 
-
-## Use Google Maps "What's here?" https://www.google.com/maps/place/8150+S+Throop+St,+Chicago,+IL
-
-Later on, google maps will be useful for filling in missing map data or for making maps in R.
-
-##For-Loops
-For loops are slow, but more flexible.
+# For loops
+Sometimes we need to have R repeat certain tasks multiple times, such as marching through each row of a dataset and modifying values. For loops accomplish this. Later in this course we will be using Google Maps to extract information about addresses. So we might need to iterate through every row in the dataset, check whether the latitude and longitude are missing, and if missing try to retrieve the latitude and longitude from Google Maps. The last crime in the dataset missing coordinates is in row 9954.
+```{r comment="", results='hold'}
+chicagoCrime[9954,]
 ```
+While the coordinates are missing, the street address, 081XX S THROOP ST, is (mostly) there. Chicago PD has masked the last two digits of the address so that we really only know the location down to the nearest block. Let's look up 8150 S Throop St, likely near the middle of the block, to see where this is. The Google Maps URL is [https://www.google.com/maps/place/8150+S+Throop+St,+Chicago,+IL](https://www.google.com/maps/place/8150+S+Throop+St,+Chicago,+IL). It would be a pain to have type out each of these URLs for every address that we wanted to look up. So let's learn a little bit about for loops to see how this might work.
+
+Here is a basic for loop that runs through the numbers 1 to 10 and prints them out one at a time.
+```{r comment="", results='hold'}
 for(i in 1:10)
 {
    print(i)
 }
 ```
-Or, using the state.names non-numerical data, 
-```
+Note the basic structure. There's the keyword `for`. Inside the parentheses is a variable `i` (but you can use any variable name you want), the keyword `in`, and finally a collection of values, in this case the numbers 1 to 10. The for loop will march through this collection of values, assigning `i` each value in turn, and running the code inside the squiggly braces. So first `i` will be set to 1 and the `print()` function will print the value 1 to the screen. When that is done, `i` will take the next value in the collection, a 2, and the for loop will run the `print()` function will print the number 2. This continues until `i` takes the value 10 and `print()` prints that 10 to the screen.
+
+Let's loop through all the states, printing out which number they are in the collection along with the state postal code.
+```{r comment="", results='hold'}
 for(i.state in 1:length(state.names))
 {
    print(c(i.state,state.names[i.state]))
 }
 ```
-Another example...Note that cat means to print your output to the screen. It functions in much the same way as print. 
-```
+Let's loop through all the letters of the alphabet and see if that letter is in the word "CRIME". `cat()` is like `print()`, but just dumps to the screen exactly what you give it^[Why "cat" you ask? Programmers in the early 1970s created a program called "cat" to concatenate files together, but most uses of "cat" were to just dumpt file contents to the screen or to some other program.]. `print()` will do some formatting to try to present the results a little nicer.
+```{r comment="", results='hold'}
 for(letter in c("A","B","C","D","E","F","G","H","I","J","K","L","M","N","O",
                 "P","Q","R","S","T","U","V","W","X","Y","Z"))
 {
    print(letter)
-   if(letter %in% c("G","R","E"))
-      cat("The letter",letter,"is in your name\n")
+   if(letter %in% c("C","R","I","M","E"))
+      cat("The letter",letter,"is in the word 'CRIME'\n")
 }
 ```
-And another example...
+Actually, R has a built in collection, `LETTERS`, that contains all of the capital letters. There really was no need to type them all out. This works too.
+```{r comment="", results='hold'}
+for(letter in LETTERS)
+{
+   print(letter)
+   if(letter %in% c("C","R","I","M","E"))
+      cat("The letter",letter,"is in the word 'CRIME'\n")
+}
 ```
+Let's loop through the states and check each one whether or not it is an island.
+```{r comment="", results='hide', echo=FALSE}
+is.island <- function(x)
+{
+  islands <- c("HI","FM","MH","PW","AS","GU","MP","PR","VI","UM")
+  return(x %in% islands)
+}
+```
+
+```{r comment="", results='hold'}
 for(nm.state in state.names)
 {
    print(nm.state)
@@ -591,62 +638,84 @@ for(nm.state in state.names)
 }
 
 ```
-Another example using google maps 
+Let's get back to our original problem of having R construct all the Google Map URLs that we need. First, we will create a new variable in the dataset called `google.maps.url` and fill it with empty text.
+```{r comment="", results='hold'}
+chicagoCrime$google.maps.url <- ""
 ```
-data$google.maps.url <- ""
-system.time( # system.time() gives program execution time
-for(i in 1:nrow(data))
+
+Now let's loop through all 10,000 rows in the dataset. First, R will use `gsub()` to replace the XX in the house number with 50, so we get the location in the middle of the block. `gsub()` is like a Find-and-Replace function, but way more powerful and flexible. We will use it extensively when covering regular expressions. After fixing the house number, we use `paste()` to assemble a URL suitable for looking up addresses on Google Maps.
+```{r comment="", results='hold'}
+time4ForLoop <- system.time(  # system.time() is like a stop watch
+for(i in 1:nrow(chicagoCrime))
 {
-   a <- gsub("([0-9]{3})XX","\\150",data$Block[i])
-   data$google.maps.url[i] <- paste("https://www.google.com/maps/place/",
-                                     a,",+Chicago,+IL",sep="")
+   a <- gsub("XX", "50", chicagoCrime$Block[i])
+   chicagoCrime$google.maps.url[i] <- paste("https://www.google.com/maps/place/",
+                                            a,
+                                            ",+Chicago,+IL",sep="")
 }
 )
 ```
-However, we could do accomplish the same task without the for-loop - and it's much quicker. 
-```
-system.time(
+Note that we've wrapped the for loop with a call to `system.time()`. This will keep the time on how long this for loop takes. When creating these notes on a laptop it took `r time4ForLoop[3]` seconds. Not bad. Much faster than having to type out these 10,000 URLs. However, if we had one million addresses, then this code is going to take much more time.
+
+In fact, in R for loops are *very* slow. They are so slow that R programmers attempt to avoid them whenever possible. We can actually accomplish the same task without using a for loop. `gsub()` will accept a whole collection of addresses and modify them all at once. `paste()` also will accept a collection of text values and paste them together with the other parts.
+```{r comment="", results='hold'}
+timeWithoutForLoop <- system.time(
 {
-a <- gsub("([0-9]{3})XX","\\150",data$Block)
-data$google.maps.url <- paste("https://www.google.com/maps/place/",
-                                  a,",+Chicago,+IL",sep="")
+a <- gsub("XX","50",chicagoCrime$Block)
+chicagoCrime$google.maps.url <- paste("https://www.google.com/maps/place/",
+                                      a,
+                                      ",+Chicago,+IL",sep="")
 }
 )
 ```
-##Classroom Exercises #8 (Answers Below)
-1. Compute the first 30 Fibonacci numbers
-0 1 1 2 3 5 8 13 ...
-2. If I give you $0.01 on Feb 1, $0.02 on Feb 2, $0.04 on Feb 3, ... how much
-   money will I have given you by the end of the month 
-3. Use a for-loop to create a variable Coordinates of the form (X.Coordinate,Y.Coordinate)
-4. Redo it without a for-loop and compare computation time
+This took `r timeWithoutForLoop[3]` seconds. That's `r round(time4ForLoop[3]/timeWithoutForLoop[3],1)` times faster than the for loop.
 
-##Extremely Valuable Tools for Selecting Data
+# Exercises
+`r exNum()`. Use a for loop to create a variable `Coordinates` that looks like "(X.Coordinate,Y.Coordinate)"
+     + Use `paste()` with the `X.Coordinate` and `Y.Coordinate` variables
+     + Remember the `sep=` option in `paste()`
+     + You might find using the `with()` function to simplify your code and avoid having a lot of `chicagoCrime$`s
+`r exNum()`. Redo the previous exercise without using a for loop and compare computation time
 
-The with() command helps avoid so many "data$"
+# More tabulating, aggregating, and breaking statistics down by group
+The variable `Arrest` indicates whether someone was arrested for the crime. Here are the first 10 values.
+```{r comment="", results='hold'}
+chicagoCrime$Arrest[1:10]
 ```
-with(data, paste(X.Coordinate, Y.Coordinate,sep=","))
-with(data, table(Arrest,Domestic))
-with(data, table(Arrest,Ward))
+We can compute the percentage of crimes with an arrest by calculating how often on average `Arrest=="true"`.
+```{r comment="", results='hold'}
+mean(chicagoCrime$Arrest=="true")
 ```
-The by() command can be used with with() - it summarizes "by" some other feature.
+The `aggregate()` function will do this same calculation, but has options for breaking it down by some other crime feature. Let's use `aggregate()` to compute the percentage of crimes with an arrest by ward. We store the result in `a`.
+```{r comment="", results='hold'}
+a <- aggregate((Arrest=="true")~Ward, data=chicagoCrime, mean)
+a
 ```
-a <- with(data, by(Arrest=="true",Ward,mean))
-a <- sort(a)
-barplot(a)
+The first part of `aggregate()` gives an R formula for how we want the data broken up. On the left of the `~` is the outcome or feature that we want to study. Here it is whether or not `Arrest` has value true. To the right of the `~` is the feature by which we want to break down the arrests, ward in this case. Then we need to tell `aggregate()` in which data frame it can find `Arrest` and `Ward`. Lastly, we need to tell `aggregate()` what to do with the outcome we are studying. Here we are asking `aggregate()` to compute the mean so that we get an arrest percentage.
+
+We can use `barplot()` to compare arrest percentages by ward.
+```{r comment="", fig.width=6.5}
+barplot(a$`(Arrest == "true")`, 
+        names.arg = a$Ward,
+        cex.names = 0.5,
+        ylab      = "Fraction arrested",
+        xlab      = "Ward")
 ```
+
+Note that the column in `a` contain the arrest fraction has a complicated name with several special symbols like `==` and `"`. R will get very confused unless we "protect" this variable name with the backquotes (also called backticks). You can visit the help for `barplot()` with `?barplot` to learn what all the arguments do.
+
 And R also enables us to subset data. 
 ```
 with(subset(data,Primary.Type=="ASSAULT"), table(Arrest,Ward))
 with(subset(data,Primary.Type=="ASSAULT"), 
      barplot(sort(by(Arrest=="true",Ward,mean))))
 ```
-##Class Exercises #9 (Answers Below)
-1. How many assaults occurred in the street? (Location.Description=="STREET")
+# Exercises
+`r exNum()`. How many assaults occurred in the street? (Location.Description=="STREET")
    (Try using subset even though there are other ways)
-2. What percentage of assaults occurred in the street, by Ward
+`r exNum()`. What percentage of assaults occurred in the street, by Ward
 
-##Plotting Data
+# Plotting Data
 
 R enables us to plot points. The points we plotted form the shape of Chicago - which makes total sense because we're using Chicago crime data. 
 ```
@@ -677,57 +746,16 @@ text(a[,1],tab+50,tab)
 
 ```
 
-##Class Exercises #10 (Answers Below)
-1. Make a barplot indicating how many states are in each region. Use state.list
-2. Identify the beat with the most crimes
-3. Identify the beat with the most domestic violence incidents
-4. Part 1 crimes are homicide, robbery, assault, arson, burglary, theft, rape, 
+# Exercises
+`r exNum()`. Make a barplot indicating how many states are in each region. Use state.list
+`r exNum()`. Identify the beat with the most crimes
+`r exNum()`. Identify the beat with the most domestic violence incidents
+`r exNum()`. Part 1 crimes are homicide, robbery, assault, arson, burglary, theft, rape, 
       motor vehicle theft. Calculate the number of Part 1 crimes in Chicago
 
 
 
 
-
-# dates and times
-#   there is no default date and time type
-#   can be simple or complex
-#   what date is one month after January 31st?
-#   Excel - days since 01/00/1900
-#   Unix  - days since 01/01/1970
-#   Timezones, daylight savings time
-#   See lubridate, http://www.jstatsoft.org/v40/i03/paper
-library(lubridate)
-textDate <- substring(data$Date[1:10],1,10)
-b <- mdy(textDate)
-
-# extract information from the date
-year(b)
-month(b)
-month(b,label=TRUE)
-month(b,label=TRUE,abbr=FALSE)
-wday(b,label=TRUE)
-
-# time since Dec 1, 2014
-b-mdy("12/01/2014")
-# time since now
-now()-b
-
-# adding time to a date
-b + dyears(1) # adds 365 days, does not increase year by 1
-b + ddays(31)
-
-# combine date and time
-data$date <- mdy_hms(data$Date) # will detect the AM/PM
-
-# set timezone
-#   default is UTC - Coordinated Universal Time
-data$date <- force_tz(data$date, "America/Chicago")
-# note that it will correctly track for DST
-force_tz(mdy("8/1/2014"), "America/Chicago")
-
-Class exercise
-1. Thanksgiving occurs on the fourth month in November. On what date will 
-   Thanksgiving fall in 2020?
 
 
 
