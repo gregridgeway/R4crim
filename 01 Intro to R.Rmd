@@ -1,23 +1,27 @@
 ---
 title: "Introduction to R"
-author: "Greg Ridgeway and Ruth Moyer"
+author:
+- Greg Ridgeway (gridge@upenn.edu)
+- Ruth Moyer (moyruth@upenn.edu)
 date: "September 20, 2017"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 fontsize: 11pt
 ---
 
-<style type="text/css">
-  
-  body{ /* Normal  */
-      font-size: 11px;
-      font-family: "Times New Roman", Times, serif;
-  }
+<!-- <style type="text/css"> -->
 
-</style>
+<!--   body{ /* Normal  */ -->
+<!--       font-size: 11px; -->
+<!--       font-family: "Times New Roman", Times, serif; -->
+<!--   } -->
+
+<!-- </style> -->
 
 
 
-##Setting the Path
+# Setting the Path
 
 Before you do anything else in R, **it's important that you set the path** - namely, the file directory or folder from which you'll be working. This step is absolutely necessary anytime you're working with a dataset (e.g., a .csv or .txt file) that is stored on your computer, Google Drive, or some other file storage location. Otherwise, R will not be able to find the file - and you won't be able to use the dataset. 
 
@@ -30,27 +34,21 @@ getwd()
 
 ```
 
-This `getwd()` command gets the working directory, the name of the folder where it will look for any data you want to load and save any objects you want to save. The result of `getwd()` shown here probably does not exist on your computer and you probably have a different name for the place where you wish to store your data and results. Note that for all platforms, Windows, Macs, and Linux, the working directory only uses forward slashes. So Windows users be careful... most Windows applications use backslashes, but in an effort to make R scripts work across all platforms, R requires forward slashes. Backslashes have a different use in R that you will meet later.
+This `getwd()` function gets the working directory, the name of the folder where it will look for any data you want to load and save any objects you want to save. The result of `getwd()` shown here probably does not exist on your computer and you probably have a different name for the place where you wish to store your data and results. Note that for all platforms, Windows, Macs, and Linux, the working directory only uses forward slashes. So Windows users be careful... most Windows applications use backslashes, but in an effort to make R scripts work across all platforms, R requires forward slashes. Backslashes have a different use in R that you will meet later.
 
 Let's say you keep all your Crim 602 work in one folder called "Crim602" and you keep that folder on your Google Drive. To figure out what the path is for this folder, do the following. Without opening it, right click on the folder that you keep all your Crim 602 material in.  Click on "Properties" and you'll see "Location:" for the folder.  For "Location:", it should give you something like, e.g., "C:/Users/ramoyer/Google Drive". This information says what the location is for the "CRIM602" folder. On a Mac, it might look something like "~/Google Drive/CRIM602".
 
-Next, in R, using the command setwd, type in the correct file location. For example, to access my "CRIM602" folder, I'd type `setwd("C:/Users/ramoyer/Google Drive/CRIM602")`. Note that I had to change the slashes from backwards to forwards.
+Next, in R, using the function `setwd()`, type in the correct file location. For example, to access my "CRIM602" folder, I'd type `setwd("C:/Users/ramoyer/Google Drive/CRIM602")`. Note that I had to change the slashes from backwards to forwards.
 
 After that, I can try to load in any dataset files that I have stored in the CRIM602 folder. If I've done my `setwd()`, correctly, I shouldn't get any errors because R will know exactly what file I'm talking about. If the path that I've given in the `setwd()` isn't right, R will think the file doesn't even exist. For example, if you give the path for, say, your Crim 600 folder, R won't be able to load the Chicago crime file because the Chicago crime file isn't stored in your Crim 600 folder. 
 
 We'll talk more about loading dataset files later. 
 
-##Help 
+# Help 
 
-R sometimes provides useful help as to how to do something (e.g., choosing the right command or figuring what the syntax of a line of code should be). Let's say we're stumped as to what the `sqrt()` command does:
+R sometimes provides useful help as to how to do something (e.g., choosing the right function or figuring what the syntax of a line of code should be). Let's say we're stumped as to what the `sqrt()` function does. Just type `?sqrt` at the R prompt to read documentation on `sqrt()`. R has over 7,000 functions and an often seemingly inconsistent syntax. As you do more complex work with R (such as using new packages), the Help tab can be useful. 
 
-```
-?sqrt()
-
-```
-R has over 7,000 commands and an often seemingly inconsistent syntax. As you do more complex work with R (such as using new packages), the Help tab can be useful. 
-
-##Basic Math and Functions in R
+# Basic Math and Functions in R
 
 R, on a very unsophisticated level, is like a calculator. 
 
@@ -67,13 +65,8 @@ round(2.718281828,3)
 factorial(4)
 abs(-4)
 ```
-##What Does NA mean in R?
 
-In R, `NA` means a missing value. We'll do more exercises later using data containing some `NA` values. In any dataset, you're virtually guaranteed to find some NAs. The function `is.na()` helps determine whether there are any missing values (any NAs).
-
-In some of the problems below, we'll use `is.na()`.
-
-## Making Vectors in R
+# Combining values together into a collection (or vector)
 
 We will use the `c()` function a lot. `c()` *c*ombines elements, like numbers and text to form a vector or a collection of values. If we wanted to combine the numbers 1 to 5 we could do
 ```{r comment=""}
@@ -98,15 +91,16 @@ Note in the examples below that you can also have a collection of non-numerical 
 c("CRIM600","CRIM601","CRIM602","CRIM603")
 c("yes","no","no",NA,NA,"yes")
 ```
+In R, `NA` means a missing value. We'll do more exercises later using data containing some `NA` values. In any dataset, you're virtually guaranteed to find some NAs. The function `is.na()` helps determine whether there are any missing values (any NAs). In some of the problems below, we'll use `is.na()`.
 
 You can use double quotes or single quotes in R as long as you are consistent. When you have quotes inside the text you need to be particularly careful.
 ```{r comment="", results='hold'}
 "Lou Gehrig's disease"
 'The officer shouted "halt!"'
 ```
-The backslashes in the above text "protect" the double quote, communicated to you and to R that the next double quote is not the end of the text, but a character that is actually part of the text the user wants to keep.
+The backslashes in the above text "protect" the double quote, communicating to you and to R that the next double quote is not the end of the text, but a character that is actually part of the text the user wants to keep.
 
-The `c()` function isn't the only way to make a list in R. For example, placing a `:` between two numbers can return a list of numbers in sequence. The functions `rep()` and `seq()` produce repeated values or sequences.
+The `c()` function isn't the only way to make a collection of values in R. For example, placing a `:` between two numbers can return a collection of numbers in sequence. The functions `rep()` and `seq()` produce repeated values or sequences.
 ```{r comment="", results='hold'}
 1:10
 5:-5
@@ -129,27 +123,27 @@ cumsum(c(1,10,3,6,2,5,8,4,7,9)) # cumulative sum
 mean(c(1,10,3,6,2,5,8,4,7,9)) # mean of collection of 10 numbers
 median(c(1,10,3,6,2,5,8,4,7,9)) # median of same population
 ```
-There are also some commands in R that help us find the biggest and smallest values. For example:
+There are also some functions in R that help us find the biggest and smallest values. For example:
 ```{r comment="", results='hold'}
 max(c(1,10,3,6,2,5,8,4,7,9)) # what is the biggest value in vector?
 which.max(c(1,10,3,6,2,5,8,4,7,9)) # in which "spot" would we find it?
 min(c(1,10,3,6,2,5,8,4,7,9)) # what is the smallest value in vector?
 which.min(c(1,10,3,6,2,5,8,4,7,9)) # in which "spot" would we find it?
 ```
-A lot of commands in R are to help you see and understand what's in a dataset. For example, we can rearrange a collection of values in ascending or descending order. Note the `order()` command.  How is it similar to the `which.max()` or `which.min()` command?  Note the `sort()` command. How is it similar to the `max()` or `min()` command?
+A lot of functions in R are to help you see and understand what's in a dataset. For example, we can rearrange a collection of values in ascending or descending order. Note the `order()` function.  How is it similar to the `which.max()` or `which.min()` function?  Note the `sort()` function.
 ```{r comment="", results='asis'}
 sort(c(1,10,3,6,2,5,8,4,7,9))
 rev(c(1,10,3,6,2,5,8,4,7,9))
 rev(sort(c(1,10,3,6,2,5,8,4,7,9)))
 sort(c(1,10,3,6,2,5,8,4,7,9),decreasing=TRUE)
 order(c(1,10,3,6,2,5,8,4,7,9))#   where is the ith biggest number?
-rank(c(1,100,3,20)) #how do I rank compared to others?
+rank(c(1,100,3,20)) #how does each value rank compared to others?
 ```
 The above examples have involved mostly numerical values in a vector. Here are some examples involving non-numerical "character" values. Let's create an object called `my.states` (a name I made up) that will contain the postal codes of places in which I've lived or worked.
 ```{r comment="", results='hold'}
 my.states <- c("WA","DC","CA","PA","MD","VA","OH")
 ```
-Take a look at the arrow `<-`.  What does it seem to do? We're going to talk more about this arrow soon. Now let's run some new functions on this collection of postal codes.
+Take a look at the arrow `<-`. This is how you tell R to take the result of what is on the right and store it in an object named on the left. We're going to talk more about this arrow soon. Now let's run some new functions on this collection of postal codes.
 ```{r comment="", results='hold'}
 nchar(my.states)
 paste(my.states, ", USA")
@@ -157,27 +151,27 @@ paste(my.states, ", USA", sep="")
 paste(my.states, collapse=",")
 paste0(my.states)
 ```
-What does the `nchar()` command do?  The `paste()` command?  Does it make a difference to use `sep=""` or `collapse=","`? What about `paste0()`?
+What does the `nchar()` function do?  The `paste()` function?  Does it make a difference to use `sep=""` or `collapse=","`? What about `paste0()`?
 
-##Class Exercises #1 (Answers Below)
+# Class Exercises #1 (Answers Below)
 1. Print all even numbers less than 100
-2. What is the standard deviation of even numbers less than 100
+2. What is the mean of even numbers less than 100
 3. Have R put in alphabetical order
 `c("WA","DC","CA","PA","MD","VA","OH")`
 
-##Assignment of Variable Names
+# Assignment of values to variables
 
 The left-facing arrow symbol is an extremely important tool in R. Try the following:
-```
+```{r comment="", results='hold'}
 a <- 1
 ```
 Now type:
-```
+```{r comment="", results='hold'}
 a
 ```
 
 R has assigned a the value of "1" - here are more examples:
-```
+```{r comment="", results='hold'}
 b <- 2+2
 a <- a+b
 a <- 1:10
@@ -190,266 +184,333 @@ state.names <- c("WV","OH","OK","NV","CA","IN","MA","MI","IL","IA","SC","NH",
                  "HI","WA","DE","NJ","NE","KY","AR","TX","NC","MD","VA","VT",
                  "KS","ID","DC")
 ```
-##Indexing 
+R programmers typically pronounce the `<-` as "gets". So we would read `a <- 1` as "a gets one".
+
+# Indexing 
 
 We can extract items from a vector, matrix, or dataframe using indexing. In R, we use square brackets to index. 
 
-```
-state.names[1]
-state.names[1:3]
-state.names[c(1,5,9)]
-state.names[2*(1:25)]
+```{r comment="", results='hold'}
+state.names[1] # get the first state
+state.names[1:3] # get the first three states
+state.names[c(1,5,9)] # get states 1, 5, and 9
+state.names[2*(1:25)] # get the even states
 ```
 
-We can also use index to remove an item. 
-```
+If you put a negative number inside the `[]`, this will communicate to R to remove that item from the collection. Let's remove DC from `state.names` since it is not one of the 50 states. Since it is the 51st item in `state.names` we can remove like this 
+```{r comment="", results='hold'}
 state.names[-51]
 ```
 
-Let's combine the sort and order commands from above (along with variable assignment) with the concept of indexing. 
+Let's combine the sort and order functions from above (along with variable assignment) with the concept of indexing. 
 
+```{r comment="", results='hold'}
+sort(state.names)[1] # sort, then give the first value
+i <- order(state.names) # index the states in order
+i[1:3]                  # which positions are the first three
+state.names[i[1:3]]     # show me those three states
 ```
-sort(state.names)[1]
-i <- order(state.names)
-i[1:3]
-state.names[i[1:3]]
-```
+Note that in the last example we used square brackets within square brackets. First, we asked R to give us the indices of the first three states in alphabetical order and that was `r i[1:3]`. Then R took those three values and plugged them into the second set of square brackets to show you the state names in those positions in the collection.
 
-## Class Exercises #2 (Answers Below)
+# Class Exercises #2 (Answers Below)
 1. What's the last state in the list?
-2. Pick out states that begin with "M" using their indices
+2. Pick out states that begin with "M" using their indices.
 3. Pick out states where you have lived.
 4. What's the last state in alphabetical order?
 5. What are the last three states in alphabetical order?
 
 
-##Boolean Operators
-Boolean operators are simple words (TRUE, FALSE, equal to, and, or, not, any, greater than, less than) that can logically be used to combine or exclude items when searching data.
-```
+# Logical values and operations
+Logical values in R are the two values `TRUE` and `FALSE`, always written in all capital letters in R. You can also combine a bunch of `TRUE` and `FALSE` values into a collection.
+```{r comment="", results='hold'}
 TRUE
 FALSE
 c(TRUE,FALSE,TRUE,FALSE)
-
-TRUE  && TRUE
-FALSE && TRUE
-FALSE || TRUE
-FALSE || FALSE
 ```
-Sometimes, the syntax in R can require either single or double vertical bars; likewise, sometimes you will need to use a single ampersand instead of a double ampersand.
-
-The greater than or less than symbols are very useful. We can also express "greater than or equal to" or "less than or equal to"
+We use logical operators to create logical expressions and r can evaluate them as either `TRUE` or `FALSE`. For example, `&` represents the logical "and" and `|` represents the logical "or."
+```{r comment="", results='hold'}
+TRUE  & TRUE
+FALSE & TRUE
+FALSE | TRUE
+FALSE | FALSE
 ```
+We can use R to compare values using greater than or less than symbols. We can also express "greater than or equal to" or "less than or equal to." These will evaluate to `TRUE` or `FALSE` depending, of course, on whether the statement is true or false.
+```{r comment="", results='hold'}
 6>5
 6<5
 6>=5
 5<=5
 ```
-We can combine Boolean operators to test whether something is true or false:
-```
-(6>5) || (100<3)
-(6>5) && (100<3)
+We can combine logical operators into more complicated expressions.
+```{r comment="", results='hold'}
+(6>5) | (100<3)
+(6>5) & (100<3)
 ```
 
-Here are some additional examples.  Note that we use a double equal sign. 
-```
+Here are some additional examples. We are going to make `a` be the values 1 to 10 and then use logical operators to ask a question (like "are you equal to?" or "are you smaller than?") of each of those values. Note that the double equal sign `==` asks the question whether the two values are the same. 
+```{r comment="", results='hold'}
 a <- 1:10
 a==5
 a!=5  # ! means "not"
 a<5
 a>=5
-13 %% 5  # = 3, 13/5 = 2 with remainder 3
-a%%2==0
+a>5 & a<8 
+a<3 | a>=7
+```
 
-a>5 & a<8  # & means "and"   IMPORTANT use single & or | for vectors
-a<3 | a>=7 # | means "or"    otherwise just compares the first values
+The `%%` operator computes the remainder after dividing the left side by the right side.
+```{r comment="", results='hold'}
+13 %% 5      # = 3, 13/5 = 2 with remainder 3
+a %% 2 == 0  # here's a way to ask each number if it's even
+```
 
-#  all/any checks whether all/any are TRUE
+
+There are special functions `any()` and `all()` that check whether all/any of the values are true.
+```{r comment="", results='hold'}
 all(a<11)
 all(a>5 & a<8)
 any(a>5 & a<8)
+```
 
-#   use booleans for indexing too
+Logical values may be used inside square brackets too. R will show you the values corresponding to `TRUE`s inside the square brackets and will eliminate any values corresponding to `FALSE`s. For example, let's store in `i` `TRUE` for even numbers and `FALSE` for odd numbers. So `i` will consist of ten logical values. Putting `i` inside the square brackets will extract just the values of `a` for which `i` has a `TRUE`.
+```{r comment="", results='hold'}
 i <- a%%2==0
+i
 a[i]
-#   ! means "not"
+```
+We can use `!`, which means "not," to reverse all the logical values and get the values of `a` that are not even.
+```{r comment="", results='hold'}
 a[!i]
+```
 
+Before we removed DC from the list of states by noticing that it was in position #51. This time, let's have R do the work of locating DC in the collection of states. We'll have R ask each element in `state.names` whether or not it equals "DC".
+```{r comment="", results='hold'}
 i <- state.names!="DC"
 state.names[i]
-state.names[state.names!="DC"]
+state.names[state.names!="DC"] # can also put directly inside []
+```
 
-#  %in% tests whether something is in a set
+The R operator `%in%` asks each value on the left whether or not it is a member of the set on the right.
+```{r comment="", results='hold'}
 a %in% c(3,7,10)
 
 my.states <- c("MD","OH","VA","CA","WA","DC")
-i <- state.names %in% my.states
-sum(i)
-sum(i)==length(my.states)
+# do these states touch the Pacific Ocean?
+my.states %in% c("CA","OR","WA","AK","HI")
+# how many of these states touch the Pacific Ocean?
+sum(my.states %in% c("CA","OR","WA","AK","HI"))
 ```
+Note in the last line we used `sum()` to count for how many of `my.states` did `%in%` evaluate to `TRUE`.
 
-##Classroom Exercises #3 (Answers Below)
-1. Report TRUE or FALSE for each state depending on if you have lived there
-2. With a<-1:100, pick out odd numbers between 50 and 75
+# Classroom Exercises #3 (Answers Below)
+1. Report `TRUE` or `FALSE` for each state depending on if you have lived there
+2. With `a <- 1:100`, pick out odd numbers between 50 and 75
 3. Use greater than less than signs to get all state names that begin with M
 
-## Conditionals
-We can use the functions if(){} to test conditions. 
-
-```
-if(state.names[1]=="WV")
-{
-   print("The Mountain State")
-}
-
-if(state.names[1] < state.names[2])
-{
-   cat(state.names[1],"comes before",state.names[2],"in alphabetical order\n")
-} else
-{
-   cat(state.names[2],"comes before",state.names[1],"in alphabetical order\n")
-}
-
-```
-
-## Sampling in R
-The command sample() randomly shuffles a vector
-```
+# Sampling
+The function `sample()` randomly shuffles a collection of values.
+```{r comment="", results='hold'}
+sample(1:10) # each time different values will appear
 sample(1:10)
 sample(1:10)
-sample(1:10)
-a <- sample(1:1000,size=10)
-a <- sample(1:6,size=1000,replace=TRUE)
+a <- sample(1:1000,size=10) # pick 10 numbers between 1-1000
+a <- sample(1:6,size=1000,replace=TRUE) # roll a die 1000 times
 ```
-## Table Command
+Notice that `sample()` has several options including `size=` to indicate how many to select and `replace=` to indicate whether to sample with or without replacement. You can access the help on the `sample()` function by typing `?sample` at the R prompt.
 
-The table command tables the values in R. For example, we had set "a" above. The table command
-helps us see how many times each value appears. Per the Law of Large Numbers, what do you think will happen the larger the value that we assign to "size"?  
-```
+# Tabulating
+
+The `table()` function counts how many of each value appear in a collection. We just set `a` to be a random collection of numbers 1 to 6, simulating rolling a die. With `table()` we can see how often each number appeared. 
+```{r comment="", results='hold'}
 table(a)
-max(table(a))
-order(table(a))
+max(table(a)) # find out which value appears most frequently
 ```
-##Classroom Exercises #4 (Answers Below)
-1. Use sample() to estimate the probability of rolling a 6
-2. Use sample() to estimate the probability that the sum of two die equal 7
-3. Use sample() to select randomly five states without replacement
-4a. Use sample() to select randomly 1000 states with replacement
-4b. Tabulate how often each state was selected
-4c. Which state was selected the least? Make R do this for you
+# Classroom Exercises #4 (Answers Below)
+1. Use `sample()` to estimate the probability of rolling a 6
+2. Use `sample()` to estimate the probability that the sum of two die equal 7
+3. Use `sample()` to select randomly five states without replacement
+4. Use `sample()` to select randomly 1000 states with replacement
+    + Tabulate how often each state was selected
+    + Which state was selected the least? Make R do this for you
 
+# Lists 
 
-## Lists 
-
-The lapply() function lets us apply a given function to every item in a list and obtain a list in return. The sapply() function works in a manner quite similar to lapply(), but it makes the output look a lot more user-friendly; the "s" stands for simplify. The list() command enables us to have different value types in the same list (e.g., numerical and character).
-```
+So far we have worked with very simple collections of numbers or text or logical values. Eventually we will need to work with more complicated kinds of data, like datasets, maps, and other objects. R stores these more complex objects in a list. A list is essentially a collection of objects, potentially of different types. Let's start with a simple list.
+```{r comment="", results='hold'}
 a <- list(1:3,5:1,1:10)
+a
+```
+The list `a` has three components, each of which is a collection of values and each has different length. Here's another list consisting of three components, each of which is a collection of different types, numeric, text, and logical values.
+```{r comment="", results='hold'}
+b <- list(0:9, c("A","B","C"),c(TRUE,FALSE,NA))
+b
+```
+We use a double set of square brackets to access the components of a list. Let's say we just want the first component of `a`, just the part with the numbers 1, 2, and 3.
+```{r comment="", results='hold'}
 a[[1]]
+```
+We can even grab the first element in the first component of the list `a`.
+```{r comment="", results='hold'}
 a[[1]][1]
+```
+Or we just select the first and third component of the list `a`. This will return a new list, but just without the second component.
+```{r comment="", results='hold'}
 a[c(1,3)]
-#  lapply() can apply a function to each component of the list
+```
+
+`lapply()` means "list apply" and lets us apply a given function to every item in a list and obtain a list in return. Let's say we want to sort each of the components in `a`. It would take too much typing to run `sort(a[[1]])` and `sort(a[[2]])` and `sort(a[[3]])`. Instead, `lapply()` can apply the sort function to each of the three components in `a`.
+```{r comment="", results='hold'}
 lapply(a,sort)
-#  sapply() is like lapply() but will convert from a list to vector
-sapply(a,sort)
+```
+There is also a function `sapply()` that works in a manner quite similar to `lapply()`. The only difference is that `sapply()` will try to simplify the results. Think about the "s" meaning "simplified". Let's compute the number of elements in each component and the average of the numbers in each component.
+```{r comment="", results='hold'}
 sapply(a,length)
+sapply(a,mean)
+```
+Since `length()` and `mean()` will return a single number for each component, the result can be simplified into a collection of three values, one for each component of the list.
+
+Let's find the component that has the most values in it.
+```{r comment="", results='hold'}
 i <- which.max(sapply(a,length))
 a[[i]]
-sapply(a,mean)
+```
+If `sapply()` is not able to simplify the result, then the result is just like `lapply()`.
+```{r comment="", results='hold'}
+sapply(a,sort)
+```
 
-#   lists can mix different types
-b <- list(0:9, c("A","B","C"),c(TRUE,FALSE,NA))
-
+Let's return to our state example. Before we just had a collection of 51 postal codes. Instead, let's create a list that separates them into three components depending on whether they are in the west, east, or central United States.
+```{r comment="", results='hold'}
 state.list <- list(
    west=c("AK","HI","WA","NV","CA","CO","UT","OR","AZ","NM","ID"),
    east=c("KY","RI","PA","DE","DC","NJ","WV","MA","SC","NH","GA","CT","NY","IN",
           "MS","AL","OH","NC","MD","VA","VT","FL","ME","TN"),
    central=c("SD","MO","MN","ND","WY","OK","MI","IL","IA","LA","WI","MT","NE",
              "AR","TX","KS"))
-names(state.list)
-state.list[[1]]
-state.list[["west"]]
+```
 
+We can now use `lapply()` to ask R to sort each region, sample three states from each region, and tell us how many states are in each region.
+```{r comment="", results='markup'}
 lapply(state.list,sort)
 lapply(state.list,sample,size=3,replace=FALSE)
 sapply(state.list,length)
-
 ```
-Note the use of brackets - especially the double brackets. Why do we use double brackets versus single brackets? 
 
-##  The Dollar Sign Symbol
-
-The dollar sign in R is going to be extremely important. We use it to extract named components from lists:
+Notice here that we have given names (west, east, and central) to each of the three components of `state.list`. We can ask R to tell us what the names of the `state.list` components are.
+```{r comment="", results='hold'}
+names(state.list)
 ```
+
+We can use the double square brackets to extract the western states. Since they are first in the list we use `[[1]]`
+```{r comment="", results='hold'}
+state.list[[1]]
+```
+However, this can be dangerous. Are we sure the first component has the western states? A safer approach is to call it by name inside the square brackets.
+```{r comment="", results='hold'}
+state.list[["west"]]
+```
+
+We can also use the `$` to extract a named component from a list. 
+```{r comment="", results='hold'}
 state.list$west
 
 ```
+The dollar sign in R is going to be extremely important. We will be using it a lot to extract variables, map components, and other values from lists.
 
-You can use it to add new components to a list (or a dataset).
-```
+You can use the `$` to add new components to a list. Let's add all the postal codes for all of the United States territories.
+```{r comment="", results='hold'}
 state.list$other <- c("AS","GU","MP","PR","VI","UM","FM","MH","PW")
 
 ```
 
-What do you think would happen if we ran just the following?
-
+What happens if we ran just the following?
 ```
 other <- c("AS","GU","MP","PR","VI","UM","FM","MH","PW")
 ```
+This creates a separate object called `other`, unconnected to our `state.list`. By using the `$` we add our new collection of states (other) to `state.list`.
 
-The dollar sign makes sure that our new vector (other) is part of our dataset (state.list).
+We have now created a lot of objects. At any time you can run `ls()` to list all the objects that R has in memory.
+```{r comment="", results='hold'}
+ls()
 
-##Classroom Exercises #5 (Answers Below)
-1. Fix state.list so that "DC" is in "other" rather than "east"
+```
+Assuming you are using RStudio, you can also see the objects stored in memory by clicking on the Environment tab.
+
+# Classroom Exercises #5 (Answers Below)
+1. Fix `state.list` so that "DC" is in "other" rather than "east". Here are a few hints.
+     + access "other" using `$`
+     + combine things using `c()`
+     + assign values using `<-`
+     + remove values using `[]` with a negative index or using a logical statement
 2. Print out east and central states together sorted
 
 
-##Functions
-A lot of the commands in R are actually "functions."  For example, the is.na() command is a function that tells us whether a missing value exists. Functions help us avoid writing the same thing over and over again. You can write your own functions. For example, 
-```
+# Functions
+So far you have seen several built-in functions in R, like `max()`, `sample()`, `is.na()`, and `table()`. These functions help us complete tasks that normally would take several lines of R code. They also make it easy to read R code... it's easy to know what `max(c(1,3,5,7,9))` means. In R you can also write your own functions. Let's say we want to just extract the first and last state from each component of `state.list`. Now this is not a particularly useful function, but we're going to use it just for demonstration. 
+```{r comment="", results='hold'}
 give.first.and.last <- function(x)
 {
    i <- c(1,length(x))
    return(x[i])
 }
+```
+As you can see, the basic template of an R function is to give it a new name (here `give.first.and.last()`), followed by the syntax `<- function` (this tells R that what comes next is a function), followed by parentheses containing the names of arguments (you choose what to call them) that will be sent to this function (here we use the not very creative `x`), followed by squiggly braces containing R code to do calculations on `x`, with the last line being `return()` containing whatever final result the function calculates. Our function here creates `i` to contain the number 1 and the length of `x` so that it can figure out where the last value is. Then it simply returns `x[i]`, using the square brackets to pick out the values of `x` indexed by `i`, the first and last values in `x`. Let's try our new function out on the numbers 1 to 100.
+
+```{r comment="", results='hold'}
 give.first.and.last(1:100)
 ```
-What does this function that you wrote do? What's the benefit of the function? What would happen if we wanted to find the first and last numbers for 50 different sequences besides "1:100" but didn't write this function? Let's try this same function with non-numerical data.
+The primary benefit of writing a function is to simplify the reading of a script. It is much easier to comprehend what a script is doing if you have code that says something like `give.first.and.last()` rather than a bunch of square brackets picking out values. A secondary benefit is that you can use this function again and again to help solve other problems.
 
+Let's combine `give.first.and.last()` with `lapply()` and `sapply()` to extract the first and last state in each component of our list.
+```{r comment="", results='markup'}
+lapply(state.list, give.first.and.last)
+sapply(state.list, give.first.and.last)
 ```
-lapply(state.list,give.first.and.last)
-sapply(state.list,give.first.and.last)
-sapply(lapply(state.list,sort),give.first.and.last)
+Note how `sapply()` noticed that `give.first.and.last()` produces exactly two values for each component of the list and went ahead and simplified the result into a 2 by 4 table. Let's first sort the states within each region and then extract the first and last states. This will give us the first and last in alphabetical order.
+```{r comment="", results='markup'}
+sapply(lapply(state.list,sort), give.first.and.last)
 ```
 
-
-##Classroom Exercises #6 (Answers Below)
-1. Make a function "is.island(x)" returns TRUE if x is an island. Islands are "HI","FM","MH","PW","AS","GU","MP","PR","VI","UM"
-2. Count how many islands within each region
-3. Which components of "b" having missing values? Use is.na()
-
-##Matrices and apply()
-
-Matrices look much like a dataset.  It's a collection of one or more rows, and one or more columns. 
-
-First let's create a matrix. Next, we'll test the apply() command on it. 
+For many functions built in to R you can see what they do by typing the name of the function. Here's how R computes the interquartile range of a collection of values.
+```{r comment="", results='markup'}
+IQR
 ```
+You can see that it computes the 0.25 quantile and the 0.75 quantile and uses `diff()` to compute their difference.
+
+# Classroom Exercises #6 (Answers Below)
+1. Make a function `is.island(x)` returns `TRUE` if `x` is an island. Islands are "HI","FM","MH","PW","AS","GU","MP","PR","VI","UM". Borrow the template I used for `give.first.and.last()`. Then try using the `%in%` operator.
+2. Count how many islands are within each region. Use an `sapply()` (or two) and your new `is.island()` function.
+3. Which components of `b` (defined earlier) having missing values? Use `is.na()`
+
+# Matrices and apply()
+
+A matrix is a collection of values of the same type (all numbers or all text or all logical values) with one or more rows and one or more columns. Let's create a matrix with some random numbers.
+```{r comment="", results='hold'}
 a <- matrix(sample(1:5,size=12,replace=TRUE),nrow=4)
+a
 ```
-The apply command lets us manipulate data more efficiently by applying a function to all rows or to all columns. Incidentally, note the use of summary.  What does summary do?
+This matrix has two dimensions, 4 rows and 3 columns. You can use square brackets to select elements from the matrix.
+```{r comment="", results='hold'}
+a[1,2]     # element in first row, second column
+a[1,]      # the entire first row
+a[,2]      # the entire second column
+a[-1,-1]   # dropping the first row and first column
+a[3:4,2:3] # rows 3 & 4, columns 2 & 3
 ```
-#all rows
-apply(a,1,sum) 
-apply(a,1,mean) 
-apply(a,1,summary)
-apply(a,1,function(x) {c(min(x),max(x))}) 
-apply(a,1,function(x) {all(x>1)})
-#   all columns
-apply(a,2,sum)
+The numbers to the left of the comma index rows and the numbers to the right of the comma index columns. The `apply()` function, like the `lapply()` and `sapply()` functions, allow you to apply a function to all the rows or all the columns of a matrix. `apply()` needs the name of the matrix, whether you want to apply the function to the first dimension (rows) or the second dimension (columns), and the name of the function to apply.
+```{r comment="", results='hold'}
+apply(a, 1, sum)     # compute sum of each row
+apply(a, 2, sum)     # compute sum of each column
+apply(a, 1, mean)    # compute mean of each row
+apply(a, 1, summary) # summarize each row
 ```
-Incidentally, note the use of summary.  What does summary do?
+We can also create a new function right on the spot to compute something on each row or column. Let's find the minimum and maximum values in each row and find out if all the values are greater than 1.
+```{r comment="", results='hold'}
+apply(a, 1, function(x) {c(min(x),max(x))}) # there is also a function range()
+apply(a, 1, function(x) {all(x>1)})
 ```
-summary(c(1, 5, 5, 9, 10, 100))
-```
-##Dataframes
+
+# Dataframes
 A dataframe is a special kind of list with an equal number of elements. Note that how we load a dataset in R is very dependent on the type of datafile. For example, if it's an .RData file, we'll load it with the load() command.  However, a .csv file requires us to use the command, read.csv().
 
 ```
