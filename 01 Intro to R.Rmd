@@ -21,29 +21,6 @@ fontsize: 11pt
 
 
 
-# Setting the Path
-
-Before you do anything else in R, **it's important that you set the path** - namely, the file directory or folder from which you'll be working. This step is absolutely necessary anytime you're working with a dataset (e.g., a .csv or .txt file) that is stored on your computer, Google Drive, or some other file storage location. Otherwise, R will not be able to find the file - and you won't be able to use the dataset. 
-
-Here is how you set the path:
-
-First, before doing anything else in R, type 
-
-```{r comment=""}
-getwd()    
-
-```
-
-This `getwd()` function gets the working directory, the name of the folder where it will look for any data you want to load and save any objects you want to save. The result of `getwd()` shown here probably does not exist on your computer and you probably have a different name for the place where you wish to store your data and results. Note that for all platforms, Windows, Macs, and Linux, the working directory only uses forward slashes. So Windows users be careful... most Windows applications use backslashes, but in an effort to make R scripts work across all platforms, R requires forward slashes. Backslashes have a different use in R that you will meet later.
-
-Let's say you keep all your Crim 602 work in one folder called "Crim602" and you keep that folder on your Google Drive. To figure out what the path is for this folder, do the following. Without opening it, right click on the folder that you keep all your Crim 602 material in.  Click on "Properties" and you'll see "Location:" for the folder.  For "Location:", it should give you something like, e.g., "C:/Users/ramoyer/Google Drive". This information says what the location is for the "CRIM602" folder. On a Mac, it might look something like "~/Google Drive/CRIM602".
-
-Next, in R, using the function `setwd()`, type in the correct file location. For example, to access my "CRIM602" folder, I'd type `setwd("C:/Users/ramoyer/Google Drive/CRIM602")`. Note that I had to change the slashes from backwards to forwards.
-
-After that, I can try to load in any dataset files that I have stored in the CRIM602 folder. If I've done my `setwd()`, correctly, I shouldn't get any errors because R will know exactly what file I'm talking about. If the path that I've given in the `setwd()` isn't right, R will think the file doesn't even exist. For example, if you give the path for, say, your Crim 600 folder, R won't be able to load the Chicago crime file because the Chicago crime file isn't stored in your Crim 600 folder. 
-
-We'll talk more about loading dataset files later. 
-
 # Help 
 
 R sometimes provides useful help as to how to do something (e.g., choosing the right function or figuring what the syntax of a line of code should be). Let's say we're stumped as to what the `sqrt()` function does. Just type `?sqrt` at the R prompt to read documentation on `sqrt()`. R has over 7,000 functions and an often seemingly inconsistent syntax. As you do more complex work with R (such as using new packages), the Help tab can be useful. 
@@ -510,11 +487,42 @@ apply(a, 1, function(x) {c(min(x),max(x))}) # there is also a function range()
 apply(a, 1, function(x) {all(x>1)})
 ```
 
-# Dataframes
-A dataframe is a special kind of list with an equal number of elements. Note that how we load a dataset in R is very dependent on the type of datafile. For example, if it's an .RData file, we'll load it with the load() command.  However, a .csv file requires us to use the command, read.csv().
+
+
+# Setting the working directory
+
+Now that we have covered a lot of fundamental R features, it is time to load in a real dataset. However, before we do that, R needs to know where to find the data file. So we first need to talk about "the working directory". When you start R it has a default folder or directory on your computer where it will retrieve or save any files. You can run `getwd()` to get the current working directory. Here's our current working directory, which will not be the same as yours.
+```{r comment=""}
+getwd()    
+```
+Almost certainly this default directory is *not* where you plan to have all of your datasets and files stored. Instead, you probably have an "analysis" or "project" or "R4criminology" folder somewhere on you computer where you would like to store your data and work.
+
+Before you do anything else in R, **it's important that you set the path** - namely, the file directory or folder from which you'll be working. This step is absolutely necessary anytime you're working with a dataset (e.g., a .csv or .txt file) that is stored on your computer, Google Drive, or some other file storage location. Otherwise, R will not be able to find the file - and you won't be able to use the dataset. 
+
+Here is how you set the path:
+
+First, before doing anything else in R, type 
+
+
+
+This `getwd()` function gets the working directory, the name of the folder where it will look for any data you want to load and save any objects you want to save. The result of `getwd()` shown here probably does not exist on your computer and you probably have a different name for the place where you wish to store your data and results. Note that for all platforms, Windows, Macs, and Linux, the working directory only uses forward slashes. So Windows users be careful... most Windows applications use backslashes, but in an effort to make R scripts work across all platforms, R requires forward slashes. Backslashes have a different use in R that you will meet later.
+
+Let's say you keep all your Crim 602 work in one folder called "Crim602" and you keep that folder on your Google Drive. To figure out what the path is for this folder, do the following. Without opening it, right click on the folder that you keep all your Crim 602 material in.  Click on "Properties" and you'll see "Location:" for the folder.  For "Location:", it should give you something like, e.g., "C:/Users/ramoyer/Google Drive". This information says what the location is for the "CRIM602" folder. On a Mac, it might look something like "~/Google Drive/CRIM602".
+
+Next, in R, using the function `setwd()`, type in the correct file location. For example, to access my "CRIM602" folder, I'd type `setwd("C:/Users/ramoyer/Google Drive/CRIM602")`. Note that I had to change the slashes from backwards to forwards.
+
+After that, I can try to load in any dataset files that I have stored in the CRIM602 folder. If I've done my `setwd()`, correctly, I shouldn't get any errors because R will know exactly what file I'm talking about. If the path that I've given in the `setwd()` isn't right, R will think the file doesn't even exist. For example, if you give the path for, say, your Crim 600 folder, R won't be able to load the Chicago crime file because the Chicago crime file isn't stored in your Crim 600 folder. 
+
+
+# Data frames
+A data frame is a special case of a list where all the components of the list have the same number of elements. Think about each component of the list being a "column" in your dataset. R code load in datasets from numerous sources (plain text, Excel files, databases, websites, etc.) including .RData format, R's unique data format. There is an extensive guide to [importing and exporting datasets](https://cran.r-project.org/doc/manuals/r-release/R-data.pdf).
+
+To import data in the .RData format use `load()`. A [sample of Chicago crime data](https://github.com/gregridgeway/R4criminology/blob/master/chicago%20crime%2020141124-20141209.RData) is available on the R4Crim github site.
+```{r comment="", results='hold'}
+load("chicago crime 20141124-20141209.RData")
+```
 
 ```
-load("chicago crime.RData")
 is(data)
 #   look up the names of the variables
 names(data)
