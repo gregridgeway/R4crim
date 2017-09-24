@@ -1,33 +1,53 @@
 ---
 title: "Introduction to R"
 author:
-- Greg Ridgeway (gridge@upenn.edu)
-- Ruth Moyer (moyruth@upenn.edu)
-date: "September 20, 2017"
+- affiliation: University of Pennsylvania
+  email: gridge@upenn.edu
+  name: Greg Ridgeway
+- affiliation: University of Pennsylvania
+  email: moyruth@upenn.edu
+  name: Ruth Moyer
+date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
-  html_document: default
-  pdf_document: default
-fontsize: 11pt
+  html_document:
+    css: htmlstyle.css
 ---
+<!-- HTML YAML header Ctrl-Shift-C to comment/uncomment -->
 
-<!-- <style type="text/css"> -->
+<!-- --- -->
+<!-- title: "Introduction to R" -->
+<!-- author: -->
+<!-- - Greg Ridgeway (gridge@upenn.edu) -->
+<!-- - Ruth Moyer (moyruth@upenn.edu) -->
+<!-- date: "`r format(Sys.time(), '%B %d, %Y')`" -->
+<!-- output: -->
+<!--   pdf_document: -->
+<!--     latex_engine: pdflatex -->
+<!--   html_document: default -->
+<!-- fontsize: 11pt -->
+<!-- fontfamily: mathpazo -->
+<!-- --- -->
+<!-- PDF YAML header Ctrl-Shift-C to comment/uncomment -->
 
-<!--   body{ /* Normal  */ -->
-<!--       font-size: 11px; -->
-<!--       font-family: "Times New Roman", Times, serif; -->
-<!--   } -->
 
-<!-- </style> -->
 
+<!-- A function for autmomating the numbering and wording of the exercise questions -->
 ```{r echo=FALSE}
 counterExercise <- 0
-exNum <- function() {counterExercise <<- counterExercise+1; counterExercise}
+exerciseQuestions <- NULL
+exNum <- function(questionText="") 
+{
+   counterExercise <<- counterExercise+1
+   exerciseQuestions <<- c(exerciseQuestions, questionText)
+   return(paste0(counterExercise,". ",questionText))
+}
 ```
 
+# Introduction
 
-# Help 
+This is the first set of notes for an introduction to R programming from criminology and criminal justice. These notes assume that you have the latest version of R and R Studio installed. We are also assuming that you know how to start a new script file and submit code to the R console. From that basic knowledge about using R, we are going to start with `2+2` and by the end of this set of notes you will load in a small Chicago crime dataset, create a few plots, count some crimes, and be able to subset the data. Our aim is to build a firm foundation on which we will build throughout this set of notes.
 
-R sometimes provides useful help as to how to do something (e.g., choosing the right function or figuring what the syntax of a line of code should be). Let's say we're stumped as to what the `sqrt()` function does. Just type `?sqrt` at the R prompt to read documentation on `sqrt()`. R has over 7,000 functions and an often seemingly inconsistent syntax. As you do more complex work with R (such as using new packages), the Help tab can be useful. 
+R sometimes provides useful help as to how to do something, such as choosing the right function or figuring what the syntax of a line of code should be. Let's say we're stumped as to what the `sqrt()` function does. Just type `?sqrt` at the R prompt to read documentation on `sqrt()`. Most help pages have examples at the bottom that can give you a better idea about how the function works. R has over 7,000 functions and an often seemingly inconsistent syntax. As you do more complex work with R (such as using new packages), the Help tab can be useful. 
 
 # Basic Math and Functions in R
 
@@ -134,11 +154,10 @@ paste0(my.states)
 ```
 What does the `nchar()` function do?  The `paste()` function?  Does it make a difference to use `sep=""` or `collapse=","`? What about `paste0()`?
 
-# Exercises
-`r exNum()`. Print all even numbers less than 100
-`r exNum()`. What is the mean of even numbers less than 100
-`r exNum()`. Have R put in alphabetical order
-`c("WA","DC","CA","PA","MD","VA","OH")`
+## Exercises
+`r exNum("Print all even numbers less than 100")`
+`r exNum("What is the mean of even numbers less than 100")`
+`r exNum('Have R put in alphabetical order \x60c("WA","DC","CA","PA","MD","VA","OH")\x60')` 
 
 # Assignment of values to variables
 
@@ -169,7 +188,7 @@ R programmers typically pronounce the `<-` as "gets". So we would read `a <- 1` 
 
 # Indexing 
 
-We can extract items from a vector, matrix, or dataframe using indexing. In R, we use square brackets to index. 
+We can extract items from a vector, matrix, or data frame using indexing. In R, we use square brackets to index. 
 
 ```{r comment="", results='hold'}
 state.names[1] # get the first state
@@ -193,12 +212,12 @@ state.names[i[1:3]]     # show me those three states
 ```
 Note that in the last example we used square brackets within square brackets. First, we asked R to give us the indices of the first three states in alphabetical order and that was `r i[1:3]`. Then R took those three values and plugged them into the second set of square brackets to show you the state names in those positions in the collection.
 
-# Exercises
-`r exNum()`. What's the last state in the list?
-`r exNum()`. Pick out states that begin with "M" using their indices.
-`r exNum()`. Pick out states where you have lived.
-`r exNum()`. What's the last state in alphabetical order?
-`r exNum()`. What are the last three states in alphabetical order?
+## Exercises
+`r exNum("What's the last state in the \x60state.names\x60?")`
+`r exNum('Pick out states that begin with "M" using their indices')`
+`r exNum("Pick out states where you have lived")`
+`r exNum("What's the last state in alphabetical order?")`
+`r exNum("What are the last three states in alphabetical order?")`
 
 
 # Logical values and operations
@@ -283,10 +302,10 @@ sum(my.states %in% c("CA","OR","WA","AK","HI"))
 ```
 Note in the last line we used `sum()` to count for how many of `my.states` did `%in%` evaluate to `TRUE`.
 
-# Exercises
-`r exNum()`. Report `TRUE` or `FALSE` for each state depending on if you have lived there
-`r exNum()`. With `a <- 1:100`, pick out odd numbers between 50 and 75
-`r exNum()`. Use greater than less than signs to get all state names that begin with M
+## Exercises
+`r exNum("Report \x60TRUE\x60 or \x60FALSE\x60 for each state depending on if you have lived there")`
+`r exNum("With \x60a <- 1:100\x60, pick out odd numbers between 50 and 75")`
+`r exNum("Use greater than less than signs to get all state names that begin with M")`
 
 # Sampling
 The function `sample()` randomly shuffles a collection of values.
@@ -306,11 +325,11 @@ The `table()` function counts how many of each value appear in a collection. We 
 table(a)
 max(table(a)) # find out which value appears most frequently
 ```
-# Exercises
-`r exNum()`. Use `sample()` to estimate the probability of rolling a 6
-`r exNum()`. Use `sample()` to estimate the probability that the sum of two die equal 7
-`r exNum()`. Use `sample()` to select randomly five states without replacement
-`r exNum()`. Use `sample()` to select randomly 1000 states with replacement
+## Exercises
+`r exNum("Use \x60sample()\x60 to estimate the probability of rolling a 6")`
+`r exNum("Use \x60sample()\x60 to estimate the probability that the sum of two die equal 7")`
+`r exNum("Use \x60sample()\x60 to select randomly five states without replacement")`
+`r exNum("Use \x60sample()\x60 to select randomly 1000 states with replacement")`
     + Tabulate how often each state was selected
     + Which state was selected the least? Make R do this for you
 
@@ -415,15 +434,15 @@ We have now created a lot of objects. At any time you can run `ls()` to list all
 ls()
 
 ```
-Assuming you are using RStudio, you can also see the objects stored in memory by clicking on the Environment tab.
+Assuming you are using R Studio, you can also see the objects stored in memory by clicking on the Environment tab.
 
-# Exercises
-`r exNum()`. Fix `state.list` so that "DC" is in "other" rather than "east". Here are a few hints.
+## Exercises
+`r exNum('Fix \x60state.list\x60 so that "DC" is in "other" rather than "east"')`. Here are a few hints
      + access "other" using `$`
      + combine things using `c()`
      + assign values using `<-`
      + remove values using `[]` with a negative index or using a logical statement
-`r exNum()`. Print out east and central states together sorted
+`r exNum("Print out east and central states together sorted")`
 
 
 # Functions
@@ -458,10 +477,10 @@ IQR
 ```
 You can see that it computes the 0.25 quantile and the 0.75 quantile and uses `diff()` to compute their difference.
 
-# Classroom Exercises #6 (Answers Below)
-1. Make a function `is.island(x)` returns `TRUE` if `x` is an island. Islands are "HI","FM","MH","PW","AS","GU","MP","PR","VI","UM". Borrow the template I used for `give.first.and.last()`. Then try using the `%in%` operator.
-2. Count how many islands are within each region. Use an `sapply()` (or two) and your new `is.island()` function.
-3. Which components of `b` (defined earlier) having missing values? Use `is.na()`
+## Exercises
+`r exNum('Make a function \x60is.island(x)\x60 returns \x60TRUE\x60 if \x60x\x60 is an island')`. Islands are "HI", "FM", "MH", "PW", "AS", "GU", "MP", "PR", "VI", "UM". Borrow the template I used for `give.first.and.last()`. Then try using the `%in%` operator
+`r exNum("Count how many islands are within each region. Use an \x60sapply()\x60 (or two) and your new \x60is.island()\x60 function")`
+`r exNum("Which components of \x60b\x60 having missing values? Use \x60is.na()\x60")`. `b` was defined earlier
 
 # Matrices and apply()
 
@@ -521,12 +540,12 @@ List the objects R now has in memory and you will see that there is a new object
 ```{r comment="", results='hold'}
 ls()
 ```
-If you did not spell the name of the .RData file exactly correctly, then R will give you an error. A common occurence when downloading the same file from the web multiple times is for you web browser to add numbers to the multiple versions you've downloaded. So check the file name carefully. Here's what happens when I request a file that doesn't exist.
+If you did not spell the name of the .RData file exactly correctly, then R will give you an error. A common occurrence when downloading the same file from the web multiple times is for you web browser to add numbers to the multiple versions you've downloaded. So check the file name carefully. Here's what happens when I request a file that doesn't exist.
 ```{r comment="", results=TRUE, warning=TRUE, error=TRUE}
 load("chicago crime.RData")
 ```
 
-Let's check that this is indeed a dataset. You can use the `is()` command on any R object to ask it to identify itself.
+Let's check that this is indeed a dataset. You can use the `is()` function on any R object to ask it to identify itself.
 ```{r comment="", results='hold'}
 is(chicagoCrime)
 ```
@@ -573,10 +592,10 @@ with(chicagoCrime, sort(table(Primary.Type[District==10])))
 ```
 Much easier to read and understand!
 
-# Exercises
-`r exNum()`. Display three randomly selected rows
-`r exNum()`. Count `NA`s in each column
-`r exNum()`. Look up `Location.Description`, `Block`, `Beat`, and `Ward` for those missing `Latitude`
+## Exercises
+`r exNum("Display three randomly selected rows")`
+`r exNum("Count \x60NA\x60s in each column")`
+`r exNum("Look up \x60Location.Description\x60, \x60Block\x60, \x60Beat\x60, and \x60Ward\x60 for those missing \x60Latitude\x60")`
 
 # For loops
 Sometimes we need to have R repeat certain tasks multiple times, such as marching through each row of a dataset and modifying values. For loops accomplish this. Later in this course we will be using Google Maps to extract information about addresses. So we might need to iterate through every row in the dataset, check whether the latitude and longitude are missing, and if missing try to retrieve the latitude and longitude from Google Maps. The last crime in the dataset missing coordinates is in row 9954.
@@ -601,7 +620,7 @@ for(i.state in 1:length(state.names))
    print(c(i.state,state.names[i.state]))
 }
 ```
-Let's loop through all the letters of the alphabet and see if that letter is in the word "CRIME". `cat()` is like `print()`, but just dumps to the screen exactly what you give it^[Why "cat" you ask? Programmers in the early 1970s created a program called "cat" to concatenate files together, but most uses of "cat" were to just dumpt file contents to the screen or to some other program.]. `print()` will do some formatting to try to present the results a little nicer.
+Let's loop through all the letters of the alphabet and see if that letter is in the word "CRIME". `cat()` is like `print()`, but just dumps to the screen exactly what you give it^[Why "cat" you ask? Programmers in the early 1970s created a program called "cat" to concatenate files together, but most uses of "cat" were to just dump file contents to the screen or to some other program.]. `print()` will do some formatting to try to present the results a little nicer.
 ```{r comment="", results='hold'}
 for(letter in c("A","B","C","D","E","F","G","H","I","J","K","L","M","N","O",
                 "P","Q","R","S","T","U","V","W","X","Y","Z"))
@@ -670,12 +689,12 @@ chicagoCrime$google.maps.url <- paste("https://www.google.com/maps/place/",
 ```
 This took `r timeWithoutForLoop[3]` seconds. That's `r round(time4ForLoop[3]/timeWithoutForLoop[3],1)` times faster than the for loop.
 
-# Exercises
-`r exNum()`. Use a for loop to create a variable `Coordinates` that looks like "(X.Coordinate,Y.Coordinate)"
+## Exercises
+`r exNum('Use a for loop to create a variable \x60Coordinates\x60 that looks like "(X.Coordinate,Y.Coordinate)"')`
      + Use `paste()` with the `X.Coordinate` and `Y.Coordinate` variables
      + Remember the `sep=` option in `paste()`
      + You might find using the `with()` function to simplify your code and avoid having a lot of `chicagoCrime$`s
-`r exNum()`. Redo the previous exercise without using a for loop and compare computation time
+`r exNum("Redo the previous exercise without using a for loop and compare computation time")`
 
 # More tabulating, aggregating, and breaking statistics down by group
 The variable `Arrest` indicates whether someone was arrested for the crime. Here are the first 10 values.
@@ -704,404 +723,348 @@ barplot(a$`(Arrest == "true")`,
 
 Note that the column in `a` contain the arrest fraction has a complicated name with several special symbols like `==` and `"`. R will get very confused unless we "protect" this variable name with the backquotes (also called backticks). You can visit the help for `barplot()` with `?barplot` to learn what all the arguments do.
 
-And R also enables us to subset data. 
+Frequently we will not to focus on just a subset of the data. For example, we might just want to study assaults rather than all crimes. The `subset()` function does this for us like `subset(data, Primary.Type=="ASSAULT")`. This is particularly useful to use in combination with `with()`. Let's create a table of the number of arrests by ward, but only for assaults.
+```{r comment="", results='hold'}
+with(subset(chicagoCrime,Primary.Type=="ASSAULT"), 
+     table(Arrest,Ward))
 ```
-with(subset(data,Primary.Type=="ASSAULT"), table(Arrest,Ward))
-with(subset(data,Primary.Type=="ASSAULT"), 
-     barplot(sort(by(Arrest=="true",Ward,mean))))
+
+Let's recreate our barplot, but now just using assaults.
+```{r comment="", fig.width=6.5}
+a <- aggregate((Arrest=="true")~Ward, 
+               data=subset(chicagoCrime,Primary.Type=="ASSAULT"), 
+               mean)
+barplot(a$`(Arrest == "true")`, 
+        names.arg = a$Ward,
+        cex.names = 0.5,
+        ylab      = "Fraction arrested",
+        xlab      = "Ward",
+        main      = "Arrest fraction for assaults")
 ```
-# Exercises
-`r exNum()`. How many assaults occurred in the street? (Location.Description=="STREET")
-   (Try using subset even though there are other ways)
-`r exNum()`. What percentage of assaults occurred in the street, by Ward
+
+## Exercises
+`r exNum('How many assaults occurred in the street? (\x60Location.Description=="STREET"\x60)')`. Try using `subset()` even though there are other ways
+`r exNum("What percentage of assaults occurred in the street by Ward?")`
 
 # Plotting Data
 
-R enables us to plot points. The points we plotted form the shape of Chicago - which makes total sense because we're using Chicago crime data. 
+R enables us to plot points. The points we plotted form the shape of Chicago... which makes total sense because we're using Chicago crime data. 
+```{r comment="", fig.width=6.5}
+plot(Latitude~Longitude, data=chicagoCrime)
 ```
-plot(data$Longitude,data$Latitude)
-```
-We can also plot the district with the most crime.
-```
-max.district <- names(rev(sort(table(data$District)))[1])
-i <- data$District==max.district
-plot(data$Longitude[!i],data$Latitude[!i],pch=".",
+
+The `plot()` function here uses the same R formula syntax as the `aggregate()` function. The variable on the left of `~` is the outcome, plotted on the y-axis, and the variable on the right appears on the x-axis. And, of course, we need to tell `plot()` that it can find these variables inside the `chicagoCrime` data frame.
+
+Let's plot the district with the most crime. The first line here tabulates how many crimes occurred in each district, sorts those counts, reverse the sorted list so that the largest one comes first, extracts the first one in the collection using `[1]` and then uses `names()` to extract the name of the district (rather than how many crimes occurred in that district). You can see all of District 8's crimes (that's the district with the most crimes) appearing as red points in the plot.
+```{r comment="", fig.width=6.5}
+# selects district 8, with 713 crimes
+max.district <- names(rev(sort(table(chicagoCrime$District)))[1]) 
+plot(Latitude~Longitude,
+     data=subset(chicagoCrime, District!=max.district),   # not in District 8
+     pch=".",                                             # plot with tiny dot
      xlab="Longitude",ylab="Latitude")
-points(data$Longitude[i],data$Latitude[i],pch=".",col="red")
+points(Latitude~Longitude,                              
+       data=subset(chicagoCrime, District==max.district), # in District 8
+       pch=".",
+       col="red")
 ```
-We can also make a bar plot. What does the below barplot show?
-```
-barplot(table(data$Primary.Type))
-```
-Here is another example of a bar plot showing the frequency of crimes. 
-```
-tab <- table(data$Primary.Type)
-par(pin=c(6.5,6),mai=c(1.02,2.5,0,0.3))
-a <- barplot(tab,col="salmon",horiz=TRUE,
-             names.arg=rep("",nrow(tab)))
-axis(2,at=a[,1],cex.axis=0.7,
-     labels=names(tab),las=1,tick=FALSE)
 
-text(a[,1],tab+50,tab)
+R tries to set up default graphics settings so that most plots look okay, but sometimes it takes a little more work to adjust them. The good thing is that R lets you adjust everything. So let's make a barplot of the number of crimes of each type.
+```{r comment="", fig.width=6.5}
+barplot(table(chicagoCrime$Primary.Type))
+```
 
+The labels on the bars are so long that only a few of them appear. So let's spend a little more time, write a few more lines of R code, and make this plot look right.
+
+```{r comment="", fig.width=6.5}
+tab <- table(chicagoCrime$Primary.Type)   # tabulate crime counts
+# give 2.5in on the left margin to give lots of space for the crime type labels
+par(pin=c(6.5,6),                         # set plot dimensions (inches)
+    mai=c(1.02, 2.5, 0, 0.3))             # set plot margins 
+a <- barplot(tab,
+             col="salmon",                # change the bars' color
+             horiz=TRUE,                  # make the bars horizontal 
+             names.arg=rep("",nrow(tab)), # put no labels on the bars
+             xlab="Number of crimes")
+# add the bar labels on the y-axis
+axis(2,                                   # set up the y-axis label (axis #2)
+     at=a[,1],                            # midpoints of bars stored in a[,1]
+     cex.axis=0.7,                        # shrink the axis text size by 30%
+     labels=names(tab),                   # the bar labels
+     las=1,                               # make labels horizonal (see ?par)
+     tick=FALSE)                          # no tick marks on the axis
+# add the actual number on the bars
+text(ifelse(tab<80, 180, tab-5),          # x-coord of text, 
+                                          #   if bar too small, put text to right
+     a[,1],                               # y-coord of text,  midpoint of bars 
+     tab,                                 # text to add to the plot
+     cex=0.7,                             # shrink text (cex=character expansion)
+     adj=1)                               # right justify text
 ```
 
 # Exercises
-`r exNum()`. Make a barplot indicating how many states are in each region. Use state.list
-`r exNum()`. Identify the beat with the most crimes
-`r exNum()`. Identify the beat with the most domestic violence incidents
-`r exNum()`. Part 1 crimes are homicide, robbery, assault, arson, burglary, theft, rape, 
-      motor vehicle theft. Calculate the number of Part 1 crimes in Chicago
+`r exNum("Make a barplot indicating how many states are in each region. Use \x60state.list\x60")`
+`r exNum("Identify the beat with the most crimes")`
+`r exNum("Identify the beat with the most domestic violence incidents")`
+`r exNum("Part 1 crimes are homicide, robbery, assault, arson, burglary, theft, rape, motor vehicle theft. Calculate the number of Part 1 crimes in Chicago")`
 
-
-
-
-
-
-
-
-
-
-
-##Class Exercises #1 (Answers)
-1. Print all even numbers less than 100
+# Solutions to the exercises 
+1. `r exerciseQuestions[1]`
+```{r comment=""}
+(1:49)*2
 ```
-(1:50)*2
-```
-2. What is the standard deviation of even numbers less than 100
-
-```
-sd(((1:49)*2))
+or
+```{r comment=""}
+seq(2,98,by=2)
 ```
 
-3. Have R put in alphabetical order
-c("WA","DC","CA","PA","MD","VA","OH")
+2. `r exerciseQuestions[2]`
+```{r comment=""}
+mean((1:49)*2)
 ```
+
+3. `r exerciseQuestions[3]`
+```{r comment=""}
 sort(c("WA","DC","CA","PA","MD","VA","OH"))
 ```
 
-## Class Exercises #2 (Answers)
-1. What's the last state in the list?
+4. `r exerciseQuestions[4]`
+```{r comment=""}
+state.names[51]
 ```
-state.names[50]
+
+5. `r exerciseQuestions[5]`
+```{r comment=""}
+state.names[c(7,8,21,24,28,32,35,46)]
 ```
-2. Pick out states that begin with "M" using their indices
-```
+or sort first so that all the M states are together
+```{r comment=""}
 sort(state.names)[20:27]
 ```
-Here's another possible answer that uses substring (which we haven't covered yet):
-```
+Here's another possible answer that uses `substring` (which we haven't covered yet):
+```{r comment=""}
 state.names[substring(state.names, 1, 1)=="M"]
 ```
 
-3. Pick out states where you have lived.
-```
-sort(state.names)[c(1, 4, 10, 26)]
-```
-
-4. What's the last state in alphabetical order?
-```
-(sort(state.names))[51]
+6. `r exerciseQuestions[6]`
+Of course, these may vary depending on where you have lived.
+```{r comment=""}
+state.names[c(1, 4, 10, 26)]
 ```
 
-5. What are the last three states in alphabetical order?
-
+7. `r exerciseQuestions[7]`
+```{r comment=""}
+sort(state.names)[51]
 ```
+or
+```{r comment=""}
+rev(sort(state.names))[1]
+```
+
+8. `r exerciseQuestions[8]`
+```{r comment=""}
 rev(sort(state.names))[1:3]
 ```
 
-##Classroom Exercises #3 (Answers)
-1. Report TRUE or FALSE for each state depending on if you have lived there
+9. `r exerciseQuestions[9]`
+```{r comment=""}
+my.states <- c("PA", "NJ", "NY", "MD", "DE", "MA", "RI", "CT", "ME", "LA", "IN")
+state.names %in% my.states
 ```
-my.states <- c("PA", "NJ", "NY", "MD", "DE", "MA", "RI", "CT", "ME", "LA", "IN", "IL", "OH", "VA", "FL")
-i <- state.names %in% my.states
-```
-2. With a<-1:100, pick out odd numbers between 50 and 75
-```
+
+10. `r exerciseQuestions[10]`
+```{r comment=""}
 a <- 1:100
-oddnum <- (((25:36)*2)+1)
-i <- a %in% oddnum
-a[i]
+a[a %% 2==1 & a>50 & a<75]
 ```
-Or, you could try
-```
-a <- 1:100
-oddnum <- seq(51, 73, 2)
-i <- a %in% oddnum
-a[i]
-```
-3. Use greater than less than signs to get all state names that begin with M
-```
+
+11. `r exerciseQuestions[11]`
+```{r comment=""}
 state.names[state.names>"LZ" & state.names<"N"]
 ```
 
-##Classroom Exercises #4 (Answers)
-1. Use sample() to estimate the probability of rolling a 6
-```
+12. `r exerciseQuestions[12]`
+```{r comment=""}
 a <- sample(1:6, size=100000, replace=TRUE)
-table(a)
-table(a)[6]/100000
+table(a)[6]/length(a)
 ```
-Or, we could try 
+Or
+```{r comment=""}
+sum(a==6)/length(a)
 ```
-sum(a==6)
-sum(a==6)/100000
-```
-Or, we could also try
-```
+Or
+```{r comment=""}
 mean(a==6)
 ```
 
-2. Use sample() to estimate the probability that the sum of two die equal 7
-```
+13. `r exerciseQuestions[13]`
+```{r comment=""}
 dice1 <- sample(1:6, size=1000, replace=TRUE)
 dice2 <- sample(1:6, size=1000, replace=TRUE)
 doubleroll <- dice1 + dice2
-mean(doubleroll==7)
+mean(doubleroll==7)   # should be close to 1/6 or 0.1666...
 ```
 
-3. Use sample() to select randomly five states without replacement
-```
+14. `r exerciseQuestions[14]` (Answers will vary)
+```{r comment=""}
 sample(state.names, size=5, replace=FALSE)
 ```
-4a. Use sample() to select randomly 1000 states with replacement
-```
-a <- sample(state.names, size=1000, replace=TRUE)
-a
-```
 
-4b. Tabulate how often each state was selected
-```
+15. `r exerciseQuestions[15]`
+   + Tabulate how often each state was selected (Answers will vary)
+```{r comment=""}
+a <- sample(state.names, size=1000, replace=TRUE)
 table(a)
 ```
-4c. Which state was selected the least? Make R do this for you
-```
+
+   + Which state was selected the least? (Answers will vary)
+```{r comment=""}
 sort(table(a))[1]
 ```
 
-##Classroom Exercises #5 (Answers)
-1. Fix state.list so that "DC" is in "other" rather than "east"
-```
+16. `r exerciseQuestions[16]`
+```{r comment=""}
 state.list$east <- state.list$east[state.list$east!="DC"]
 state.list$other <- c(state.list$other, "DC")
+state.list
+```
+Or
+```{r comment=""}
+state.list$east <- setdiff(state.list$east, "DC")
+state.list$other <- c(state.list$other, "DC")
+state.list
 ```
 
-2. Print out east and central states together sorted
+17. `r exerciseQuestions[17]`
+```{r comment=""}
+sort(c(state.list$east, state.list$central))
 ```
-lapply(state.list,sort)[c(2,3)]
-```
-
-Or, you could try
-```
-state.EC <- c(state.list$east, state.list$central)
-sort(state.EC)
-```
-Or, you could try
-```
+Or
+```{r comment=""}
 with(state.list, sort(c(east, central)))
 ```
 
-##Classroom Exercises #6 (Answers)
-1. Make a function "is.island(x)" returns TRUE if x is an island. Islands are "HI","FM","MH","PW","AS","GU","MP","PR","VI","UM."
-
-```
+18. `r exerciseQuestions[18]`
+```{r comment=""}
 is.island <- function(x)
 {
-islands <- (c("HI", "FM", "MH", "PW", "AS", "GU", "MP", "PR", "VI", "UM"))
-return (x%in% islands)
+   return(x %in% c("HI", "FM", "MH", "PW", "AS", "GU", "MP", "PR", "VI", "UM"))
 }
 ```
 
-We'll get to for-loops later. But, you could also try:
+19. `r exerciseQuestions[19]`
 
+First, this `lapply()` asks each state if they are an island.
+```{r comment=""}
+lapply(state.list, is.island)
 ```
-
-i <- (c("HI","FM","MH","PW","AS","GU","MP","PR","VI","UM"))
-is.island <- function(x) {
-  if (x %in% i) {
-  result <- "TRUE"
-  }    
-  else {
-  result <- "FALSE"
-  }
-  return(result)
-}
-
-```
-
-2. Count how many islands within each region
-
-```
-lapply(state.list, function(z) sum((z %in% i)))
-```
-Or, you could try, 
-```
+Now we want to count up how many `TRUE`s there are in each component, so wrap this `lapply()` with an `sapply()`
+```{r comment=""}
 sapply(lapply(state.list, is.island), sum)
 ```
-Or, 
-```
-sapply(state.list, is.island)
-```
-Or, 
 
+20. `r exerciseQuestions[20]`
+```{r comment=""}
+sapply(lapply(b, is.na), any)
 ```
-sapply(sapply(state.list, is.island), sum)
-```
-
-3. Which components of "b" having missing values? Use is.na()
-
-```
-b <- list(0:9, c("A","B","C"),c(TRUE,FALSE,NA))
-sapply(b, function(x) sum(is.na(x)))
-
-```
-Or,
-
-```
-b <- list(0:9, c("A","B","C"),c(TRUE,FALSE,NA))
-lapply(b, function(x) sum(is.na(x)))
-
-```
-Or,
-
-```
-b <- list(0:9, c("A","B","C"),c(TRUE,FALSE,NA))
-sapply(sapply(b, is.na), sum)
-
-```
-Or, 
-
-```
-sapply(sapply(b, is.na), any)
-
-```
-##Classroom Exercises #7 (Answers)
-1. Display 3 randomly selected rows
-
-```
-x<- sample(1:100, size=1)
-y <- (x+2)
-data[x:y,]
-```
-Or, 
-```
-data[sample(1:10000,size=3),]
-```
-Or,
-```
-data[sample(nrow(data),3, replace=FALSE),]
-```
-2. Count NAs in each column
-```
-summary(data)
-```
-Or, 
-```
-sapply(data, function(x) sum(is.na(x)))
-```
-Or, 
-```
-sapply(data, summary)
+Or
+```{r comment=""}
+b <- list(0:9, c("A","B","C"), c(TRUE,FALSE,NA))
+sapply(b, function(x) any(is.na(x)))
 ```
 
-3. Look up Location.Description, Block, Beat, and Ward for those missing Latitude
+21. `r exerciseQuestions[21]`
+```{r comment=""}
+chicagoCrime[sample(1:nrow(chicagoCrime), size=3),]
+```
 
+22. `r exerciseQuestions[22]`
+```{r comment=""}
+sapply(lapply(chicagoCrime, is.na), sum)
 ```
-i <- is.na(data$Latitude)
-data[i,c("Location.Description","Block","Beat","Ward")]
+Or
+```{r comment=""}
+sapply(chicagoCrime, function(x) sum(is.na(x)))
 ```
-##Classroom Exercises #8 (Answers)
-1. Compute the first 30 Fibonacci numbers 0 1 1 2 3 5 8 13 ...
 
+23. `r exerciseQuestions[23]`
+```{r comment=""}
+i <- is.na(chicagoCrime$Latitude)
+# Let's just show the first 5 rows
+i <- which(i)[1:5]
+chicagoCrime[i,c("Location.Description","Block","Beat","Ward")]
 ```
-for(i in 0:30)
+Or
+```{r comment=""}
+subset(chicagoCrime, is.na(chicagoCrime$Latitude),
+       select=c("Location.Description","Block","Beat","Ward"))[1:5,]
+```
+
+24. `r exerciseQuestions[24]`
+```{r comment=""}
+system.time(
+for (i in 1:nrow(chicagoCrime))
 {
-  print(i)
+   chicagoCrime$coords[i] <- paste0(chicagoCrime$X.Coordinate[i], ", " , 
+                                    chicagoCrime$Y.Coordinate[i])
 }
-
-number <- 1:30
-number[1] <- 1
-number[2] <- 1
-for (i in 3:30) { 
-  number[i] <- number[i-1]+number[i-2]
+)
+```
+Or
+```{r comment=""}
+system.time(
+for (i in 1:nrow(chicagoCrime)) 
+{
+   chicagoCrime$coords2[i] <- with(chicagoCrime, 
+                                   paste("(",X.Coordinate[i], ",",
+                                             Y.Coordinate[i],")",sep=""))
 }
+)
 ```
-2. If I give you $0.01 on Feb 1, $0.02 on Feb 2, $0.04 on Feb 3, ... how much
-   money will I have given you by the end of the month 
-   
-```
-   for(i in 1:29)
-   {
-     print(i)
-   }
-   
-   number <- 1:29 
-   number[1] <- .01
-   number[2] <- .02
-   number[3] <- .04
-   for (i in 4:29) 
-   { 
-     number[i] <- number[i-1]*2
-   }  
-
-```
-3. Use a for-loop to create a variable Coordinates of the form 
-(X.Coordinate,Y.Coordinate)
-
-```
-for (i in 1:nrow(data)) 
-{data$coords[i] <- paste0(data$X.Coordinate[i], ", " , data$Y.Coordinate[i])}
-```
-Or, you could do
-
-```
-for (i in 1:nrow(data)) 
-{data$coords2[i] <- paste("(",data$X.Coordinate[i], ",", data$Y.Coordinate[i],")",sep="")}
-```
-4. Redo it without a for-loop and compare computation time
-```
-data$coords3 <- paste("(", data$X.Coordinate, ",",data$Y.Coordinate,")",sep="")
+25. `r exerciseQuestions[25]`
+```{r comment=""}
+system.time(
+chicagoCrime$coords3 <- with(chicagoCrime, 
+                             paste0("(", X.Coordinate, ",",Y.Coordinate,")"))
+)
 ```
 
-##Class Exercises #9 (Answers)
-1. How many assaults occurred in the street? (Location.Description=="STREET")
-   (Try using subset even though there are other ways)
-```
-with(subset(data,Location.Description=="STREET"), table(data$Primary.Type=="ASSAULT"))
-```
-Or, 
-```
-with(subset(data,Primary.Type=="ASSAULT"), table(data$Location.Description=="STREET"))
-```
-2. What percentage of assaults occurred in the street, by Ward
-```
-with(subset(data,Primary.Type=="ASSAULT"), by(Location.Description==
-    "STREET", Ward, mean))
-```
-##Class Exercises #10 (Answers)
-1. Make a barplot indicating how many states are in each region. Use state.list
-
-```
-a <- sapply(state.list, length)
-  barplot(a)
-```
-2. Identify the beat with the most crimes
-```
-sort(table(data$Beat))
+26. `r exerciseQuestions[26]`
+```{r comment=""}
+with(subset(chicagoCrime, Primary.Type=="ASSAULT"), 
+     sum(chicagoCrime$Location.Description=="STREET"))
 ```
 
-3. Identify the beat with the most domestic violence incidents
+27. `r exerciseQuestions[27]`
+```{r comment=""}
+aggregate((Location.Description=="STREET")~Ward,
+          data=subset(chicagoCrime, Primary.Type=="ASSAULT"),
+          mean)
 ```
-a <- subset(data,Description=="DOMESTIC BATTERY SIMPLE")
-  sort(table(a$Beat))
-```
-4. Part 1 crimes are homicide, robbery, assault, arson, burglary, theft, rape, 
-      motor vehicle theft. Calculate the number of Part 1 crimes in Chicago.
-      
-```
-part1 <- subset(data, Primary.Type %in% c("HOMICIDE", "ROBBERY", "ASSAULT", "ARSON", "BURGLARY", "THEFT", "SEX OFFENSE", "MOTOR VEHICLE THEFT"))
 
-table(part1$Primary.Type)
-
+28. `r exerciseQuestions[28]`
+```{r comment=""}
+barplot(sapply(state.list, length))
 ```
-Note that you can subset data by using c() and %in% to grab multiple types.  
+
+29. `r exerciseQuestions[29]`
+```{r comment=""}
+names(rev(sort(table(chicagoCrime$Beat)))[1])
+```
+Or
+```{r comment=""}
+names(which.max(table(chicagoCrime$Beat)))
+```
+
+30. `r exerciseQuestions[30]`
+```{r comment=""}
+with(subset(chicagoCrime, Description=="DOMESTIC BATTERY SIMPLE"),
+     names(which.max(table(Beat))))
+```
+
+31. `r exerciseQuestions[31]`
+```{r comment=""}
+sum(chicagoCrime$Primary.Type %in% c("HOMICIDE", "ROBBERY", "ASSAULT", "ARSON", 
+                                     "BURGLARY", "THEFT", "SEX OFFENSE", 
+                                     "MOTOR VEHICLE THEFT"))
+```
