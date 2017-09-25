@@ -1,0 +1,89 @@
+---
+title: "Dates and Times"
+author:
+- affiliation: University of Pennsylvania
+  email: gridge@upenn.edu
+  name: Greg Ridgeway
+- affiliation: University of Pennsylvania
+  email: moyruth@upenn.edu
+  name: Ruth Moyer
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    css: htmlstyle.css
+---
+<!-- HTML YAML header Ctrl-Shift-C to comment/uncomment -->
+
+<!-- --- -->
+<!-- title: "Dates and Times" -->
+<!-- author: -->
+<!-- - Greg Ridgeway (gridge@upenn.edu) -->
+<!-- - Ruth Moyer (moyruth@upenn.edu) -->
+<!-- date: "`r format(Sys.time(), '%B %d, %Y')`" -->
+<!-- output: -->
+<!--   pdf_document: -->
+<!--     latex_engine: pdflatex -->
+<!--   html_document: default -->
+<!-- fontsize: 11pt -->
+<!-- fontfamily: mathpazo -->
+<!-- --- -->
+<!-- PDF YAML header Ctrl-Shift-C to comment/uncomment -->
+
+
+# Introduction
+
+Working with dates and times is a lot different than working with the more familiar numbers. Months have different number of days. Sometimes we count hours of the day up to 12 and then start over. Sometimes we count hours up to 24 and then start over. Some years have 366 days. We have 24 times zones around the world. Twice a year we switch clocks for Daylight Saving Time, except in some places like Arizona. Arithmetic, such as adding one month to a date, is poorly defined. Which date is one month after January 31st? Is it February 28th? Or is it March 3rd?
+
+Fortunately, software for working with dates exist to make these tasks easier. Unfortunately, every system seems to make their own design decisions. Excel stores dates as the number of days since January 0, 1900... that's not a typo... they count from January 0, 1900. Linux systems count days since January 1, 1970. SPSS stores times as the number of seconds since midnight October 14, 1582, the adoption date of the Gregorian calendar. Much of the world did not adopt the calendar in 1582. The American colonies did not adopt the Gregorian calendar until 1752 along with Great Britain. So beware if you are a historian digging through centuries old data. Aligning dates can become very messy.
+
+R has had a variety of attempts at providing a means for managing dates. We are going to use the [`lubridate`](http://www.jstatsoft.org/v40/i03/paper) package that address just about everything you might need to do with dates and times. 
+
+`lubridate` is not part of R by default. You will need to install it. Simply run
+```
+install.packages("lubridate")
+```
+and R will hit the web, download the lubridate package and any supporting packages it needs (and it does need a few), and installs them. This is a one time event. Once you have `lubridate` on your machine you will not need to reinstall it every time you need it.
+
+Some of our students, particularly on Macs, have encountered trouble installing some packages for R. R will sometimes try to download the source code for the packages and compile them from scratch on your machine. Sometimes that goes well and other times it requires that you have other tools installed on your machine. Any easy solution is to run
+```
+install.packages("lubridate", type="mac.binary")
+```
+instead to insist that R finds and installs a ready-to-use version of the packages.
+
+
+
+
+# Working with dates
+library(lubridate)
+textDate <- substring(data$Date[1:10],1,10)
+b <- mdy(textDate)
+
+
+# extract information from the date
+year(b)
+month(b)
+month(b,label=TRUE)
+month(b,label=TRUE,abbr=FALSE)
+wday(b,label=TRUE)
+
+# time since Dec 1, 2014
+b-mdy("12/01/2014")
+# time since now
+now()-b
+
+# adding time to a date
+b + dyears(1) # adds 365 days, does not increase year by 1
+b + ddays(31)
+
+# combine date and time
+data$date <- mdy_hms(data$Date) # will detect the AM/PM
+
+# set timezone
+#   default is UTC - Coordinated Universal Time
+data$date <- force_tz(data$date, "America/Chicago")
+# note that it will correctly track for DST
+force_tz(mdy("8/1/2014"), "America/Chicago")
+
+Class exercise
+1. Thanksgiving occurs on the fourth month in November. On what date will 
+   Thanksgiving fall in 2020?
