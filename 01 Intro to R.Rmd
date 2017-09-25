@@ -532,7 +532,7 @@ Now you can use R functions to load in any datasets that are in your working fol
 # Data frames
 A data frame is a special case of a list where all the components of the list have the same number of elements. Think about each component of the list being a "column" in your dataset. R code load in datasets from numerous sources (plain text, Excel files, databases, websites, etc.) including .RData format, R's unique data format. There is an extensive guide to [importing and exporting datasets](https://cran.r-project.org/doc/manuals/r-release/R-data.pdf).
 
-To import data in the .RData format use `load()`. A [sample of Chicago crime data](https://github.com/gregridgeway/R4criminology/blob/master/chicago%20crime%2020141124-20141209.RData) is available on the R4Crim github site.
+To import data in the .RData format use `load()`. A [sample of Chicago crime data](https://github.com/gregridgeway/R4criminology/blob/master/chicago%20crime%2020141124-20141209.RData) is available on the [R4Crim github site](https://github.com/gregridgeway/R4crim).
 ```{r comment="", results='hold'}
 load("chicago crime 20141124-20141209.RData")
 ```
