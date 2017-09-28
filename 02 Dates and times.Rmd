@@ -44,7 +44,7 @@ R has had a variety of attempts at providing a means for managing dates. We are 
 ```
 install.packages("lubridate")
 ```
-and R will hit the web, download the lubridate package and any supporting packages it needs (and it does need a few), and installs them. This is a one time event. Once you have `lubridate` on your machine you will not need to reinstall it every time you need it.
+and R will hit the web, download the `lubridate` package and any supporting packages it needs (and it does need a few), and installs them. This is a one time event. Once you have `lubridate` on your machine you will not need to reinstall it every time you need it.
 
 Some of our students, particularly on Macs, have encountered trouble installing some packages for R. R will sometimes try to download the source code for the packages and compile them from scratch on your machine. Sometimes that goes well and other times it requires that you have other tools installed on your machine. Any easy solution is to run
 ```
