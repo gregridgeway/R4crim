@@ -1,0 +1,271 @@
+---
+title: "Working with Uniform Crime Report Data"
+author:
+- affiliation: University of Pennsylvania
+  email: gridge@upenn.edu
+  name: Greg Ridgeway
+- affiliation: University of Pennsylvania
+  email: moyruth@upenn.edu
+  name: Ruth Moyer
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    css: htmlstyle.css
+---
+<!-- HTML YAML header Ctrl-Shift-C to comment/uncomment -->
+
+<!-- --- -->
+<!-- title: "Introduction to R" -->
+<!-- author: -->
+<!-- - Greg Ridgeway (gridge@upenn.edu) -->
+<!-- - Ruth Moyer (moyruth@upenn.edu) -->
+<!-- date: "`r format(Sys.time(), '%B %d, %Y')`" -->
+<!-- output: -->
+<!--   pdf_document: -->
+<!--     latex_engine: pdflatex -->
+<!--   html_document: default -->
+<!-- fontsize: 11pt -->
+<!-- fontfamily: mathpazo -->
+<!-- --- -->
+<!-- PDF YAML header Ctrl-Shift-C to comment/uncomment -->
+
+<!-- A function for autmomating the numbering and wording of the exercise questions -->
+```{r echo=FALSE}
+.counterExercise <- 0
+.exerciseQuestions <- NULL
+.exNum <- function(questionText="") 
+{
+   .counterExercise <<- .counterExercise+1
+   .exerciseQuestions <<- c(.exerciseQuestions, .questionText)
+   return(paste0(.counterExercise,". ",.questionText))
+}
+```
+
+# Introduction
+Published by the FBI, the Uniform Crime Reports (UCR) is a yearly collection of official data on crime in the United States. Approximately 18,000 individual city, university and college, county, state, tribal, and federal law enforcement agencies report data to the FBI. Some agencies are more consistent than other agencies with reporting their data to the FBI. For example, you may find a handful of very rural counties that have no data in, e.g,. 2012, but have data in 2014. 
+
+Earlier in the semester, we worked with one dataset from the UCR, Law Enforcement officers Killed and Assaulted (LEOKA). Now, we're working with a different portion of the UCR, "Offenses Known and Clearances by Arrest." The University of Michigan converts this data into a format that is easy-to-use in R For example, here is the link to access the 2012 data http://www.icpsr.umich.edu/icpsrweb/NACJD/studies/35021. As of October 2017, the Offenses Known and Clearances by Arrest Data is available for up to 2016. 
+
+For each year, there will be a zip file to download. There are two main files within the zip file that you need: (1) a .rda file (which contains your datain R format) and (2) the codebook (which is in PDF format).
+
+The data file has monthly data on the number of Crime Index offenses reported and the number of offenses cleared by arrest or other means. Thus, the data isn't "incident-level" data - in contrast to the Chicago data that we've worked with. The data instead includes crime counts for each agency. You can get helpful summaries about the UCR OKCA data [here](https://www.icpsr.umich.edu/icpsrweb/content/NACJD/guides/ucr.html) and [here](https://www.fbi.gov/news/pressrel/press-releases/fbi-releases-2016-crime-statistics). 
+
+# Loading the UCR data
+In this section we are going to work with the [2012 UCR data](http://www.icpsr.umich.edu/icpsrweb/NACJD/studies/35021). The first step when working with this UCR data is loading it into R. As with loading any data, it's very important that your path is correct using `setwd()`. Set it to wherever you have unzipped your .rda file. since the data are in R's .rda format, we use `load()` to import it into R.
+
+```{r comment="", results='hold'}
+load("35021-0001-Data.rda")
+```
+Let's check what R now has in its memory.
+```{r comment="", results='hold'}
+ls()
+```
+Now we see that a new object is in R's memory, `da35021.0001`. We can ask R what this is...
+```{r comment="", results='hold'}
+is(da35021.0001)
+```
+...and, sure enough, it is a new R data frame, presumably containing the 2012 UCR data. Let's take a look inside the dataset to see what we have.
+
+Let's look at the first two rows. Each row describes the features of one law enforcement agency. You will see that there are a lot of features recorded in the data, `r ncol(da35021.0001)` features to be precise. Unfortunately, the variable names are not very helpful. Several you can figure out by looking at the data within the column. Clearly, `V2` indicates the state where the law enforcement agency is located. `V10` looks like some kind of date. `V26` gives the name of the agency. But most of the rest are rather mysterious.
+```{r comment="", results='hold'}
+da35021.0001[1:2,]
+```
+
+We need to refer to the codebook. Open up the [codebook](http://www.icpsr.umich.edu/cgi-bin/file?comp=none&study=35021&ds=1&file_id=1154736&path=NACJD) and flip through the pages. Starting on page 11 you can see what each variable is and clicking on the variable name in the pdf will give you more details on the agency attribute. 
+
+It would be more helpful if we had better variable names in our dataset. Transcribing variable names piecemeal isn't the most efficient - or error-proof method. Fortunately, our data has variable definitions stored in the dataset's attributes. Attributes provide information about the data that isn't explicitly in the dataset itself. It's a bit like a "footnote" that elaborates about something within the main "text" (the data). As we can see, the first 32 variables in our data are about agency and reporting. 
+
+```{r comment="", results='hold'}
+var.lookup <- attributes(da35021.0001)$variable.labels
+var.lookup[1:32]
+```
+
+Importantly, the variable `V12` indicates which months have been reported.
+
+```{r comment="", results='hold'}
+table(da35021.0001$V12)
+```
+
+As you can see, most agencies report in December - the end of the year.  Also, you'll see a sizable amount (`r prettyNum(sum(da35021.0001$V12=="(00) No months reported"),big.mark=",")`) that don't report for any months.
+
+Also, not all "large" agencies report in December.
+```{r comment="",results='hold'}
+with(subset(da35021.0001,V12!="(12) Dec last reported"),
+     summary(V14,digits=10)) # population of jurisdiction
+subset(da35021.0001,V14==468609)[,1:30]
+subset(da35021.0001,
+       (V12!="(12) Dec last reported") & (V14>50000))[,c("V27","V29","V14","V13","V12")]
+```
+
+
+Additionally, make note of variables like "MONTH INCLUDED IN."  They indicate whether this month was reported in another month. The following lines make a table for each of these values
+```{r comment="",results='hold'}
+var.names <- grep("MONTH INCLUDED IN",var.lookup,value=TRUE)
+var.names <- names(var.names) # grab just the "V" variable names
+for(xj in var.names) print(table(da35021.0001[,xj]))
+```
+
+For now, we just want to work with agencies that have complete data.
+```{r comment="",results='hold'}
+da35021.0001 <- subset(da35021.0001, V12=="(12) Dec last reported")
+```
+
+#Creating a Dataframe
+
+Of course, for most criminological questions we're interested in, we don't need all 32 columns. For example, we don't need to know Variable 25 - "SPECIAL MAILING ADDRESS."  So, we'll create a smaller data frame with just the information we need.
+
+Think about the structure of this dataframe. Why are we making some of the variables "as.character?" As a hint, note that we didn't use "as.character with the POP variable.  What is the ORI variable?  What is the AGENCY variable? Note that stringsAsFactors=FALSE states that we should simply treat all strings as characters - and not as factor variables. 
+
+What do you notice that is useful about this new dataframe?  Hint - it has to do with the variable names. Each row in our dataset refers to an individual agency.
+
+```{r comment="", results='hold'}
+ucr <- data.frame(ORI   =as.character(da35021.0001$V3),
+                  AGENCY=as.character(da35021.0001$V29),
+                  AREA  =as.character(da35021.0001$V26),
+                  POP   =da35021.0001$V14,
+                  MONTHS=as.character(da35021.0001$V12),
+                  STATE=as.character(da35021.0001$V2),
+                  stringsAsFactors=FALSE)
+```
+
+Importantly, our UCR OKCA data covers only what the FBI calls "Part I" crimes. Part I crimes are Murder, Rape, Robbery, Larceny, Motor Vehicle Theft, Assaults (Aggravated), and Burglary. 
+
+So for each of the 15,862 agencies, we can count up the number of Murders as follows:
+```{r comment="", results='hold'}
+var.names <- grep("ACT NUM MURDER",var.lookup,value=TRUE)
+var.names <- names(var.names)
+ucr$murder <- rowSums(da35021.0001[,var.names])
+```
+
+Run the first three lines of the ucr dataset.  You should see a new column called murder. Let's add a new column for rape count for each agency. 
+
+```{r comment="", results='hold'}
+var.names <- grep("ACT NUM RAPE",var.lookup,value=TRUE)
+var.names <- names(var.names)
+ucr$rape <- rowSums(da35021.0001[,var.names])
+```
+
+And robbery
+```{r comment="", results='hold'}
+var.names <- grep("ACT NUM ROBBRY",var.lookup,value=TRUE)
+var.names <- names(var.names)
+ucr$robbery <- rowSums(da35021.0001[,var.names])
+```
+
+Let's add another column for Assault. Assault requires a bit more steps because we are interested in only what most jurisdictions would define as Aggravated Assault. We will subtract the number of simple assaults from the total number of assaults to obtain the total number of aggravated assaults. 
+```{r comment="", results='hold'}
+var.names <- grep("ACT NUM ASSLT",var.lookup,value=TRUE)
+var.names <- names(var.names)
+ucr$assault <- rowSums(da35021.0001[,var.names])
+var.names <- grep("ACT # SIMPLE ASSLT",var.lookup,value=TRUE)
+var.names <- names(var.names)
+ucr$assault <- ucr$assault - rowSums(da35021.0001[,var.names])
+```
+
+Let's add a column for burglary, a column for larceny, and a column for vehicle theft:
+
+```{r comment="", results='hold'}
+var.names <- grep("ACT # BURGLARY",var.lookup,value=TRUE)
+var.names <- names(var.names)
+ucr$burglary <- rowSums(da35021.0001[,var.names])
+
+var.names <- grep("ACT # LARCENY",var.lookup,value=TRUE)
+var.names <- names(var.names)
+ucr$larceny <- rowSums(da35021.0001[,var.names])
+
+var.names <- grep("ACT # VHC THEFT",var.lookup,value=TRUE)
+var.names <- names(var.names)
+ucr$gta <- rowSums(da35021.0001[,var.names])
+```
+
+
+# Trying out our dataset.
+
+We can use this dataset to check crime counts for individual cities. First, take a look at http://www.fbi.gov/about-us/cjis/ucr/crime-in-the-u.s/2012/crime-in-the-u.s.-2012/tables/8tabledatadecpdf/table-8-state-cuts/table-8-pennsylvania.  This provides some annotations about reporting involving any agency in Pennsylvania.  Let's use our dataset to find out crime counts in Philadelphia in 2012. Note that if you use regular expressions to find "Philadelphia," you'll also grab "other" Philadelphias such as Philadelphia, Mississippi - so check your STATE column. Also, would we want to include "New Philadelphia?"
+```{r comment="", results='hold'}
+i <- grep("PHILADELPHIA",ucr$AGENCY)
+ucr[i,]
+```
+
+Which rows pertain to Philadelphia, Pennsylvania?  Why would Row 11863 have a POP of 0?  Hint: that line refers to the Pennsylvania State Police who investigate/report crimes in Philadelphia County.
+
+Let's try another large city - Chicago. First, look at this link: https://ucr.fbi.gov/crime-in-the-u.s/2012/crime-in-the-u.s.-2012/tables/8tabledatadecpdf/table-8-state-cuts/table_8_offenses_known_to_law_enforcement_by_illinois_by_city_2012.xls
+
+As you can see, the data collection methodology for the offense of forcible rape used by Chicago, Illinois, does not comply with national Uniform Crime Reporting Program guidelines. Consequently, its figures for forcible rape and violent crime (of which forcible rape is a part) are not published in this table.
+```{r comment="", results='hold'}
+i <- grep("CHICAGO",ucr$AGENCY)
+ucr[i,]
+```
+
+Certainly, Philadelphia had more than one agency; but, here's another large city has a large amount of agencies. So, if you were going to count up all of the crimes in Los Angeles County in 2012, you would have to (1) consider which agencies would apply and (2) then add up the counts for each of these agencies. 
+```{r comment="", results='hold'}
+i <- grep("LOS ANGELES",ucr$AGENCY)
+ucr[i,]
+```
+
+#Class Exercises
+
+1. How many car thefts reported to the police?
+```{r comment="", results='hold'}
+sum(ucr$gta)
+```
+2. How many rapes reported to the police?
+```{r comment="", results='hold'}
+sum(ucr$rape)
+```
+3. Pick out all agencies that have "New York" in their name?
+```{r comment="", results='hold'}
+i <- grep("NEW YORK",ucr$AGENCY)
+ucr[i,]
+```
+Note what the i (indexing variable) does - it is a list of the row numbers in the ucr dataframe that have "NEW YORK" somewhere in the agency column.
+
+4a. Next, make a little dataframe of just "New Jersey"; how many rows is it? There are two ways to do the dataframe
+
+```{r comment="", results='hold'}
+nj <- ucr[grep("New Jersey", ucr$STATE),]  
+```
+
+Or, 
+```{r comment="", results='hold'}
+nj2 <- subset(ucr, STATE=="(29) New Jersey")
+```
+
+4b. How many murders, robberies, etc.?
+```{r comment="", results='hold'}
+sum(nj$murder)
+
+sum(nj$robbery)
+```
+4c. How would you find out the average burglary rate/person in New Jersey? per 100,000?
+
+```{r comment="", results='hold'}
+sum(nj$murder)/sum(nj$POP)
+
+(sum(nj$murder)/sum(nj$POP)*100000)
+```
+
+4d. Add a new column to your dataset for the burglary rate for each agency. Sort your dataset by order of burglary rate.
+
+```{r comment="", results='hold'}
+
+nj$burglaryrate <- (nj$burglary/nj$POP)*100000
+
+nj[order(nj$burglaryrate),]
+
+nj[rev(order(nj$burglaryrate)),]
+```
+
+We have a bit of a snag. Look at the burglary rate column. You'll notice some  NaN and Inf values. Get rid of them:
+
+```{r comment="", results='hold'}
+nj.new <- subset(nj, !is.nan(burglaryrate))
+
+nj.new <- subset(nj.new, !is.infinite(burglaryrate))
+```
+Now sort the dataset by burglary rate:
+
+```{r comment="", results='hold'}
+nj.new[rev(order(nj.new$burglaryrate)),]
+```
+Why do you think some of Agencies are at the top of the list?  Hint: take a look at the population column.
