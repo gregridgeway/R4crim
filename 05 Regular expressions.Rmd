@@ -101,7 +101,7 @@ Let's try another example. Instead of a letter, let's try to find a number such 
 grep("1",dataText,value=TRUE)
 ```
 
-We can also search for multiple characters - instead of individual characters. We place our list of desired characters within square brackets `[  ]` within the quotes. For example, let's find items that contain numbers. 
+We can also search for multiple characters, instead of individual characters. We place our list of desired characters within square brackets `[  ]` within the quotes. For example, let's find items that contain numbers. 
 ```{r comment="", results='hold'}
 grep("[0123456789]",dataText,value=TRUE)
 ```
