@@ -44,17 +44,21 @@ output:
 # Introduction
 Published by the FBI, the Uniform Crime Reports (UCR) is a yearly collection of official data on crime in the United States. Approximately 18,000 individual city, university and college, county, state, tribal, and federal law enforcement agencies report data to the FBI. Some agencies are more consistent than other agencies with reporting their data to the FBI. For example, you may find a handful of very rural counties that have no data in, e.g,. 2012, but have data in 2014. 
 
-Earlier in the semester, we worked with one dataset from the UCR, Law Enforcement officers Killed and Assaulted (LEOKA). Now, we're working with a different portion of the UCR, "Offenses Known and Clearances by Arrest." The University of Michigan converts this data into a format that is easy-to-use in R For example, here is the link to access the 2012 data http://www.icpsr.umich.edu/icpsrweb/NACJD/studies/35021. As of October 2017, the Offenses Known and Clearances by Arrest Data is available for up to 2016. 
+Earlier in the semester, we worked with one dataset from the UCR, Law Enforcement officers Killed and Assaulted (LEOKA). Now, we're working with a different portion of the UCR, "Offenses Known and Clearances by Arrest." The University of Michigan converts this data into a format that is easy-to-use in R. Download the [2012 UCR data](http://www.icpsr.umich.edu/icpsrweb/NACJD/studies/35021) to your computer. As of October 2017, the Offenses Known and Clearances by Arrest Data is available for up to 2016. We have called our subfolder `UCR2012` and here are the files in our subfolder. Yours should look the same.
 
-For each year, there will be a zip file to download. There are two main files within the zip file that you need: (1) a .rda file (which contains your datain R format) and (2) the codebook (which is in PDF format).
+```{r comment="", results='hold'}
+list.files("UCR2012/", recursive=TRUE)
+```
+
+For each year, there will be a zip file to download. There are two main files within the zip file that we will be using: (1) a .rda file (which contains your datain R format) and (2) the codebook (which is in PDF format).
 
 The data file has monthly data on the number of Crime Index offenses reported and the number of offenses cleared by arrest or other means. Thus, the data isn't "incident-level" data - in contrast to the Chicago data that we've worked with. The data instead includes crime counts for each agency. You can get helpful summaries about the UCR OKCA data [here](https://www.icpsr.umich.edu/icpsrweb/content/NACJD/guides/ucr.html) and [here](https://www.fbi.gov/news/pressrel/press-releases/fbi-releases-2016-crime-statistics). 
 
 # Loading the UCR data
-In this section we are going to work with the [2012 UCR data](http://www.icpsr.umich.edu/icpsrweb/NACJD/studies/35021). The first step when working with this UCR data is loading it into R. As with loading any data, it's very important that your path is correct using `setwd()`. Set it to wherever you have unzipped your .rda file. since the data are in R's .rda format, we use `load()` to import it into R.
+In this section we are going to work with the [2012 UCR data](http://www.icpsr.umich.edu/icpsrweb/NACJD/studies/35021). The first step when working with this UCR data is loading it into R. As with loading any data, it's very important that your path is correct using `setwd()`. Set it to wherever you have unzipped your 2012 UCR data. Again, since our subfolder is called `UCR2012` we use the following `load()` to import the data into R. If you called your folder something other than `UCR2012` then you will have to edit this `load()` function to match your subfolder's name.
 
 ```{r comment="", results='hold'}
-load("35021-0001-Data.rda")
+load("UCR2012/DS0001/35021-0001-Data.rda")
 ```
 Let's check what R now has in its memory.
 ```{r comment="", results='hold'}
