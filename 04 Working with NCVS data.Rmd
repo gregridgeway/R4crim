@@ -1,0 +1,538 @@
+---
+title: "Working with National Crime Victimization Survey Data"
+author:
+- affiliation: University of Pennsylvania
+  email: gridge@upenn.edu
+  name: Greg Ridgeway
+- affiliation: University of Pennsylvania
+  email: moyruth@upenn.edu
+  name: Ruth Moyer
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    css: htmlstyle.css
+---
+
+<!-- HTML YAML header Ctrl-Shift-C to comment/uncomment -->
+
+
+<!-- --- -->
+<!-- title: "Working with National Crime Victimization Survey Data" -->
+<!-- author: -->
+<!-- - Greg Ridgeway (gridge@upenn.edu) -->
+<!-- - Ruth Moyer (moyruth@upenn.edu) -->
+<!-- date: "`r format(Sys.time(), '%B %d, %Y')`" -->
+<!-- output: -->
+<!--   pdf_document: -->
+<!--     latex_engine: pdflatex -->
+<!--   html_document: default -->
+<!-- fontsize: 11pt -->
+<!-- fontfamily: mathpazo -->
+<!-- --- -->
+<!-- PDF YAML header Ctrl-Shift-C to comment/uncomment -->
+
+
+
+
+<!-- A function for autmomating the numbering and wording of the exercise questions -->
+```{r echo=FALSE}
+.counterExercise <- 0
+.exerciseQuestions <- NULL
+.exNum <- function(.questionText="") 
+{
+   .counterExercise <<- .counterExercise+1
+   .exerciseQuestions <<- c(.exerciseQuestions, .questionText)
+   return(paste0(.counterExercise,". ",.questionText))
+}
+knitr::opts_chunk$set(echo=TRUE, cache=TRUE, cache.lazy=FALSE)
+```
+
+
+
+
+# Introduction - National Crime Victimization Survey Data
+
+Through our work with the UCR, we've already discussed reported crime. Nonetheless, not all crimes are reported to the police. Also, sometimes the UCR doesn't provide us with specific information about a crime incident involving a victim such as who the offenders were in relationship to the victim or where the crime incident occurred. 
+
+Each year, the U.S. Census Bureau conducts the National Crime Victimization Survey (NCVS), which is a valuable source of self-reported victimization data. The Census Bureau interviews a sample of people about the number and characteristics of crime victimizations they experienced during the prior 6 months. In 2015, for example, they collected data from 95,760 households and 163,880 persons.   
+
+The NCVS contains valuable information about nonfatal personal crimes such as rape or robbery as well as property crimes such as burglary. Additional information about the NCVS can be found at the [BJS website](https://www.bjs.gov/index.cfm?ty=dcdetail&iid=245). To give a sense of the type of data that the NCVS contains, refer to the [Official 2012-2013 BJS Crime Victimization report](http://www.bjs.gov/content/pub/pdf/cv12.pdf).
+
+# Acquiring the NCVS data
+
+The University of Michigan consolidates the NCVS data into a format that is easily accessible in R. We will be using 2012 and 2013 NCVS data.
+
+First, we will download the NCVS 2012 data, [ICPSR 34650](http://www.icpsr.umich.edu/icpsrweb/NACJD/studies/34650). We will need to download the following files, DS1, DS2, DS3, DS4, and DS5 in R format. Also, download DS0, the Codebook (which is in PDF format). We will refer to the codebook frequently. As for the DS1, DS2, DS3, DS4, and DS5 files, we are interested in the .rda files. 
+
+Next, downoad the NCVS 2013 data, [ICPSR 35164](http://www.icpsr.umich.edu/icpsrweb/NACJD/studies/35164). Same drill as above - retrieve DS1, DS2, DS3, DS4, and DS5 in R format.
+
+All told you should have ten .rda files, and one PDF codebook. For now, we won't be using the DS5 files that much. Also, the file names are admittedly a bit unwieldy with all the numbers so it might be a good idea to change the names to something that will help you quickly distinguish among all the files. We've created subfolders called NCVS2012 and NCVS2013 that contains the files extracted from the data download. Here are the files we have in our NCVS2012 and NCVS2013 subfolders.
+
+```{r comment=""}
+list.files("NCVS2012/",recursive = TRUE)
+list.files("NCVS2013/",recursive = TRUE)
+```
+
+Let's see what's in these .rda files. The DS1s for both 2012 and 2013 are the address record-type files. First, 2012:
+```{r comment="", results='hold'}
+load("NCVS2012/DS0001/34650-0001-Data.rda")
+ls()
+head(da34650.0001)
+```
+
+As you can see, the DS1 for 2012 contains a unique identifer for each interviewed household. Let's load the address record-type file for 2013.
+
+```{r comment="", results='hold'}
+load("NCVS2013/DS0001/35164-0001-Data.rda")
+```
+
+Let's give these address record-type files for 2012 and 2013 more useful names.
+```{r comment="", results='hold'}
+dataAddr12 <- da34650.0001 
+dataAddr13 <- da35164.0001 
+```
+
+By contrast, DS2 contains household information. Let's load the household data and give them more useful names
+```{r comment="", results='hold'}
+load("NCVS2012/DS0002/34650-0002-Data.rda")
+load("NCVS2013/DS0002/35164-0002-Data.rda")
+
+dataHH12 <- da34650.0002 
+dataHH13 <- da35164.0002 
+```
+
+The DS3 files contain person specific information whereas the DS4 files provide incident information. Let's load them and give them useful names.
+```{r comment="", results='hold'}
+
+load("NCVS2012/DS0003/34650-0003-Data.rda")
+load("NCVS2013/DS0003/35164-0003-Data.rda")
+dataPers12 <- da34650.0003
+dataPers13 <- da35164.0003
+
+load("NCVS2012/DS0004/34650-0004-Data.rda")
+load("NCVS2013/DS0004/35164-0004-Data.rda")
+dataInc12 <- da34650.0004
+dataInc13 <- da35164.0004
+```
+
+Now that we've loaded and renamed all the files we'll need, we can remove objects from our working environment that we no longer need. We can use `rm()` to accomplish this:
+```{r comment="", results='hold'}
+rm(da34650.0001,da34650.0002,da34650.0003,da34650.0004,
+   da35164.0001,da35164.0002,da35164.0003,da35164.0004)
+```
+
+Let's examine in a bit more detail the first three rows of the person file. The dataset contains `r ncol(dataPers12)` so we will just show the first 40 columns here. Note IDHH (household ID), IDPER (person ID), and the relationship between the first two rows. Also, note that V3077 (Variable #3077) refers to who responded to the survey.
+```{r comment="", results='hold'}
+dataPers12[1:3, 1:40]
+```
+Let's examine the corresponding household information. 
+
+```{r comment="", results='hold'}
+subset(dataHH12, IDHH=="2501017260961929294229224")
+```
+
+And the corresponding incident file:
+```{r comment="", results='hold'}
+dataInc12[1:3,]
+```
+
+Let's look at the month and year of crime incident variables
+```{r comment="", results='hold'}
+with(dataInc12, table(V4014,V4015)) 
+with(dataInc13, table(V4014,V4015))
+```
+
+# Creating Dataframe and Weights with Incident Data
+Next, we can create a 2012 incident dataframe. Importantly, the 2012 data contain incidents that occurred in 2012 as well as 2011 but were all self-reported to the Census Bureau in 2012. Likewise, the 2013 data contain incidents that occurred in 2012 as well as 2013.  If we wanted to analyze crime that occurred in only 2012, we'd subset the data to include only 2012. We will combine the 2012 and 2013 incident dataframes and then subset this new dataframe so that we exclude 2011 and 2013. As we can see in the Codebook PDF, the variable V4015 refers to the year of occurrence.
+
+```{r comment="", results='hold'}
+dataInc <- rbind(dataInc12,dataInc13)
+table(dataInc$V4015) # year crime occured
+dataInc <- subset(dataInc, V4015==2012)
+```
+
+We will also want to exclude crime that happens outside the United States or crimes for which we do not know the location (NA). According to the Codebook, V4022 refers to location.
+
+```{r comment="", results='hold'}
+dataInc <- subset(dataInc, (V4022!="(1) Outside U.S.") | is.na(V4022))
+```
+
+A lot of crimes happen in a series. The BJS convention is to include up to 10 occurrences in a series crime
+```{r comment="", results='hold'}
+i <- with(dataInc, which((V4019=="(2) No (is series)") & (V4016>=11) & (V4016<=996)))
+dataInc$V4016[i] <- 10
+dataInc$V4016[dataInc$V4016>=997] <- NA
+```
+
+Also, BJS analyses of NCVS data generally use weights because NCVS is survey data. There are three NCVS weight categories: household, personal, and incident. 
+
+For more information about NCVS weights, consult the [helpful summary](https://www.icpsr.umich.edu/icpsrweb/NACJD/NCVS/accuracy.jsp).
+
+To that extent, let's update the weight for series crimes and create a "date year" weight.
+```{r comment="", results='hold'}
+i <- which(dataInc$V4019=="(2) No (is series)")
+dataInc$WGTVICDY <- dataInc$WGTVICCY
+dataInc$WGTVICDY[i] <- with(dataInc, WGTVICDY[i] * V4016[i])
+```
+We can also tabulate total weight by crime type to estimate the count of a crime. As the Codebook instrucs, `V4529` is the variable for crime type.  
+```{r comment="", results='hold'}
+with(dataInc, by(WGTVICDY, V4529, sum))
+```
+As you can see, there are some irregularities with the coding of crime types.  Sometimes a type is coded as "(01)", but other times it is coded as "(1)". Let's standardize this coding using regular expressions.
+```{r comment="", results='hold'}
+dataInc$V4529 <- gsub("\\(([1-9])\\)", "(0\\1)", dataInc$V4529)
+with(dataInc, by(WGTVICDY, V4529, sum))
+```
+
+Now, we can use the NCVS incident data to find out how many car thefts occurred in 2012. 
+```{r comment="", results='hold'}
+with(subset(dataInc, V4529=="(40) Motor veh theft"), 
+     sum(WGTVICDY))
+```
+
+Also, note that the [definition of rape changed](http://www.fbi.gov/about-us/cjis/cjis-link/march-2012/ucr-program-changes-definition-of-rape) in 2013. 
+```{r comment="", results='hold'}
+with(subset(dataInc,V4529=="(01) Completed rape"), 
+     sum(WGTVICDY))
+```     
+
+# Creating Dataframe and Weights with Household and Person Data
+So far, we've created a dataframe and worked with weights for the Incident data.  However, the Household and Person Data each have their own unique weights. Let's first create a 2012 data year household data frame, much like we did with the incident data. Note that `YEARQ` refers to the year and quarter of the interview. The variable `V2130` is the month allocated from panel/rotation number. The panel/rotation number refer to [the process](https://www.bjs.gov/content/pub/pdf/ncvs_methodology.pdf) thru which interviews are conducted.
+
+```{r comment="", results='hold'}
+dataHH <- rbind(dataHH12,dataHH13)
+dataHH <- subset(dataHH, YEARQ>=2012.1 & YEARQ<=2013.2)
+```
+Let's make the "month allocated" uniform, and using regular expressions, delete "0s" following parentheses.
+```{r comment="", results='hold'}
+table(dataHH$V2130)
+dataHH$V2130 <- gsub("\\(0", "\\(", dataHH$V2130)
+```
+
+Next, create a 2012 data year person data frame. We need to first fix incompatible factor/numeric in 2012/2013.  The factor levels in 2012 look like "(1) Yes", but in 2013 are just "1."
+
+```{r comment="", results='hold'}
+i <- sapply(dataPers12, levels)
+i <- i[!sapply(i,is.null)]
+i <- sapply(i, function(x) all(substring(x,1,1)=="("))
+var.fix <- names(i)[i]
+for(xj in var.fix)
+{
+   dataPers12[,xj] <- gsub("\\(([0-9]+)\\).*", "\\1", dataPers12[,xj])
+   dataPers12[,xj] <- as.numeric(dataPers12[,xj])
+}
+```
+
+Then, stack the 2012 and 2013 data frames using `rbind()`.
+```{r comment="", results='hold'}
+dataPers <- rbind(dataPers12, dataPers13)
+dataPers <- subset(dataPers, YEARQ>=2012.1 & YEARQ<=2013.2)
+```
+
+# Creating Dataframe and Weights with Household and Person Data
+
+Now that we've created a person dataframe and an incident dataframe, we can merge them together. As with any merge, it's important to make a "key" upon which to sew the frames together.
+
+```{r comment="", results='hold'}
+dataInc$IDPER.YEARQ  <- with(dataInc,  paste(IDPER,YEARQ,sep="|"))
+dataPers$IDPER.YEARQ <- with(dataPers, paste(IDPER,YEARQ,sep="|"))
+
+i <- match(dataInc$IDPER.YEARQ, dataPers$IDPER.YEARQ)
+dataInc[1:3,1:5]
+dataPers[i[1:3],1:5]
+```
+
+Let's also merge in some demographic data, such as age categories.
+```{r comment="", results='hold'}
+dataInc$age      <- dataPers$V3014[i]
+dataInc$ageGroup <- cut(dataInc$age, breaks=c(0,16,21,35,45,60,110))
+```
+
+Marital status is another useful category; note that "8" is a missing value indicator. Always refer to the Codebook if you are not sure what a variable or a categorical variable value means.
+
+```{r comment="", results='hold'}
+dataInc$marital <- dataPers$V3015[i]
+dataInc$marital[dataInc$marital==8] <- NA
+```
+
+Note that factor variables in R put meaningful labels on categorical variables. Instead of working with the numbers 1-5 for marital status, let's assign the number values their actual corresponding names.
+```{r comment="", results='hold'}
+dataInc$marital <- factor(dataInc$marital, levels=1:5,
+                           labels=c("married","widowed","divorced",
+                                    "separated","never married"))
+dataInc$sex     <- dataPers$V3018[i]
+dataInc$sex <- factor(dataInc$sex, levels=1:2, 
+                       labels=c("male","female"))
+```
+Let's get estimated counts by age group and sex
+```{r comment="", results='hold'}
+aggregate(WGTVICDY~ageGroup+sex, data=dataInc, FUN=sum)
+```
+We can also find out common crime type by sex
+```{r comment="", results='hold'}
+a <- aggregate(WGTVICDY~V4529+sex, data=dataInc, FUN=sum)
+b <- data.frame(crime=sort(unique(a$V4529)),
+                male=0,female=0)
+i <- match(a$V4529[a$sex=="male"], b$crime)
+b$male[i] <- a$WGTVICDY[a$sex=="male"]
+i <- match(a$V4529[a$sex=="female"], b$crime)
+b$female[i] <- a$WGTVICDY[a$sex=="female"]
+```
+We can then convert this result to column percentages. To obtain a column percentage, we divide counts for an individual cell by the total number of counts for the column. So, the sum of all the values in the male column should equal 100:
+```{r comment="", results='hold'}
+temp <- b
+temp$male   <- with(temp, 100*male/  sum(male))
+temp$female <- with(temp, 100*female/sum(female))
+temp$ratio <- temp$female/temp$male
+temp[order(-temp$ratio),]
+```
+
+And convert to row percentages. Note that if we sum the value in the male column and the value in the female column, we get 100.
+```{r comment="", results='hold'}
+temp <- b
+row.total <- with(temp, male+female)
+temp$male   <- with(temp, 100*male/  row.total)
+temp$female <- with(temp, 100*female/row.total)
+temp$ratio <- temp$female/temp$male
+temp[order(-temp$ratio),]
+```
+
+# Using the NCVS
+
+## Describe the context of assaults. For example, where did they occur? 
+
+As with all of these problems, it is very important to refer to the Codebook to find out relevant variables. Note that Variable `V4024` refers to "Where did the incident happen?" and `V4529` refers to the offense type. We first need to determine which `V4529` values refer to some form of assault. When working with any open-ended criminological question, use your own judgment as to which crimes to include. For example, some researchers would exclude a verbal threat of assault, wheras others would include that as assault.
+
+```{r comment="", results='hold'}
+with(subset(dataInc,V4529 %in% c("(11) Ag aslt w injury", 
+                                  "(14) Simp aslt w inj",
+                                  "(12) At ag aslt w wea",
+                                  "(17) Asl wo weap, wo inj", 
+                                  "(20) Verbal thr aslt", 
+                                  "(13) Thr aslt w weap")), 
+     by(WGTVICDY,V4024,sum))
+```
+
+## When did the assaults occur? 
+
+As our Codebook tells us, Variable `V4021B` refers to "About what time did incident occur?" and `V4014` refers to "Month incident occurred." Let's use both variables to answer this question.
+
+```{r comment="", results='hold'}
+with(subset(dataInc,V4529 %in% c("(11) Ag aslt w injury", 
+                                  "(14) Simp aslt w inj",
+                                  "(12) At ag aslt w wea",
+                                  "(17) Asl wo weap, wo inj", 
+                                  "(20) Verbal thr aslt", 
+                                  "(13) Thr aslt w weap")),
+     by(WGTVICDY,V4021B,sum))
+
+with(subset(dataInc,V4529 %in% c("(11) Ag aslt w injury", 
+                                 "(14) Simp aslt w inj",
+                                 "(12) At ag aslt w wea",
+                                 "(17) Asl wo weap, wo inj", 
+                                 "(20) Verbal thr aslt", 
+                                 "(13) Thr aslt w weap")),
+     by(WGTVICDY,V4014,sum))
+
+```
+
+## Who was the offender?
+
+Variable `V4241` refers to "Single Offender Stranger" whereas `V4245` refers to "Single Offender - How Did Respondent Know Offender?", and `V4248` refers to "Number of Offenders (Multiple Offenders)."
+
+```{r comment="", results='hold'}
+
+with(subset(dataInc,V4529 %in% c("(11) Ag aslt w injury", 
+                                 "(14) Simp aslt w inj",
+                                 "(12) At ag aslt w wea",
+                                 "(17) Asl wo weap, wo inj", 
+                                 "(20) Verbal thr aslt", 
+                                 "(13) Thr aslt w weap")),
+     by(WGTVICDY, V4241, sum))
+
+with(subset(dataInc,V4529 %in% c("(11) Ag aslt w injury", 
+                                  "(14) Simp aslt w inj",
+                                  "(12) At ag aslt w wea", 
+                                  "(17) Asl wo weap, wo inj", 
+                                  "(20) Verbal thr aslt", 
+                                  "(13) Thr aslt w weap")),
+     by(WGTVICDY, V4245, sum))
+
+```
+
+Note that with the multi-offender variable, we need to exclude values greater than 96. 
+
+```{r comment="", results='hold'}
+dataInc$V4248[dataInc$V4248>=96] <- NA
+dataInc$multOffender <- dataInc$V4248
+
+with(subset(dataInc,V4529 %in% c("(11) Ag aslt w injury", 
+                                 "(14) Simp aslt w inj",
+                                 "(12) At ag aslt w wea",
+                                 "(17) Asl wo weap, wo inj", 
+                                 "(20) Verbal thr aslt", 
+                                 "(13) Thr aslt w weap")),
+     by(WGTVICDY, multOffender, sum))
+```
+
+## What sort of weapons were used?
+
+As the Codebook shows, Variables `V4051`-`V4059` list types of weapons. Because it's a bit difficult to interpret the output in R with just the variable names, let's rename the variables.
+
+```{r comment="", results='hold'}
+dataInc$handgun     <- dataInc$V4051
+dataInc$otherGun    <- dataInc$V4052
+dataInc$knife       <- dataInc$V4053
+dataInc$sharpObject <- dataInc$V4054
+dataInc$bluntObject <- dataInc$V4055
+dataInc$other       <- dataInc$V4056
+dataInc$unknownGun  <- dataInc$V4057
+dataInc$missing     <- dataInc$V4058
+dataInc$hit         <- dataInc$V4059
+
+assault <- subset(dataInc, V4529 %in% c("(11) Ag aslt w injury", 
+                                        "(14) Simp aslt w inj",
+                                        "(12) At ag aslt w wea",
+                                        "(17) Asl wo weap, wo inj", 
+                                        "(20) Verbal thr aslt", 
+                                        "(13) Thr aslt w weap"))
+
+with(assault, by(WGTVICDY, handgun,     sum))
+with(assault, by(WGTVICDY, knife,       sum))
+with(assault, by(WGTVICDY, otherGun,    sum))
+with(assault, by(WGTVICDY, sharpObject, sum))
+with(assault, by(WGTVICDY, bluntObject, sum))
+with(assault, by(WGTVICDY, other,       sum))
+with(assault, by(WGTVICDY, unknownGun,  sum))
+with(assault, by(WGTVICDY, missing,     sum))
+with(assault, by(WGTVICDY, hit,         sum))
+```
+
+## Were the police called?
+Note that `V4399` refers to "Reported to Police"
+
+```{r comment="", results='hold'}
+dataInc$reported <- dataInc$V4399
+
+with(subset(dataInc,V4529 %in% c("(11) Ag aslt w injury", 
+                                 "(14) Simp aslt w inj",
+                                 "(12) At ag aslt w wea",
+                                 "(17) Asl wo weap, wo inj", 
+                                 "(20) Verbal thr aslt", 
+                                 "(13) Thr aslt w weap")), 
+     by(WGTVICDY, reported, sum))
+```
+
+## How many victims used firearms defensively?
+
+As the Codebook tells us, `V4147` asks whether the victim threatened with a gun.
+
+```{r comment="", results='hold'}
+dataInc$selfDefenseGun <- dataInc$V4147
+
+with(subset(dataInc,V4529 %in% c("(11) Ag aslt w injury", 
+                                 "(14) Simp aslt w inj",
+                                 "(12) At ag aslt w wea",
+                                 "(17) Asl wo weap, wo inj", 
+                                 "(20) Verbal thr aslt", 
+                                 "(13) Thr aslt w weap")), 
+     by(WGTVICDY, selfDefenseGun, sum))
+```
+
+
+## How many victims by race and crime type
+
+First, let's use all the racial groups in the dataset.
+
+```{r comment="", results='hold'}
+dataInc$IDPER.YEARQ  <- with(dataInc,  paste(IDPER,YEARQ,sep="|"))
+dataPers$IDPER.YEARQ <- with(dataPers, paste(IDPER,YEARQ,sep="|"))
+i <- match(dataInc$IDPER.YEARQ, dataPers$IDPER.YEARQ)
+dataInc[1:3,1:5]
+dataPers[i[1:3],1:5]
+dataInc$race <- dataPers$V3023A[i]
+
+dataInc$race[dataInc$race==98] <- NA
+
+dataInc$race <- factor(dataInc$race, levels=1:20,
+                       labels=c("White", "Black", "AmerInd", "Asian",
+                                "HawaiianPacificIslander", "WhiteBlack",
+                                "WhiteAmerIndian", "WhiteAsian", "WhiteHawaiian",
+                                "BlackAmerIndian", "BlackAsian", 
+                                "BlackHawaiianPacificIslander",        
+                                "AmericanIndianAsian", 
+                                "AsianHawaiianPacificIslander", "WBAmerInd", 
+                                "WBAsian", "WAmerIndAsian", "WAsianHawaiian", 
+                                "2or3races", "4or5 races"))
+
+aggregate(WGTVICDY~race, data=dataInc, FUN=sum)
+
+a <- aggregate(WGTVICDY~V4529+race, data=dataInc, FUN=sum)
+a
+reshape(a, timevar="race", idvar="V4529", direction="wide")
+
+a[order(a$WGTVICDY),]
+```
+
+As the results indicate, the crime with the greatest number of victims, regardless of race, is generally Theft $50-$249.
+
+Let's also consider the most common crimes that affect Hispanics (binary variable Y/N):
+
+```{r comment="", results='hold'}
+i <- match(dataInc$IDPER.YEARQ, dataPers$IDPER.YEARQ)
+dataInc$hispanic <- dataPers$V3024[i]
+
+dataInc$hispanic[dataInc$hispanic==8] <- NA
+
+dataInc$hispanic <- factor(dataInc$hispanic, levels=1:2, labels=c("Yes","No"))
+
+aggregate(WGTVICDY~hispanic,data=dataInc,FUN=sum)
+
+x <- aggregate(WGTVICDY~V4529+hispanic,data=dataInc,FUN=sum)
+
+x[order(x$WGTVICDY),]
+```
+
+
+## Find crime types that disproportionately affect black victims
+
+As the below analysis finds, the crimes that disproportionately affect black victims compared to white victims are Verbal Threat of Sexual Assault, Attempted robbery with injury, Attempted Purse Snatching, and Purse Snatching.
+
+```{r comment="", results='hold'}
+b <- data.frame(crime=sort(unique(a$V4529)),
+                White=0,Black=0)
+i <- match(a$V4529[a$race=="White"], b$crime)
+b$White[i] <- a$WGTVICDY[a$race=="White"]
+i <- match(a$V4529[a$race=="Black"], b$crime)
+b$Black[i] <- a$WGTVICDY[a$race=="Black"]
+
+temp <- b
+temp$White <- with(temp, 100*White/ sum(White))
+temp$Black <- with(temp, 100*Black/sum(Black))
+temp$ratio <- temp$Black/temp$White
+temp[order(-temp$ratio),]
+```
+
+Or, we can also combine some races into a category called "Other" (instead of simply White). Note that our results change with the lead offense now being Burglary
+```{r comment="", results='hold'}
+b <- data.frame(crime=sort(unique(a$V4529)),
+                Other=0,Black=0)
+i <- match(a$V4529[a$race%in%c("White", "AmerInd", "Asian", "HawaiianPacificIslander")], b$crime)
+b$Other[i] <- a$WGTVICDY[a$race%in%c("White","AmerInd", "Asian", "HawaiianPacificIslander")]
+i <- match(a$V4529[a$race=="Black"], b$crime)
+b$Black[i] <- a$WGTVICDY[a$race=="Black"]
+
+temp <- b
+temp$Other <- with(temp, 100*Other/ sum(Other))
+temp$Black <- with(temp, 100*Black/sum(Black))
+temp$ratio <- temp$Black/temp$Other
+temp[order(-temp$ratio),]
+
+b <- data.frame(crime=sort(unique(a$V4529)),
+                Other=0,Black=0)
+i <- match(a$V4529[a$race%in%c("White", "AmerInd", "Asian", "HawaiianPacificIslander")], b$crime)
+b$Other[i] <- a$WGTVICDY[a$race%in%c("White","AmerInd", "Asian", "HawaiianPacificIslander")]
+i <- match(a$V4529[a$race=="Black"], b$crime)
+b$Black[i] <- a$WGTVICDY[a$race=="Black"]
+```
+
