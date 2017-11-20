@@ -225,8 +225,8 @@ dataInc13 &lt;- da35164.0004</code></pre>
 <p>Now that we’ve loaded and renamed all the files we’ll need, we can remove objects from our working environment that we no longer need. We can use <code>rm()</code> to accomplish this:</p>
 <pre class="r"><code>rm(da34650.0001,da34650.0002,da34650.0003,da34650.0004,
    da35164.0001,da35164.0002,da35164.0003,da35164.0004)</code></pre>
-<p>Let’s examine in a bit more detail the first three rows of the person file. Note IDHH (household ID), IDPER (person ID), and the relationship between the first two rows. Also, note that V3077 (Variable #3077) refers to who responded to the survey.</p>
-<pre class="r"><code>dataPers12[1:3,]</code></pre>
+<p>Let’s examine in a bit more detail the first three rows of the person file. The dataset contains 240 so we will just show the first 40 columns here. Note IDHH (household ID), IDPER (person ID), and the relationship between the first two rows. Also, note that V3077 (Variable #3077) refers to who responded to the survey.</p>
+<pre class="r"><code>dataPers12[1:3, 1:40]</code></pre>
 <pre><code>              V3001  YEARQ                      IDHH
 1 (3) Person record 2012.1 2501017260961929294229224
 2 (3) Person record 2012.1 2501017260961929294229224
@@ -254,145 +254,9 @@ dataInc13 &lt;- da35164.0004</code></pre>
     V3034 V3035   V3036 V3037  V3038 V3039  V3040 V3041   V3042 V3043
 1  (2) No    NA    &lt;NA&gt;    NA   &lt;NA&gt;    NA (2) No    NA  (2) No    NA
 2  (2) No    NA  (2) No    NA (2) No    NA (2) No    NA  (2) No    NA
-3 (1) Yes     1 (1) Yes     1 (2) No    NA (2) No    NA (1) Yes     2
-   V3044 V3045  V3046 V3047  V3048 V3049 V3050 V3051 V3052 V3053  V3054
-1 (2) No    NA (2) No    NA (2) No  &lt;NA&gt;  &lt;NA&gt;    NA  &lt;NA&gt;    NA (2) No
-2 (2) No    NA (2) No    NA (2) No  &lt;NA&gt;  &lt;NA&gt;    NA  &lt;NA&gt;    NA (2) No
-3 (2) No    NA (2) No    NA (2) No  &lt;NA&gt;  &lt;NA&gt;    NA  &lt;NA&gt;    NA (2) No
-  V3055 V3056 V3057 V3058 V3059                V3060   V3061  V3062  V3063
-1  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;    NA (1) At least 1 entry (1) Yes (0) No (0) No
-2  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;    NA (1) At least 1 entry (1) Yes (0) No (0) No
-3  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;    NA (1) At least 1 entry (1) Yes (0) No (0) No
-   V3064  V3065  V3066  V3067  V3068               V3069 V3070   V3071
-1 (0) No (0) No (0) No (0) No (0) No (0) No out of range  &lt;NA&gt; (1) Yes
-2 (0) No (0) No (0) No (0) No (0) No (0) No out of range  &lt;NA&gt; (1) Yes
-3 (0) No (0) No (0) No (0) No (0) No (0) No out of range  &lt;NA&gt;  (2) No
-   V3072 V3073               V3074            V3075      V3076
-1   &lt;NA&gt;  &lt;NA&gt; (27) Something else (2) Federal govt (1) A city
-2   &lt;NA&gt;  &lt;NA&gt; (27) Something else (1) Priv company (1) A city
-3 (2) No  &lt;NA&gt;                &lt;NA&gt;             &lt;NA&gt;       &lt;NA&gt;
-              V3077  V3078                  V3079    V3080 WGTPERCY V3081
-1 (0) Not hhld resp (2) No (4) None above schools 2179.883 1089.941     0
-2     (1) Hhld resp (2) No (4) None above schools 3281.629 1640.815     0
-3     (1) Hhld resp   &lt;NA&gt; (4) None above schools 2874.980 1437.490     4
-  V3082 PERREPWGT1 PERREPWGT2 PERREPWGT3 PERREPWGT4 PERREPWGT5 PERREPWGT6
-1  2012   2178.535   642.2658   2193.551   2169.713   637.0570   634.9561
-2  2012   3308.043   840.5376   3207.668   3114.827   955.0288   889.4339
-3  2012   2891.926   860.8661   2871.166    836.316  2789.3262  4736.1664
-  PERREPWGT7 PERREPWGT8 PERREPWGT9 PERREPWGT10 PERREPWGT11 PERREPWGT12
-1   2158.132   3689.693   2204.264    638.2614   2215.3887    2201.351
-2   3126.063   5337.324   2991.483    993.4820   3239.6155    3012.367
-3   2796.390   2841.269   2752.314    862.8491    875.9226    4920.429
-  PERREPWGT13 PERREPWGT14 PERREPWGT15 PERREPWGT16 PERREPWGT17 PERREPWGT18
-1    2170.001    637.1823    3691.780    2177.115    3648.117    3694.733
-2    3170.222    937.8131    5441.701    3248.409    5194.486    5798.001
-3    3018.755   4870.0419    2837.415    2924.788    4690.472    2989.841
-  PERREPWGT19 PERREPWGT20 PERREPWGT21 PERREPWGT22 PERREPWGT23 PERREPWGT24
-1    2160.239   3736.0498    2203.958   3758.1570    2117.123   2213.6799
-2    3281.977   5747.4508    3253.864   5445.4894    3216.601   3186.8281
-3    5045.169    882.6529    2880.841    878.8886    2909.236    887.6555
-  PERREPWGT25 PERREPWGT26 PERREPWGT27 PERREPWGT28 PERREPWGT29 PERREPWGT30
-1    3668.192    3744.873    2201.846    644.2975    2153.665    3687.758
-2    5567.323    5692.527    3153.237    890.3965    3356.095    5757.356
-3    2815.204    4935.069    2821.116   2862.5850    2828.943     863.990
-  PERREPWGT31 PERREPWGT32 PERREPWGT33 PERREPWGT34 PERREPWGT35 PERREPWGT36
-1   2164.9880    2180.205    2175.786    3684.666    639.8925    2171.437
-2   2982.0251    3337.565    3332.517    5518.537   1043.1909    3444.597
-3    851.9558    4750.904    2650.510    4497.205   2877.8495    2920.133
-  PERREPWGT37 PERREPWGT38 PERREPWGT39 PERREPWGT40 PERREPWGT41 PERREPWGT42
-1    637.3975    633.8986    2161.198    642.2628    2196.269   3653.0505
-2    979.4475    967.9730    3169.713    962.0465    3362.718   5758.8818
-3   4818.2943   2769.8328    4900.177    833.8484    2901.263    856.0509
-  PERREPWGT43 PERREPWGT44 PERREPWGT45 PERREPWGT46 PERREPWGT47 PERREPWGT48
-1    2172.347   2176.4705    3731.388    3703.043    2167.953    639.0265
-2    3184.656   3356.6352    5386.170    5979.845    3648.629    884.6709
-3    2757.671    796.0404    2931.592    4878.624    2920.669   2822.8203
-  PERREPWGT49 PERREPWGT50 PERREPWGT51 PERREPWGT52 PERREPWGT53 PERREPWGT54
-1    2157.083   3773.7734   2177.6071    2163.538    2206.226    3735.595
-2    3217.309   5241.6556   3353.8083    3234.551    3471.566    5920.653
-3    2840.018    863.2011    865.8998    4811.825    2749.867    5099.692
-  PERREPWGT55 PERREPWGT56 PERREPWGT57 PERREPWGT58 PERREPWGT59 PERREPWGT60
-1    644.3686    2178.741    646.8281    645.6322    2229.281    634.6783
-2    886.0409    3278.084   1058.3086    971.5301    3031.958   1002.2954
-3   2858.4598    2755.528   4742.2564   2929.5559    4911.805    907.1226
-  PERREPWGT61 PERREPWGT62 PERREPWGT63 PERREPWGT64 PERREPWGT65 PERREPWGT66
-1    2160.452    637.0091    2224.072   2161.1745    643.0187    644.9042
-2    3330.845    976.5864    3470.683   3029.5725    983.1649    939.3875
-3    2861.007    826.5897    2951.757    899.4323   2821.2057   4694.7269
-  PERREPWGT67 PERREPWGT68 PERREPWGT69 PERREPWGT70 PERREPWGT71 PERREPWGT72
-1    2167.338    3748.331    2201.805    2177.115    3648.117    3694.733
-2    3614.113    5352.677    3426.875    3248.409    5194.486    5798.001
-3    2854.873    2840.892    2764.987    2924.788    4690.472    2989.841
-  PERREPWGT73 PERREPWGT74 PERREPWGT75 PERREPWGT76 PERREPWGT77 PERREPWGT78
-1    2160.239    639.0965    3689.210    2205.313    3720.831    3710.766
-2    3281.977    946.0622    5546.310    3398.073    5370.618    6165.891
-3    5045.169   4855.3951    3101.192    2824.322    4793.443    2844.394
-  PERREPWGT79 PERREPWGT80 PERREPWGT81 PERREPWGT82 PERREPWGT83 PERREPWGT84
-1    3668.192    3744.873    2201.846    644.2975    2131.246   2185.8922
-2    5567.323    5692.527    3153.237    890.3965    3366.076   3210.2473
-3    2815.204    4935.069    2821.116   2862.5850    2951.975    816.1781
-  PERREPWGT85 PERREPWGT86 PERREPWGT87 PERREPWGT88 PERREPWGT89 PERREPWGT90
-1    3700.722    3720.150    2164.516    3684.666    639.8925    2171.437
-2    5757.068    6196.430    3503.026    5518.537   1043.1909    3444.597
-3    2963.548    5108.783    2897.584    4497.205   2877.8495    2920.133
-  PERREPWGT91 PERREPWGT92 PERREPWGT93 PERREPWGT94 PERREPWGT95 PERREPWGT96
-1    637.3975    2174.475    2182.912    3701.967    2190.947    633.5507
-2    979.4475    3762.477    3227.079    6467.735    3205.792   1040.5177
-3   4818.2943    4822.948    2699.796    4809.018    2887.719   5085.7594
-  PERREPWGT97 PERREPWGT98 PERREPWGT99 PERREPWGT100 PERREPWGT101
-1    2172.347   2176.4705    3731.388     3703.043     2144.064
-2    3184.656   3356.6352    5386.170     5979.845     3502.782
-3    2757.671    796.0404    2931.592     4878.624     2811.714
-  PERREPWGT102 PERREPWGT103 PERREPWGT104 PERREPWGT105 PERREPWGT106
-1     626.0742     2219.944    2130.6661     646.1716     629.7354
-2    1001.0398     3363.252    3035.3195    1007.9271     945.8471
-3     820.3694     2845.398     854.0069    2878.4250    4521.3338
-  PERREPWGT107 PERREPWGT108 PERREPWGT109 PERREPWGT110 PERREPWGT111
-1     2148.629     3741.916     2171.306     649.5949    2181.7555
-2     3198.176     5303.659     3433.783     948.8173    3504.9626
-3     2926.901     2848.238     2871.022     845.1464     855.0249
-  PERREPWGT112 PERREPWGT113 PERREPWGT114 PERREPWGT115 PERREPWGT116
-1     2148.520     2206.725     632.8686     3654.117     2172.512
-2     3219.211     3247.230    1004.6993     5747.288     3251.599
-3     4830.021     3064.791    4956.2417     2943.073     3061.679
-  PERREPWGT117 PERREPWGT118 PERREPWGT119 PERREPWGT120 PERREPWGT121
-1     3757.521     3716.060     2190.903    3758.6982     2197.174
-2     5496.386     6310.797     3239.519    5233.8922     3336.448
-3     4878.607     3090.050     4706.873     889.8671     2848.492
-  PERREPWGT122 PERREPWGT123 PERREPWGT124 PERREPWGT125 PERREPWGT126
-1     644.8920     2225.314    2150.2413     638.2281     642.1402
-2     876.1216     3306.501    3217.0305     914.4856     929.0106
-3     807.5762     2994.211     871.4237    2907.9437    4992.0892
-  PERREPWGT127 PERREPWGT128 PERREPWGT129 PERREPWGT130 PERREPWGT131
-1     2180.475     3692.998     2209.008     643.7358    2205.3083
-2     2894.456     5617.910     3159.321    1004.6252    3181.9415
-3     2860.172     2898.837     2788.548     816.8910     886.8299
-  PERREPWGT132 PERREPWGT133 PERREPWGT134 PERREPWGT135 PERREPWGT136
-1     2217.141     2165.561     641.0468     3652.532     2206.701
-2     3264.916     3458.326     947.4844     5984.558     3423.679
-3     4993.543     2829.424    4530.2132     2959.636     2850.753
-  PERREPWGT137 PERREPWGT138 PERREPWGT139 PERREPWGT140 PERREPWGT141
-1     3671.889     3687.942     2165.830    3711.9391     2224.024
-2     5038.002     5657.009     3429.476    5544.6618     3266.431
-3     5042.738     3031.083     4911.174     794.3362     2891.061
-  PERREPWGT142 PERREPWGT143 PERREPWGT144 PERREPWGT145 PERREPWGT146
-1    3752.1109     2118.352    2225.1763     3630.016     3766.875
-2    5582.0101     3235.218    3153.4568     5648.287     6624.792
-3     852.9234     2916.203     837.6961     2911.395     5019.669
-  PERREPWGT147 PERREPWGT148 PERREPWGT149 PERREPWGT150 PERREPWGT151
-1     2203.856     640.9229     2137.721    3648.8859    2169.3245
-2     2980.745     946.0944     3045.120    5700.0356    3375.1180
-3     2857.087    2903.9704     3059.215     843.0915     861.8441
-  PERREPWGT152 PERREPWGT153 PERREPWGT154 PERREPWGT155 PERREPWGT156
-1     2190.736     2178.948     3725.757      646.172     2177.241
-2     3329.970     3074.975     5701.616      991.769     3292.765
-3     4727.533     2908.610     4739.330     2836.046     2836.421
-  PERREPWGT157 PERREPWGT158 PERREPWGT159 PERREPWGT160
-1     643.6503     643.9673     2184.692     647.0423
-2    1020.4383     940.3248     3195.131     951.1935
-3    5073.3424    2944.6631     4647.547     902.3878</code></pre>
-<p>Let’s examine the corresponding household information.</p>
-<pre class="r"><code>subset(dataHH12, IDHH==&quot;2501017260961929294229224&quot;)</code></pre>
+3 (1) Yes     1 (1) Yes     1 (2) No    NA (2) No    NA (1) Yes     2</code></pre>
+<p>Let’s examine the corresponding household information. This dataset also has a lot of features so we will just show here the first 53 of 280 columns.</p>
+<pre class="r"><code>subset(dataHH12, IDHH==&quot;2501017260961929294229224&quot;)[,1:53]</code></pre>
 <pre><code>                 V2001  YEARQ                      IDHH V2002
 1 (2) Household record 2012.1 2501017260961929294229224 27296
                     V2003 V2004                V2005 V2006 V2008 V2009
@@ -411,82 +275,10 @@ dataInc13 &lt;- da35164.0004</code></pre>
 1 (1) Married (2) Female (2) No (28) High school grad (01) White only
     V2041 V2042       V2043       V2044    V2045   V2046
 1 (1) Yes    22 (1) Married (1) Married (1) Male (1) Yes
-                  V2047          V2049A  V2050 V2051 V2052 V2053 V2054
-1 (28) High school grad (02) Black only (2) No    NA    NA  &lt;NA&gt;    NA
-  V2055 V2056 V2057 V2058 V2059 V2060 V2061 V2062 V2063 V2064 V2065 V2066
-1    NA  &lt;NA&gt;    NA    NA  &lt;NA&gt;    NA    NA  &lt;NA&gt;    NA  &lt;NA&gt;    NA  &lt;NA&gt;
-  V2067 V2068 V2069 V2070 V2071 V2072 V2072A V2073  V2074 V2075  V2076
-1    NA  &lt;NA&gt;    NA  &lt;NA&gt;     2     0      0     0 (2) No  &lt;NA&gt; (2) No
-  V2077   V2078  V2079 V2080 V2109             V2110 V2111 V2112 V2113
-1    NA (2) Two (2) No    NA   107 (0) Recoded value     2    56     0
-  V2114        V2115    V2116  WGTHHCY V2117 V2118  V2119
-1   237 (1) Non-CATI 3057.223 1528.612    63     2 (2) No
-                 V2120       V2121 V2121B        V2122         V2123
-1 (2) No-not pub house (8) Residue (2) No (08) M ref W (1) Interview
-           V2124     V2125              V2126B    V2127B   V2128B
-1 (2) Continuing (1) Urban (00) Not in a place (3) South (3) Area
-                V2129         V2130 V2131                  V2132
-1 (2) (S)MSA not city (02) February  2012 (4) None above schools
-                   V2133 V2134        V2135 V2136        V2137 V2138
-1 (4) None above schools    98 (98) Residue    98 (98) Residue    98
-         V2139 V2140        V2141 V2142 FRCODE              COHORT
-1 (98) Residue    98 (98) Residue  2012  24504 (2) Cohort 2 (2012)
-  HHREPWGT1 HHREPWGT2 HHREPWGT3 HHREPWGT4 HHREPWGT5 HHREPWGT6 HHREPWGT7
-1    3075.6  786.3739  2971.569  2923.012  878.9171  833.6147  2908.282
-  HHREPWGT8 HHREPWGT9 HHREPWGT10 HHREPWGT11 HHREPWGT12 HHREPWGT13
-1  4974.997   2793.02   926.2282   3015.403   2834.479   2935.023
-  HHREPWGT14 HHREPWGT15 HHREPWGT16 HHREPWGT17 HHREPWGT18 HHREPWGT19
-1    875.025   5087.737   3032.349   4823.704   5410.169   3034.934
-  HHREPWGT20 HHREPWGT21 HHREPWGT22 HHREPWGT23 HHREPWGT24 HHREPWGT25
-1   5365.106   3037.558   5058.972   3011.776   2952.744   5238.137
-  HHREPWGT26 HHREPWGT27 HHREPWGT28 HHREPWGT29 HHREPWGT30 HHREPWGT31
-1   5305.965   2926.488   836.8622   3128.822   5360.841   2764.781
-  HHREPWGT32 HHREPWGT33 HHREPWGT34 HHREPWGT35 HHREPWGT36 HHREPWGT37
-1   3092.578   3108.703   5118.272   967.9861   3203.132   912.7762
-  HHREPWGT38 HHREPWGT39 HHREPWGT40 HHREPWGT41 HHREPWGT42 HHREPWGT43
-1    904.126   2947.297   899.1669   3136.909   5334.917    2975.03
-  HHREPWGT44 HHREPWGT45 HHREPWGT46 HHREPWGT47 HHREPWGT48 HHREPWGT49
-1   3126.002   5063.591   5550.255   3402.925   826.2768   2996.741
-  HHREPWGT50 HHREPWGT51 HHREPWGT52 HHREPWGT53 HHREPWGT54 HHREPWGT55
-1   4855.893   3132.974   3009.047   3255.289   5506.614   824.1247
-  HHREPWGT56 HHREPWGT57 HHREPWGT58 HHREPWGT59 HHREPWGT60 HHREPWGT61
-1   3039.264   984.8708    903.049   2836.636   932.9985   3097.602
-  HHREPWGT62 HHREPWGT63 HHREPWGT64 HHREPWGT65 HHREPWGT66 HHREPWGT67
-1    910.075   3229.087   2832.082   907.2785   875.0653   3387.384
-  HHREPWGT68 HHREPWGT69 HHREPWGT70 HHREPWGT71 HHREPWGT72 HHREPWGT73
-1   4954.268   3172.894   3032.349   4823.704   5410.169   3034.934
-  HHREPWGT74 HHREPWGT75 HHREPWGT76 HHREPWGT77 HHREPWGT78 HHREPWGT79
-1   881.6248   5190.458   3159.703   5008.156   5717.569   5238.137
-  HHREPWGT80 HHREPWGT81 HHREPWGT82 HHREPWGT83 HHREPWGT84 HHREPWGT85
-1   5305.965   2926.488   836.8622   3156.004   2986.829   5400.219
-  HHREPWGT86 HHREPWGT87 HHREPWGT88 HHREPWGT89 HHREPWGT90 HHREPWGT91
-1   5731.808   3267.555   5118.272   967.9861   3203.132   912.7762
-  HHREPWGT92 HHREPWGT93 HHREPWGT94 HHREPWGT95 HHREPWGT96 HHREPWGT97
-1    3486.44   3023.322   6035.617    2983.61   968.2154    2975.03
-  HHREPWGT98 HHREPWGT99 HHREPWGT100 HHREPWGT101 HHREPWGT102 HHREPWGT103
-1   3126.002   5063.591    5550.255    3251.699    929.3205     3123.01
-  HHREPWGT104 HHREPWGT105 HHREPWGT106 HHREPWGT107 HHREPWGT108 HHREPWGT109
-1    2838.477    935.5531    886.2363    2996.096    4912.783    3193.008
-  HHREPWGT110 HHREPWGT111 HHREPWGT112 HHREPWGT113 HHREPWGT114 HHREPWGT115
-1    884.3636    3259.099    3011.662    3019.761    941.1186    5365.185
-  HHREPWGT116 HHREPWGT117 HHREPWGT118 HHREPWGT119 HHREPWGT120 HHREPWGT121
-1    3008.756    5113.723    5857.815    3010.373     4873.69    3101.307
-  HHREPWGT122 HHREPWGT123 HHREPWGT124 HHREPWGT125 HHREPWGT126 HHREPWGT127
-1    821.7617    3073.408    3012.787     842.867    867.9898     2685.17
-  HHREPWGT128 HHREPWGT129 HHREPWGT130 HHREPWGT131 HHREPWGT132 HHREPWGT133
-1    5241.832    2964.399    937.6086    2957.981    3062.453    3196.319
-  HHREPWGT134 HHREPWGT135 HHREPWGT136 HHREPWGT137 HHREPWGT138 HHREPWGT139
-1    884.9346     5607.11    3219.737    4694.122     5250.62     3196.38
-  HHREPWGT140 HHREPWGT141 HHREPWGT142 HHREPWGT143 HHREPWGT144 HHREPWGT145
-1    5143.086    3054.319    5175.568    3036.039     2912.69    5331.696
-  HHREPWGT146 HHREPWGT147 HHREPWGT148 HHREPWGT149 HHREPWGT150 HHREPWGT151
-1    6136.561    2776.509    889.3386    2838.554     5311.18    3136.186
-  HHREPWGT152 HHREPWGT153 HHREPWGT154 HHREPWGT155 HHREPWGT156 HHREPWGT157
-1    3071.325    2865.481    5314.175    913.5914    3059.209    950.9401
-  HHREPWGT158 HHREPWGT159 HHREPWGT160
-1    876.5697    2969.766    887.2935</code></pre>
-<p>And the corresponding incident file:</p>
-<pre class="r"><code>dataInc12[1:3,]</code></pre>
+                  V2047          V2049A  V2050 V2051 V2052
+1 (28) High school grad (02) Black only (2) No    NA    NA</code></pre>
+<p>And the corresponding incident file (just the first 43 of 950 columns):</p>
+<pre class="r"><code>dataInc12[1:3, 1:43]</code></pre>
 <pre><code>                V4001  YEARQ                      IDHH
 1 (4) Incident record 2012.1 2501051210759582293728435
 2 (4) Incident record 2012.1 2501051210759582293728435
@@ -515,506 +307,10 @@ dataInc13 &lt;- da35164.0004</code></pre>
 1 (0) No (0) No (0) No (0) No (0) No (0) No (1) Yes (0) No (0) No
 2   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;
 3   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;
-                V4039              V4040 V4041A V4041B              V4041C
-1 (0) No out of range               &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;                &lt;NA&gt;
-2                &lt;NA&gt; (04) Unlk door/win   &lt;NA&gt;   &lt;NA&gt;                &lt;NA&gt;
-3                &lt;NA&gt;               &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt; (1) Open to the pub
-        V4042                V4043   V4044   V4045               V4046
-1        &lt;NA&gt; (1) R home/next door  (2) No  (2) No                &lt;NA&gt;
-2        &lt;NA&gt; (1) R home/next door (1) Yes (1) Yes (1) Respondent only
-3 (1) Indoors (4) 50 miles or less (1) Yes (1) Yes (1) Respondent only
-                V4047   V4048  V4049 V4050 V4051 V4052 V4053 V4054 V4055
-1                &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-2 (1) Respondent only (1) Yes (2) No  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-3 (1) Respondent only (1) Yes (2) No  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-  V4056 V4057 V4058   V4059   V4060  V4061  V4062  V4063  V4064
-1  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;
-2  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  (2) No  (2) No (2) No (2) No (2) No (2) No
-3  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; (1) Yes (1) Yes   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;
-                 V4065  V4066  V4067  V4068  V4069  V4070  V4071  V4072
-1                 &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;
-2 (1) At least 1 entry (0) No (0) No (0) No (0) No (0) No (0) No (0) No
-3                 &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;
-   V4073  V4074   V4075               V4076 V4077 V4078 V4079 V4080 V4081
-1   &lt;NA&gt;   &lt;NA&gt;    &lt;NA&gt;                &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-2 (0) No (0) No (1) Yes (0) No out of range  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-3   &lt;NA&gt;   &lt;NA&gt;    &lt;NA&gt;                &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-  V4082 V4083 V4084 V4085 V4086 V4087 V4088 V4089 V4090 V4091 V4092
-1  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-2  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-3  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-                 V4093  V4094  V4095  V4096  V4097  V4098  V4099  V4100
-1                 &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;
-2                 &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;
-3 (1) At least 1 entry (0) No (0) No (0) No (0) No (0) No (0) No (0) No
-   V4101  V4102  V4103  V4104   V4105  V4106  V4107               V4108
-1   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;                &lt;NA&gt;
-2   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;                &lt;NA&gt;
-3 (0) No (0) No (0) No (0) No (1) Yes (0) No (0) No (0) No out of range
-    V4109                V4110  V4111  V4112  V4113  V4114  V4115  V4116
-1    &lt;NA&gt;                 &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;
-2    &lt;NA&gt;                 &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;
-3 (1) Yes (1) At least 1 entry (0) No (0) No (0) No (0) No (0) No (0) No
-   V4117  V4118  V4119   V4120  V4121               V4122 V4123 V4124
-1   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;                &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-2   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;                &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-3 (0) No (0) No (0) No (1) Yes (0) No (0) No out of range  &lt;NA&gt;  &lt;NA&gt;
-  V4125 V4126  V4127 V4128 V4129 V4130 V4131 V4132 V4133 V4134 V4135 V4136
-1  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-2  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-3  &lt;NA&gt;  &lt;NA&gt; (2) No  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-  V4137 V4138 V4139 V4140 V4140B1 V4140B2                    V4140B3
-1  &lt;NA&gt;    NA  &lt;NA&gt;    NA    &lt;NA&gt;    &lt;NA&gt;                       &lt;NA&gt;
-2  &lt;NA&gt;    NA  &lt;NA&gt;    NA    &lt;NA&gt;    &lt;NA&gt;                       &lt;NA&gt;
-3  &lt;NA&gt;    NA  &lt;NA&gt;    NA  (2) No (1) Yes (1) Not at all distressing
-  V4140B4 V4140B5 V4140B6 V4140B7 V4140B8 V4140B9 V4140B10 V4140B11
-1    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;
-2    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;
-3  (2) No  (2) No  (2) No  (2) No  (2) No  (2) No   (2) No   (2) No
-  V4140B12 V4140B13 V4140B14 V4140B15 V4140B16 V4140B17 V4140B18 V4140B19
-1     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;
-2     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;
-3     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;
-  V4140B20 V4140B21 V4140B22 V4140B23 V4140B24 V4140B25 V4140B26 V4140B27
-1     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;
-2     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;
-3   (2) No   (2) No   (2) No   (2) No   (2) No   (2) No   (2) No   (2) No
-  V4140B28 V4140B29 V4140B30 V4140B31 V4140B32 V4140B33 V4140B34 V4140B35
-1     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;
-2     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;
-3     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;
-  V4140A   V4141 V4142                V4143  V4144  V4145   V4146   V4147
-1   &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;                 &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;
-2   &lt;NA&gt; (1) Yes  &lt;NA&gt; (1) At least 1 entry (0) No (0) No  (0) No (1) Yes
-3   &lt;NA&gt; (1) Yes  &lt;NA&gt; (1) At least 1 entry (0) No (0) No (1) Yes  (0) No
-   V4148  V4149   V4150   V4151  V4152  V4153  V4154  V4155   V4156  V4157
-1   &lt;NA&gt;   &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;
-2 (0) No (0) No  (0) No (1) Yes (0) No (0) No (0) No (0) No (1) Yes (0) No
-3 (0) No (0) No (1) Yes (1) Yes (0) No (0) No (0) No (0) No  (0) No (0) No
-   V4158  V4159               V4160                V4161  V4162   V4163
-1   &lt;NA&gt;   &lt;NA&gt;                &lt;NA&gt;                 &lt;NA&gt;   &lt;NA&gt;    &lt;NA&gt;
-2 (0) No (0) No (0) No out of range                 &lt;NA&gt;   &lt;NA&gt;    &lt;NA&gt;
-3 (0) No (0) No (0) No out of range (1) At least 1 entry (0) No (1) Yes
-   V4164               V4165   V4166                V4167   V4168   V4169
-1   &lt;NA&gt;                &lt;NA&gt;    &lt;NA&gt;                 &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;
-2   &lt;NA&gt;                &lt;NA&gt; (1) Yes (1) At least 1 entry (1) Yes (1) Yes
-3 (0) No (0) No out of range (1) Yes (1) At least 1 entry (1) Yes  (0) No
-   V4170   V4171   V4172  V4173               V4174  V4175 V4176 V4177
-1   &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;                &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-2 (0) No (1) Yes (1) Yes (0) No (0) No out of range (2) No  &lt;NA&gt;  &lt;NA&gt;
-3 (0) No  (0) No  (0) No (0) No (0) No out of range (2) No  &lt;NA&gt;  &lt;NA&gt;
-  V4178 V4179 V4180 V4181 V4182 V4183   V4184  V4185 V4186 V4187 V4188
-1  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-2  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  (2) No   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-3  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; (1) Yes (2) No  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-  V4189 V4190 V4191 V4192 V4193  V4194 V4195 V4196 V4197 V4198 V4199 V4200
-1  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-2  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-3  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; (2) No  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-  V4201 V4202  V4203 V4204 V4205 V4206 V4207   V4208           V4209
-1  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;    NA    NA    NA    NA    &lt;NA&gt;            &lt;NA&gt;
-2  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;    NA    NA    NA    NA (1) Yes (2) Offender(s)
-3  &lt;NA&gt;  &lt;NA&gt; (2) No    NA    NA    NA    NA (1) Yes (2) Offender(s)
-   V4210 V4211 V4212 V4213 V4214 V4215 V4216 V4217 V4218 V4219 V4220 V4221
-1 (2) No  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-2   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-3   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-  V4222 V4223 V4224 V4225 V4226 V4227 V4228 V4229 V4230 V4231 V4232 V4233
-1  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-2  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-3  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-         V4234 V4235    V4236     V4237 V4237A         V4238         V4239
-1         &lt;NA&gt;  &lt;NA&gt;     &lt;NA&gt;      &lt;NA&gt;   &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;
-2 (1) Only one  &lt;NA&gt; (1) Male   (6) 30+ (2) No (3) Dont know (3) Dont know
-3 (1) Only one  &lt;NA&gt; (1) Male (5) 21-29 (2) No        (2) No       (1) Yes
-     V4240             V4241   V4242               V4243  V4244
-1     &lt;NA&gt;              &lt;NA&gt;    &lt;NA&gt;                &lt;NA&gt;   &lt;NA&gt;
-2     &lt;NA&gt;      (2) Stranger (1) Yes                &lt;NA&gt; (2) No
-3 (3) Both (1) Knew/had seen    &lt;NA&gt; (2) Casual acquaint   &lt;NA&gt;
-                 V4245               V4246A V4246B  V4246C V4246D V4246E
-1                 &lt;NA&gt;                 &lt;NA&gt;   &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;
-2                 &lt;NA&gt; (1) At least 1 entry (0) No (1) Yes (0) No (0) No
-3 (13) Oth nonrelative (1) At least 1 entry (0) No (1) Yes (0) No (0) No
-  V4246F V4246G V4246H   V4247 V4248 V4249 V4250 V4251 V4252 V4252A V4252B
-1   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;    &lt;NA&gt;    NA  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;
-2 (0) No (0) No (0) No (1) Yes    NA  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;
-3 (0) No (0) No (0) No (1) Yes    NA  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;
-  V4253 V4254 V4255 V4256 V4257 V4258 V4259 V4260 V4261 V4262 V4263 V4264
-1  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-2  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-3  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-  V4265 V4266 V4267 V4268 V4269 V4270 V4271 V4272 V4273 V4274 V4275 V4276
-1  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-2  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-3  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-  V4277 V4277A V4277B V4277C V4277D V4277E V4278 V4279 V4280 V4281 V4282A
-1  &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;
-2  &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;
-3  &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;
-  V4282B V4282C V4283 V4284 V4285A V4286   V4287   V4288         V4289
-1   &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt; (1) Yes (1) Yes          &lt;NA&gt;
-2   &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;  (2) No  (2) No (3) Dont know
-3   &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;  (2) No  (2) No        (2) No
-   V4290 V4291 V4292 V4293 V4294 V4295 V4296 V4297 V4298 V4299 V4300 V4301
-1   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-2 (2) No  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-3 (2) No  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-  V4302 V4303 V4304 V4305 V4306 V4307 V4308 V4309 V4310 V4311 V4312 V4313
-1  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;    NA    NA    NA
-2  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;    NA    NA    NA
-3  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;    NA    NA    NA
-  V4314 V4315 V4316 V4317 V4318 V4319 V4320 V4321                V4322
-1  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;    NA    NA     0 (1) At least 1 entry
-2  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;    NA    NA    NA                 &lt;NA&gt;
-3  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;    NA    NA    NA                 &lt;NA&gt;
-   V4323  V4324  V4325  V4326  V4327  V4328  V4329  V4330  V4331  V4332
-1 (0) No (0) No (0) No (0) No (0) No (0) No (0) No (0) No (0) No (0) No
-2   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;
-3   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;
-   V4333  V4334  V4335  V4336  V4337  V4338  V4339  V4340  V4341  V4342
-1 (0) No (0) No (0) No (0) No (0) No (0) No (0) No (0) No (0) No (0) No
-2   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;
-3   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;
-   V4343   V4344  V4345  V4346  V4347  V4348  V4349               V4350
-1 (0) No (1) Yes (0) No (0) No (0) No (0) No (0) No (0) No out of range
-2   &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;                &lt;NA&gt;
-3   &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;                &lt;NA&gt;
-                V4351 V4352 V4353 V4354 V4355 V4356  V4357 V4357A V4357B
-1 (1) Respondent only    NA    NA    NA  &lt;NA&gt;  &lt;NA&gt; (2) No     NA     NA
-2                &lt;NA&gt;    NA    NA    NA  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;     NA     NA
-3                &lt;NA&gt;    NA    NA    NA  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;     NA     NA
-  V4358 V4359  V4360 V4361 V4362 V4363 V4364                V4365   V4366
-1  &lt;NA&gt;  &lt;NA&gt; (2) No  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;   475 (1) At least 1 entry (1) Yes
-2  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;    NA                 &lt;NA&gt;    &lt;NA&gt;
-3  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;    NA                 &lt;NA&gt;    &lt;NA&gt;
-   V4367  V4368  V4369  V4370  V4371  V4372               V4373    V4374
-1 (0) No (0) No (0) No (0) No (0) No (0) No (0) No out of range (3) None
-2   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;                &lt;NA&gt;     &lt;NA&gt;
-3   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;                &lt;NA&gt;     &lt;NA&gt;
-  V4375 V4376 V4377 V4378 V4379 V4380 V4381 V4382 V4383 V4384 V4385
-1    NA  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;    NA
-2    NA  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;    NA
-3    NA  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;    NA
-             V4386A   V4387        V4388 V4389 V4390                V4391
-1 (3) Dont have ins (1) Yes (1) Yes, all    NA   100 (1) At least 1 entry
-2              &lt;NA&gt;  (2) No         &lt;NA&gt;    NA    NA                 &lt;NA&gt;
-3              &lt;NA&gt;  (2) No         &lt;NA&gt;    NA    NA                 &lt;NA&gt;
-   V4392   V4393  V4394  V4395  V4396  V4397               V4398   V4399
-1 (0) No (1) Yes (0) No (0) No (0) No (0) No (0) No out of range  (2) No
-2   &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;                &lt;NA&gt; (1) Yes
-3   &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;                &lt;NA&gt;  (2) No
-           V4400                V4401  V4402   V4403  V4404  V4405  V4406
-1           &lt;NA&gt; (1) At least 1 entry (0) No  (0) No (0) No (0) No (0) No
-2 (1) Respondent                 &lt;NA&gt;   &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;
-3           &lt;NA&gt; (1) At least 1 entry (0) No (1) Yes (0) No (0) No (0) No
-   V4407  V4408  V4409   V4410  V4411  V4412  V4413  V4414  V4415  V4416
-1 (0) No (0) No (0) No (1) Yes (0) No (0) No (0) No (0) No (0) No (0) No
-2   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;
-3 (0) No (0) No (0) No  (0) No (0) No (0) No (0) No (0) No (0) No (0) No
-   V4417  V4418  V4419  V4420               V4421                 V4422
-1 (0) No (0) No (0) No (0) No (0) No out of range   (09) Cld not id off
-2   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;                &lt;NA&gt;                  &lt;NA&gt;
-3 (0) No (0) No (0) No (0) No (0) No out of range (02) Priv, per matter
-                 V4423   V4424  V4425  V4426  V4427  V4428  V4429  V4430
-1                 &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;
-2 (1) At least 1 entry (1) Yes (0) No (0) No (0) No (0) No (0) No (0) No
-3                 &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;
-   V4431   V4432  V4433    V4434    V4435               V4436
-1   &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;                &lt;NA&gt;
-2 (0) No (1) Yes (0) No (0) None (0) None (0) No out of range
-3   &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;                &lt;NA&gt;
-               V4437   V4438              V4439                V4440
-1               &lt;NA&gt;    &lt;NA&gt;               &lt;NA&gt;                 &lt;NA&gt;
-2 (09) Imp surv of R (1) Yes (3) Within an hour (1) At least 1 entry
-3               &lt;NA&gt;    &lt;NA&gt;               &lt;NA&gt;                 &lt;NA&gt;
-    V4441   V4442  V4443  V4444   V4445  V4446  V4447  V4448  V4449
-1    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;
-2 (1) Yes (1) Yes (0) No (0) No (1) Yes (0) No (0) No (0) No (0) No
-3    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;
-                V4450  V4451 V4452 V4453 V4454 V4455 V4456 V4457 V4458
-1                &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-2 (0) No out of range (2) No  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-3                &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-  V4459 V4460 V4461 V4462 V4463 V4464  V4465  V4466  V4467 V4468  V4469
-1  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt; (2) No  &lt;NA&gt;   &lt;NA&gt;
-2  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; (2) No (2) No (2) No  &lt;NA&gt; (2) No
-3  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt; (2) No  &lt;NA&gt;   &lt;NA&gt;
-  V4470 V4471 V4472 V4473 V4474 V4475 V4476  V4477                V4478
-1  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;        (08) Sleeping
-2  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; (2) No        (08) Sleeping
-3  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt; (07) Leisure fr home
-    V4479 V4480 V4481A V4481B V4482 V4482A V4482B V4483 V4484 V4485 V4485A
-1 (1) Yes  &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;
-2 (1) Yes  &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;
-3 (1) Yes  &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;
-    V4486 V4487   V4488 V4489                V4490  V4491  V4492  V4493
-1    &lt;NA&gt;    NA    &lt;NA&gt;    NA (1) At least 1 entry (0) No (0) No (0) No
-2    &lt;NA&gt;    NA    &lt;NA&gt;    NA (1) At least 1 entry (0) No (0) No (0) No
-3 (1) Yes     2 (1) Yes   500 (1) At least 1 entry (0) No (0) No (0) No
-   V4494  V4495   V4496               V4497 V4498 V4499 V4500 V4501 V4502
-1 (0) No (0) No (1) Yes (0) No out of range    NA  &lt;NA&gt;    NA  &lt;NA&gt;    NA
-2 (0) No (0) No (1) Yes (0) No out of range    NA  &lt;NA&gt;    NA  &lt;NA&gt;    NA
-3 (0) No (0) No (1) Yes (0) No out of range    NA  &lt;NA&gt;    NA  &lt;NA&gt;    NA
-  V4503 V4504 V4505 V4506 V4507 V4508 V4509 V4510 V4511 V4512 V4513 V4514
-1  &lt;NA&gt;    NA  &lt;NA&gt;    NA    NA    NA    NA  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-2  &lt;NA&gt;    NA  &lt;NA&gt;    NA    NA    NA    NA  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-3  &lt;NA&gt;    NA  &lt;NA&gt;    NA    NA    NA    NA  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
-  V4515 V4516 V4517 V4518 V4519 V4520 V4522 V4522A V4522B V4522C V4522D
-1  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;
-2  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;
-3  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;
-  V4522E V4522F V4522G V4522H V4522I V4523 V4524 V4525 V4526 V4526AA
-1   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  (2) No
-2   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  (2) No
-3   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; (1) Yes
-   V4526A V4526B V4526C V4526D V4526E V4526F  V4526G V4526H V4526HA1
-1    &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;     &lt;NA&gt;
-2    &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;     &lt;NA&gt;
-3 (1) Yes (2) No (2) No (2) No (2) No (2) No (1) Yes (2) No  (1) Yes
-  V4526HA2 V4526HA3 V4526HA4      V4526HA5 V4526HA6 V4526HA7 V4526HA8
-1     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;          &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;
-2     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;          &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;
-3  (1) Yes  (1) Yes   (2) No (3) Dont know   (2) No   (2) No  (1) Yes
-  V4526HA9 V4526H3A V4526H3B V4526H4 V4526H5 V4526H6 V4526H7 V4526H9
-1     &lt;NA&gt;   (2) No   (2) No  (2) No  (2) No  (2) No  (2) No  (2) No
-2     &lt;NA&gt;   (2) No   (2) No  (2) No  (2) No  (2) No  (2) No  (2) No
-3     &lt;NA&gt;   (2) No   (2) No  (2) No  (2) No  (2) No  (2) No  (2) No
-  V4526H10    V4527                V4528                 V4529 WGTVICCY
-1     &lt;NA&gt; 2690.516 (31) Bur, forc entry  (31) Burg, force ent 2690.516
-2     &lt;NA&gt; 2690.516  (32) Burg, wo force (32) Burg, ent wo for 2690.516
-3     &lt;NA&gt; 2874.980 (14) Simp aslt w inj  (14) Simp aslt w inj 2874.980
-                   HELD V4531    V4532 INCREPWGT1 INCREPWGT2 INCREPWGT3
-1 (0) Not held incident  2011 2690.516   2694.176   806.4258   2684.057
-2 (0) Not held incident  2011 2690.516   2694.176   806.4258   2684.057
-3 (0) Not held incident  2011 2874.980   2891.926   860.8661   2871.166
-  INCREPWGT4 INCREPWGT5 INCREPWGT6 INCREPWGT7 INCREPWGT8 INCREPWGT9
-1   785.0183   2616.708   4410.941   2630.871   2666.889   2580.973
-2   785.0183   2616.708   4410.941   2630.871   2666.889   2580.973
-3   836.3160   2789.326   4736.166   2796.390   2841.269   2752.314
-  INCREPWGT10 INCREPWGT11 INCREPWGT12 INCREPWGT13 INCREPWGT14 INCREPWGT15
-1    808.6445    816.5943    4636.736    2833.014    4593.556    2666.753
-2    808.6445    816.5943    4636.736    2833.014    4593.556    2666.753
-3    862.8491    875.9226    4920.429    3018.755    4870.042    2837.415
-  INCREPWGT16 INCREPWGT17 INCREPWGT18 INCREPWGT19 INCREPWGT20 INCREPWGT21
-1    2738.817    4403.224    2799.036    4716.885    820.5188    2689.362
-2    2738.817    4403.224    2799.036    4716.885    820.5188    2689.362
-3    2924.788    4690.472    2989.841    5045.169    882.6529    2880.841
-  INCREPWGT22 INCREPWGT23 INCREPWGT24 INCREPWGT25 INCREPWGT26 INCREPWGT27
-1    818.6729    2735.268    830.8158    2657.087    4601.828    2632.734
-2    818.6729    2735.268    830.8158    2657.087    4601.828    2632.734
-3    878.8886    2909.236    887.6555    2815.204    4935.069    2821.116
-  INCREPWGT28 INCREPWGT29 INCREPWGT30 INCREPWGT31 INCREPWGT32 INCREPWGT33
-1    2674.478    2639.705    801.7568    797.0990    4460.541     2487.52
-2    2674.478    2639.705    801.7568    797.0990    4460.541     2487.52
-3    2862.585    2828.943    863.9900    851.9558    4750.904     2650.51
-  INCREPWGT34 INCREPWGT35 INCREPWGT36 INCREPWGT37 INCREPWGT38 INCREPWGT39
-1    4224.996    2711.062    2739.897    4492.243    2594.534    4592.816
-2    4224.996    2711.062    2739.897    4492.243    2594.534    4592.816
-3    4497.205    2877.850    2920.133    4818.294    2769.833    4900.177
-  INCREPWGT40 INCREPWGT41 INCREPWGT42 INCREPWGT43 INCREPWGT44 INCREPWGT45
-1    773.4456    2736.664    798.2596    2585.247    740.6961    2743.844
-2    773.4456    2736.664    798.2596    2585.247    740.6961    2743.844
-3    833.8484    2901.263    856.0509    2757.671    796.0404    2931.592
-  INCREPWGT46 INCREPWGT47 INCREPWGT48 INCREPWGT49 INCREPWGT50 INCREPWGT51
-1    4578.111    2730.000    2626.195    2644.352    805.3297    809.2328
-2    4578.111    2730.000    2626.195    2644.352    805.3297    809.2328
-3    4878.624    2920.669    2822.820    2840.018    863.2011    865.8998
-  INCREPWGT52 INCREPWGT53 INCREPWGT54 INCREPWGT55 INCREPWGT56 INCREPWGT57
-1    4476.196    2563.365    4785.953    2651.354    2596.646    4452.988
-2    4476.196    2563.365    4785.953    2651.354    2596.646    4452.988
-3    4811.825    2749.867    5099.692    2858.460    2755.528    4742.256
-  INCREPWGT58 INCREPWGT59 INCREPWGT60 INCREPWGT61 INCREPWGT62 INCREPWGT63
-1    2739.826    4601.045    853.1285    2676.052    771.9030    2766.618
-2    2739.826    4601.045    853.1285    2676.052    771.9030    2766.618
-3    2929.556    4911.805    907.1226    2861.007    826.5897    2951.757
-  INCREPWGT64 INCREPWGT65 INCREPWGT66 INCREPWGT67 INCREPWGT68 INCREPWGT69
-1    843.8673    2630.645    4420.300    2698.217    2667.369    2587.387
-2    843.8673    2630.645    4420.300    2698.217    2667.369    2587.387
-3    899.4323    2821.206    4694.727    2854.873    2840.892    2764.987
-  INCREPWGT70 INCREPWGT71 INCREPWGT72 INCREPWGT73 INCREPWGT74 INCREPWGT75
-1    2738.817    4403.224    2799.036    4716.885    4522.732    2885.962
-2    2738.817    4403.224    2799.036    4716.885    4522.732    2885.962
-3    2924.788    4690.472    2989.841    5045.169    4855.395    3101.192
-  INCREPWGT76 INCREPWGT77 INCREPWGT78 INCREPWGT79 INCREPWGT80 INCREPWGT81
-1    2643.600    4520.312    2662.401    2657.087    4601.828    2632.734
-2    2643.600    4520.312    2662.401    2657.087    4601.828    2632.734
-3    2824.322    4793.443    2844.394    2815.204    4935.069    2821.116
-  INCREPWGT82 INCREPWGT83 INCREPWGT84 INCREPWGT85 INCREPWGT86 INCREPWGT87
-1    2674.478    2768.336    760.2232    2772.984    4762.538    2697.597
-2    2674.478    2768.336    760.2232    2772.984    4762.538    2697.597
-3    2862.585    2951.975    816.1781    2963.548    5108.783    2897.584
-  INCREPWGT88 INCREPWGT89 INCREPWGT90 INCREPWGT91 INCREPWGT92 INCREPWGT93
-1    4224.996    2711.062    2739.897    4492.243    4492.621    2513.654
-2    4224.996    2711.062    2739.897    4492.243    4492.621    2513.654
-3    4497.205    2877.850    2920.133    4818.294    4822.948    2699.796
-  INCREPWGT94 INCREPWGT95 INCREPWGT96 INCREPWGT97 INCREPWGT98 INCREPWGT99
-1    4468.297    2702.455    4761.930    2585.247    740.6961    2743.844
-2    4468.297    2702.455    4761.930    2585.247    740.6961    2743.844
-3    4809.018    2887.719    5085.759    2757.671    796.0404    2931.592
-  INCREPWGT100 INCREPWGT101 INCREPWGT102 INCREPWGT103 INCREPWGT104
-1     4578.111     2639.847     764.6805     2666.085     799.4622
-2     4578.111     2639.847     764.6805     2666.085     799.4622
-3     4878.624     2811.714     820.3694     2845.398     854.0069
-  INCREPWGT105 INCREPWGT106 INCREPWGT107 INCREPWGT108 INCREPWGT109
-1     2679.092     4232.912     2729.637     2661.739     2696.593
-2     2679.092     4232.912     2729.637     2661.739     2696.593
-3     2878.425     4521.334     2926.901     2848.238     2871.022
-  INCREPWGT110 INCREPWGT111 INCREPWGT112 INCREPWGT113 INCREPWGT114
-1     796.4101     802.4453     4515.656     2882.070     4645.578
-2     796.4101     802.4453     4515.656     2882.070     4645.578
-3     845.1464     855.0249     4830.021     3064.791     4956.242
-  INCREPWGT115 INCREPWGT116 INCREPWGT117 INCREPWGT118 INCREPWGT119
-1     2749.690     2851.519     4602.992     2854.391     4423.033
-2     2749.690     2851.519     4602.992     2854.391     4423.033
-3     2943.073     3061.679     4878.607     3090.050     4706.873
-  INCREPWGT120 INCREPWGT121 INCREPWGT122 INCREPWGT123 INCREPWGT124
-1     834.8549     2653.037     747.8067     2795.483     818.1869
-2     834.8549     2653.037     747.8067     2795.483     818.1869
-3     889.8671     2848.492     807.5762     2994.211     871.4237
-  INCREPWGT125 INCREPWGT126 INCREPWGT127 INCREPWGT128 INCREPWGT129
-1     2729.061     4666.343     2673.572     2717.406     2625.743
-2     2729.061     4666.343     2673.572     2717.406     2625.743
-3     2907.944     4992.089     2860.172     2898.837     2788.548
-  INCREPWGT130 INCREPWGT131 INCREPWGT132 INCREPWGT133 INCREPWGT134
-1     767.1651     829.1126     4698.345     2655.455     4261.860
-2     767.1651     829.1126     4698.345     2655.455     4261.860
-3     816.8910     886.8299     4993.543     2829.424     4530.213
-  INCREPWGT135 INCREPWGT136 INCREPWGT137 INCREPWGT138 INCREPWGT139
-1     2786.696     2663.005     4732.439     2829.271     4607.850
-2     2786.696     2663.005     4732.439     2829.271     4607.850
-3     2959.636     2850.753     5042.738     3031.083     4911.174
-  INCREPWGT140 INCREPWGT141 INCREPWGT142 INCREPWGT143 INCREPWGT144
-1     742.0497     2688.858     801.9181     2718.958     780.4386
-2     742.0497     2688.858     801.9181     2718.958     780.4386
-3     794.3362     2891.061     852.9234     2916.203     837.6961
-  INCREPWGT145 INCREPWGT146 INCREPWGT147 INCREPWGT148 INCREPWGT149
-1     2716.865     4674.966     2677.111     2714.578     2854.181
-2     2716.865     4674.966     2677.111     2714.578     2854.181
-3     2911.395     5019.669     2857.087     2903.970     3059.215
-  INCREPWGT150 INCREPWGT151 INCREPWGT152 INCREPWGT153 INCREPWGT154
-1     781.6359     808.2460     4434.171     2713.832      4431.33
-2     781.6359     808.2460     4434.171     2713.832      4431.33
-3     843.0915     861.8441     4727.533     2908.610      4739.33
-  INCREPWGT155 INCREPWGT156 INCREPWGT157 INCREPWGT158 INCREPWGT159
-1     2659.149     2651.307     4738.554     2773.349     4323.181
-2     2659.149     2651.307     4738.554     2773.349     4323.181
-3     2836.046     2836.421     5073.342     2944.663     4647.547
-  INCREPWGT160 VICREPWGT1 VICREPWGT2 VICREPWGT3 VICREPWGT4 VICREPWGT5
-1     844.9347   2694.176   806.4258   2684.057   785.0183   2616.708
-2     844.9347   2694.176   806.4258   2684.057   785.0183   2616.708
-3     902.3878   2891.926   860.8661   2871.166   836.3160   2789.326
-  VICREPWGT6 VICREPWGT7 VICREPWGT8 VICREPWGT9 VICREPWGT10 VICREPWGT11
-1   4410.941   2630.871   2666.889   2580.973    808.6445    816.5943
-2   4410.941   2630.871   2666.889   2580.973    808.6445    816.5943
-3   4736.166   2796.390   2841.269   2752.314    862.8491    875.9226
-  VICREPWGT12 VICREPWGT13 VICREPWGT14 VICREPWGT15 VICREPWGT16 VICREPWGT17
-1    4636.736    2833.014    4593.556    2666.753    2738.817    4403.224
-2    4636.736    2833.014    4593.556    2666.753    2738.817    4403.224
-3    4920.429    3018.755    4870.042    2837.415    2924.788    4690.472
-  VICREPWGT18 VICREPWGT19 VICREPWGT20 VICREPWGT21 VICREPWGT22 VICREPWGT23
-1    2799.036    4716.885    820.5188    2689.362    818.6729    2735.268
-2    2799.036    4716.885    820.5188    2689.362    818.6729    2735.268
-3    2989.841    5045.169    882.6529    2880.841    878.8886    2909.236
-  VICREPWGT24 VICREPWGT25 VICREPWGT26 VICREPWGT27 VICREPWGT28 VICREPWGT29
-1    830.8158    2657.087    4601.828    2632.734    2674.478    2639.705
-2    830.8158    2657.087    4601.828    2632.734    2674.478    2639.705
-3    887.6555    2815.204    4935.069    2821.116    2862.585    2828.943
-  VICREPWGT30 VICREPWGT31 VICREPWGT32 VICREPWGT33 VICREPWGT34 VICREPWGT35
-1    801.7568    797.0990    4460.541     2487.52    4224.996    2711.062
-2    801.7568    797.0990    4460.541     2487.52    4224.996    2711.062
-3    863.9900    851.9558    4750.904     2650.51    4497.205    2877.850
-  VICREPWGT36 VICREPWGT37 VICREPWGT38 VICREPWGT39 VICREPWGT40 VICREPWGT41
-1    2739.897    4492.243    2594.534    4592.816    773.4456    2736.664
-2    2739.897    4492.243    2594.534    4592.816    773.4456    2736.664
-3    2920.133    4818.294    2769.833    4900.177    833.8484    2901.263
-  VICREPWGT42 VICREPWGT43 VICREPWGT44 VICREPWGT45 VICREPWGT46 VICREPWGT47
-1    798.2596    2585.247    740.6961    2743.844    4578.111    2730.000
-2    798.2596    2585.247    740.6961    2743.844    4578.111    2730.000
-3    856.0509    2757.671    796.0404    2931.592    4878.624    2920.669
-  VICREPWGT48 VICREPWGT49 VICREPWGT50 VICREPWGT51 VICREPWGT52 VICREPWGT53
-1    2626.195    2644.352    805.3297    809.2328    4476.196    2563.365
-2    2626.195    2644.352    805.3297    809.2328    4476.196    2563.365
-3    2822.820    2840.018    863.2011    865.8998    4811.825    2749.867
-  VICREPWGT54 VICREPWGT55 VICREPWGT56 VICREPWGT57 VICREPWGT58 VICREPWGT59
-1    4785.953    2651.354    2596.646    4452.988    2739.826    4601.045
-2    4785.953    2651.354    2596.646    4452.988    2739.826    4601.045
-3    5099.692    2858.460    2755.528    4742.256    2929.556    4911.805
-  VICREPWGT60 VICREPWGT61 VICREPWGT62 VICREPWGT63 VICREPWGT64 VICREPWGT65
-1    853.1285    2676.052    771.9030    2766.618    843.8673    2630.645
-2    853.1285    2676.052    771.9030    2766.618    843.8673    2630.645
-3    907.1226    2861.007    826.5897    2951.757    899.4323    2821.206
-  VICREPWGT66 VICREPWGT67 VICREPWGT68 VICREPWGT69 VICREPWGT70 VICREPWGT71
-1    4420.300    2698.217    2667.369    2587.387    2738.817    4403.224
-2    4420.300    2698.217    2667.369    2587.387    2738.817    4403.224
-3    4694.727    2854.873    2840.892    2764.987    2924.788    4690.472
-  VICREPWGT72 VICREPWGT73 VICREPWGT74 VICREPWGT75 VICREPWGT76 VICREPWGT77
-1    2799.036    4716.885    4522.732    2885.962    2643.600    4520.312
-2    2799.036    4716.885    4522.732    2885.962    2643.600    4520.312
-3    2989.841    5045.169    4855.395    3101.192    2824.322    4793.443
-  VICREPWGT78 VICREPWGT79 VICREPWGT80 VICREPWGT81 VICREPWGT82 VICREPWGT83
-1    2662.401    2657.087    4601.828    2632.734    2674.478    2768.336
-2    2662.401    2657.087    4601.828    2632.734    2674.478    2768.336
-3    2844.394    2815.204    4935.069    2821.116    2862.585    2951.975
-  VICREPWGT84 VICREPWGT85 VICREPWGT86 VICREPWGT87 VICREPWGT88 VICREPWGT89
-1    760.2232    2772.984    4762.538    2697.597    4224.996    2711.062
-2    760.2232    2772.984    4762.538    2697.597    4224.996    2711.062
-3    816.1781    2963.548    5108.783    2897.584    4497.205    2877.850
-  VICREPWGT90 VICREPWGT91 VICREPWGT92 VICREPWGT93 VICREPWGT94 VICREPWGT95
-1    2739.897    4492.243    4492.621    2513.654    4468.297    2702.455
-2    2739.897    4492.243    4492.621    2513.654    4468.297    2702.455
-3    2920.133    4818.294    4822.948    2699.796    4809.018    2887.719
-  VICREPWGT96 VICREPWGT97 VICREPWGT98 VICREPWGT99 VICREPWGT100
-1    4761.930    2585.247    740.6961    2743.844     4578.111
-2    4761.930    2585.247    740.6961    2743.844     4578.111
-3    5085.759    2757.671    796.0404    2931.592     4878.624
-  VICREPWGT101 VICREPWGT102 VICREPWGT103 VICREPWGT104 VICREPWGT105
-1     2639.847     764.6805     2666.085     799.4622     2679.092
-2     2639.847     764.6805     2666.085     799.4622     2679.092
-3     2811.714     820.3694     2845.398     854.0069     2878.425
-  VICREPWGT106 VICREPWGT107 VICREPWGT108 VICREPWGT109 VICREPWGT110
-1     4232.912     2729.637     2661.739     2696.593     796.4101
-2     4232.912     2729.637     2661.739     2696.593     796.4101
-3     4521.334     2926.901     2848.238     2871.022     845.1464
-  VICREPWGT111 VICREPWGT112 VICREPWGT113 VICREPWGT114 VICREPWGT115
-1     802.4453     4515.656     2882.070     4645.578     2749.690
-2     802.4453     4515.656     2882.070     4645.578     2749.690
-3     855.0249     4830.021     3064.791     4956.242     2943.073
-  VICREPWGT116 VICREPWGT117 VICREPWGT118 VICREPWGT119 VICREPWGT120
-1     2851.519     4602.992     2854.391     4423.033     834.8549
-2     2851.519     4602.992     2854.391     4423.033     834.8549
-3     3061.679     4878.607     3090.050     4706.873     889.8671
-  VICREPWGT121 VICREPWGT122 VICREPWGT123 VICREPWGT124 VICREPWGT125
-1     2653.037     747.8067     2795.483     818.1869     2729.061
-2     2653.037     747.8067     2795.483     818.1869     2729.061
-3     2848.492     807.5762     2994.211     871.4237     2907.944
-  VICREPWGT126 VICREPWGT127 VICREPWGT128 VICREPWGT129 VICREPWGT130
-1     4666.343     2673.572     2717.406     2625.743     767.1651
-2     4666.343     2673.572     2717.406     2625.743     767.1651
-3     4992.089     2860.172     2898.837     2788.548     816.8910
-  VICREPWGT131 VICREPWGT132 VICREPWGT133 VICREPWGT134 VICREPWGT135
-1     829.1126     4698.345     2655.455     4261.860     2786.696
-2     829.1126     4698.345     2655.455     4261.860     2786.696
-3     886.8299     4993.543     2829.424     4530.213     2959.636
-  VICREPWGT136 VICREPWGT137 VICREPWGT138 VICREPWGT139 VICREPWGT140
-1     2663.005     4732.439     2829.271     4607.850     742.0497
-2     2663.005     4732.439     2829.271     4607.850     742.0497
-3     2850.753     5042.738     3031.083     4911.174     794.3362
-  VICREPWGT141 VICREPWGT142 VICREPWGT143 VICREPWGT144 VICREPWGT145
-1     2688.858     801.9181     2718.958     780.4386     2716.865
-2     2688.858     801.9181     2718.958     780.4386     2716.865
-3     2891.061     852.9234     2916.203     837.6961     2911.395
-  VICREPWGT146 VICREPWGT147 VICREPWGT148 VICREPWGT149 VICREPWGT150
-1     4674.966     2677.111     2714.578     2854.181     781.6359
-2     4674.966     2677.111     2714.578     2854.181     781.6359
-3     5019.669     2857.087     2903.970     3059.215     843.0915
-  VICREPWGT151 VICREPWGT152 VICREPWGT153 VICREPWGT154 VICREPWGT155
-1     808.2460     4434.171     2713.832      4431.33     2659.149
-2     808.2460     4434.171     2713.832      4431.33     2659.149
-3     861.8441     4727.533     2908.610      4739.33     2836.046
-  VICREPWGT156 VICREPWGT157 VICREPWGT158 VICREPWGT159 VICREPWGT160
-1     2651.307     4738.554     2773.349     4323.181     844.9347
-2     2651.307     4738.554     2773.349     4323.181     844.9347
-3     2836.421     5073.342     2944.663     4647.547     902.3878</code></pre>
+                V4039              V4040 V4041A
+1 (0) No out of range               &lt;NA&gt;   &lt;NA&gt;
+2                &lt;NA&gt; (04) Unlk door/win   &lt;NA&gt;
+3                &lt;NA&gt;               &lt;NA&gt;   &lt;NA&gt;</code></pre>
 <p>Let’s look at the month and year of crime incident variables</p>
 <pre class="r"><code>with(dataInc12, table(V4014,V4015)) 
 with(dataInc13, table(V4014,V4015))</code></pre>
@@ -1348,42 +644,47 @@ dataPers &lt;- subset(dataPers, YEARQ&gt;=2012.1 &amp; YEARQ&lt;=2013.2)</code><
 </div>
 <div id="creating-dataframe-and-weights-with-household-and-person-data-1" class="section level1">
 <h1>Creating Dataframe and Weights with Household and Person Data</h1>
-<p>Now that we’ve created a person dataframe and an incident dataframe, we can merge them together. As with any merge, it’s important to make a “key” upon which to sew the frames together.</p>
-<pre class="r"><code>dataInc$IDPER.YEARQ  &lt;- with(dataInc,  paste(IDPER,YEARQ,sep=&quot;|&quot;))
-dataPers$IDPER.YEARQ &lt;- with(dataPers, paste(IDPER,YEARQ,sep=&quot;|&quot;))
+<p>Now that we’ve created a person dataframe and an incident dataframe, we can merge them together. We will use <code>merge()</code> to pull age, marital status, and sex into the incident data. The <code>merge()</code> function has several parameters that communicate to R which features should be used to match and which ones should be merged. Here we tell <code>merge()</code> to use use a pair of features from the incident data (<code>IDPER</code> and <code>YEARQ</code>) and look up a row in <code>dataPers</code> with the same values of <code>IDPER</code> and <code>YEARQ</code>. We’ve selected only the five columns <code>IDPER</code>, <code>YEARQ</code>, <code>V3014</code>, <code>V3015</code>, and <code>V3018</code> from <code>dataPers</code>. The first two <code>merge()</code> uses to identify matching rows and the last three will be attached as new columns to <code>dataInc</code>.</p>
+<pre class="r"><code>a &lt;- merge(dataInc,                     # incident data
+           dataPers[,c(&quot;IDPER&quot;,&quot;YEARQ&quot;, # IDPER &amp; YEARQ unique IDs of person
+                       &quot;V3014&quot;,         # age
+                       &quot;V3015&quot;,         # marital status
+                       &quot;V3018&quot;)],       # sex
+           by=c(&quot;IDPER&quot;,&quot;YEARQ&quot;),       # variables used to merge
+           all.x=TRUE)                  # keep all incidents, even if not matched
 
-i &lt;- match(dataInc$IDPER.YEARQ, dataPers$IDPER.YEARQ)
-dataInc[1:3,1:5]
-dataPers[i[1:3],1:5]</code></pre>
-<pre><code>                 V4001  YEARQ                      IDHH
-8  (4) Incident record 2012.1 2501722756503088292804224
-16 (4) Incident record 2012.1 2520082700194588295304126
-41 (4) Incident record 2012.1 2520234866639637290437125
-                         IDPER V4002
-8  250172275650308829280422401 27297
-16 252008270019458829530412602  9999
-41 252023486663963729043712502  9733
-    V3001  YEARQ                      IDHH                       IDPER
-11      3 2012.1 2501722756503088292804224 250172275650308829280422401
-413     3 2012.1 2520082700194588295304126 252008270019458829530412602
-941     3 2012.1 2520234866639637290437125 252023486663963729043712502
-    V3002
-11  27297
-413  9999
-941  9733</code></pre>
-<p>Let’s also merge in some demographic data, such as age categories.</p>
-<pre class="r"><code>dataInc$age      &lt;- dataPers$V3014[i]
-dataInc$ageGroup &lt;- cut(dataInc$age, breaks=c(0,16,21,35,45,60,110))</code></pre>
-<p>Marital status is another useful category; note that “8” is a missing value indicator. Always refer to the Codebook if you are not sure what a variable or a categorical variable value means.</p>
-<pre class="r"><code>dataInc$marital &lt;- dataPers$V3015[i]
-dataInc$marital[dataInc$marital==8] &lt;- NA</code></pre>
-<p>Note that factor variables in R put meaningful labels on categorical variables. Instead of working with the numbers 1-5 for marital status, let’s assign the number values their actual corresponding names.</p>
+# a should have the same number of rows as dataInc, but 3 additional new columns
+dim(dataInc)</code></pre>
+<pre><code>[1] 8852  951</code></pre>
+<pre class="r"><code>dim(a)</code></pre>
+<pre><code>[1] 8852  954</code></pre>
+<pre class="r"><code># replace dataInc with a, now containing age, marital, and sex
+dataInc &lt;- a
+
+# check merge for first incident
+dataInc[1,c(&quot;IDPER&quot;,&quot;YEARQ&quot;,&quot;V3014&quot;,&quot;V3015&quot;,&quot;V3018&quot;)]</code></pre>
+<pre><code>                        IDPER  YEARQ V3014 V3015 V3018
+1 250105121075958229372843501 2012.3    28     3     1</code></pre>
+<pre class="r"><code># check dataPers for this person's age, marital, and sex
+subset(dataPers, IDPER==&quot;250105121075958229372843501&quot; &amp; YEARQ==2012.3,
+       select = c(&quot;IDPER&quot;,&quot;YEARQ&quot;,&quot;V3014&quot;,&quot;V3015&quot;,&quot;V3018&quot;))</code></pre>
+<pre><code>                            IDPER  YEARQ V3014 V3015 V3018
+95199 250105121075958229372843501 2012.3    28     3     1</code></pre>
+<p>We can see that the first row of <code>dataInc</code> now has three additional columns, and that they have the correct values merged from the <code>dataPers</code> data.</p>
+<p>Let’s give these new columns better names.</p>
+<pre class="r"><code>names(dataInc)[names(dataInc)==&quot;V3014&quot;] &lt;- &quot;age&quot;
+names(dataInc)[names(dataInc)==&quot;V3015&quot;] &lt;- &quot;marital&quot;
+names(dataInc)[names(dataInc)==&quot;V3018&quot;] &lt;- &quot;sex&quot;</code></pre>
+<p>Let’s also create a new variable that breaks age into age categories.</p>
+<pre class="r"><code>dataInc$ageGroup &lt;- cut(dataInc$age, breaks=c(0,16,21,35,45,60,110))</code></pre>
+<p>Note that “8” is a missing value indicator for marital status. Always refer to the Codebook if you are not sure what a variable or a categorical variable value means.</p>
+<pre class="r"><code>dataInc$marital[dataInc$marital==8] &lt;- NA</code></pre>
+<p>Factor variables in R put meaningful labels on categorical variables. Instead of working with the numbers 1-5 for marital status, let’s assign the number values their actual corresponding names.</p>
 <pre class="r"><code>dataInc$marital &lt;- factor(dataInc$marital, levels=1:5,
-                           labels=c(&quot;married&quot;,&quot;widowed&quot;,&quot;divorced&quot;,
-                                    &quot;separated&quot;,&quot;never married&quot;))
-dataInc$sex     &lt;- dataPers$V3018[i]
+                        labels=c(&quot;married&quot;,&quot;widowed&quot;,&quot;divorced&quot;,
+                                 &quot;separated&quot;,&quot;never married&quot;))
 dataInc$sex &lt;- factor(dataInc$sex, levels=1:2, 
-                       labels=c(&quot;male&quot;,&quot;female&quot;))</code></pre>
+                      labels=c(&quot;male&quot;,&quot;female&quot;))</code></pre>
 <p>Let’s get estimated counts by age group and sex</p>
 <pre class="r"><code>aggregate(WGTVICDY~ageGroup+sex, data=dataInc, FUN=sum)</code></pre>
 <pre><code>   ageGroup    sex  WGTVICDY
@@ -1399,96 +700,137 @@ dataInc$sex &lt;- factor(dataInc$sex, levels=1:2,
 10  (35,45] female 2307591.3
 11  (45,60] female 3240564.4
 12 (60,110] female 1921647.3</code></pre>
-<p>We can also find out common crime type by sex</p>
+<p>We can also find out common crime type by sex. As before, <code>aggregate()</code> will total up the weights, but as you see in the ageGroup/sex example above, <code>aggregate()</code> produces the results in a long form. Sometimes this is useful, but sometimes we want to have our results side-by-side. We will use <code>reshape()</code> to convert the “long format” results from <code>aggregate()</code> to a “wide format”.</p>
 <pre class="r"><code>a &lt;- aggregate(WGTVICDY~V4529+sex, data=dataInc, FUN=sum)
-b &lt;- data.frame(crime=sort(unique(a$V4529)),
-                male=0,female=0)
-i &lt;- match(a$V4529[a$sex==&quot;male&quot;], b$crime)
-b$male[i] &lt;- a$WGTVICDY[a$sex==&quot;male&quot;]
-i &lt;- match(a$V4529[a$sex==&quot;female&quot;], b$crime)
-b$female[i] &lt;- a$WGTVICDY[a$sex==&quot;female&quot;]</code></pre>
+a &lt;- reshape(a, timevar=&quot;sex&quot;, idvar=&quot;V4529&quot;, direction=&quot;wide&quot;)
+a[is.na(a)] &lt;- 0
+names(a) &lt;- c(&quot;crimeType&quot;,&quot;male&quot;,&quot;female&quot;)
+a</code></pre>
+<pre><code>                  crimeType        male      female
+1       (01) Completed rape    6318.130  122814.480
+2       (02) Attempted rape   42077.861   19064.366
+3    (03) Sex aslt w s aslt   38218.021    8769.029
+4     (05) Rob w inj s aslt   80534.437   52276.793
+5     (06) Rob w inj m aslt   35610.607  106142.282
+6        (07) Rob wo injury  150662.017   84724.733
+7     (08) At rob inj s asl   22330.349    6638.802
+8     (09) At rob inj m asl   12200.917   25295.171
+9        (10) At rob w aslt  104657.340   44199.671
+10    (11) Ag aslt w injury  188925.090  196423.404
+11    (12) At ag aslt w wea  185157.394   85898.556
+12     (13) Thr aslt w weap  237527.692  183883.312
+13     (14) Simp aslt w inj  448773.257  506208.479
+14     (15) Sex aslt wo inj    3119.587   29460.740
+15    (16) Unw sex wo force    2957.926   13034.133
+16 (17) Asl wo weap, wo inj 1042741.375  962894.567
+17     (18) Verbal thr rape   26408.008   13337.490
+18    (19) Ver thr sex aslt    9298.262    6071.520
+19     (20) Verbal thr aslt 1099721.249  919823.826
+20      (23) Pocket picking   81230.111   45187.984
+21     (31) Burg, force ent  609106.185  606180.810
+22    (32) Burg, ent wo for  741492.194 1016552.357
+23     (33) Att force entry  269383.309  441969.018
+24     (40) Motor veh theft  256959.885  223318.276
+25    (41) At mtr veh theft   87364.540   78632.297
+26         (54) Theft &lt; $10  444360.185  670778.978
+27       (55) Theft $10-$49 1217450.179 1682478.881
+28      (56) Theft $50-$249 2261589.762 2657037.634
+29         (57) Theft $250+ 1825854.971 1964564.610
+30      (58) Theft value NA  588405.556  781094.421
+31     (59) Attempted theft  349959.481  336192.254
+35   (04) Sex aslt w m aslt       0.000    6515.781
+52     (21) Purse snatching       0.000   15990.538
+53     (22) At purse snatch       0.000    7272.660</code></pre>
 <p>We can then convert this result to column percentages. To obtain a column percentage, we divide counts for an individual cell by the total number of counts for the column. So, the sum of all the values in the male column should equal 100:</p>
-<pre class="r"><code>temp &lt;- b
+<pre class="r"><code>temp &lt;- a
 temp$male   &lt;- with(temp, 100*male/  sum(male))
 temp$female &lt;- with(temp, 100*female/sum(female))
-temp$ratio &lt;- temp$female/temp$male
+colSums(temp[,-1]) # check that the columns sum to 100</code></pre>
+<pre><code>  male female 
+   100    100 </code></pre>
+<pre class="r"><code>temp$ratio &lt;- temp$female/temp$male
 temp[order(-temp$ratio),]</code></pre>
-<pre><code>                      crime        male      female      ratio
-4    (04) Sex aslt w m aslt  0.00000000  0.04680632        Inf
-21     (21) Purse snatching  0.00000000  0.11486855        Inf
-22     (22) At purse snatch  0.00000000  0.05224339        Inf
+<pre><code>                  crimeType        male      female      ratio
+35   (04) Sex aslt w m aslt  0.00000000  0.04680632        Inf
+52     (21) Purse snatching  0.00000000  0.11486855        Inf
+53     (22) At purse snatch  0.00000000  0.05224339        Inf
 1       (01) Completed rape  0.05066503  0.88224180 17.4132299
-15     (15) Sex aslt wo inj  0.02501594  0.21163218  8.4598928
-16    (16) Unw sex wo force  0.02371958  0.09363112  3.9474183
-6     (06) Rob w inj m aslt  0.28556116  0.76247652  2.6700989
-9     (09) At rob inj m asl  0.09783905  0.18170868  1.8572204
-26     (33) Att force entry  2.16018250  3.17489877  1.4697364
-29         (54) Theft &lt; $10  3.56332060  4.81856254  1.3522675
-30       (55) Theft $10-$49  9.76272278 12.08614160  1.2379888
-25    (32) Burg, ent wo for  5.94601969  7.30243682  1.2281219
-33      (58) Theft value NA  4.71841922  5.61101711  1.1891731
-31      (56) Theft $50-$249 18.13566934 19.08691602  1.0524517
-14     (14) Simp aslt w inj  3.59870899  3.63636503  1.0104638
-32         (57) Theft $250+ 14.64151570 14.11251359  0.9638697
-11    (11) Ag aslt w injury  1.51498871  1.41101390  0.9313692
-24     (31) Burg, force ent  4.88441739  4.35451951  0.8915126
-34     (59) Attempted theft  2.80632214  2.41504796  0.8605740
-17 (17) Asl wo weap, wo inj  8.36173435  6.91698435  0.8272189
-28    (41) At mtr veh theft  0.70057552  0.56485766  0.8062766
-27     (40) Motor veh theft  2.06055917  1.60421408  0.7785334
-20     (20) Verbal thr aslt  8.81865547  6.60758428  0.7492734
-13     (13) Thr aslt w weap  1.90473257  1.32093174  0.6934998
-19    (19) Ver thr sex aslt  0.07456269  0.04361496  0.5849435
-5     (05) Rob w inj s aslt  0.64580498  0.37553204  0.5814945
-7        (07) Rob wo injury  1.20815745  0.60862286  0.5037612
-23      (23) Pocket picking  0.65138358  0.32460935  0.4983382
-18     (18) Verbal thr rape  0.21176560  0.09581030  0.4524356
-12    (12) At ag aslt w wea  1.48477559  0.61705507  0.4155881
+14     (15) Sex aslt wo inj  0.02501594  0.21163218  8.4598928
+15    (16) Unw sex wo force  0.02371958  0.09363112  3.9474183
+5     (06) Rob w inj m aslt  0.28556116  0.76247652  2.6700989
+8     (09) At rob inj m asl  0.09783905  0.18170868  1.8572204
+23     (33) Att force entry  2.16018250  3.17489877  1.4697364
+26         (54) Theft &lt; $10  3.56332060  4.81856254  1.3522675
+27       (55) Theft $10-$49  9.76272278 12.08614160  1.2379888
+22    (32) Burg, ent wo for  5.94601969  7.30243682  1.2281219
+30      (58) Theft value NA  4.71841922  5.61101711  1.1891731
+28      (56) Theft $50-$249 18.13566934 19.08691602  1.0524517
+13     (14) Simp aslt w inj  3.59870899  3.63636503  1.0104638
+29         (57) Theft $250+ 14.64151570 14.11251359  0.9638697
+10    (11) Ag aslt w injury  1.51498871  1.41101390  0.9313692
+21     (31) Burg, force ent  4.88441739  4.35451951  0.8915126
+31     (59) Attempted theft  2.80632214  2.41504796  0.8605740
+16 (17) Asl wo weap, wo inj  8.36173435  6.91698435  0.8272189
+25    (41) At mtr veh theft  0.70057552  0.56485766  0.8062766
+24     (40) Motor veh theft  2.06055917  1.60421408  0.7785334
+19     (20) Verbal thr aslt  8.81865547  6.60758428  0.7492734
+12     (13) Thr aslt w weap  1.90473257  1.32093174  0.6934998
+18    (19) Ver thr sex aslt  0.07456269  0.04361496  0.5849435
+4     (05) Rob w inj s aslt  0.64580498  0.37553204  0.5814945
+6        (07) Rob wo injury  1.20815745  0.60862286  0.5037612
+20      (23) Pocket picking  0.65138358  0.32460935  0.4983382
+17     (18) Verbal thr rape  0.21176560  0.09581030  0.4524356
+11    (12) At ag aslt w wea  1.48477559  0.61705507  0.4155881
 2       (02) Attempted rape  0.33742202  0.13694949  0.4058700
-10       (10) At rob w aslt  0.83924634  0.31750977  0.3783273
-8     (08) At rob inj s asl  0.17906688  0.04769005  0.2663253
+9        (10) At rob w aslt  0.83924634  0.31750977  0.3783273
+7     (08) At rob inj s asl  0.17906688  0.04769005  0.2663253
 3    (03) Sex aslt w s aslt  0.30646999  0.06299260  0.2055425</code></pre>
-<p>And convert to row percentages. Note that if we sum the value in the male column and the value in the female column, we get 100.</p>
-<pre class="r"><code>temp &lt;- b
+<p>Or we can compute row percentages to determine what percentage of each crime is male and female.</p>
+<pre class="r"><code>temp &lt;- a
 row.total &lt;- with(temp, male+female)
 temp$male   &lt;- with(temp, 100*male/  row.total)
 temp$female &lt;- with(temp, 100*female/row.total)
+rowSums(temp[,-1]) # check that the rows sum to 100
 temp$ratio &lt;- temp$female/temp$male
 temp[order(-temp$ratio),]</code></pre>
-<pre><code>                      crime      male    female      ratio
-4    (04) Sex aslt w m aslt  0.000000 100.00000        Inf
-21     (21) Purse snatching  0.000000 100.00000        Inf
-22     (22) At purse snatch  0.000000 100.00000        Inf
+<pre><code>  1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18 
+100 100 100 100 100 100 100 100 100 100 100 100 100 100 100 100 100 100 
+ 19  20  21  22  23  24  25  26  27  28  29  30  31  35  52  53 
+100 100 100 100 100 100 100 100 100 100 100 100 100 100 100 100 
+                  crimeType      male    female      ratio
+35   (04) Sex aslt w m aslt  0.000000 100.00000        Inf
+52     (21) Purse snatching  0.000000 100.00000        Inf
+53     (22) At purse snatch  0.000000 100.00000        Inf
 1       (01) Completed rape  4.892745  95.10725 19.4384234
-15     (15) Sex aslt wo inj  9.575063  90.42494  9.4437952
-16    (16) Unw sex wo force 18.496217  81.50378  4.4065110
-6     (06) Rob w inj m aslt 25.121609  74.87839  2.9806367
-9     (09) At rob inj m asl 32.539173  67.46083  2.0732188
-26     (33) Att force entry 37.869182  62.13082  1.6406696
-29         (54) Theft &lt; $10 39.847958  60.15204  1.5095389
-30       (55) Theft $10-$49 41.982068  58.01793  1.3819694
-25    (32) Burg, ent wo for 42.177099  57.82290  1.3709549
-33      (58) Theft value NA 42.964992  57.03501  1.3274763
-31      (56) Theft $50-$249 45.980099  54.01990  1.1748539
-14     (14) Simp aslt w inj 46.992863  53.00714  1.1279827
-32         (57) Theft $250+ 48.170260  51.82974  1.0759697
-11    (11) Ag aslt w injury 49.027074  50.97293  1.0396894
-24     (31) Burg, force ent 50.120357  49.87964  0.9951973
-34     (59) Attempted theft 51.003220  48.99678  0.9606605
-17 (17) Asl wo weap, wo inj 51.990561  48.00944  0.9234261
-28    (41) At mtr veh theft 52.630244  47.36976  0.9000482
-27     (40) Motor veh theft 53.502305  46.49770  0.8690784
-20     (20) Verbal thr aslt 54.453910  45.54609  0.8364154
-13     (13) Thr aslt w weap 56.364853  43.63515  0.7741553
-19    (19) Ver thr sex aslt 60.497034  39.50297  0.6529736
-5     (05) Rob w inj s aslt 60.638274  39.36173  0.6491235
-7        (07) Rob wo injury 64.006159  35.99384  0.5623496
-23      (23) Pocket picking 64.255130  35.74487  0.5562960
-18     (18) Verbal thr rape 66.442765  33.55724  0.5050548
-12    (12) At ag aslt w wea 68.309658  31.69034  0.4639218
+14     (15) Sex aslt wo inj  9.575063  90.42494  9.4437952
+15    (16) Unw sex wo force 18.496217  81.50378  4.4065110
+5     (06) Rob w inj m aslt 25.121609  74.87839  2.9806367
+8     (09) At rob inj m asl 32.539173  67.46083  2.0732188
+23     (33) Att force entry 37.869182  62.13082  1.6406696
+26         (54) Theft &lt; $10 39.847958  60.15204  1.5095389
+27       (55) Theft $10-$49 41.982068  58.01793  1.3819694
+22    (32) Burg, ent wo for 42.177099  57.82290  1.3709549
+30      (58) Theft value NA 42.964992  57.03501  1.3274763
+28      (56) Theft $50-$249 45.980099  54.01990  1.1748539
+13     (14) Simp aslt w inj 46.992863  53.00714  1.1279827
+29         (57) Theft $250+ 48.170260  51.82974  1.0759697
+10    (11) Ag aslt w injury 49.027074  50.97293  1.0396894
+21     (31) Burg, force ent 50.120357  49.87964  0.9951973
+31     (59) Attempted theft 51.003220  48.99678  0.9606605
+16 (17) Asl wo weap, wo inj 51.990561  48.00944  0.9234261
+25    (41) At mtr veh theft 52.630244  47.36976  0.9000482
+24     (40) Motor veh theft 53.502305  46.49770  0.8690784
+19     (20) Verbal thr aslt 54.453910  45.54609  0.8364154
+12     (13) Thr aslt w weap 56.364853  43.63515  0.7741553
+18    (19) Ver thr sex aslt 60.497034  39.50297  0.6529736
+4     (05) Rob w inj s aslt 60.638274  39.36173  0.6491235
+6        (07) Rob wo injury 64.006159  35.99384  0.5623496
+20      (23) Pocket picking 64.255130  35.74487  0.5562960
+17     (18) Verbal thr rape 66.442765  33.55724  0.5050548
+11    (12) At ag aslt w wea 68.309658  31.69034  0.4639218
 2       (02) Attempted rape 68.819641  31.18036  0.4530735
-10       (10) At rob w aslt 70.307297  29.69270  0.4223275
-8     (08) At rob inj s asl 77.083202  22.91680  0.2972995
+9        (10) At rob w aslt 70.307297  29.69270  0.4223275
+7     (08) At rob inj s asl 77.083202  22.91680  0.2972995
 3    (03) Sex aslt w s aslt 81.337349  18.66265  0.2294475</code></pre>
 </div>
 <div id="using-the-ncvs" class="section level1">
@@ -1766,11 +1108,11 @@ V4014: (9) September
      by(WGTVICDY, V4241, sum))
 
 with(subset(dataInc,V4529 %in% c(&quot;(11) Ag aslt w injury&quot;, 
-                                  &quot;(14) Simp aslt w inj&quot;,
-                                  &quot;(12) At ag aslt w wea&quot;, 
-                                  &quot;(17) Asl wo weap, wo inj&quot;, 
-                                  &quot;(20) Verbal thr aslt&quot;, 
-                                  &quot;(13) Thr aslt w weap&quot;)),
+                                 &quot;(14) Simp aslt w inj&quot;,
+                                 &quot;(12) At ag aslt w wea&quot;, 
+                                 &quot;(17) Asl wo weap, wo inj&quot;, 
+                                 &quot;(20) Verbal thr aslt&quot;, 
+                                 &quot;(13) Thr aslt w weap&quot;)),
      by(WGTVICDY, V4245, sum))</code></pre>
 <pre><code>V4241: (1) Knew/had seen
 [1] 3459932
@@ -1869,8 +1211,8 @@ V4245: (8) Friend or ex
 -------------------------------------------------------- 
 V4245: (9) Roommate, board
 [1] 10046.88</code></pre>
-<p>Note that with the multi-offender variable, we need to exclude values greater than 96.</p>
-<pre class="r"><code>dataInc$V4248[dataInc$V4248&gt;=96] &lt;- NA
+<p>The codebook tells us that with the multi-offender variable <code>V4248</code>, “97” does not mean 97 offenders. It means “don’t know.” 98 actually means “missing”. 99 means “out of universe”, which really means that the response was out of range. We mark as missing any values greater than or equal to 97.</p>
+<pre class="r"><code>dataInc$V4248[dataInc$V4248&gt;=97] &lt;- NA
 dataInc$multOffender &lt;- dataInc$V4248
 
 with(subset(dataInc,V4529 %in% c(&quot;(11) Ag aslt w injury&quot;, 
@@ -1914,7 +1256,10 @@ multOffender: 20
 [1] 53590.19
 -------------------------------------------------------- 
 multOffender: 30
-[1] 2726.227</code></pre>
+[1] 2726.227
+-------------------------------------------------------- 
+multOffender: 96
+[1] 18440.35</code></pre>
 </div>
 <div id="what-sort-of-weapons-were-used" class="section level2">
 <h2>What sort of weapons were used?</h2>
@@ -2014,6 +1359,9 @@ hit: (2) No
 -------------------------------------------------------- 
 hit: (8) Residue
 [1] NA</code></pre>
+<p>Or use <code>sapply()</code> to avoid repetitive lines of code.</p>
+<pre class="r"><code>sapply(c(&quot;handgun&quot;,&quot;knife&quot;,&quot;otherGun&quot;,&quot;sharpObject&quot;,&quot;bluntObject&quot;,&quot;other&quot;,&quot;unknownGun&quot;,&quot;missing&quot;,&quot;hit&quot;),
+       function(x) by(assault$WGTVICDY, assault[,x], sum))</code></pre>
 </div>
 <div id="were-the-police-called" class="section level2">
 <h2>Were the police called?</h2>
@@ -2063,15 +1411,20 @@ selfDefenseGun: (8) Residue
 <div id="how-many-victims-by-race-and-crime-type" class="section level2">
 <h2>How many victims by race and crime type</h2>
 <p>First, let’s use all the racial groups in the dataset.</p>
-<pre class="r"><code>dataInc$IDPER.YEARQ  &lt;- with(dataInc,  paste(IDPER,YEARQ,sep=&quot;|&quot;))
-dataPers$IDPER.YEARQ &lt;- with(dataPers, paste(IDPER,YEARQ,sep=&quot;|&quot;))
-i &lt;- match(dataInc$IDPER.YEARQ, dataPers$IDPER.YEARQ)
-dataInc[1:3,1:5]
-dataPers[i[1:3],1:5]
-dataInc$race &lt;- dataPers$V3023A[i]
+<pre class="r"><code># merge in race
+a &lt;- merge(dataInc,
+           dataPers[,c(&quot;IDPER&quot;,&quot;YEARQ&quot;,
+                       &quot;V3023A&quot;,        # race
+                       &quot;V3024&quot;)],       # and get hispanic, while we're at it
+           by=c(&quot;IDPER&quot;,&quot;YEARQ&quot;),
+           all.x=TRUE)
+names(a)[names(a)==&quot;V3023A&quot;] &lt;- &quot;race&quot;
+dataInc &lt;- a
 
+# 98s are missing values
 dataInc$race[dataInc$race==98] &lt;- NA
 
+# recode race as a factor variable
 dataInc$race &lt;- factor(dataInc$race, levels=1:20,
                        labels=c(&quot;White&quot;, &quot;Black&quot;, &quot;AmerInd&quot;, &quot;Asian&quot;,
                                 &quot;HawaiianPacificIslander&quot;, &quot;WhiteBlack&quot;,
@@ -2082,31 +1435,8 @@ dataInc$race &lt;- factor(dataInc$race, levels=1:20,
                                 &quot;AsianHawaiianPacificIslander&quot;, &quot;WBAmerInd&quot;, 
                                 &quot;WBAsian&quot;, &quot;WAmerIndAsian&quot;, &quot;WAsianHawaiian&quot;, 
                                 &quot;2or3races&quot;, &quot;4or5 races&quot;))
-
-aggregate(WGTVICDY~race, data=dataInc, FUN=sum)
-
-a &lt;- aggregate(WGTVICDY~V4529+race, data=dataInc, FUN=sum)
-a
-reshape(a, timevar=&quot;race&quot;, idvar=&quot;V4529&quot;, direction=&quot;wide&quot;)
-
-a[order(a$WGTVICDY),]</code></pre>
-<pre><code>                 V4001  YEARQ                      IDHH
-8  (4) Incident record 2012.1 2501722756503088292804224
-16 (4) Incident record 2012.1 2520082700194588295304126
-41 (4) Incident record 2012.1 2520234866639637290437125
-                         IDPER V4002
-8  250172275650308829280422401 27297
-16 252008270019458829530412602  9999
-41 252023486663963729043712502  9733
-    V3001  YEARQ                      IDHH                       IDPER
-11      3 2012.1 2501722756503088292804224 250172275650308829280422401
-413     3 2012.1 2520082700194588295304126 252008270019458829530412602
-941     3 2012.1 2520234866639637290437125 252023486663963729043712502
-    V3002
-11  27297
-413  9999
-941  9733
-                           race     WGTVICDY
+aggregate(WGTVICDY~race, data=dataInc, FUN=sum)</code></pre>
+<pre><code>                           race     WGTVICDY
 1                         White 20325363.491
 2                         Black  3922621.250
 3                       AmerInd   391752.018
@@ -2123,213 +1453,12 @@ a[order(a$WGTVICDY),]</code></pre>
 14                WAmerIndAsian     3253.276
 15               WAsianHawaiian     2530.258
 16                    2or3races     5028.427
-17                   4or5 races    27588.216
-                       V4529                         race    WGTVICDY
-1        (01) Completed rape                        White  103280.959
-2        (02) Attempted rape                        White   17775.773
-3     (03) Sex aslt w s aslt                        White   46987.050
-4     (04) Sex aslt w m aslt                        White    1612.130
-5      (05) Rob w inj s aslt                        White  115894.521
-6      (06) Rob w inj m aslt                        White   78902.277
-7         (07) Rob wo injury                        White  194556.360
-8      (08) At rob inj s asl                        White   22603.790
-9      (09) At rob inj m asl                        White   18955.182
-10        (10) At rob w aslt                        White  103657.632
-11     (11) Ag aslt w injury                        White  285893.771
-12     (12) At ag aslt w wea                        White  206706.450
-13      (13) Thr aslt w weap                        White  272847.708
-14      (14) Simp aslt w inj                        White  785679.784
-15      (15) Sex aslt wo inj                        White   29951.777
-16     (16) Unw sex wo force                        White   15992.059
-17  (17) Asl wo weap, wo inj                        White 1567340.159
-18      (18) Verbal thr rape                        White   13393.918
-19     (19) Ver thr sex aslt                        White    8290.007
-20      (20) Verbal thr aslt                        White 1533465.127
-21      (21) Purse snatching                        White    9321.731
-22      (22) At purse snatch                        White    3006.697
-23       (23) Pocket picking                        White   95832.610
-24      (31) Burg, force ent                        White  832635.810
-25     (32) Burg, ent wo for                        White 1447606.070
-26      (33) Att force entry                        White  503437.423
-27      (40) Motor veh theft                        White  329864.267
-28     (41) At mtr veh theft                        White  125090.201
-29          (54) Theft &lt; $10                        White  898305.920
-30        (55) Theft $10-$49                        White 2282637.533
-31       (56) Theft $50-$249                        White 3843351.899
-32          (57) Theft $250+                        White 2962503.394
-33       (58) Theft value NA                        White 1011664.176
-34      (59) Attempted theft                        White  556319.326
-35       (01) Completed rape                        Black   12643.248
-36       (02) Attempted rape                        Black    1288.593
-37     (05) Rob w inj s aslt                        Black   12594.761
-38     (06) Rob w inj m aslt                        Black   15950.122
-39        (07) Rob wo injury                        Black   31047.979
-40     (08) At rob inj s asl                        Black    6365.360
-41     (09) At rob inj m asl                        Black   14245.997
-42        (10) At rob w aslt                        Black   31357.316
-43     (11) Ag aslt w injury                        Black   72627.882
-44     (12) At ag aslt w wea                        Black   47414.402
-45      (13) Thr aslt w weap                        Black  111649.084
-46      (14) Simp aslt w inj                        Black  114291.382
-47      (15) Sex aslt wo inj                        Black    2628.551
-48  (17) Asl wo weap, wo inj                        Black  291080.022
-49     (19) Ver thr sex aslt                        Black    7079.775
-50      (20) Verbal thr aslt                        Black  350969.780
-51      (21) Purse snatching                        Black    6668.807
-52      (22) At purse snatch                        Black    2215.912
-53       (23) Pocket picking                        Black   22775.079
-54      (31) Burg, force ent                        Black  318494.080
-55     (32) Burg, ent wo for                        Black  142141.885
-56      (33) Att force entry                        Black  160314.905
-57      (40) Motor veh theft                        Black   98815.835
-58     (41) At mtr veh theft                        Black   32724.272
-59          (54) Theft &lt; $10                        Black  117303.794
-60        (55) Theft $10-$49                        Black  360916.388
-61       (56) Theft $50-$249                        Black  688365.830
-62          (57) Theft $250+                        Black  556873.416
-63       (58) Theft value NA                        Black  231612.551
-64      (59) Attempted theft                        Black   60164.243
-65     (06) Rob w inj m aslt                      AmerInd   39247.457
-66     (11) Ag aslt w injury                      AmerInd    4239.840
-67     (12) At ag aslt w wea                      AmerInd    8553.009
-68      (13) Thr aslt w weap                      AmerInd    8715.912
-69      (14) Simp aslt w inj                      AmerInd   11886.947
-70  (17) Asl wo weap, wo inj                      AmerInd   17449.707
-71      (18) Verbal thr rape                      AmerInd   21818.327
-72      (20) Verbal thr aslt                      AmerInd   10830.742
-73      (31) Burg, force ent                      AmerInd   10461.118
-74     (32) Burg, ent wo for                      AmerInd   41339.995
-75      (33) Att force entry                      AmerInd   13766.940
-76      (40) Motor veh theft                      AmerInd    6295.737
-77          (54) Theft &lt; $10                      AmerInd   20156.929
-78        (55) Theft $10-$49                      AmerInd   31806.394
-79       (56) Theft $50-$249                      AmerInd   82053.571
-80          (57) Theft $250+                      AmerInd   31067.968
-81       (58) Theft value NA                      AmerInd   26315.302
-82      (59) Attempted theft                      AmerInd    5746.124
-83     (06) Rob w inj m aslt                        Asian    7653.033
-84        (07) Rob wo injury                        Asian    5815.415
-85     (09) At rob inj m asl                        Asian    4294.908
-86        (10) At rob w aslt                        Asian    7934.807
-87     (12) At ag aslt w wea                        Asian    5981.115
-88      (13) Thr aslt w weap                        Asian   11787.913
-89      (14) Simp aslt w inj                        Asian   12171.616
-90  (17) Asl wo weap, wo inj                        Asian   39631.677
-91      (18) Verbal thr rape                        Asian    3103.095
-92      (20) Verbal thr aslt                        Asian   30123.665
-93       (23) Pocket picking                        Asian    1721.134
-94      (31) Burg, force ent                        Asian   21579.658
-95     (32) Burg, ent wo for                        Asian   50424.690
-96      (33) Att force entry                        Asian   14391.509
-97      (40) Motor veh theft                        Asian   20431.175
-98     (41) At mtr veh theft                        Asian    5392.491
-99          (54) Theft &lt; $10                        Asian   29681.244
-100       (55) Theft $10-$49                        Asian   76954.856
-101      (56) Theft $50-$249                        Asian  171559.179
-102         (57) Theft $250+                        Asian  115060.812
-103      (58) Theft value NA                        Asian   59844.879
-104     (59) Attempted theft                        Asian   21740.574
-105      (02) Attempted rape      HawaiianPacificIslander   38761.013
-106   (04) Sex aslt w m aslt      HawaiianPacificIslander    4903.651
-107 (17) Asl wo weap, wo inj      HawaiianPacificIslander    3616.106
-108     (20) Verbal thr aslt      HawaiianPacificIslander    6601.177
-109      (23) Pocket picking      HawaiianPacificIslander    2644.136
-110     (31) Burg, force ent      HawaiianPacificIslander    2904.212
-111    (32) Burg, ent wo for      HawaiianPacificIslander    6190.034
-112       (55) Theft $10-$49      HawaiianPacificIslander   26982.152
-113      (56) Theft $50-$249      HawaiianPacificIslander   14636.978
-114         (57) Theft $250+      HawaiianPacificIslander   18534.728
-115      (58) Theft value NA      HawaiianPacificIslander    5714.833
-116     (59) Attempted theft      HawaiianPacificIslander   13511.452
-117    (05) Rob w inj s aslt                   WhiteBlack    1685.678
-118       (10) At rob w aslt                   WhiteBlack    2467.651
-119     (13) Thr aslt w weap                   WhiteBlack    7298.199
-120     (14) Simp aslt w inj                   WhiteBlack   13605.696
-121 (17) Asl wo weap, wo inj                   WhiteBlack   18302.270
-122     (22) At purse snatch                   WhiteBlack    2050.052
-123     (31) Burg, force ent                   WhiteBlack    4886.321
-124    (32) Burg, ent wo for                   WhiteBlack    4522.696
-125     (33) Att force entry                   WhiteBlack    5489.463
-126         (54) Theft &lt; $10                   WhiteBlack   12936.929
-127       (55) Theft $10-$49                   WhiteBlack   39782.291
-128      (56) Theft $50-$249                   WhiteBlack   19594.590
-129         (57) Theft $250+                   WhiteBlack   16204.430
-130      (58) Theft value NA                   WhiteBlack   10449.655
-131      (01) Completed rape              WhiteAmerIndian   13208.403
-132    (05) Rob w inj s aslt              WhiteAmerIndian    2636.270
-133       (07) Rob wo injury              WhiteAmerIndian    3966.996
-134       (10) At rob w aslt              WhiteAmerIndian    3439.604
-135    (11) Ag aslt w injury              WhiteAmerIndian   19708.298
-136    (12) At ag aslt w wea              WhiteAmerIndian    2400.975
-137     (13) Thr aslt w weap              WhiteAmerIndian    2238.745
-138     (14) Simp aslt w inj              WhiteAmerIndian    4291.840
-139 (17) Asl wo weap, wo inj              WhiteAmerIndian   15963.351
-140     (18) Verbal thr rape              WhiteAmerIndian    1430.159
-141     (20) Verbal thr aslt              WhiteAmerIndian   71517.702
-142      (23) Pocket picking              WhiteAmerIndian    3445.137
-143     (31) Burg, force ent              WhiteAmerIndian   16923.718
-144    (32) Burg, ent wo for              WhiteAmerIndian   59386.489
-145     (33) Att force entry              WhiteAmerIndian    4696.305
-146     (40) Motor veh theft              WhiteAmerIndian   23274.429
-147    (41) At mtr veh theft              WhiteAmerIndian    2789.873
-148         (54) Theft &lt; $10              WhiteAmerIndian   19197.882
-149       (55) Theft $10-$49              WhiteAmerIndian   42515.118
-150      (56) Theft $50-$249              WhiteAmerIndian   52666.550
-151         (57) Theft $250+              WhiteAmerIndian   34597.267
-152      (58) Theft value NA              WhiteAmerIndian    7085.195
-153     (59) Attempted theft              WhiteAmerIndian   24305.909
-154    (11) Ag aslt w injury                   WhiteAsian    2878.704
-155     (14) Simp aslt w inj                   WhiteAsian    3690.459
-156 (17) Asl wo weap, wo inj                   WhiteAsian   31064.644
-157     (20) Verbal thr aslt                   WhiteAsian   12207.364
-158     (31) Burg, force ent                   WhiteAsian    1502.143
-159     (33) Att force entry                   WhiteAsian    2455.084
-160     (40) Motor veh theft                   WhiteAsian    1596.719
-161         (54) Theft &lt; $10                   WhiteAsian    8144.374
-162       (55) Theft $10-$49                   WhiteAsian   21549.354
-163      (56) Theft $50-$249                   WhiteAsian   10950.400
-164         (57) Theft $250+                   WhiteAsian   20987.290
-165      (58) Theft value NA                   WhiteAsian    7087.425
-166     (59) Attempted theft                   WhiteAsian    4364.107
-167      (02) Attempted rape                WhiteHawaiian    3316.848
-168     (14) Simp aslt w inj                WhiteHawaiian    3691.642
-169 (17) Asl wo weap, wo inj                WhiteHawaiian    2314.741
-170     (20) Verbal thr aslt                WhiteHawaiian    3829.518
-171    (32) Burg, ent wo for                WhiteHawaiian    3028.042
-172       (55) Theft $10-$49                WhiteHawaiian    5351.793
-173      (56) Theft $50-$249                WhiteHawaiian    2430.836
-174         (57) Theft $250+                WhiteHawaiian    5272.062
-175      (58) Theft value NA                WhiteHawaiian    5050.796
-176     (14) Simp aslt w inj              BlackAmerIndian    2856.740
-177 (17) Asl wo weap, wo inj              BlackAmerIndian    7807.665
-178     (33) Att force entry              BlackAmerIndian    3647.649
-179         (54) Theft &lt; $10              BlackAmerIndian    2620.371
-180       (55) Theft $10-$49              BlackAmerIndian    5077.655
-181      (56) Theft $50-$249              BlackAmerIndian    8154.566
-182         (57) Theft $250+              BlackAmerIndian   12627.808
-183      (58) Theft value NA              BlackAmerIndian    1794.755
-184      (56) Theft $50-$249                   BlackAsian    2742.835
-185         (57) Theft $250+                   BlackAsian    2688.696
-186         (54) Theft &lt; $10 AsianHawaiianPacificIslander    2511.847
-187      (56) Theft $50-$249 AsianHawaiianPacificIslander    5667.237
-188         (57) Theft $250+ AsianHawaiianPacificIslander    6220.478
-189     (13) Thr aslt w weap                    WBAmerInd    6873.443
-190     (31) Burg, force ent                    WBAmerInd    2495.284
-191     (33) Att force entry                    WBAmerInd    3153.049
-192       (55) Theft $10-$49                    WBAmerInd    3102.247
-193      (56) Theft $50-$249                    WBAmerInd   11424.497
-194         (57) Theft $250+                    WBAmerInd    2633.165
-195      (58) Theft value NA                    WBAmerInd    2880.410
-196       (55) Theft $10-$49                WAmerIndAsian    3253.276
-197 (17) Asl wo weap, wo inj               WAsianHawaiian    2530.258
-198      (56) Theft $50-$249                    2or3races    5028.427
-199     (14) Simp aslt w inj                   4or5 races    2815.631
-200 (17) Asl wo weap, wo inj                   4or5 races    8535.344
-201     (31) Burg, force ent                   4or5 races    3404.650
-202    (32) Burg, ent wo for                   4or5 races    3404.650
-203         (54) Theft &lt; $10                   4or5 races    4279.872
-204         (57) Theft $250+                   4or5 races    5148.067
-                      V4529 WGTVICDY.White WGTVICDY.Black WGTVICDY.AmerInd
+17                   4or5 races    27588.216</code></pre>
+<pre class="r"><code># break down race and crime type
+a &lt;- aggregate(WGTVICDY~V4529+race, data=dataInc, FUN=sum)
+# reshape and just show the first four columns here
+reshape(a, timevar=&quot;race&quot;, idvar=&quot;V4529&quot;, direction=&quot;wide&quot;)[,1:4]</code></pre>
+<pre><code>                      V4529 WGTVICDY.White WGTVICDY.Black WGTVICDY.AmerInd
 1       (01) Completed rape     103280.959      12643.248               NA
 2       (02) Attempted rape      17775.773       1288.593               NA
 3    (03) Sex aslt w s aslt      46987.050             NA               NA
@@ -2363,440 +1492,21 @@ a[order(a$WGTVICDY),]</code></pre>
 31      (56) Theft $50-$249    3843351.899     688365.830        82053.571
 32         (57) Theft $250+    2962503.394     556873.416        31067.968
 33      (58) Theft value NA    1011664.176     231612.551        26315.302
-34     (59) Attempted theft     556319.326      60164.243         5746.124
-   WGTVICDY.Asian WGTVICDY.HawaiianPacificIslander WGTVICDY.WhiteBlack
-1              NA                               NA                  NA
-2              NA                        38761.013                  NA
-3              NA                               NA                  NA
-4              NA                         4903.651                  NA
-5              NA                               NA            1685.678
-6        7653.033                               NA                  NA
-7        5815.415                               NA                  NA
-8              NA                               NA                  NA
-9        4294.908                               NA                  NA
-10       7934.807                               NA            2467.651
-11             NA                               NA                  NA
-12       5981.115                               NA                  NA
-13      11787.913                               NA            7298.199
-14      12171.616                               NA           13605.696
-15             NA                               NA                  NA
-16             NA                               NA                  NA
-17      39631.677                         3616.106           18302.270
-18       3103.095                               NA                  NA
-19             NA                               NA                  NA
-20      30123.665                         6601.177                  NA
-21             NA                               NA                  NA
-22             NA                               NA            2050.052
-23       1721.134                         2644.136                  NA
-24      21579.658                         2904.212            4886.321
-25      50424.690                         6190.034            4522.696
-26      14391.509                               NA            5489.463
-27      20431.175                               NA                  NA
-28       5392.491                               NA                  NA
-29      29681.244                               NA           12936.929
-30      76954.856                        26982.152           39782.291
-31     171559.179                        14636.978           19594.590
-32     115060.812                        18534.728           16204.430
-33      59844.879                         5714.833           10449.655
-34      21740.574                        13511.452                  NA
-   WGTVICDY.WhiteAmerIndian WGTVICDY.WhiteAsian WGTVICDY.WhiteHawaiian
-1                 13208.403                  NA                     NA
-2                        NA                  NA               3316.848
-3                        NA                  NA                     NA
-4                        NA                  NA                     NA
-5                  2636.270                  NA                     NA
-6                        NA                  NA                     NA
-7                  3966.996                  NA                     NA
-8                        NA                  NA                     NA
-9                        NA                  NA                     NA
-10                 3439.604                  NA                     NA
-11                19708.298            2878.704                     NA
-12                 2400.975                  NA                     NA
-13                 2238.745                  NA                     NA
-14                 4291.840            3690.459               3691.642
-15                       NA                  NA                     NA
-16                       NA                  NA                     NA
-17                15963.351           31064.644               2314.741
-18                 1430.159                  NA                     NA
-19                       NA                  NA                     NA
-20                71517.702           12207.364               3829.518
-21                       NA                  NA                     NA
-22                       NA                  NA                     NA
-23                 3445.137                  NA                     NA
-24                16923.718            1502.143                     NA
-25                59386.489                  NA               3028.042
-26                 4696.305            2455.084                     NA
-27                23274.429            1596.719                     NA
-28                 2789.873                  NA                     NA
-29                19197.882            8144.374                     NA
-30                42515.118           21549.354               5351.793
-31                52666.550           10950.400               2430.836
-32                34597.267           20987.290               5272.062
-33                 7085.195            7087.425               5050.796
-34                24305.909            4364.107                     NA
-   WGTVICDY.BlackAmerIndian WGTVICDY.BlackAsian
-1                        NA                  NA
-2                        NA                  NA
-3                        NA                  NA
-4                        NA                  NA
-5                        NA                  NA
-6                        NA                  NA
-7                        NA                  NA
-8                        NA                  NA
-9                        NA                  NA
-10                       NA                  NA
-11                       NA                  NA
-12                       NA                  NA
-13                       NA                  NA
-14                 2856.740                  NA
-15                       NA                  NA
-16                       NA                  NA
-17                 7807.665                  NA
-18                       NA                  NA
-19                       NA                  NA
-20                       NA                  NA
-21                       NA                  NA
-22                       NA                  NA
-23                       NA                  NA
-24                       NA                  NA
-25                       NA                  NA
-26                 3647.649                  NA
-27                       NA                  NA
-28                       NA                  NA
-29                 2620.371                  NA
-30                 5077.655                  NA
-31                 8154.566            2742.835
-32                12627.808            2688.696
-33                 1794.755                  NA
-34                       NA                  NA
-   WGTVICDY.AsianHawaiianPacificIslander WGTVICDY.WBAmerInd
-1                                     NA                 NA
-2                                     NA                 NA
-3                                     NA                 NA
-4                                     NA                 NA
-5                                     NA                 NA
-6                                     NA                 NA
-7                                     NA                 NA
-8                                     NA                 NA
-9                                     NA                 NA
-10                                    NA                 NA
-11                                    NA                 NA
-12                                    NA                 NA
-13                                    NA           6873.443
-14                                    NA                 NA
-15                                    NA                 NA
-16                                    NA                 NA
-17                                    NA                 NA
-18                                    NA                 NA
-19                                    NA                 NA
-20                                    NA                 NA
-21                                    NA                 NA
-22                                    NA                 NA
-23                                    NA                 NA
-24                                    NA           2495.284
-25                                    NA                 NA
-26                                    NA           3153.049
-27                                    NA                 NA
-28                                    NA                 NA
-29                              2511.847                 NA
-30                                    NA           3102.247
-31                              5667.237          11424.497
-32                              6220.478           2633.165
-33                                    NA           2880.410
-34                                    NA                 NA
-   WGTVICDY.WAmerIndAsian WGTVICDY.WAsianHawaiian WGTVICDY.2or3races
-1                      NA                      NA                 NA
-2                      NA                      NA                 NA
-3                      NA                      NA                 NA
-4                      NA                      NA                 NA
-5                      NA                      NA                 NA
-6                      NA                      NA                 NA
-7                      NA                      NA                 NA
-8                      NA                      NA                 NA
-9                      NA                      NA                 NA
-10                     NA                      NA                 NA
-11                     NA                      NA                 NA
-12                     NA                      NA                 NA
-13                     NA                      NA                 NA
-14                     NA                      NA                 NA
-15                     NA                      NA                 NA
-16                     NA                      NA                 NA
-17                     NA                2530.258                 NA
-18                     NA                      NA                 NA
-19                     NA                      NA                 NA
-20                     NA                      NA                 NA
-21                     NA                      NA                 NA
-22                     NA                      NA                 NA
-23                     NA                      NA                 NA
-24                     NA                      NA                 NA
-25                     NA                      NA                 NA
-26                     NA                      NA                 NA
-27                     NA                      NA                 NA
-28                     NA                      NA                 NA
-29                     NA                      NA                 NA
-30               3253.276                      NA                 NA
-31                     NA                      NA           5028.427
-32                     NA                      NA                 NA
-33                     NA                      NA                 NA
-34                     NA                      NA                 NA
-   WGTVICDY.4or5 races
-1                   NA
-2                   NA
-3                   NA
-4                   NA
-5                   NA
-6                   NA
-7                   NA
-8                   NA
-9                   NA
-10                  NA
-11                  NA
-12                  NA
-13                  NA
-14            2815.631
-15                  NA
-16                  NA
-17            8535.344
-18                  NA
-19                  NA
-20                  NA
-21                  NA
-22                  NA
-23                  NA
-24            3404.650
-25            3404.650
-26                  NA
-27                  NA
-28                  NA
-29            4279.872
-30                  NA
-31                  NA
-32            5148.067
-33                  NA
-34                  NA
-                       V4529                         race    WGTVICDY
-36       (02) Attempted rape                        Black    1288.593
-140     (18) Verbal thr rape              WhiteAmerIndian    1430.159
-158     (31) Burg, force ent                   WhiteAsian    1502.143
-160     (40) Motor veh theft                   WhiteAsian    1596.719
-4     (04) Sex aslt w m aslt                        White    1612.130
-117    (05) Rob w inj s aslt                   WhiteBlack    1685.678
-93       (23) Pocket picking                        Asian    1721.134
-183      (58) Theft value NA              BlackAmerIndian    1794.755
-122     (22) At purse snatch                   WhiteBlack    2050.052
-52      (22) At purse snatch                        Black    2215.912
-137     (13) Thr aslt w weap              WhiteAmerIndian    2238.745
-169 (17) Asl wo weap, wo inj                WhiteHawaiian    2314.741
-136    (12) At ag aslt w wea              WhiteAmerIndian    2400.975
-173      (56) Theft $50-$249                WhiteHawaiian    2430.836
-159     (33) Att force entry                   WhiteAsian    2455.084
-118       (10) At rob w aslt                   WhiteBlack    2467.651
-190     (31) Burg, force ent                    WBAmerInd    2495.284
-186         (54) Theft &lt; $10 AsianHawaiianPacificIslander    2511.847
-197 (17) Asl wo weap, wo inj               WAsianHawaiian    2530.258
-179         (54) Theft &lt; $10              BlackAmerIndian    2620.371
-47      (15) Sex aslt wo inj                        Black    2628.551
-194         (57) Theft $250+                    WBAmerInd    2633.165
-132    (05) Rob w inj s aslt              WhiteAmerIndian    2636.270
-109      (23) Pocket picking      HawaiianPacificIslander    2644.136
-185         (57) Theft $250+                   BlackAsian    2688.696
-184      (56) Theft $50-$249                   BlackAsian    2742.835
-147    (41) At mtr veh theft              WhiteAmerIndian    2789.873
-199     (14) Simp aslt w inj                   4or5 races    2815.631
-176     (14) Simp aslt w inj              BlackAmerIndian    2856.740
-154    (11) Ag aslt w injury                   WhiteAsian    2878.704
-195      (58) Theft value NA                    WBAmerInd    2880.410
-110     (31) Burg, force ent      HawaiianPacificIslander    2904.212
-22      (22) At purse snatch                        White    3006.697
-171    (32) Burg, ent wo for                WhiteHawaiian    3028.042
-192       (55) Theft $10-$49                    WBAmerInd    3102.247
-91      (18) Verbal thr rape                        Asian    3103.095
-191     (33) Att force entry                    WBAmerInd    3153.049
-196       (55) Theft $10-$49                WAmerIndAsian    3253.276
-167      (02) Attempted rape                WhiteHawaiian    3316.848
-201     (31) Burg, force ent                   4or5 races    3404.650
-202    (32) Burg, ent wo for                   4or5 races    3404.650
-134       (10) At rob w aslt              WhiteAmerIndian    3439.604
-142      (23) Pocket picking              WhiteAmerIndian    3445.137
-107 (17) Asl wo weap, wo inj      HawaiianPacificIslander    3616.106
-178     (33) Att force entry              BlackAmerIndian    3647.649
-155     (14) Simp aslt w inj                   WhiteAsian    3690.459
-168     (14) Simp aslt w inj                WhiteHawaiian    3691.642
-170     (20) Verbal thr aslt                WhiteHawaiian    3829.518
-133       (07) Rob wo injury              WhiteAmerIndian    3966.996
-66     (11) Ag aslt w injury                      AmerInd    4239.840
-203         (54) Theft &lt; $10                   4or5 races    4279.872
-138     (14) Simp aslt w inj              WhiteAmerIndian    4291.840
-85     (09) At rob inj m asl                        Asian    4294.908
-166     (59) Attempted theft                   WhiteAsian    4364.107
-124    (32) Burg, ent wo for                   WhiteBlack    4522.696
-145     (33) Att force entry              WhiteAmerIndian    4696.305
-123     (31) Burg, force ent                   WhiteBlack    4886.321
-106   (04) Sex aslt w m aslt      HawaiianPacificIslander    4903.651
-198      (56) Theft $50-$249                    2or3races    5028.427
-175      (58) Theft value NA                WhiteHawaiian    5050.796
-180       (55) Theft $10-$49              BlackAmerIndian    5077.655
-204         (57) Theft $250+                   4or5 races    5148.067
-174         (57) Theft $250+                WhiteHawaiian    5272.062
-172       (55) Theft $10-$49                WhiteHawaiian    5351.793
-98     (41) At mtr veh theft                        Asian    5392.491
-125     (33) Att force entry                   WhiteBlack    5489.463
-187      (56) Theft $50-$249 AsianHawaiianPacificIslander    5667.237
-115      (58) Theft value NA      HawaiianPacificIslander    5714.833
-82      (59) Attempted theft                      AmerInd    5746.124
-84        (07) Rob wo injury                        Asian    5815.415
-87     (12) At ag aslt w wea                        Asian    5981.115
-111    (32) Burg, ent wo for      HawaiianPacificIslander    6190.034
-188         (57) Theft $250+ AsianHawaiianPacificIslander    6220.478
-76      (40) Motor veh theft                      AmerInd    6295.737
-40     (08) At rob inj s asl                        Black    6365.360
-108     (20) Verbal thr aslt      HawaiianPacificIslander    6601.177
-51      (21) Purse snatching                        Black    6668.807
-189     (13) Thr aslt w weap                    WBAmerInd    6873.443
-49     (19) Ver thr sex aslt                        Black    7079.775
-152      (58) Theft value NA              WhiteAmerIndian    7085.195
-165      (58) Theft value NA                   WhiteAsian    7087.425
-119     (13) Thr aslt w weap                   WhiteBlack    7298.199
-83     (06) Rob w inj m aslt                        Asian    7653.033
-177 (17) Asl wo weap, wo inj              BlackAmerIndian    7807.665
-86        (10) At rob w aslt                        Asian    7934.807
-161         (54) Theft &lt; $10                   WhiteAsian    8144.374
-181      (56) Theft $50-$249              BlackAmerIndian    8154.566
-19     (19) Ver thr sex aslt                        White    8290.007
-200 (17) Asl wo weap, wo inj                   4or5 races    8535.344
-67     (12) At ag aslt w wea                      AmerInd    8553.009
-68      (13) Thr aslt w weap                      AmerInd    8715.912
-21      (21) Purse snatching                        White    9321.731
-130      (58) Theft value NA                   WhiteBlack   10449.655
-73      (31) Burg, force ent                      AmerInd   10461.118
-72      (20) Verbal thr aslt                      AmerInd   10830.742
-163      (56) Theft $50-$249                   WhiteAsian   10950.400
-193      (56) Theft $50-$249                    WBAmerInd   11424.497
-88      (13) Thr aslt w weap                        Asian   11787.913
-69      (14) Simp aslt w inj                      AmerInd   11886.947
-89      (14) Simp aslt w inj                        Asian   12171.616
-157     (20) Verbal thr aslt                   WhiteAsian   12207.364
-37     (05) Rob w inj s aslt                        Black   12594.761
-182         (57) Theft $250+              BlackAmerIndian   12627.808
-35       (01) Completed rape                        Black   12643.248
-126         (54) Theft &lt; $10                   WhiteBlack   12936.929
-131      (01) Completed rape              WhiteAmerIndian   13208.403
-18      (18) Verbal thr rape                        White   13393.918
-116     (59) Attempted theft      HawaiianPacificIslander   13511.452
-120     (14) Simp aslt w inj                   WhiteBlack   13605.696
-75      (33) Att force entry                      AmerInd   13766.940
-41     (09) At rob inj m asl                        Black   14245.997
-96      (33) Att force entry                        Asian   14391.509
-113      (56) Theft $50-$249      HawaiianPacificIslander   14636.978
-38     (06) Rob w inj m aslt                        Black   15950.122
-139 (17) Asl wo weap, wo inj              WhiteAmerIndian   15963.351
-16     (16) Unw sex wo force                        White   15992.059
-129         (57) Theft $250+                   WhiteBlack   16204.430
-143     (31) Burg, force ent              WhiteAmerIndian   16923.718
-70  (17) Asl wo weap, wo inj                      AmerInd   17449.707
-2        (02) Attempted rape                        White   17775.773
-121 (17) Asl wo weap, wo inj                   WhiteBlack   18302.270
-114         (57) Theft $250+      HawaiianPacificIslander   18534.728
-9      (09) At rob inj m asl                        White   18955.182
-148         (54) Theft &lt; $10              WhiteAmerIndian   19197.882
-128      (56) Theft $50-$249                   WhiteBlack   19594.590
-135    (11) Ag aslt w injury              WhiteAmerIndian   19708.298
-77          (54) Theft &lt; $10                      AmerInd   20156.929
-97      (40) Motor veh theft                        Asian   20431.175
-164         (57) Theft $250+                   WhiteAsian   20987.290
-162       (55) Theft $10-$49                   WhiteAsian   21549.354
-94      (31) Burg, force ent                        Asian   21579.658
-104     (59) Attempted theft                        Asian   21740.574
-71      (18) Verbal thr rape                      AmerInd   21818.327
-8      (08) At rob inj s asl                        White   22603.790
-53       (23) Pocket picking                        Black   22775.079
-146     (40) Motor veh theft              WhiteAmerIndian   23274.429
-153     (59) Attempted theft              WhiteAmerIndian   24305.909
-81       (58) Theft value NA                      AmerInd   26315.302
-112       (55) Theft $10-$49      HawaiianPacificIslander   26982.152
-99          (54) Theft &lt; $10                        Asian   29681.244
-15      (15) Sex aslt wo inj                        White   29951.777
-92      (20) Verbal thr aslt                        Asian   30123.665
-39        (07) Rob wo injury                        Black   31047.979
-156 (17) Asl wo weap, wo inj                   WhiteAsian   31064.644
-80          (57) Theft $250+                      AmerInd   31067.968
-42        (10) At rob w aslt                        Black   31357.316
-78        (55) Theft $10-$49                      AmerInd   31806.394
-58     (41) At mtr veh theft                        Black   32724.272
-151         (57) Theft $250+              WhiteAmerIndian   34597.267
-105      (02) Attempted rape      HawaiianPacificIslander   38761.013
-65     (06) Rob w inj m aslt                      AmerInd   39247.457
-90  (17) Asl wo weap, wo inj                        Asian   39631.677
-127       (55) Theft $10-$49                   WhiteBlack   39782.291
-74     (32) Burg, ent wo for                      AmerInd   41339.995
-149       (55) Theft $10-$49              WhiteAmerIndian   42515.118
-3     (03) Sex aslt w s aslt                        White   46987.050
-44     (12) At ag aslt w wea                        Black   47414.402
-95     (32) Burg, ent wo for                        Asian   50424.690
-150      (56) Theft $50-$249              WhiteAmerIndian   52666.550
-144    (32) Burg, ent wo for              WhiteAmerIndian   59386.489
-103      (58) Theft value NA                        Asian   59844.879
-64      (59) Attempted theft                        Black   60164.243
-141     (20) Verbal thr aslt              WhiteAmerIndian   71517.702
-43     (11) Ag aslt w injury                        Black   72627.882
-100       (55) Theft $10-$49                        Asian   76954.856
-6      (06) Rob w inj m aslt                        White   78902.277
-79       (56) Theft $50-$249                      AmerInd   82053.571
-23       (23) Pocket picking                        White   95832.610
-57      (40) Motor veh theft                        Black   98815.835
-1        (01) Completed rape                        White  103280.959
-10        (10) At rob w aslt                        White  103657.632
-45      (13) Thr aslt w weap                        Black  111649.084
-46      (14) Simp aslt w inj                        Black  114291.382
-102         (57) Theft $250+                        Asian  115060.812
-5      (05) Rob w inj s aslt                        White  115894.521
-59          (54) Theft &lt; $10                        Black  117303.794
-28     (41) At mtr veh theft                        White  125090.201
-55     (32) Burg, ent wo for                        Black  142141.885
-56      (33) Att force entry                        Black  160314.905
-101      (56) Theft $50-$249                        Asian  171559.179
-7         (07) Rob wo injury                        White  194556.360
-12     (12) At ag aslt w wea                        White  206706.450
-63       (58) Theft value NA                        Black  231612.551
-13      (13) Thr aslt w weap                        White  272847.708
-11     (11) Ag aslt w injury                        White  285893.771
-48  (17) Asl wo weap, wo inj                        Black  291080.022
-54      (31) Burg, force ent                        Black  318494.080
-27      (40) Motor veh theft                        White  329864.267
-50      (20) Verbal thr aslt                        Black  350969.780
-60        (55) Theft $10-$49                        Black  360916.388
-26      (33) Att force entry                        White  503437.423
-34      (59) Attempted theft                        White  556319.326
-62          (57) Theft $250+                        Black  556873.416
-61       (56) Theft $50-$249                        Black  688365.830
-14      (14) Simp aslt w inj                        White  785679.784
-24      (31) Burg, force ent                        White  832635.810
-29          (54) Theft &lt; $10                        White  898305.920
-33       (58) Theft value NA                        White 1011664.176
-25     (32) Burg, ent wo for                        White 1447606.070
-20      (20) Verbal thr aslt                        White 1533465.127
-17  (17) Asl wo weap, wo inj                        White 1567340.159
-30        (55) Theft $10-$49                        White 2282637.533
-32          (57) Theft $250+                        White 2962503.394
-31       (56) Theft $50-$249                        White 3843351.899</code></pre>
+34     (59) Attempted theft     556319.326      60164.243         5746.124</code></pre>
 <p>As the results indicate, the crime with the greatest number of victims, regardless of race, is generally Theft $50-$249.</p>
 <p>Let’s also consider the most common crimes that affect Hispanics (binary variable Y/N):</p>
-<pre class="r"><code>i &lt;- match(dataInc$IDPER.YEARQ, dataPers$IDPER.YEARQ)
-dataInc$hispanic &lt;- dataPers$V3024[i]
-
+<pre class="r"><code>names(dataInc)[names(dataInc)==&quot;V3024&quot;] &lt;- &quot;hispanic&quot;
+# recode &quot;8&quot; as missing
 dataInc$hispanic[dataInc$hispanic==8] &lt;- NA
-
+# 1=Yes, 2=No 
 dataInc$hispanic &lt;- factor(dataInc$hispanic, levels=1:2, labels=c(&quot;Yes&quot;,&quot;No&quot;))
-
-aggregate(WGTVICDY~hispanic,data=dataInc,FUN=sum)
-
-x &lt;- aggregate(WGTVICDY~V4529+hispanic,data=dataInc,FUN=sum)
-
-x[order(x$WGTVICDY),]</code></pre>
+aggregate(WGTVICDY~hispanic, data=dataInc, FUN=sum)</code></pre>
 <pre><code>  hispanic WGTVICDY
 1      Yes  4301807
-2       No 22065485
-                      V4529 hispanic    WGTVICDY
+2       No 22065485</code></pre>
+<pre class="r"><code>a &lt;- aggregate(WGTVICDY~V4529+hispanic, data=dataInc, FUN=sum)
+a[order(a$WGTVICDY),]</code></pre>
+<pre><code>                      V4529 hispanic    WGTVICDY
 3    (04) Sex aslt w m aslt      Yes    1612.130
 17     (21) Purse snatching      Yes    2970.145
 8     (09) At rob inj m asl      Yes    4488.080
@@ -2864,19 +1574,17 @@ x[order(x$WGTVICDY),]</code></pre>
 <div id="find-crime-types-that-disproportionately-affect-black-victims" class="section level2">
 <h2>Find crime types that disproportionately affect black victims</h2>
 <p>As the below analysis finds, the crimes that disproportionately affect black victims compared to white victims are Verbal Threat of Sexual Assault, Attempted robbery with injury, Attempted Purse Snatching, and Purse Snatching.</p>
-<pre class="r"><code>b &lt;- data.frame(crime=sort(unique(a$V4529)),
-                White=0,Black=0)
-i &lt;- match(a$V4529[a$race==&quot;White&quot;], b$crime)
-b$White[i] &lt;- a$WGTVICDY[a$race==&quot;White&quot;]
-i &lt;- match(a$V4529[a$race==&quot;Black&quot;], b$crime)
-b$Black[i] &lt;- a$WGTVICDY[a$race==&quot;Black&quot;]
+<pre class="r"><code>a &lt;- aggregate(WGTVICDY~V4529+race, data=dataInc, FUN=sum)
+a &lt;- subset(a, race %in% c(&quot;Black&quot;,&quot;White&quot;))
+temp &lt;- reshape(a, timevar=&quot;race&quot;, idvar=&quot;V4529&quot;, direction=&quot;wide&quot;)
+temp[is.na(temp)] &lt;- 0
+names(temp) &lt;- c(&quot;crimeType&quot;,&quot;White&quot;,&quot;Black&quot;)
 
-temp &lt;- b
-temp$White &lt;- with(temp, 100*White/ sum(White))
+temp$White &lt;- with(temp, 100*White/sum(White))
 temp$Black &lt;- with(temp, 100*Black/sum(Black))
 temp$ratio &lt;- temp$Black/temp$White
 temp[order(-temp$ratio),]</code></pre>
-<pre><code>                      crime        White       Black     ratio
+<pre><code>                  crimeType        White       Black     ratio
 19    (19) Ver thr sex aslt  0.040786513  0.18048582 4.4251347
 9     (09) At rob inj m asl  0.093258761  0.36317544 3.8942770
 22     (22) At purse snatch  0.014792833  0.05649058 3.8187804
@@ -2911,61 +1619,6 @@ temp[order(-temp$ratio),]</code></pre>
 4    (04) Sex aslt w m aslt  0.007931615  0.00000000 0.0000000
 16    (16) Unw sex wo force  0.078680311  0.00000000 0.0000000
 18     (18) Verbal thr rape  0.065897559  0.00000000 0.0000000</code></pre>
-<p>Or, we can also combine some races into a category called “Other” (instead of simply White). Note that our results change with the lead offense now being Burglary</p>
-<pre class="r"><code>b &lt;- data.frame(crime=sort(unique(a$V4529)),
-                Other=0,Black=0)
-i &lt;- match(a$V4529[a$race%in%c(&quot;White&quot;, &quot;AmerInd&quot;, &quot;Asian&quot;, &quot;HawaiianPacificIslander&quot;)], b$crime)
-b$Other[i] &lt;- a$WGTVICDY[a$race%in%c(&quot;White&quot;,&quot;AmerInd&quot;, &quot;Asian&quot;, &quot;HawaiianPacificIslander&quot;)]
-i &lt;- match(a$V4529[a$race==&quot;Black&quot;], b$crime)
-b$Black[i] &lt;- a$WGTVICDY[a$race==&quot;Black&quot;]
-
-temp &lt;- b
-temp$Other &lt;- with(temp, 100*Other/ sum(Other))
-temp$Black &lt;- with(temp, 100*Black/sum(Black))
-temp$ratio &lt;- temp$Black/temp$Other
-temp[order(-temp$ratio),]
-
-b &lt;- data.frame(crime=sort(unique(a$V4529)),
-                Other=0,Black=0)
-i &lt;- match(a$V4529[a$race%in%c(&quot;White&quot;, &quot;AmerInd&quot;, &quot;Asian&quot;, &quot;HawaiianPacificIslander&quot;)], b$crime)
-b$Other[i] &lt;- a$WGTVICDY[a$race%in%c(&quot;White&quot;,&quot;AmerInd&quot;, &quot;Asian&quot;, &quot;HawaiianPacificIslander&quot;)]
-i &lt;- match(a$V4529[a$race==&quot;Black&quot;], b$crime)
-b$Black[i] &lt;- a$WGTVICDY[a$race==&quot;Black&quot;]</code></pre>
-<pre><code>                      crime      Other       Black        ratio
-24     (31) Burg, force ent  0.4586511  8.11941964 17.702824496
-17 (17) Asl wo weap, wo inj  0.5710777  7.42054874 12.993937879
-20     (20) Verbal thr aslt  1.0424987  8.94732775  8.582579482
-31      (56) Theft $50-$249  2.3115621 17.54861829  7.591670680
-33      (58) Theft value NA  0.9025217  5.90453515  6.542263965
-32         (57) Theft $250+  2.9271188 14.19646151  4.849977914
-25    (32) Burg, ent wo for  0.9775684  3.62364540  3.706794670
-11    (11) Ag aslt w injury  0.6695817  1.85151401  2.765179942
-30       (55) Theft $10-$49  4.2611883  9.20089821  2.159232962
-26     (33) Att force entry  2.2727961  4.08693307  1.798196101
-13     (13) Thr aslt w weap  1.8616201  2.84628765  1.528930421
-14     (14) Simp aslt w inj  1.9222168  2.91364816  1.515774967
-23      (23) Pocket picking  0.4175783  0.58060867  1.390418656
-12    (12) At ag aslt w wea  0.9445746  1.20874280  1.279668951
-28    (41) At mtr veh theft  0.8516155  0.83424501  0.979602882
-7        (07) Rob wo injury  0.9184063  0.79151100  0.861831005
-27     (40) Motor veh theft  3.2266174  2.51912761  0.780733279
-34     (59) Attempted theft  2.1338121  1.53377651  0.718796433
-29         (54) Theft &lt; $10  4.6874456  2.99044406  0.637968804
-10       (10) At rob w aslt  1.2531138  0.79939700  0.637928485
-9     (09) At rob inj m asl  0.6782785  0.36317544  0.535437087
-6     (06) Rob w inj m aslt  1.2086143  0.40661895  0.336434003
-19    (19) Ver thr sex aslt  1.3092092  0.18048582  0.137858655
-22     (22) At purse snatch  0.4748362  0.05649058  0.118968566
-21     (21) Purse snatching  1.4721455  0.17000895  0.115483796
-8     (08) At rob inj s asl  3.5697303  0.16227313  0.045458092
-1       (01) Completed rape 16.3107677  0.32231630  0.019760952
-5     (05) Rob w inj s aslt 18.3027794  0.32108023  0.017542703
-15     (15) Sex aslt wo inj  4.7301698  0.06701006  0.014166523
-2       (02) Attempted rape  6.1213788  0.03285030  0.005366487
-3    (03) Sex aslt w s aslt  7.4204855  0.00000000  0.000000000
-4    (04) Sex aslt w m aslt  0.7744149  0.00000000  0.000000000
-16    (16) Unw sex wo force  2.5255649  0.00000000  0.000000000
-18     (18) Verbal thr rape  0.4900599  0.00000000  0.000000000</code></pre>
 </div>
 </div>
 
