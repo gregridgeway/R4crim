@@ -110,9 +110,9 @@ For now, we just want to work with agencies that have complete data.
 da35021.0001 <- subset(da35021.0001, V12=="(12) Dec last reported")
 ```
 
-#Creating a Dataframe
+# Creating a Dataframe
 
-Of course, for most criminological questions we're interested in, we don't need all 32 columns. For example, we don't need to know Variable 25 - "SPECIAL MAILING ADDRESS."  So, we'll create a smaller data frame with just the information we need.
+Of course, for most criminological questions we're interested in, we don't need all 32 columns. For example, we don't need to know Variable 25 - "SPECIAL MAILING ADDRESS." So, we'll create a smaller data frame with just the information we need.
 
 Think about the structure of this dataframe. Why are we making some of the variables "as.character?" As a hint, note that we didn't use "as.character with the POP variable.  What is the ORI variable?  What is the AGENCY variable? Note that stringsAsFactors=FALSE states that we should simply treat all strings as characters - and not as factor variables. 
 
