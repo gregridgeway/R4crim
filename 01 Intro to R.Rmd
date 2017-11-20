@@ -55,7 +55,7 @@ R, on a very unsophisticated level, is like a calculator.
 
 ```{r comment="", results='hold'}
 2+2
-1*2*3
+1*2*3*4
 (1+2+3-4)/(5*7)
 sqrt(2)
 (1+sqrt(5))/2 # golden ratio
