@@ -49,7 +49,7 @@ output:
 
 # Introduction
 
-A regular expression is a sequence of characters that defines a search pattern. Sometimes we use  regular expressions to help us find a pattern in text that we want, like the Find functionality in Word. Other times, we use a regular expression to help us find and *replace* a piece of text, like the Find and Replace Functionality in Word. The two main R functions that we will learn about are `grep()` and `gsub()`. You may use them in verb form (e.g., "I need to grep all the gun cases," "I was grepping like crazy to find all the opioid cases," "I first had to gsub the commas with semicolons"). Regular expressions are available in numerous other software packages, so everything you learn here will port over to using regular expressions in Linux, Stata, Python, Java, ArcGIS, and many others.
+A regular expression is a sequence of characters that defines a search pattern. Sometimes we use regular expressions to help us find a pattern in text that we want, like the Find functionality in Word. Other times, we use a regular expression to help us find and *replace* a piece of text, like the Find and Replace functionality in Word. The two main R functions that we will learn about are `grep()` and `gsub()`. You may use them in verb form (e.g., "I need to grep all the gun cases," "I was grepping like crazy to find all the opioid cases," "I first had to gsub the commas with semicolons"). Regular expressions are available in numerous other software packages, so everything you learn here will port over to using regular expressions in Linux, Stata, Python, Java, ArcGIS, and many others.
 
 We've already used regular expressions in previous work that we've done. We had to clean up the NCVS data since the text description of crime types changed from one year to the next. In 2012 the NCVS crime type had a leading 0, like "(01) Completed rape" and then in 2013 the crime type did not have the leading 0 like "(1) Completed rape". In order to tabulate the number of rapes in the calendar year 2012, we had to combine the data collected in 2012 and 2013 and reformat the crime types with rather mysterious looking code `gsub("\\(([1-9])\\)", "(0\\1)", data.inc$V4529)`. This will all become clear in these notes.
 
@@ -57,7 +57,7 @@ We've already used regular expressions in previous work that we've done. We had 
 
 First we'll learn about `grep()`, which was first developed in the early 1970s. `grep()` searches data for lines that match a given expression. The name `grep` is an acronym for "globally search a regular expression and print." Some tangible examples will help us see how `grep()` works.
 
-First, run the following line that provides a string of text with a diverse range of capitalization, letters, punctuation, and other features. 
+First, run the following line that provides a collect of text elements with a diverse range of capitalization, letters, punctuation, and other features. 
 
 ```{r comment="", results='hold'}
 dataText <- c("suspect",
@@ -85,56 +85,56 @@ dataText <- c("suspect",
 
 Let's find all of the items that have the letter "a" in `dataText`.
 ```{r comment="", results='hold'}
-grep("a",dataText)
+grep("a", dataText)
 ```
 This shows the indices of which elements of `dataText` have an "a" in them. Sure enough the fourth element, "9mm firearm", has an "a" and you can confirm that the other indices `grep()` returned also indicate elements of `dataText` that have an "a".
 
 For most of these notes we're going to set `value=TRUE`, which will return the actual elements matched rather than their indices. This will make it easier to check that `grep()` is finding the elements that we are expecting to match.
 ```{r comment="", results='hold'}
-grep("a",dataText,value=TRUE)
+grep("a", dataText, value=TRUE)
 ```
-As you can see, `grep()` uses the following general syntax: grep("what we're searching for", the text, and an optional value=TRUE if we want to return text). If we put `value=FALSE` or don't put `value=TRUE`, we will just receive the index in the text where we can find what we're searching for.
+As you can see, `grep()` uses the following general syntax: grep("what we're searching for", the text, and an optional `value=TRUE` if we want to return text). If we put `value=FALSE` or don't put `value=TRUE`, we will just receive the index in the text where we can find what we're searching for.
 
 Let's try another example. Instead of a letter, let's try to find a number such as "1". Specifically, which items in `dataText` have a "1" in them?
 
 ```{r comment="", results='hold'}
-grep("1",dataText,value=TRUE)
+grep("1", dataText, value=TRUE)
 ```
 
-We can also search for multiple characters, instead of individual characters. We place our list of desired characters within square brackets `[  ]` within the quotes. For example, let's find items that contain numbers. 
+We can also search for multiple characters, instead of individual characters. We place our list of desired characters within square brackets `[  ]`. For example, let's find items that contain numbers. 
 ```{r comment="", results='hold'}
-grep("[0123456789]",dataText,value=TRUE)
+grep("[0123456789]", dataText, value=TRUE)
 ```
 If we wanted items that contained an odd number, we could do this.
 ```{r comment="", results='hold'}
-grep("[13579]",dataText,value=TRUE)
+grep("[13579]", dataText, value=TRUE)
 ```
 So the `[]` in a regular expression means "match any of these characters." We can also place square brackets next to each other. For example, let's say we wanted to find an item in `dataText` that has four adjacent numbers.
 ```{r comment="", results='hold'}
-grep("[0-9][0-9][0-9][0-9]",dataText,value=TRUE)
+grep("[0-9][0-9][0-9][0-9]", dataText, value=TRUE)
 ```
 Note that we can use the shorthand `0-9` to mean any number between 0 and 9, including 0 and 9. This regular expression says "find a number, followed by a number, followed by another number, followed by another number." Alternatively we can use `{4}` to mean "match four of the previous character".
 ```{r comment="", results='hold'}
-grep("[0-9]{4}",dataText,value=TRUE)
+grep("[0-9]{4}", dataText, value=TRUE)
 ```
 {n} means the preceding item will be matched exactly n times. Note that this also matches text that has five or more numbers in a row, since if they have five numbers in a row, then they will also have four numbers in a row. Later we will learn about how to find exactly four numbers in a row.
 
 We can also use the squiggly brackets to make a range.
 ```{r comment="", results='hold'}
-grep("[0-9]{5,10}",dataText,value=TRUE)
+grep("[0-9]{5,10}", dataText, value=TRUE)
 ```
 
-Thus {n,m} will find something matched at least n times, but not more than m times. We've used examples above with numbers, but you can apply this syntax to letters. 
+Thus {n,m} will find something matched between n and m times. We've used examples above with numbers, but you can apply this syntax to letters.
 ```{r comment="", results='hold'}
-grep("[a-zA-Z]{5}",dataText,value=TRUE)
+grep("[a-zA-Z]{5}", dataText, value=TRUE)
 ```
 Note how we used the shorthand `a-z` to mean any lowercase letter and `A-Z` to mean any uppercase letter. `grep()` will match a different set of elements if we just search for lower case letters.
 ```{r comment="", results='hold'}
-grep("[a-z]{5}",dataText,value=TRUE)
+grep("[a-z]{5}", dataText, value=TRUE)
 ```
 Searches using `grep()` are case-sensitive. For example, let's find all items that contain capital letters.
 ```{r comment="", results='hold'}
-grep("[A-Z]",dataText,value=TRUE)
+grep("[A-Z]", dataText, value=TRUE)
 ```
 
 ### Exercises
