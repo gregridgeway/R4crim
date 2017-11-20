@@ -1,3 +1,4 @@
+
 ---
 title: "Working with National Crime Victimization Survey Data"
 author:
@@ -30,6 +31,7 @@ output:
 <!-- fontfamily: mathpazo -->
 <!-- --- -->
 <!-- PDF YAML header Ctrl-Shift-C to comment/uncomment -->
+
 
 
 
@@ -125,15 +127,15 @@ Let's examine in a bit more detail the first three rows of the person file. The 
 ```{r comment="", results='hold'}
 dataPers12[1:3, 1:40]
 ```
-Let's examine the corresponding household information. 
+Let's examine the corresponding household information. This dataset also has a lot of features so we will just show here the first 53  of `r ncol(dataHH12)` columns. 
 
 ```{r comment="", results='hold'}
-subset(dataHH12, IDHH=="2501017260961929294229224")
+subset(dataHH12, IDHH=="2501017260961929294229224")[,1:53]
 ```
 
-And the corresponding incident file:
+And the corresponding incident file (just the first 43 of `r ncol(dataInc12)` columns):
 ```{r comment="", results='hold'}
-dataInc12[1:3,]
+dataInc12[1:3, 1:43]
 ```
 
 Let's look at the month and year of crime incident variables
@@ -231,68 +233,85 @@ dataPers <- subset(dataPers, YEARQ>=2012.1 & YEARQ<=2013.2)
 
 # Creating Dataframe and Weights with Household and Person Data
 
-Now that we've created a person dataframe and an incident dataframe, we can merge them together. As with any merge, it's important to make a "key" upon which to sew the frames together.
+Now that we've created a person dataframe and an incident dataframe, we can merge them together. We will use `merge()` to pull age, marital status, and sex into the incident data. The `merge()` function has several parameters that communicate to R which features should be used to match and which ones should be merged. Here we tell `merge()` to use use a pair of features from the incident data (`IDPER` and `YEARQ`) and look up a row in `dataPers` with the same values of `IDPER` and `YEARQ`. We've selected only the five columns `IDPER`, `YEARQ`, `V3014`, `V3015`, and `V3018` from `dataPers`. The first two `merge()` uses to identify matching rows and the last three will be attached as new columns to `dataInc`.
 
-```{r comment="", results='hold'}
-dataInc$IDPER.YEARQ  <- with(dataInc,  paste(IDPER,YEARQ,sep="|"))
-dataPers$IDPER.YEARQ <- with(dataPers, paste(IDPER,YEARQ,sep="|"))
+```{r comment=""}
+a <- merge(dataInc,                     # incident data
+           dataPers[,c("IDPER","YEARQ", # IDPER & YEARQ unique IDs of person
+                       "V3014",         # age
+                       "V3015",         # marital status
+                       "V3018")],       # sex
+           by=c("IDPER","YEARQ"),       # variables used to merge
+           all.x=TRUE)                  # keep all incidents, even if not matched
 
-i <- match(dataInc$IDPER.YEARQ, dataPers$IDPER.YEARQ)
-dataInc[1:3,1:5]
-dataPers[i[1:3],1:5]
+# a should have the same number of rows as dataInc, but 3 additional new columns
+dim(dataInc)
+dim(a)
+# replace dataInc with a, now containing age, marital, and sex
+dataInc <- a
+
+# check merge for first incident
+dataInc[1,c("IDPER","YEARQ","V3014","V3015","V3018")]
+# check dataPers for this person's age, marital, and sex
+subset(dataPers, IDPER=="250105121075958229372843501" & YEARQ==2012.3,
+       select = c("IDPER","YEARQ","V3014","V3015","V3018"))
 ```
 
-Let's also merge in some demographic data, such as age categories.
+We can see that the first row of `dataInc` now has three additional columns, and that they have the correct values merged from the `dataPers` data.
+
+Let's give these new columns better names.
 ```{r comment="", results='hold'}
-dataInc$age      <- dataPers$V3014[i]
+names(dataInc)[names(dataInc)=="V3014"] <- "age"
+names(dataInc)[names(dataInc)=="V3015"] <- "marital"
+names(dataInc)[names(dataInc)=="V3018"] <- "sex"
+```
+Let's also create a new variable that breaks age into age categories.
+```{r comment="", results='hold'}
 dataInc$ageGroup <- cut(dataInc$age, breaks=c(0,16,21,35,45,60,110))
 ```
 
-Marital status is another useful category; note that "8" is a missing value indicator. Always refer to the Codebook if you are not sure what a variable or a categorical variable value means.
-
+Note that "8" is a missing value indicator for marital status. Always refer to the Codebook if you are not sure what a variable or a categorical variable value means.
 ```{r comment="", results='hold'}
-dataInc$marital <- dataPers$V3015[i]
 dataInc$marital[dataInc$marital==8] <- NA
 ```
-
-Note that factor variables in R put meaningful labels on categorical variables. Instead of working with the numbers 1-5 for marital status, let's assign the number values their actual corresponding names.
+Factor variables in R put meaningful labels on categorical variables. Instead of working with the numbers 1-5 for marital status, let's assign the number values their actual corresponding names.
 ```{r comment="", results='hold'}
 dataInc$marital <- factor(dataInc$marital, levels=1:5,
-                           labels=c("married","widowed","divorced",
-                                    "separated","never married"))
-dataInc$sex     <- dataPers$V3018[i]
+                        labels=c("married","widowed","divorced",
+                                 "separated","never married"))
 dataInc$sex <- factor(dataInc$sex, levels=1:2, 
-                       labels=c("male","female"))
+                      labels=c("male","female"))
 ```
 Let's get estimated counts by age group and sex
 ```{r comment="", results='hold'}
 aggregate(WGTVICDY~ageGroup+sex, data=dataInc, FUN=sum)
 ```
-We can also find out common crime type by sex
+We can also find out common crime type by sex. As before, `aggregate()` will total up the weights, but as you see in the ageGroup/sex example above, `aggregate()` produces the results in a long form. Sometimes this is useful, but sometimes we want to have our results side-by-side. We will use `reshape()` to convert the "long format" results from `aggregate()` to a "wide format".
 ```{r comment="", results='hold'}
 a <- aggregate(WGTVICDY~V4529+sex, data=dataInc, FUN=sum)
-b <- data.frame(crime=sort(unique(a$V4529)),
-                male=0,female=0)
-i <- match(a$V4529[a$sex=="male"], b$crime)
-b$male[i] <- a$WGTVICDY[a$sex=="male"]
-i <- match(a$V4529[a$sex=="female"], b$crime)
-b$female[i] <- a$WGTVICDY[a$sex=="female"]
+a <- reshape(a, timevar="sex", idvar="V4529", direction="wide")
+a[is.na(a)] <- 0
+names(a) <- c("crimeType","male","female")
+a
 ```
+
 We can then convert this result to column percentages. To obtain a column percentage, we divide counts for an individual cell by the total number of counts for the column. So, the sum of all the values in the male column should equal 100:
-```{r comment="", results='hold'}
-temp <- b
+```{r comment=""}
+temp <- a
 temp$male   <- with(temp, 100*male/  sum(male))
 temp$female <- with(temp, 100*female/sum(female))
+colSums(temp[,-1]) # check that the columns sum to 100
 temp$ratio <- temp$female/temp$male
 temp[order(-temp$ratio),]
 ```
 
-And convert to row percentages. Note that if we sum the value in the male column and the value in the female column, we get 100.
+Or we can compute row percentages to determine what percentage of each crime is male and female.
 ```{r comment="", results='hold'}
-temp <- b
+temp <- a
 row.total <- with(temp, male+female)
 temp$male   <- with(temp, 100*male/  row.total)
 temp$female <- with(temp, 100*female/row.total)
+rowSums(temp[,-1]) # check that the rows sum to 100
 temp$ratio <- temp$female/temp$male
 temp[order(-temp$ratio),]
 ```
@@ -351,19 +370,19 @@ with(subset(dataInc,V4529 %in% c("(11) Ag aslt w injury",
      by(WGTVICDY, V4241, sum))
 
 with(subset(dataInc,V4529 %in% c("(11) Ag aslt w injury", 
-                                  "(14) Simp aslt w inj",
-                                  "(12) At ag aslt w wea", 
-                                  "(17) Asl wo weap, wo inj", 
-                                  "(20) Verbal thr aslt", 
-                                  "(13) Thr aslt w weap")),
+                                 "(14) Simp aslt w inj",
+                                 "(12) At ag aslt w wea", 
+                                 "(17) Asl wo weap, wo inj", 
+                                 "(20) Verbal thr aslt", 
+                                 "(13) Thr aslt w weap")),
      by(WGTVICDY, V4245, sum))
 
 ```
 
-Note that with the multi-offender variable, we need to exclude values greater than 96. 
+The codebook tells us that with the multi-offender variable `V4248`, "97" does not mean 97 offenders. It means "don't know." 98 actually means "missing". 99 means "out of universe", which really means that the response was out of range. We mark as missing any values greater than or equal to 97. 
 
 ```{r comment="", results='hold'}
-dataInc$V4248[dataInc$V4248>=96] <- NA
+dataInc$V4248[dataInc$V4248>=97] <- NA
 dataInc$multOffender <- dataInc$V4248
 
 with(subset(dataInc,V4529 %in% c("(11) Ag aslt w injury", 
@@ -407,6 +426,12 @@ with(assault, by(WGTVICDY, unknownGun,  sum))
 with(assault, by(WGTVICDY, missing,     sum))
 with(assault, by(WGTVICDY, hit,         sum))
 ```
+Or use `sapply()` to avoid repetitive lines of code.
+```{r comment="", results='hide'}
+sapply(c("handgun","knife","otherGun","sharpObject","bluntObject","other","unknownGun","missing","hit"),
+       function(x) by(assault$WGTVICDY, assault[,x], sum))
+```
+
 
 ## Were the police called?
 Note that `V4399` refers to "Reported to Police"
@@ -444,16 +469,21 @@ with(subset(dataInc,V4529 %in% c("(11) Ag aslt w injury",
 
 First, let's use all the racial groups in the dataset.
 
-```{r comment="", results='hold'}
-dataInc$IDPER.YEARQ  <- with(dataInc,  paste(IDPER,YEARQ,sep="|"))
-dataPers$IDPER.YEARQ <- with(dataPers, paste(IDPER,YEARQ,sep="|"))
-i <- match(dataInc$IDPER.YEARQ, dataPers$IDPER.YEARQ)
-dataInc[1:3,1:5]
-dataPers[i[1:3],1:5]
-dataInc$race <- dataPers$V3023A[i]
+```{r comment=""}
+# merge in race
+a <- merge(dataInc,
+           dataPers[,c("IDPER","YEARQ",
+                       "V3023A",        # race
+                       "V3024")],       # and get hispanic, while we're at it
+           by=c("IDPER","YEARQ"),
+           all.x=TRUE)
+names(a)[names(a)=="V3023A"] <- "race"
+dataInc <- a
 
+# 98s are missing values
 dataInc$race[dataInc$race==98] <- NA
 
+# recode race as a factor variable
 dataInc$race <- factor(dataInc$race, levels=1:20,
                        labels=c("White", "Black", "AmerInd", "Asian",
                                 "HawaiianPacificIslander", "WhiteBlack",
@@ -464,75 +494,43 @@ dataInc$race <- factor(dataInc$race, levels=1:20,
                                 "AsianHawaiianPacificIslander", "WBAmerInd", 
                                 "WBAsian", "WAmerIndAsian", "WAsianHawaiian", 
                                 "2or3races", "4or5 races"))
-
 aggregate(WGTVICDY~race, data=dataInc, FUN=sum)
 
+# break down race and crime type
 a <- aggregate(WGTVICDY~V4529+race, data=dataInc, FUN=sum)
-a
-reshape(a, timevar="race", idvar="V4529", direction="wide")
-
-a[order(a$WGTVICDY),]
+# reshape and just show the first four columns here
+reshape(a, timevar="race", idvar="V4529", direction="wide")[,1:4]
 ```
 
 As the results indicate, the crime with the greatest number of victims, regardless of race, is generally Theft $50-$249.
 
 Let's also consider the most common crimes that affect Hispanics (binary variable Y/N):
 
-```{r comment="", results='hold'}
-i <- match(dataInc$IDPER.YEARQ, dataPers$IDPER.YEARQ)
-dataInc$hispanic <- dataPers$V3024[i]
-
+```{r comment=""}
+names(dataInc)[names(dataInc)=="V3024"] <- "hispanic"
+# recode "8" as missing
 dataInc$hispanic[dataInc$hispanic==8] <- NA
-
+# 1=Yes, 2=No 
 dataInc$hispanic <- factor(dataInc$hispanic, levels=1:2, labels=c("Yes","No"))
-
-aggregate(WGTVICDY~hispanic,data=dataInc,FUN=sum)
-
-x <- aggregate(WGTVICDY~V4529+hispanic,data=dataInc,FUN=sum)
-
-x[order(x$WGTVICDY),]
+aggregate(WGTVICDY~hispanic, data=dataInc, FUN=sum)
+a <- aggregate(WGTVICDY~V4529+hispanic, data=dataInc, FUN=sum)
+a[order(a$WGTVICDY),]
 ```
-
 
 ## Find crime types that disproportionately affect black victims
 
 As the below analysis finds, the crimes that disproportionately affect black victims compared to white victims are Verbal Threat of Sexual Assault, Attempted robbery with injury, Attempted Purse Snatching, and Purse Snatching.
 
 ```{r comment="", results='hold'}
-b <- data.frame(crime=sort(unique(a$V4529)),
-                White=0,Black=0)
-i <- match(a$V4529[a$race=="White"], b$crime)
-b$White[i] <- a$WGTVICDY[a$race=="White"]
-i <- match(a$V4529[a$race=="Black"], b$crime)
-b$Black[i] <- a$WGTVICDY[a$race=="Black"]
+a <- aggregate(WGTVICDY~V4529+race, data=dataInc, FUN=sum)
+a <- subset(a, race %in% c("Black","White"))
+temp <- reshape(a, timevar="race", idvar="V4529", direction="wide")
+temp[is.na(temp)] <- 0
+names(temp) <- c("crimeType","White","Black")
 
-temp <- b
-temp$White <- with(temp, 100*White/ sum(White))
+temp$White <- with(temp, 100*White/sum(White))
 temp$Black <- with(temp, 100*Black/sum(Black))
 temp$ratio <- temp$Black/temp$White
 temp[order(-temp$ratio),]
-```
-
-Or, we can also combine some races into a category called "Other" (instead of simply White). Note that our results change with the lead offense now being Burglary
-```{r comment="", results='hold'}
-b <- data.frame(crime=sort(unique(a$V4529)),
-                Other=0,Black=0)
-i <- match(a$V4529[a$race%in%c("White", "AmerInd", "Asian", "HawaiianPacificIslander")], b$crime)
-b$Other[i] <- a$WGTVICDY[a$race%in%c("White","AmerInd", "Asian", "HawaiianPacificIslander")]
-i <- match(a$V4529[a$race=="Black"], b$crime)
-b$Black[i] <- a$WGTVICDY[a$race=="Black"]
-
-temp <- b
-temp$Other <- with(temp, 100*Other/ sum(Other))
-temp$Black <- with(temp, 100*Black/sum(Black))
-temp$ratio <- temp$Black/temp$Other
-temp[order(-temp$ratio),]
-
-b <- data.frame(crime=sort(unique(a$V4529)),
-                Other=0,Black=0)
-i <- match(a$V4529[a$race%in%c("White", "AmerInd", "Asian", "HawaiianPacificIslander")], b$crime)
-b$Other[i] <- a$WGTVICDY[a$race%in%c("White","AmerInd", "Asian", "HawaiianPacificIslander")]
-i <- match(a$V4529[a$race=="Black"], b$crime)
-b$Black[i] <- a$WGTVICDY[a$race=="Black"]
 ```
 
