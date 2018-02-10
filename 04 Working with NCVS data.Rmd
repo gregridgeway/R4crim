@@ -54,7 +54,7 @@ knitr::opts_chunk$set(echo=TRUE, cache=TRUE, cache.lazy=FALSE)
 
 # Introduction - National Crime Victimization Survey Data
 
-Through our work with the UCR, we've already discussed reported crime. Nonetheless, not all crimes are reported to the police. Also, sometimes the UCR doesn't provide us with specific information about a crime incident involving a victim such as who the offenders were in relationship to the victim or where the crime incident occurred. 
+Through our work with the UCR, we've already discussed reported crime. Nonetheless, not all crimes are reported to the police. Also, sometimes the UCR doesn't provide us with specific information about a victim-involved crime incident such as whether the victim knew the offenders or the location of the crime incident. 
 
 Each year, the U.S. Census Bureau conducts the National Crime Victimization Survey (NCVS), which is a valuable source of self-reported victimization data. The Census Bureau interviews a sample of people about the number and characteristics of crime victimizations they experienced during the prior 6 months. In 2015, for example, they collected data from 95,760 households and 163,880 persons.   
 
