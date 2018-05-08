@@ -367,8 +367,17 @@ points(a[which.max(a$crimecount), 2:3],pch=16, col="salmon",cex=4)
 a[which.max(a$crimecount),2:3]
 ```
 
+#One More SQL Tip
 
+SQL sometimes has a hard time recognizing a column name with a period (.) in it.  For example, if you were to run the following query, you might get a message that there is no column called Crime.Type when, in fact, there is such a column in your dataset.
+res <- dbSendQuery(con, "
+                   SELECT Crime.Type, Longitude, Latitude
+                   FROM oshkoshcrime") 
+fetch(res, n = 10)
 
-
-
-
+So, to get around this, just put brackets around Crime.Type so that the new query is:
+res <- dbSendQuery(con, "
+                   SELECT [Crime.Type], Longitude, Latitude
+                   FROM oshkoshcrime") 
+fetch(res, n = 10)
+And, of course, you could also just change the column name to something without a period.
