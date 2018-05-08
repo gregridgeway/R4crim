@@ -33,7 +33,33 @@ https://data.cityofchicago.org/api/views/ijzp-q8t2/rows.csv?accessType=DOWNLOAD
 
 The Chicago crime data is voluminous - and would be too much for R, by itself, to handle. So SQL helps make working with voluminous datasets do-able. 
 
-Importantly, however, SQL is very particular about the formatting of a file.  For example, a .csv ("comma-separated file") will need to be converted to a semi-colon separated file. We will cover how to clean a file in a different section.
+Importantly, however, SQL is very particular about the formatting of a file.  For example, a .csv ("comma-separated file") will need to be converted to a semi-colon separated file. Let's take a slight detour right now to find out how to convert a comma-separated file into a semi-colon separated file. You'll know if you need to convert your file if, when you try to set up your SQL database, you receive an error message about an "extra column."  The problem is that your csv file is comma separated, but, there's an extra comma in the dataset.
+
+SQL becomes confused, thinking that there must be an "extra column" because of the extra comma.  TThe below script converts your csv file from a comma-separated to a semi-colon-separated file - and takes care of the extra comma problem.  Once you've run this script, you can proceed with setting up your database (remember to use the new csv file).
+
+This script essentially sets up an input file and an output file. Remember to make two different file names for the input file and the output file. 
+
+#beginning of script
+infile <- file("citydata.csv", 'r')
+outfile <- file("citydataclean.csv", 'w')
+
+c.lines <- 0
+# loop through the data, 100,000 rows at a time,
+# changing commas not in quotes to semi-colons
+while ((length(a <- readLines(infile, n=100000)) > 0))
+{
+c.lines <- c.lines + length(a)
+print(c.lines)
+# remove any semi-colons if they are there
+a <- gsub(";", "", a)
+# use ?= to "lookahead" for paired quotes
+a <- gsub("(,)(?=(?:[^\"]|\"[^\"]*\")*$)", ";", a, perl=TRUE)
+# write the cleaned up data to storage
+writeLines(a, con=outfile)
+}
+close(infile)
+close(outfile)
+#end of script
 
 For now, we'll use a file that we've already cleaned; let's look at the first five lines of the dataset.
 
