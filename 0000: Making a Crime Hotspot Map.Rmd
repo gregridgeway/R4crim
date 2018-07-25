@@ -1,0 +1,164 @@
+---
+title: "Making a Hotspot Map"
+author: "XXXXXXXXXXXXXX"
+date: "March 9, 2018"
+output: html_document
+---
+
+Now that we've learned how to work with SQL, we can make a hotspot map with a large dataset. The concept of determining the geographic locations where crime is most intense - crime hotspots - is very important to criminological theory as well as to the very practical question of where police officers should be deployed. 
+
+Here, we will make hotspot maps with our Chicago crime data (which requires use of SQL). Of course, if you had a small dataset, you could use these same methods to make a hotspot map using only R. 
+
+First, you'll need to install two packages, ggmap and hexbin. With ggmap, it's extremely important that you have the newest version. However, before installing and attaching the newest version of ggmap, you need to make sure you have the latest version of R. An easy way to update R (or to confirm that your R version is updated) is to click on "Help" and then "Check for Updates." 
+
+Next, you should access the latest version of ggmap, which is available at the following website: https://github.com/dkahle/ggmap
+
+At the bottom of the website, there is a line of code that you need to run. For convenience, we have copied and pasted it below:
+
+```{r comment="", results='hold'} 
+devtools::install_github("dkahle/ggmap")
+```
+
+Next, attach the ggmap and hexbin packages:
+
+```{r comment="", results='hold'} 
+library(ggmap)
+library(hexbin)
+```
+
+After you've attached the packages, you'll need run an SQL query that will create a dataset with two columns, Latitude and Longitude, and a row for each crime incident in the dataset.  
+
+```{r comment="", results='hold'} 
+res <- dbSendQuery(con, "
+                   SELECT Latitude,Longitude
+                   FROM crime")
+a <- fetch(res, n = -1)
+dbClearResult(res)
+```
+
+How would your query differ if you wanted to do a hotspot map of only assaults? 
+
+```{r comment="", results='hold'} 
+res <- dbSendQuery(con, "
+                   SELECT Latitude,Longitude
+                   FROM crime
+                   WHERE PrimaryType='ASSAULT'")
+b <- fetch(res, n = -1)
+dbClearResult(res)
+```
+
+Next, we'll need to get a map of Chicago. The ggmap package enables us to obtain a Google Maps map. Try changing the zoom level. Experiment with moving the legend. 
+
+If you type get_map in R or type ?ggmap, you'll see an array of different options for your map.  Instead of doing maptype="satellite," try maptype="hybrid"  What's the difference?   
+
+```{r comment="", results='hold'}
+chicago.map <- ggmap(get_map("Chicago", zoom = 11, maptype = "satellite"),extent="device",legend="topright")
+chicago.map
+```
+
+Let's plot as points on the Chicago map, a random sample of 100,000 rows from our dataset.  It doesn't look terribly useful because it is just a giant red splotch.  These are all the points where a crime occurred - there's no density to show us the high crime or low crime areas. But, we're making process with getting points onto a map! 
+
+```{r comment="", results='hold'}
+i <- sample(1:nrow(a),100000)
+chicago.map +
+  geom_point(aes(x=Longitude,y=Latitude), data=a[i,],
+             alpha=0.5, color="darkred", size = 1)
+```
+
+Let's instead try plotting hexagonal bins. 
+
+```{r comment="", results='hold'}
+chicago.map +
+  coord_cartesian() +
+  stat_binhex(aes(x=Longitude, y=Latitude),
+              bins=60, data = a)
+```
+
+Or try the following.  What does the alpha=2/4 do?
+
+```{r comment="", results='hold'}
+chicago.map +
+  coord_cartesian() +
+  stat_binhex(aes(x=Longitude, y=Latitude),
+              bins=60, alpha = 2/4, data = a)
+```
+
+The previous map was a default monochromatic color (blue). You can change the color gradient. To see what colors are available, type colors()
+
+```{r comment="", results='hold'}
+chicago.map +
+  coord_cartesian() +
+  stat_binhex(aes(x=Longitude, y=Latitude),
+              bins=60, alpha = 2/4, data = a) +
+  scale_fill_gradient('Crime Density',low="springgreen",high="hotpink")
+```
+
+You can also do a map that shows the high crime areas in a way that is akin to elevation on a topographic map. The more concentrated the concentric areas, the higher the crime (or, in the case of a topographic map, the higher the terrain).
+
+Note that a plot using stat_density2d() requires a lot of memory; that's why it's a good idea to use a sample of cases:
+
+```{r comment="", results='hold'}
+i <- sample(1:nrow(a),100000)
+chicago.map +
+  stat_density2d(aes(x=Longitude,y=Latitude),
+  bins = 5, data = a[i,], geom = 'density2d',
+  col='white')
+```
+
+Let's make a hotspot map with a gradient, red for high crime and green for low crime. 
+
+```{r comment="", results='hold'}
+
+chicago.map +
+  stat_density2d(aes(x=Longitude,y=Latitude,fill=..level..,alpha=..level..),
+                 data = a[i,], geom = 'polygon') +
+  scale_fill_gradient('Crime Density',low="green",high="red") +
+  scale_alpha(range = c(.4, .75), guide = FALSE) +
+  guides(fill = guide_colorbar(barwidth = 1.5, barheight = 10))
+```
+
+```
+
+We can use bins to control the number of levels of colors plotted. 
+
+```{r comment="", results='hold'}
+chicago.map +
+  stat_density2d(aes(x=Longitude,y=Latitude,fill=..level..,alpha=..level..),
+                 bins = 20, data = a[i,], geom = 'polygon') +
+  scale_fill_gradient('Crime Density',low="green",high="red") +
+  scale_alpha(range = c(.4, .75), guide = FALSE) +
+  guides(fill = guide_colorbar(barwidth = 1.5, barheight = 10))
+```
+
+Let's do hotspot maps with just motor vehicle theft, and let's make a map for each year between 2005 and 2014.  Note the line with the command SUBSTR. The SUBSTR command helps us grab a section of a string. Here's an example. Take a look at the Date column in our initial dataset.  We want only the year. It's in the 7th position. The year is only 4 spaces long.  So the syntax of SUBSTR is: SUBSTR(string, start, length) 
+
+```{r comment="", results='hold'}
+
+res <- dbSendQuery(con, "
+                   SELECT Latitude,Longitude,
+                   SUBSTR(Date,7,4) AS year
+                   FROM crime
+                   WHERE PrimaryType='MOTOR VEHICLE THEFT'")
+b <- fetch(res, n = -1)
+dbClearResult(res)
+
+for(year0 in 2005:2014)
+{
+  print(
+    chicago.map +
+      stat_density2d(aes(x=Longitude,y=Latitude,fill=..level..,alpha=..level..),
+                     size = 2, bins = 4, geom = 'polygon',
+                     data = subset(b,year==year0)) +
+      scale_fill_gradient(year0) +
+      scale_alpha(range = c(.4, .75), guide = FALSE) +
+      guides(fill = guide_colorbar(barwidth = 1.5, barheight = 10))
+  )
+  Sys.sleep(5) # pause for 5 seconds
+}
+
+```
+
+Many cities other than Chicago have accessible incident-level data so that you can try to make a hotspot map. Cities include Jersey City, Philadelphia, Los Angeles, Seattle, San Francisco, Baltimore, and Washington, DC. To work with the data from some of these cities, it's necessary to learn some tricks to clean up the dataset. We'll cover that topic in a different post. 
+
+
+
