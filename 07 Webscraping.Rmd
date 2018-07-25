@@ -1,9 +1,52 @@
+
 ---
-title: "Webscraping and Parallel Implementation"
-author: "XXXXXX"
-date: "November 20, 2017"
-output: html_document
+title: "Webscraping and Parallel Processing"
+author:
+- affiliation: University of Pennsylvania
+  email: gridge@upenn.edu
+  name: Greg Ridgeway
+- affiliation: University of Pennsylvania
+  email: moyruth@upenn.edu
+  name: Ruth Moyer
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    css: htmlstyle.css
 ---
+
+<!-- HTML YAML header Ctrl-Shift-C to comment/uncomment -->
+
+
+<!-- --- -->
+<!-- title: "Introduction to R" -->
+<!-- author: -->
+<!-- - Greg Ridgeway (gridge@upenn.edu) -->
+<!-- - Ruth Moyer (moyruth@upenn.edu) -->
+<!-- date: "`r format(Sys.time(), '%B %d, %Y')`" -->
+<!-- output: -->
+<!--   pdf_document: -->
+<!--     latex_engine: pdflatex -->
+<!--   html_document: default -->
+<!-- fontsize: 11pt -->
+<!-- fontfamily: mathpazo -->
+<!-- --- -->
+<!-- PDF YAML header Ctrl-Shift-C to comment/uncomment -->
+
+
+
+
+<!-- A function for autmomating the numbering and wording of the exercise questions -->
+```{r echo=FALSE}
+.counterExercise <- 0
+.exerciseQuestions <- NULL
+.exNum <- function(.questionText="") 
+{
+   .counterExercise <<- .counterExercise+1
+   .exerciseQuestions <<- c(.exerciseQuestions, .questionText)
+   return(paste0(.counterExercise,". ",.questionText))
+}
+```
+
 
 #Introduction 
 At the end of our discussion about regular expressions, we introduced the concept of web scraping. Not all online data is in a tidy, downloadable format such as a .csv or .rda file. Yet, patterns in the underlying html code and regular expressions together provide a valuable way to "scrape" data off of a webpage. Here, we're going to give a slightly more complicated example of web scraping. 
