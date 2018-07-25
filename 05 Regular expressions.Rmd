@@ -105,7 +105,7 @@ We can also search for multiple characters, instead of individual characters. We
 ```{r comment="", results='hold'}
 grep("[0123456789]", dataText, value=TRUE)
 ```
-If we wanted items that contained an odd number, we could do this.
+If we wanted items that contain an odd number, we could do this.
 ```{r comment="", results='hold'}
 grep("[13579]", dataText, value=TRUE)
 ```
@@ -210,7 +210,7 @@ Here's how we can find words that have exactly four characters. To be exactly fo
 ```{r comment="", results='hold'}
 grep("( |^)[A-Za-z]{4}( |$)",dataText,value=TRUE)
 ```
-Note that this did not select "Phil." since it has a period following it. We'll need a more generaly regular expression to select that one as well.
+Note that this did not select "Phil." since it has a period following it. We'll need a more general regular expression to select that one as well.
 
 Let's try to find phone numbers in `dataText`. The problem is that phone numbers have three different formats in our data. The easiest phone number pattern to find is the one with 10 digits in a row.
 ```{r comment="", results='hold'}
@@ -316,7 +316,7 @@ Now let's go back to that regular expression we used to standardize the NCVS cri
 `r .exNum('Add commas to these numbers \x60c("9453","2332","4645","1234")\x60.')` That is, make these numbers look like 9,453 and 2,332 and so on. Fill in the find pattern and replacement pattern in `gsub("", "", c("9453","2332","4645","1234"))`
    
 ## Lookaheads
-Although not as commonly used as a backreference, a "lookhead" can be helpful to find what comes next - or more generally to `gsub()` items that are a bit more complicated.  Here is an illustration of what a lookahead does. Let's say you wanted to check that every q is followed by a u. If it's not, then insert the u after the q.
+Although not as commonly used as a backreference, a "lookahead" can be helpful to find what comes next - or more generally to `gsub()` items that are a bit more complicated.  Here is an illustration of what a lookahead does. Let's say you wanted to check that every q is followed by a u. If it's not, then insert the u after the q.
 
 Maybe you would do something like this
 ```{r comment="", results='hold'} 
@@ -373,7 +373,7 @@ words <- scan("http://en.wiktionary.org/wiki/Wiktionary:Frequency_lists/PG/2006/
 ```
 If you get an error saying this page is forbidden, try changing the `http` to `https`. If instead you got a message like "Read 50247 items" then you're in luck. You just used R to scrape a webpage. You might get a number different from 50247 and it might change if you run the script another day. Websites make updates to headers, footers, and banners and these changes change the number of lines of HTML code required to generate the page.
 
-The first several lines of HTML code in `words` all contain HTML code to set up the page
+The first several lines of HTML code in `words` all contain HTML code to set up the page.
 ```{r comment="", results='hold'}
 words[1:6]
 ```

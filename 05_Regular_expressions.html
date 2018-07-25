@@ -10,7 +10,7 @@
 
 
 
-<meta name="date" content="2017-11-20" />
+<meta name="date" content="2018-07-25" />
 
 <title>Regular Expressions</title>
 
@@ -35,7 +35,7 @@ if (window.hljs) {
   hljs.configure({languages: []});
   hljs.initHighlightingOnLoad();
   if (document.readyState && document.readyState === "complete") {
-    window.setTimeout(function() { hljs.initHighlightingOnLoad(); }, 0);
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
   }
 }
 </script>
@@ -128,7 +128,7 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
 <address class="author_afil">
 University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="mailto:moyruth@upenn.edu">moyruth@upenn.edu</a></a>
 </address>
-<h4 class="date"><em>November 20, 2017</em></h4>
+<h4 class="date"><em>July 25, 2018</em></h4>
 
 </div>
 
@@ -139,7 +139,7 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
 <!-- author: -->
 <!-- - Greg Ridgeway (gridge@upenn.edu) -->
 <!-- - Ruth Moyer (moyruth@upenn.edu) -->
-<!-- date: "November 20, 2017" -->
+<!-- date: "July 25, 2018" -->
 <!-- output: -->
 <!--   pdf_document: -->
 <!--     latex_engine: pdflatex -->
@@ -199,7 +199,7 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
  [7] &quot;19104-6286&quot;          &quot;20015&quot;               &quot;90291&quot;              
 [10] &quot;90210&quot;               &quot;(215) 573-9097&quot;      &quot;215-573-9097&quot;       
 [13] &quot;2155739097&quot;         </code></pre>
-<p>If we wanted items that contained an odd number, we could do this.</p>
+<p>If we wanted items that contain an odd number, we could do this.</p>
 <pre class="r"><code>grep(&quot;[13579]&quot;, dataText, value=TRUE)</code></pre>
 <pre><code> [1] &quot;3 suspects&quot;          &quot;9mm firearm&quot;         &quot;483 McNeil Building&quot;
  [4] &quot;3718 Locust Walk&quot;    &quot;10880 Malibu Point&quot;  &quot;19104-6286&quot;         
@@ -308,7 +308,7 @@ grep(&quot;7$&quot;,dataText,value=TRUE)</code></pre>
 <p>Here’s how we can find words that have exactly four characters. To be exactly four characters, on either side of them there needs to be a space or the beginning or end of the line.</p>
 <pre class="r"><code>grep(&quot;( |^)[A-Za-z]{4}( |$)&quot;,dataText,value=TRUE)</code></pre>
 <pre><code>[1] &quot;3718 Locust Walk&quot; &quot;Phil Dunphy&quot;     </code></pre>
-<p>Note that this did not select “Phil.” since it has a period following it. We’ll need a more generaly regular expression to select that one as well.</p>
+<p>Note that this did not select “Phil.” since it has a period following it. We’ll need a more general regular expression to select that one as well.</p>
 <p>Let’s try to find phone numbers in <code>dataText</code>. The problem is that phone numbers have three different formats in our data. The easiest phone number pattern to find is the one with 10 digits in a row.</p>
 <pre class="r"><code>grep(&quot;[0-9]{10}&quot;,dataText,value=TRUE)</code></pre>
 <pre><code>[1] &quot;2155739097&quot;</code></pre>
@@ -431,7 +431,7 @@ grep(&quot;Phil(adelphia)?&quot;,dataText,value=TRUE)</code></pre>
 </div>
 <div id="lookaheads" class="section level2">
 <h2>Lookaheads</h2>
-<p>Although not as commonly used as a backreference, a “lookhead” can be helpful to find what comes next - or more generally to <code>gsub()</code> items that are a bit more complicated. Here is an illustration of what a lookahead does. Let’s say you wanted to check that every q is followed by a u. If it’s not, then insert the u after the q.</p>
+<p>Although not as commonly used as a backreference, a “lookahead” can be helpful to find what comes next - or more generally to <code>gsub()</code> items that are a bit more complicated. Here is an illustration of what a lookahead does. Let’s say you wanted to check that every q is followed by a u. If it’s not, then insert the u after the q.</p>
 <p>Maybe you would do something like this</p>
 <pre class="r"><code>gsub(&quot;q[^u]&quot;,&quot;qu&quot;,c(&quot;quiet&quot;,&quot;quick&quot;,&quot;quagmire&quot;,&quot;qixotic&quot;))</code></pre>
 <pre><code>[1] &quot;quiet&quot;    &quot;quick&quot;    &quot;quagmire&quot; &quot;quxotic&quot; </code></pre>
@@ -471,7 +471,7 @@ cat(text.w.quotes,&quot;\n&quot;)</code></pre>
 <pre class="r"><code>words &lt;- scan(&quot;http://en.wiktionary.org/wiki/Wiktionary:Frequency_lists/PG/2006/04/1-10000&quot;,
           what=&quot;&quot;,sep=&quot;\n&quot;)</code></pre>
 <p>If you get an error saying this page is forbidden, try changing the <code>http</code> to <code>https</code>. If instead you got a message like “Read 50247 items” then you’re in luck. You just used R to scrape a webpage. You might get a number different from 50247 and it might change if you run the script another day. Websites make updates to headers, footers, and banners and these changes change the number of lines of HTML code required to generate the page.</p>
-<p>The first several lines of HTML code in <code>words</code> all contain HTML code to set up the page</p>
+<p>The first several lines of HTML code in <code>words</code> all contain HTML code to set up the page.</p>
 <pre class="r"><code>words[1:6]</code></pre>
 <pre><code>[1] &quot;&lt;!DOCTYPE html&gt;&quot;                                                                                                                                    
 [2] &quot;&lt;html class=\&quot;client-nojs\&quot; lang=\&quot;en\&quot; dir=\&quot;ltr\&quot;&gt;&quot;                                                                                               
@@ -481,17 +481,17 @@ cat(text.w.quotes,&quot;\n&quot;)</code></pre>
 [6] &quot;&lt;script&gt;document.documentElement.className = document.documentElement.className.replace( /(^|\\s)client-nojs(\\s|$)/, \&quot;$1client-js$2\&quot; );&lt;/script&gt;&quot;</code></pre>
 <p>There’s nothing of interest to us here. We just want the part with the 9,999 most common words. Let’s look further down the page.</p>
 <pre class="r"><code>words[300:310]</code></pre>
-<pre><code> [1] &quot;&lt;td&gt;51&lt;/td&gt;&quot;                                               
- [2] &quot;&lt;td&gt;&lt;a href=\&quot;/wiki/there\&quot; title=\&quot;there\&quot;&gt;there&lt;/a&gt;&lt;/td&gt;&quot;
- [3] &quot;&lt;td&gt;1961200&lt;/td&gt;&quot;                                          
- [4] &quot;&lt;/tr&gt;&quot;                                                     
- [5] &quot;&lt;tr&gt;&quot;                                                      
- [6] &quot;&lt;td&gt;52&lt;/td&gt;&quot;                                               
- [7] &quot;&lt;td&gt;&lt;a href=\&quot;/wiki/if\&quot; title=\&quot;if\&quot;&gt;if&lt;/a&gt;&lt;/td&gt;&quot;         
- [8] &quot;&lt;td&gt;1951102&lt;/td&gt;&quot;                                          
- [9] &quot;&lt;/tr&gt;&quot;                                                     
-[10] &quot;&lt;tr&gt;&quot;                                                      
-[11] &quot;&lt;td&gt;53&lt;/td&gt;&quot;                                               </code></pre>
+<pre><code> [1] &quot;&lt;tr&gt;&quot;                                                      
+ [2] &quot;&lt;td&gt;51&lt;/td&gt;&quot;                                               
+ [3] &quot;&lt;td&gt;&lt;a href=\&quot;/wiki/there\&quot; title=\&quot;there\&quot;&gt;there&lt;/a&gt;&lt;/td&gt;&quot;
+ [4] &quot;&lt;td&gt;1961200&quot;                                               
+ [5] &quot;&lt;/td&gt;&lt;/tr&gt;&quot;                                                
+ [6] &quot;&lt;tr&gt;&quot;                                                      
+ [7] &quot;&lt;td&gt;52&lt;/td&gt;&quot;                                               
+ [8] &quot;&lt;td&gt;&lt;a href=\&quot;/wiki/if\&quot; title=\&quot;if\&quot;&gt;if&lt;/a&gt;&lt;/td&gt;&quot;         
+ [9] &quot;&lt;td&gt;1951102&quot;                                               
+[10] &quot;&lt;/td&gt;&lt;/tr&gt;&quot;                                                
+[11] &quot;&lt;tr&gt;&quot;                                                      </code></pre>
 <p>Here we start finding some words! Note that every line that has one of the words we are looking for has <code>title=\&quot;</code>. We can use that phrase to find lines that have the 9,999 words on them. Use <code>grep()</code> to find those lines and print out the first 10 of them to see if this will work for us.</p>
 <pre class="r"><code>words &lt;- grep(&quot;title=\&quot;&quot;, words, value=TRUE)
 words[1:10]</code></pre>
@@ -516,12 +516,12 @@ tail(words) # look at the last several rows</code></pre>
 [4] &quot;&lt;td&gt;&lt;a href=\&quot;/wiki/to\&quot; title=\&quot;to\&quot;&gt;to&lt;/a&gt;&lt;/td&gt;&quot;   
 [5] &quot;&lt;td&gt;&lt;a href=\&quot;/wiki/in\&quot; title=\&quot;in\&quot;&gt;in&lt;/a&gt;&lt;/td&gt;&quot;   
 [6] &quot;&lt;td&gt;&lt;a href=\&quot;/wiki/i\&quot; title=\&quot;i\&quot;&gt;i&lt;/a&gt;&lt;/td&gt;&quot;      
-[1] &quot;&lt;td&gt;&lt;a href=\&quot;/wiki/film\&quot; title=\&quot;film\&quot;&gt;film&lt;/a&gt;&lt;/td&gt;&quot;                     
-[2] &quot;&lt;td&gt;&lt;a href=\&quot;/wiki/repressed\&quot; title=\&quot;repressed\&quot;&gt;repressed&lt;/a&gt;&lt;/td&gt;&quot;      
-[3] &quot;&lt;td&gt;&lt;a href=\&quot;/wiki/cooperation\&quot; title=\&quot;cooperation\&quot;&gt;cooperation&lt;/a&gt;&lt;/td&gt;&quot;
-[4] &quot;&lt;td&gt;&lt;a href=\&quot;/wiki/sequel\&quot; title=\&quot;sequel\&quot;&gt;sequel&lt;/a&gt;&lt;/td&gt;&quot;               
-[5] &quot;&lt;td&gt;&lt;a href=\&quot;/wiki/wench\&quot; title=\&quot;wench\&quot;&gt;wench&lt;/a&gt;&lt;/td&gt;&quot;                  
-[6] &quot;&lt;td&gt;&lt;a href=\&quot;/wiki/calves\&quot; title=\&quot;calves\&quot;&gt;calves&lt;/a&gt;&lt;/td&gt;&quot;               </code></pre>
+[1] &quot;&lt;td&gt;&lt;a href=\&quot;/wiki/experimental\&quot; title=\&quot;experimental\&quot;&gt;experimental&lt;/a&gt;&lt;/td&gt;&quot;
+[2] &quot;&lt;td&gt;&lt;a href=\&quot;/wiki/film\&quot; title=\&quot;film\&quot;&gt;film&lt;/a&gt;&lt;/td&gt;&quot;                        
+[3] &quot;&lt;td&gt;&lt;a href=\&quot;/wiki/repressed\&quot; title=\&quot;repressed\&quot;&gt;repressed&lt;/a&gt;&lt;/td&gt;&quot;         
+[4] &quot;&lt;td&gt;&lt;a href=\&quot;/wiki/cooperation\&quot; title=\&quot;cooperation\&quot;&gt;cooperation&lt;/a&gt;&lt;/td&gt;&quot;   
+[5] &quot;&lt;td&gt;&lt;a href=\&quot;/wiki/sequel\&quot; title=\&quot;sequel\&quot;&gt;sequel&lt;/a&gt;&lt;/td&gt;&quot;                  
+[6] &quot;&lt;td&gt;&lt;a href=\&quot;/wiki/wench\&quot; title=\&quot;wench\&quot;&gt;wench&lt;/a&gt;&lt;/td&gt;&quot;                     </code></pre>
 <p>These lines have the text we need, but there are still a lot of HTML tags, all that HTML code wrapped in <code>&lt; &gt;</code>. <code>&lt;td&gt;</code> is the HTML tag marking a cell in a table and <code>&lt;a&gt;</code> is the HTML tag for creating hyperlinks to other pages. Each of these also has ending tags <code>&lt;/td&gt;</code> and <code>&lt;/a&gt;</code>. Fortunately for us they are all contained within the <code>&lt;</code> and <code>&gt;</code> characters. So let’s use <code>gsub()</code> to remove all the HTMl tags.</p>
 <pre class="r"><code>words &lt;- gsub(&quot;&lt;[^&gt;]*&gt;&quot;,&quot;&quot;,words)</code></pre>
 <p>This regular expression looks for a <code>&lt;</code>, then a bunch of characters that are not a <code>&gt;</code>, followed by a <code>&gt;</code> and replaces them with nothing. Now <code>words</code> contains just our list of 9,999 most common words. Here are the first 50 of them.</p>
