@@ -17,7 +17,7 @@ output:
 
 
 <!-- --- -->
-<!-- title: "Introduction to R" -->
+<!-- title: "Regular Expressions" -->
 <!-- author: -->
 <!-- - Greg Ridgeway (gridge@upenn.edu) -->
 <!-- - Ruth Moyer (moyruth@upenn.edu) -->
