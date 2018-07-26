@@ -50,7 +50,7 @@ Earlier in the semester, we worked with one dataset from the UCR, Law Enforcemen
 list.files("UCR2012/", recursive=TRUE)
 ```
 
-For each year, there will be a zip file to download. There are two main files within the zip file that we will be using: (1) a .rda file (which contains your datain R format) and (2) the codebook (which is in PDF format).
+For each year, there will be a zip file to download. There are two main files within the zip file that we will be using: (1) a .rda file (which contains your data in R format) and (2) the codebook (which is in PDF format).
 
 The data file has monthly data on the number of Crime Index offenses reported and the number of offenses cleared by arrest or other means. Thus, the data isn't "incident-level" data - in contrast to the Chicago data that we've worked with. The data instead includes crime counts for each agency. You can get helpful summaries about the UCR OKCA data [here](https://www.icpsr.umich.edu/icpsrweb/content/NACJD/guides/ucr.html) and [here](https://www.fbi.gov/news/pressrel/press-releases/fbi-releases-2016-crime-statistics). 
 
@@ -74,6 +74,8 @@ Let's look at the first two rows. Each row describes the features of one law enf
 ```{r comment="", results='hold'}
 da35021.0001[1:2,]
 ```
+
+
 
 We need to refer to the codebook. Open up the [codebook](http://www.icpsr.umich.edu/cgi-bin/file?comp=none&study=35021&ds=1&file_id=1154736&path=NACJD) and flip through the pages. Starting on page 11 you can see what each variable is and clicking on the variable name in the pdf will give you more details on the agency attribute. 
 
