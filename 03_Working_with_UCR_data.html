@@ -822,7 +822,7 @@ for(xj in var.names) print(table(da35021.0001[,xj]))</code></pre>
 <pre class="r"><code>da35021.0001 &lt;- subset(da35021.0001, V12==&quot;(12) Dec last reported&quot;)</code></pre>
 </div>
 <div id="creating-a-dataframe" class="section level1">
-<h1>Creating a Dataframe</h1>
+<h1>Creating a dataframe</h1>
 <p>Of course, for most criminological questions we’re interested in, we don’t need all 32 columns. For example, we don’t need to know Variable 25 - “SPECIAL MAILING ADDRESS.” So, we’ll create a smaller data frame with just the information we need.</p>
 <p>Think about the structure of this dataframe. Why are we making some of the variables “as.character?” As a hint, note that we didn’t use “as.character with the POP variable. What is the ORI variable? What is the AGENCY variable? Note that stringsAsFactors=FALSE states that we should simply treat all strings as characters - and not as factor variables.</p>
 <p>What do you notice that is useful about this new dataframe? Hint - it has to do with the variable names. Each row in our dataset refers to an individual agency.</p>
@@ -866,8 +866,8 @@ var.names &lt;- grep(&quot;ACT # VHC THEFT&quot;,var.lookup,value=TRUE)
 var.names &lt;- names(var.names)
 ucr$gta &lt;- rowSums(da35021.0001[,var.names])</code></pre>
 </div>
-<div id="trying-out-our-dataset." class="section level1">
-<h1>Trying out our dataset.</h1>
+<div id="trying-out-our-dataset" class="section level1">
+<h1>Trying out our dataset</h1>
 <p>We can use this dataset to check crime counts for individual cities. First, take a look at <a href="http://www.fbi.gov/about-us/cjis/ucr/crime-in-the-u.s/2012/crime-in-the-u.s.-2012/tables/8tabledatadecpdf/table-8-state-cuts/table-8-pennsylvania" class="uri">http://www.fbi.gov/about-us/cjis/ucr/crime-in-the-u.s/2012/crime-in-the-u.s.-2012/tables/8tabledatadecpdf/table-8-state-cuts/table-8-pennsylvania</a>. This provides some annotations about reporting involving any agency in Pennsylvania. Let’s use our dataset to find out crime counts in Philadelphia in 2012. Note that if you use regular expressions to find “Philadelphia,” you’ll also grab “other” Philadelphias such as Philadelphia, Mississippi - so check your STATE column. Also, would we want to include “New Philadelphia?”</p>
 <pre class="r"><code>i &lt;- grep(&quot;PHILADELPHIA&quot;,ucr$AGENCY)
 ucr[i,]</code></pre>
@@ -1076,7 +1076,7 @@ ucr[i,]</code></pre>
 957      38        9      46   377</code></pre>
 </div>
 <div id="class-exercises" class="section level1">
-<h1>Class Exercises</h1>
+<h1>Class exercises</h1>
 <ol style="list-style-type: decimal">
 <li>How many car thefts reported to the police?</li>
 </ol>

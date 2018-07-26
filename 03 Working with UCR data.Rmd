@@ -116,7 +116,7 @@ For now, we just want to work with agencies that have complete data.
 da35021.0001 <- subset(da35021.0001, V12=="(12) Dec last reported")
 ```
 
-# Creating a Dataframe
+# Creating a dataframe
 
 Of course, for most criminological questions we're interested in, we don't need all 32 columns. For example, we don't need to know Variable 25 - "SPECIAL MAILING ADDRESS." So, we'll create a smaller data frame with just the information we need.
 
@@ -185,7 +185,7 @@ ucr$gta <- rowSums(da35021.0001[,var.names])
 ```
 
 
-# Trying out our dataset.
+# Trying out our dataset
 
 We can use this dataset to check crime counts for individual cities. First, take a look at http://www.fbi.gov/about-us/cjis/ucr/crime-in-the-u.s/2012/crime-in-the-u.s.-2012/tables/8tabledatadecpdf/table-8-state-cuts/table-8-pennsylvania.  This provides some annotations about reporting involving any agency in Pennsylvania.  Let's use our dataset to find out crime counts in Philadelphia in 2012. Note that if you use regular expressions to find "Philadelphia," you'll also grab "other" Philadelphias such as Philadelphia, Mississippi - so check your STATE column. Also, would we want to include "New Philadelphia?"
 ```{r comment="", results='hold'}
@@ -209,7 +209,7 @@ i <- grep("LOS ANGELES",ucr$AGENCY)
 ucr[i,]
 ```
 
-#Class Exercises
+# Class exercises
 
 1. How many car thefts reported to the police?
 ```{r comment="", results='hold'}
