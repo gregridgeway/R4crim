@@ -1,33 +1,36 @@
 ---
 title: "Dates and Times"
 author:
-- Greg Ridgeway (gridge@upenn.edu)
-- Ruth Moyer (moyruth@upenn.edu)
+- affiliation: University of Pennsylvania
+  email: gridge@upenn.edu
+  name: Greg Ridgeway
+- affiliation: University of Pennsylvania
+  email: moyruth@upenn.edu
+  name: Ruth Moyer
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
-  pdf_document:
-    latex_engine: pdflatex
-  html_document: default
-fontsize: 11pt
-fontfamily: mathpazo
+  html_document:
+    css: htmlstyle.css
 ---
-<!-- PDF YAML header Ctrl-Shift-C to comment/uncomment -->
+<!-- HTML YAML header Ctrl-Shift-C to comment/uncomment -->
 
+
+<!-- PDF YAML header Ctrl-Shift-C to comment/uncomment -->
 <!-- --- -->
 <!-- title: "Dates and Times" -->
 <!-- author: -->
-<!-- - affiliation: University of Pennsylvania -->
-<!--   email: gridge@upenn.edu -->
-<!--   name: Greg Ridgeway -->
-<!-- - affiliation: University of Pennsylvania -->
-<!--   email: moyruth@upenn.edu -->
-<!--   name: Ruth Moyer -->
+<!-- - Greg Ridgeway (gridge@upenn.edu) -->
+<!-- - Ruth Moyer (moyruth@upenn.edu) -->
 <!-- date: "`r format(Sys.time(), '%B %d, %Y')`" -->
 <!-- output: -->
-<!--   html_document: -->
-<!--     css: htmlstyle.css -->
+<!--   pdf_document: -->
+<!--     latex_engine: pdflatex -->
+<!--   html_document: default -->
+<!-- fontsize: 11pt -->
+<!-- fontfamily: mathpazo -->
 <!-- --- -->
-<!-- HTML YAML header Ctrl-Shift-C to comment/uncomment -->
+
+
 
 
 
@@ -70,7 +73,7 @@ Let's extract five dates from the `chicagoCrime` dataset.
 i <- c(1,2500,5000,7500,10000)   # select 5 rows to get the dates
 chicagoCrime$Date[i]
 ```
-As you can see the dates include the date in month/day/year format and the time on a 12 hour AM/PM clock. R has not idea that these values represent dates. You are familiar with this date formatting, but R just things they are strings of characters. Use `substring()` to just extract the date part, the first 10 characters of `Date`.
+As you can see the dates include the date in month/day/year format and the time on a 12 hour AM/PM clock. R has no idea that these values represent dates. You are familiar with this date formatting, but R just thinks they are strings of characters. Use `substring()` to just extract the date part, the first 10 characters of `Date`.
 ```{r comment="", results='hold'}
 textDate <- substring(chicagoCrime$Date[i],1,10)
 textDate
