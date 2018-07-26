@@ -99,7 +99,7 @@ You can use double quotes or single quotes in R as long as you are consistent. W
 "Lou Gehrig's disease"
 'The officer shouted "halt!"'
 ```
-The backslashes in the above text "protect" the double quote, communicating to you and to R that the next double quote is not the end of the text, but a character that is actually part of the text the user wants to keep.
+The backslashes in the above text "protect" the double quote, communicating to you and to R that the next double quote is not the end of the text, but a character that is actually part of the text you want to keep.
 
 The `c()` function isn't the only way to make a collection of values in R. For example, placing a `:` between two numbers can return a collection of numbers in sequence. The functions `rep()` and `seq()` produce repeated values or sequences.
 ```{r comment="", results='hold'}
@@ -112,7 +112,7 @@ seq(1, 5)
 seq(1, 5, 2)
 ```
 
-R will also do arithmetic with two vectors, doing the calculation pairwise. This following will compute 1+11 and 2+12 up to 10+20.
+R will also do arithmetic with two vectors, doing the calculation pairwise. The following will compute 1+11 and 2+12 up to 10+20.
 ```{r comment=""}
 1:10 + 11:20
 ```
@@ -140,6 +140,7 @@ sort(c(1,10,3,6,2,5,8,4,7,9),decreasing=TRUE)
 order(c(1,10,3,6,2,5,8,4,7,9))#   where is the ith biggest number?
 rank(c(1,100,3,20)) #how does each value rank compared to others?
 ```
+
 The above examples have involved mostly numerical values in a vector. Here are some examples involving non-numerical "character" values. Let's create an object called `my.states` (a name I made up) that will contain the postal codes of places in which I've lived or worked.
 ```{r comment="", results='hold'}
 my.states <- c("WA","DC","CA","PA","MD","VA","OH")
@@ -197,7 +198,7 @@ state.names[c(1,5,9)] # get states 1, 5, and 9
 state.names[2*(1:25)] # get the even states
 ```
 
-If you put a negative number inside the `[]`, this will communicate to R to remove that item from the collection. Let's remove DC from `state.names` since it is not one of the 50 states. Since it is the 51st item in `state.names` we can remove like this 
+If you put a negative number inside the `[]`, this will communicate to R to remove that item from the collection. Let's remove DC from `state.names` since it is not one of the 50 states. Since it is the 51st item in `state.names` we can remove it like this 
 ```{r comment="", results='hold'}
 state.names[-51]
 ```
@@ -227,7 +228,7 @@ TRUE
 FALSE
 c(TRUE,FALSE,TRUE,FALSE)
 ```
-We use logical operators to create logical expressions and r can evaluate them as either `TRUE` or `FALSE`. For example, `&` represents the logical "and" and `|` represents the logical "or."
+We use logical operators to create logical expressions and R can evaluate them as either `TRUE` or `FALSE`. For example, `&` represents the logical "and" and `|` represents the logical "or."
 ```{r comment="", results='hold'}
 TRUE  & TRUE
 FALSE & TRUE
@@ -283,7 +284,7 @@ We can use `!`, which means "not," to reverse all the logical values and get the
 a[!i]
 ```
 
-Before we removed DC from the list of states by noticing that it was in position #51. This time, let's have R do the work of locating DC in the collection of states. We'll have R ask each element in `state.names` whether or not it equals "DC".
+Before, we removed DC from the list of states by noticing that it was in position #51. This time, let's have R do the work of locating DC in the collection of states. We'll have R ask each element in `state.names` whether or not it equals "DC".
 ```{r comment="", results='hold'}
 i <- state.names!="DC"
 state.names[i]
@@ -300,7 +301,7 @@ my.states %in% c("CA","OR","WA","AK","HI")
 # how many of these states touch the Pacific Ocean?
 sum(my.states %in% c("CA","OR","WA","AK","HI"))
 ```
-Note in the last line we used `sum()` to count for how many of `my.states` did `%in%` evaluate to `TRUE`.
+Note in the last line we used `sum()` to count for how many of the elements in `my.states` did `%in%` evaluate to be `TRUE`.
 
 ## Exercises
 `r exNum("Report \x60TRUE\x60 or \x60FALSE\x60 for each state depending on if you have lived there")`
@@ -466,12 +467,12 @@ Let's combine `give.first.and.last()` with `lapply()` and `sapply()` to extract 
 lapply(state.list, give.first.and.last)
 sapply(state.list, give.first.and.last)
 ```
-Note how `sapply()` noticed that `give.first.and.last()` produces exactly two values for each component of the list and went ahead and simplified the result into a 2 by 4 table. Let's first sort the states within each region and then extract the first and last states. This will give us the first and last in alphabetical order.
+Note how `sapply()` noticed that `give.first.and.last()` produces exactly two values for each component of the list and went ahead and simplified the result into a 2 by 4 table. Let's first sort the states within each region and then extract the first and last states. This will give us the first and last state in alphabetical order.
 ```{r comment="", results='markup'}
 sapply(lapply(state.list,sort), give.first.and.last)
 ```
 
-For many functions built in to R you can see what they do by typing the name of the function. Here's how R computes the interquartile range of a collection of values.
+For many functions built into R you can see what they do by typing the name of the function. Here's how R computes the interquartile range of a collection of values.
 ```{r comment="", results='markup'}
 IQR
 ```
@@ -497,7 +498,7 @@ a[,2]      # the entire second column
 a[-1,-1]   # dropping the first row and first column
 a[3:4,2:3] # rows 3 & 4, columns 2 & 3
 ```
-The numbers to the left of the comma index rows and the numbers to the right of the comma index columns. The `apply()` function, like the `lapply()` and `sapply()` functions, allow you to apply a function to all the rows or all the columns of a matrix. `apply()` needs the name of the matrix, whether you want to apply the function to the first dimension (rows) or the second dimension (columns), and the name of the function to apply.
+The numbers to the left of the comma index rows and the numbers to the right of the comma index columns. The `apply()` function, like the `lapply()` and `sapply()` functions, allows you to apply a function to all the rows or all the columns of a matrix. `apply()` needs the name of the matrix, whether you want to apply the function to the first dimension (rows) or the second dimension (columns), and the name of the function to apply.
 ```{r comment="", results='hold'}
 apply(a, 1, sum)     # compute sum of each row
 apply(a, 2, sum)     # compute sum of each column
@@ -513,13 +514,13 @@ apply(a, 1, function(x) {all(x>1)})
 
 
 # Setting the working directory
-Now that we have covered a lot of fundamental R features, it is time to load in a real dataset. However, before we do that, R needs to know where to find the data file. So we first need to talk about "the working directory". When you start R it has a default folder or directory on your computer where it will retrieve or save any files. You can run `getwd()` to get the current working directory. Here's our current working directory, which will not be the same as yours.
+Now that we have covered a lot of fundamental R features, it is time to load in a real dataset. However, before we do that, R needs to know where to find the data file. So we first need to talk about "the working directory". When you start R, it has a default folder or directory on your computer where it will retrieve or save any files. You can run `getwd()` to get the current working directory. Here's our current working directory, which will not be the same as yours.
 ```{r comment=""}
 getwd()    
 ```
 Almost certainly this default directory is *not* where you plan to have all of your datasets and files stored. Instead, you probably have an "analysis" or "project" or "R4crim" folder somewhere on you computer where you would like to store your data and work.
 
-Use `setwd()` to tell R what folder you want it to use as the working directory. If you do not set the working directory R will not know where to find the data you wish to import and will save your results in a location in which you would probably never look. Make it a habit to have `setwd()` as the first line of every script your write. If know the working directory you want to use, then you can just put inside the `setwd()` function.
+Use `setwd()` to tell R what folder you want it to use as the working directory. If you do not set the working directory, R will not know where to find the data you wish to import and will save your results in a location in which you would probably never look. Make it a habit to have `setwd()` as the first line of every script you write. If you know the working directory you want to use, then you can just put it inside the `setwd()` function.
 ```
 setwd("C:\Users\gridge\Google Drive\R4crim")    
 ```
@@ -530,7 +531,7 @@ If you do not know how to write your working directory, here comes R Studio to t
 Now you can use R functions to load in any datasets that are in your working folder. If you have done your `setwd()` correctly, you shouldn't get any errors because R will know exactly where to look for the data files. If the working directory that you've given in the `setwd()` isn't right, R will think the file doesn't even exist. For example, if you give the path for, say, your R4econ folder, R won't be able to load data because the file isn't stored in what R thinks is your working directory. With that out of the way, let's load a dataset.
 
 # Data frames
-A data frame is a special case of a list where all the components of the list have the same number of elements. Think about each component of the list being a "column" in your dataset. R code load in datasets from numerous sources (plain text, Excel files, databases, websites, etc.) including .RData format, R's unique data format. There is an extensive guide to [importing and exporting datasets](https://cran.r-project.org/doc/manuals/r-release/R-data.pdf).
+A data frame is a special case of a list where all the components of the list have the same number of elements. Think about each component of the list being a "column" in your dataset. R can load in datasets from numerous sources (plain text, Excel files, databases, websites, etc.) including .RData format, R's unique data format. There is an extensive guide to [importing and exporting datasets](https://cran.r-project.org/doc/manuals/r-release/R-data.pdf).
 
 To import data in the .RData format use `load()`. A [sample of Chicago crime data](https://github.com/gregridgeway/R4criminology/blob/master/chicago%20crime%2020141124-20141209.RData) is available on the [R4Crim github site](https://github.com/gregridgeway/R4crim).
 ```{r comment="", results='hold'}
@@ -540,12 +541,13 @@ List the objects R now has in memory and you will see that there is a new object
 ```{r comment="", results='hold'}
 ls()
 ```
-If you did not spell the name of the .RData file exactly correctly, then R will give you an error. A common occurrence when downloading the same file from the web multiple times is for you web browser to add numbers to the multiple versions you've downloaded. So check the file name carefully. Here's what happens when I request a file that doesn't exist.
+If you did not spell the name of the .RData file exactly correctly, then R will give you an error. A common occurrence when downloading the same file from the web multiple times is for your web browser to add numbers to the multiple versions you've downloaded. So check the file name carefully. Here's what happens when I request a file that doesn't exist.
 ```{r comment="", results=TRUE, warning=TRUE, error=TRUE}
 load("chicago crime.RData")
 ```
+If you get an error like this, then go double check that the file name is spelled exactly and you have correctly set the working directory.
 
-Let's check that this is indeed a dataset. You can use the `is()` function on any R object to ask it to identify itself.
+Once you successfully load in a dataset, we can begin to explore it. Let's check that this is indeed a dataset. You can use the `is()` function on any R object to ask it to identify itself.
 ```{r comment="", results='hold'}
 is(chicagoCrime)
 ```
@@ -567,10 +569,14 @@ chicagoCrime[1:3,1:3]
 chicagoCrime[1:3,c("Latitude","Longitude")]
 ```
 
-Ask R what types of values each of crime features hold.
+Ask R what types of values each of the crime features contain.
 ```{r comment="", results='hold'}
 #   look at the types of each variable
 sapply(chicagoCrime, is)
+```
+
+That gives a lot of detailed information. Here's a trick to just get the first value for each one.
+```{r comment="", results='hold'}
 sapply(chicagoCrime, function(x) is(x)[1])
 ```
 
@@ -639,7 +645,7 @@ for(letter in LETTERS)
       cat("The letter",letter,"is in the word 'CRIME'\n")
 }
 ```
-Let's loop through the states and check each one whether or not it is an island.
+Let's loop through the states and check whether each one is an island or not.
 ```{r comment="", results='hide', echo=FALSE}
 is.island <- function(x)
 {
@@ -721,9 +727,9 @@ barplot(a$`(Arrest == "true")`,
         xlab      = "Ward")
 ```
 
-Note that the column in `a` contain the arrest fraction has a complicated name with several special symbols like `==` and `"`. R will get very confused unless we "protect" this variable name with the backquotes (also called backticks). You can visit the help for `barplot()` with `?barplot` to learn what all the arguments do.
+Note that the column in `a` containing the arrest fraction has a complicated name with several special symbols like `==` and `"`. R will get very confused unless we "protect" this variable name with the backquotes (also called backticks). You can visit the help for `barplot()` with `?barplot` to learn what all the arguments do.
 
-Frequently we will not to focus on just a subset of the data. For example, we might just want to study assaults rather than all crimes. The `subset()` function does this for us like `subset(data, Primary.Type=="ASSAULT")`. This is particularly useful to use in combination with `with()`. Let's create a table of the number of arrests by ward, but only for assaults.
+Frequently we will focus on just a subset of the data. For example, we might just want to study assaults rather than all crimes. The `subset()` function does this for us like `subset(data, Primary.Type=="ASSAULT")`. This is particularly useful to use in combination with `with()`. Let's create a table of the number of arrests by ward, but only for assaults.
 ```{r comment="", results='hold'}
 with(subset(chicagoCrime,Primary.Type=="ASSAULT"), 
      table(Arrest,Ward))
@@ -806,7 +812,7 @@ text(ifelse(tab<80, 180, tab-5),          # x-coord of text,
 `r exNum("Make a barplot indicating how many states are in each region. Use \x60state.list\x60")`
 `r exNum("Identify the beat with the most crimes")`
 `r exNum("Identify the beat with the most domestic violence incidents")`
-`r exNum("Part 1 crimes are homicide, robbery, assault, arson, burglary, theft, rape, motor vehicle theft. Calculate the number of Part 1 crimes in Chicago")`
+`r exNum("Part 1 crimes are homicide, robbery, assault, arson, burglary, theft, sex offense, motor vehicle theft. Calculate the number of Part 1 crimes in Chicago")`
 
 # Solutions to the exercises 
 1. `r exerciseQuestions[1]`
