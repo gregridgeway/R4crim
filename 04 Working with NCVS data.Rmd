@@ -13,9 +13,10 @@ output:
     css: htmlstyle.css
 ---
 
+
 <!-- HTML YAML header Ctrl-Shift-C to comment/uncomment -->
 
-
+<!-- PDF YAML header Ctrl-Shift-C to comment/uncomment -->
 <!-- --- -->
 <!-- title: "Working with National Crime Victimization Survey Data" -->
 <!-- author: -->
@@ -29,7 +30,6 @@ output:
 <!-- fontsize: 11pt -->
 <!-- fontfamily: mathpazo -->
 <!-- --- -->
-<!-- PDF YAML header Ctrl-Shift-C to comment/uncomment -->
 
 
 
@@ -51,7 +51,7 @@ knitr::opts_chunk$set(echo=TRUE, cache=TRUE, cache.lazy=FALSE)
 
 
 
-# Introduction - National Crime Victimization Survey Data
+# Introduction
 
 Through our work with the UCR, we've already discussed reported crime. Nonetheless, not all crimes are reported to the police. Also, sometimes the UCR doesn't provide us with specific information about a victim-involved crime incident such as whether the victim knew the offenders or the location of the crime incident. 
 
@@ -93,7 +93,7 @@ dataAddr12 <- da34650.0001
 dataAddr13 <- da35164.0001 
 ```
 
-By contrast, DS2 contains household information. Let's load the household data and give them more useful names
+By contrast, DS2 contains household information. Let's load the household data and give them more useful names.
 ```{r comment="", results='hold'}
 load("NCVS2012/DS0002/34650-0002-Data.rda")
 load("NCVS2013/DS0002/35164-0002-Data.rda")
@@ -122,7 +122,7 @@ rm(da34650.0001,da34650.0002,da34650.0003,da34650.0004,
    da35164.0001,da35164.0002,da35164.0003,da35164.0004)
 ```
 
-Let's examine in a bit more detail the first three rows of the person file. The dataset contains `r ncol(dataPers12)` so we will just show the first 40 columns here. Note IDHH (household ID), IDPER (person ID), and the relationship between the first two rows. Also, note that V3077 (Variable #3077) refers to who responded to the survey.
+Let's examine in a bit more detail the first three rows of the person file. The dataset contains `r ncol(dataPers12)` columns so we will just show the first 40 columns here. Note IDHH (household ID), IDPER (person ID), and the relationship between the first two rows. Also, note that V3077 (Variable #3077) refers to who responded to the survey.
 ```{r comment="", results='hold'}
 dataPers12[1:3, 1:40]
 ```
@@ -143,7 +143,7 @@ with(dataInc12, table(V4014,V4015))
 with(dataInc13, table(V4014,V4015))
 ```
 
-# Creating Dataframe and Weights with Incident Data
+# Creating a dataframe and weights with NCVS incident data
 Next, we can create a 2012 incident dataframe. Importantly, the 2012 data contain incidents that occurred in 2012 as well as 2011 but were all self-reported to the Census Bureau in 2012. Likewise, the 2013 data contain incidents that occurred in 2012 as well as 2013.  If we wanted to analyze crime that occurred in only 2012, we'd subset the data to include only 2012. We will combine the 2012 and 2013 incident dataframes and then subset this new dataframe so that we exclude 2011 and 2013. As we can see in the Codebook PDF, the variable V4015 refers to the year of occurrence.
 
 ```{r comment="", results='hold'}
@@ -177,12 +177,12 @@ dataInc$WGTVICDY[i] <- with(dataInc, WGTVICDY[i] * V4016[i])
 ```
 We can also tabulate total weight by crime type to estimate the count of a crime. As the Codebook instrucs, `V4529` is the variable for crime type.  
 ```{r comment="", results='hold'}
-with(dataInc, by(WGTVICDY, V4529, sum))
+aggregate(WGTVICDY~V4529, data=dataInc, sum)
 ```
 As you can see, there are some irregularities with the coding of crime types.  Sometimes a type is coded as "(01)", but other times it is coded as "(1)". Let's standardize this coding using regular expressions.
 ```{r comment="", results='hold'}
 dataInc$V4529 <- gsub("\\(([1-9])\\)", "(0\\1)", dataInc$V4529)
-with(dataInc, by(WGTVICDY, V4529, sum))
+aggregate(WGTVICDY~V4529, data=dataInc, sum)
 ```
 
 Now, we can use the NCVS incident data to find out how many car thefts occurred in 2012. 
@@ -197,8 +197,8 @@ with(subset(dataInc,V4529=="(01) Completed rape"),
      sum(WGTVICDY))
 ```     
 
-# Creating Dataframe and Weights with Household and Person Data
-So far, we've created a dataframe and worked with weights for the Incident data.  However, the Household and Person Data each have their own unique weights. Let's first create a 2012 data year household data frame, much like we did with the incident data. Note that `YEARQ` refers to the year and quarter of the interview. The variable `V2130` is the month allocated from panel/rotation number. The panel/rotation number refer to [the process](https://www.bjs.gov/content/pub/pdf/ncvs_methodology.pdf) thru which interviews are conducted.
+# Merging in data from the household and person data
+So far, we've created a dataframe and worked with weights for the Incident data.  However, the Household and Person Data have data that we might need. Let's first create a 2012 data year household data frame, much like we did with the incident data. Note that `YEARQ` refers to the year and quarter of the interview. The variable `V2130` is the month allocated from panel/rotation number. The panel/rotation number refer to [the process](https://www.bjs.gov/content/pub/pdf/ncvs_methodology.pdf) through which interviews are conducted.
 
 ```{r comment="", results='hold'}
 dataHH <- rbind(dataHH12,dataHH13)
@@ -209,7 +209,6 @@ Let's make the "month allocated" uniform, and using regular expressions, delete 
 table(dataHH$V2130)
 dataHH$V2130 <- gsub("\\(0", "\\(", dataHH$V2130)
 ```
-
 Next, create a 2012 data year person data frame. We need to first fix incompatible factor/numeric in 2012/2013.  The factor levels in 2012 look like "(1) Yes", but in 2013 are just "1."
 
 ```{r comment="", results='hold'}
@@ -229,8 +228,6 @@ Then, stack the 2012 and 2013 data frames using `rbind()`.
 dataPers <- rbind(dataPers12, dataPers13)
 dataPers <- subset(dataPers, YEARQ>=2012.1 & YEARQ<=2013.2)
 ```
-
-# Creating Dataframe and Weights with Household and Person Data
 
 Now that we've created a person dataframe and an incident dataframe, we can merge them together. We will use `merge()` to pull age, marital status, and sex into the incident data. The `merge()` function has several parameters that communicate to R which features should be used to match and which ones should be merged. Here we tell `merge()` to use use a pair of features from the incident data (`IDPER` and `YEARQ`) and look up a row in `dataPers` with the same values of `IDPER` and `YEARQ`. We've selected only the five columns `IDPER`, `YEARQ`, `V3014`, `V3015`, and `V3018` from `dataPers`. The first two `merge()` uses to identify matching rows and the last three will be attached as new columns to `dataInc`.
 
@@ -281,7 +278,7 @@ dataInc$marital <- factor(dataInc$marital, levels=1:5,
 dataInc$sex <- factor(dataInc$sex, levels=1:2, 
                       labels=c("male","female"))
 ```
-Let's get estimated counts by age group and sex
+Let's get estimated counts by age group and sex.
 ```{r comment="", results='hold'}
 aggregate(WGTVICDY~ageGroup+sex, data=dataInc, FUN=sum)
 ```
@@ -319,16 +316,19 @@ temp[order(-temp$ratio),]
 
 ## Describe the context of assaults. For example, where did they occur? 
 
-As with all of these problems, it is very important to refer to the Codebook to find out relevant variables. Note that Variable `V4024` refers to "Where did the incident happen?" and `V4529` refers to the offense type. We first need to determine which `V4529` values refer to some form of assault. When working with any open-ended criminological question, use your own judgment as to which crimes to include. For example, some researchers would exclude a verbal threat of assault, wheras others would include that as assault.
+As with all of these problems, it is very important to refer to the Codebook to find out relevant variables. Note that Variable `V4024` refers to "Where did the incident happen?" and `V4529` refers to the offense type. We first need to determine which `V4529` values refer to some form of assault. When working with any open-ended criminological question, use your own judgment as to which crimes to include. For example, some researchers would exclude a verbal threat of assault, whereas others would include that as assault.
 
 ```{r comment="", results='hold'}
-with(subset(dataInc,V4529 %in% c("(11) Ag aslt w injury", 
-                                  "(14) Simp aslt w inj",
-                                  "(12) At ag aslt w wea",
-                                  "(17) Asl wo weap, wo inj", 
-                                  "(20) Verbal thr aslt", 
-                                  "(13) Thr aslt w weap")), 
-     by(WGTVICDY,V4024,sum))
+# first fix (x) -> (0x)
+dataInc$V4024 <- gsub("\\(([1-9])\\)", "(0\\1)", dataInc$V4024)
+aggregate(WGTVICDY~V4024,
+          data=subset(dataInc,V4529 %in% c("(11) Ag aslt w injury", 
+                                           "(14) Simp aslt w inj",
+                                           "(12) At ag aslt w wea",
+                                           "(17) Asl wo weap, wo inj", 
+                                           "(20) Verbal thr aslt", 
+                                           "(13) Thr aslt w weap")),
+          sum)
 ```
 
 ## When did the assaults occur? 
@@ -336,22 +336,27 @@ with(subset(dataInc,V4529 %in% c("(11) Ag aslt w injury",
 As our Codebook tells us, Variable `V4021B` refers to "About what time did incident occur?" and `V4014` refers to "Month incident occurred." Let's use both variables to answer this question.
 
 ```{r comment="", results='hold'}
-with(subset(dataInc,V4529 %in% c("(11) Ag aslt w injury", 
-                                  "(14) Simp aslt w inj",
-                                  "(12) At ag aslt w wea",
-                                  "(17) Asl wo weap, wo inj", 
-                                  "(20) Verbal thr aslt", 
-                                  "(13) Thr aslt w weap")),
-     by(WGTVICDY,V4021B,sum))
+# first fix (x) -> (0x)
+dataInc$V4021B <- gsub("\\(([1-9])\\)", "(0\\1)", dataInc$V4021B)
+dataInc$V4014  <- gsub("\\(([1-9])\\)", "(0\\1)", dataInc$V4014)
 
-with(subset(dataInc,V4529 %in% c("(11) Ag aslt w injury", 
-                                 "(14) Simp aslt w inj",
-                                 "(12) At ag aslt w wea",
-                                 "(17) Asl wo weap, wo inj", 
-                                 "(20) Verbal thr aslt", 
-                                 "(13) Thr aslt w weap")),
-     by(WGTVICDY,V4014,sum))
+aggregate(WGTVICDY~V4021B,
+          data=subset(dataInc,V4529 %in% c("(11) Ag aslt w injury",
+                                           "(14) Simp aslt w inj",
+                                           "(12) At ag aslt w wea",
+                                           "(17) Asl wo weap, wo inj",
+                                           "(20) Verbal thr aslt",
+                                           "(13) Thr aslt w weap")),
+          sum)
 
+aggregate(WGTVICDY~V4014,
+          data=subset(dataInc,V4529 %in% c("(11) Ag aslt w injury",
+                                           "(14) Simp aslt w inj",
+                                           "(12) At ag aslt w wea",
+                                           "(17) Asl wo weap, wo inj",
+                                           "(20) Verbal thr aslt",
+                                           "(13) Thr aslt w weap")),
+          sum)
 ```
 
 ## Who was the offender?
@@ -360,21 +365,25 @@ Variable `V4241` refers to "Single Offender Stranger" whereas `V4245` refers to 
 
 ```{r comment="", results='hold'}
 
-with(subset(dataInc,V4529 %in% c("(11) Ag aslt w injury", 
-                                 "(14) Simp aslt w inj",
-                                 "(12) At ag aslt w wea",
-                                 "(17) Asl wo weap, wo inj", 
-                                 "(20) Verbal thr aslt", 
-                                 "(13) Thr aslt w weap")),
-     by(WGTVICDY, V4241, sum))
+aggregate(WGTVICDY~V4241,
+          data=subset(dataInc,V4529 %in% c("(11) Ag aslt w injury",
+                                           "(14) Simp aslt w inj",
+                                           "(12) At ag aslt w wea",
+                                           "(17) Asl wo weap, wo inj",
+                                           "(20) Verbal thr aslt",
+                                           "(13) Thr aslt w weap")),
+          sum)
 
-with(subset(dataInc,V4529 %in% c("(11) Ag aslt w injury", 
-                                 "(14) Simp aslt w inj",
-                                 "(12) At ag aslt w wea", 
-                                 "(17) Asl wo weap, wo inj", 
-                                 "(20) Verbal thr aslt", 
-                                 "(13) Thr aslt w weap")),
-     by(WGTVICDY, V4245, sum))
+# first fix (x) -> (0x)
+dataInc$V4245 <- gsub("\\(([1-9])\\)", "(0\\1)", dataInc$V4245)
+aggregate(WGTVICDY~V4245,
+          data=subset(dataInc,V4529 %in% c("(11) Ag aslt w injury",
+                                           "(14) Simp aslt w inj",
+                                           "(12) At ag aslt w wea",
+                                           "(17) Asl wo weap, wo inj",
+                                           "(20) Verbal thr aslt",
+                                           "(13) Thr aslt w weap")),
+          sum)
 
 ```
 
@@ -382,20 +391,19 @@ The codebook tells us that with the multi-offender variable `V4248`, "97" does n
 
 ```{r comment="", results='hold'}
 dataInc$V4248[dataInc$V4248>=97] <- NA
-dataInc$multOffender <- dataInc$V4248
-
-with(subset(dataInc,V4529 %in% c("(11) Ag aslt w injury", 
-                                 "(14) Simp aslt w inj",
-                                 "(12) At ag aslt w wea",
-                                 "(17) Asl wo weap, wo inj", 
-                                 "(20) Verbal thr aslt", 
-                                 "(13) Thr aslt w weap")),
-     by(WGTVICDY, multOffender, sum))
+aggregate(WGTVICDY~V4248,
+          data=subset(dataInc,V4529 %in% c("(11) Ag aslt w injury",
+                                           "(14) Simp aslt w inj",
+                                           "(12) At ag aslt w wea",
+                                           "(17) Asl wo weap, wo inj",
+                                           "(20) Verbal thr aslt",
+                                           "(13) Thr aslt w weap")),
+          sum)
 ```
 
 ## What sort of weapons were used?
 
-As the Codebook shows, Variables `V4051`-`V4059` list types of weapons. Because it's a bit difficult to interpret the output in R with just the variable names, let's rename the variables.
+As the Codebook shows, Variables `V4051`-`V4059` list types of weapons. Because it's a bit difficult to interpret the output in R with just the variable names, let's create new variables with better names.
 
 ```{r comment="", results='hold'}
 dataInc$handgun     <- dataInc$V4051
@@ -405,7 +413,6 @@ dataInc$sharpObject <- dataInc$V4054
 dataInc$bluntObject <- dataInc$V4055
 dataInc$other       <- dataInc$V4056
 dataInc$unknownGun  <- dataInc$V4057
-dataInc$missing     <- dataInc$V4058
 dataInc$hit         <- dataInc$V4059
 
 assault <- subset(dataInc, V4529 %in% c("(11) Ag aslt w injury", 
@@ -415,57 +422,61 @@ assault <- subset(dataInc, V4529 %in% c("(11) Ag aslt w injury",
                                         "(20) Verbal thr aslt", 
                                         "(13) Thr aslt w weap"))
 
-with(assault, by(WGTVICDY, handgun,     sum))
-with(assault, by(WGTVICDY, knife,       sum))
-with(assault, by(WGTVICDY, otherGun,    sum))
-with(assault, by(WGTVICDY, sharpObject, sum))
-with(assault, by(WGTVICDY, bluntObject, sum))
-with(assault, by(WGTVICDY, other,       sum))
-with(assault, by(WGTVICDY, unknownGun,  sum))
-with(assault, by(WGTVICDY, missing,     sum))
-with(assault, by(WGTVICDY, hit,         sum))
+with(subset(assault, handgun    =="(1) Yes"), sum(WGTVICDY))
+with(subset(assault, otherGun   =="(1) Yes"), sum(WGTVICDY))
+with(subset(assault, unknownGun =="(1) Yes"), sum(WGTVICDY))
+with(subset(assault, knife      =="(1) Yes"), sum(WGTVICDY))
+with(subset(assault, sharpObject=="(1) Yes"), sum(WGTVICDY))
+with(subset(assault, bluntObject=="(1) Yes"), sum(WGTVICDY))
+with(subset(assault, hit        =="(1) Yes"), sum(WGTVICDY))
+with(subset(assault, other      =="(1) Yes"), sum(WGTVICDY))
 ```
-Or use `sapply()` to avoid repetitive lines of code.
+
+If you find yourself copying and pasting essentially the same code over and over again like this, there is a better way. You should think about using a loop or `sapply()`. A loop or `sapply()` might run faster on your computer, but more importantly they are easier to read, maintain, and less likely to create errors.
+
+Here's a for-loop example.
 ```{r comment="", results='hide'}
-sapply(c("handgun","knife","otherGun","sharpObject","bluntObject","other","unknownGun","missing","hit"),
+for(x in c("handgun","otherGun","unknownGun","knife","sharpObject","bluntObject","hit","other"))
+{
+   print(x)
+   print(sum(assault$WGTVICDY[!is.na(assault[,x]) & assault[,x]=="(1) Yes"]))
+}
+```
+
+And here's another for-loop example using expressions.
+```{r comment="", results='hide'}
+for(x in c("handgun","otherGun","unknownGun","knife","sharpObject","bluntObject","hit","other"))
+{
+   print(x)
+   subsetExpression <- parse(text=paste(x,'=="(1) Yes"'))
+   with(subset(assault, eval(subsetExpression)), print(sum(WGTVICDY)))
+}
+```
+
+Or use `sapply()` and `by()`.
+```{r comment="", results='hide'}
+sapply(c("handgun","otherGun","unknownGun","knife","sharpObject","bluntObject","hit","other"),
        function(x) by(assault$WGTVICDY, assault[,x], sum))
 ```
 
 
 ## Were the police called?
-Note that `V4399` refers to "Reported to Police"
+Note that `V4399` refers to "Reported to Police".
 
 ```{r comment="", results='hold'}
-dataInc$reported <- dataInc$V4399
-
-with(subset(dataInc,V4529 %in% c("(11) Ag aslt w injury", 
-                                 "(14) Simp aslt w inj",
-                                 "(12) At ag aslt w wea",
-                                 "(17) Asl wo weap, wo inj", 
-                                 "(20) Verbal thr aslt", 
-                                 "(13) Thr aslt w weap")), 
-     by(WGTVICDY, reported, sum))
+aggregate(WGTVICDY~V4399, data=assault, sum)
 ```
 
 ## How many victims used firearms defensively?
 
-As the Codebook tells us, `V4147` asks whether the victim threatened with a gun.
+As the Codebook tells us, `V4147` asks whether the victim was threatened with a gun.
 
 ```{r comment="", results='hold'}
-dataInc$selfDefenseGun <- dataInc$V4147
-
-with(subset(dataInc,V4529 %in% c("(11) Ag aslt w injury", 
-                                 "(14) Simp aslt w inj",
-                                 "(12) At ag aslt w wea",
-                                 "(17) Asl wo weap, wo inj", 
-                                 "(20) Verbal thr aslt", 
-                                 "(13) Thr aslt w weap")), 
-     by(WGTVICDY, selfDefenseGun, sum))
+aggregate(WGTVICDY~V4147, data=assault, sum)
 ```
 
 
 ## How many victims by race and crime type
-
 First, let's use all the racial groups in the dataset.
 
 ```{r comment=""}
@@ -476,7 +487,14 @@ a <- merge(dataInc,
                        "V3024")],       # and get hispanic, while we're at it
            by=c("IDPER","YEARQ"),
            all.x=TRUE)
+
+# check that the number of rows and columns look right
+dim(dataInc)
+dim(a) # should have same # rows, but 2 extra columns
+
+# rename V3023A to be more readable as "race"
 names(a)[names(a)=="V3023A"] <- "race"
+
 dataInc <- a
 
 # 98s are missing values
