@@ -63,7 +63,7 @@ ORDER BY  	list of fields to sort by
 
 However, before being able to use SQL as a tool in R, it will first be necessary to install the `sqldf` package.
 
-```{r comment="", results='hold'} 
+```{r comment="", results='hold', cache=FALSE} 
 library(sqldf)
 ```
 
@@ -141,6 +141,18 @@ The next step is to set up the SQL database. The following lines of code will se
 ```{r comment="", results='hold'}
 # create a connection to the database
 con <- dbConnect(SQLite(), dbname="chicagocrime.db")
+
+# peek at the first few rows of the dataset
+a <- read.table("Crimes_-_2001_to_present-clean.csv",
+                sep=";",nrows=5,header=TRUE)
+# ask SQLite what data type it plans to use to store each column (eg number, text)
+variabletypes <- dbDataType(con, a)
+# make sure IUCR and Ward are stored as TEXT
+variabletypes["IUCR"] <- "TEXT"
+variabletypes["Ward"] <- "TEXT"
+variabletypes["District"] <- "TEXT"
+variabletypes["Community.Area"] <- "TEXT"
+
 # just in case you've already created a "crime" table, delete it
 if(dbExistsTable(con, "crime")) dbRemoveTable(con, "crime")
 # import the data file into the database
@@ -148,7 +160,10 @@ dbWriteTable(con, "crime",                         # create crime table
              "Crimes_-_2001_to_present-clean.csv", # from our cleaned up file
              row.names=FALSE,
              header=TRUE,                          # first row has column names
+             field.types=variabletypes,            
              sep=";")                              # columns separated with ;
+# does the table exist?
+dbListTables(con)
 # a quick check to see if all the columns are there
 dbListFields(con,"crime")
 # disconnect from the database to finalize
@@ -156,7 +171,7 @@ dbDisconnect(con)
 ```
 
 Once you've successfully set up your database, there is no reason to run these lines of code again. You should never again need to turn commas into semi-colons or run `dbWriteTable()`. Instead, every time you want to work with your database, you can simply need to reconnect to the database with: 
-```{r comment="", results='hold'} 
+```{r comment="", results='hold', cache=FALSE} 
 con <- dbConnect(SQLite(), dbname="chicagocrime.db")
 ```
 (Note that if you're keeping you are using a cloud-based backup service like iCloud, OneDrive, or Google Drive, you might need to wait until your "db" file has completely "synced" before you can access your database.)
@@ -191,91 +206,43 @@ fetch(res, n = 10) # just the first 10 rows
 dbClearResult(res)
 ```
 
-Just as `SELECT` filters the columns, the `WHERE` clause filters the rows. Note the use of `AND` and `OR` in the `WHERE` clause. As you might intuitively guess, `AND` and `OR` are logical operators that help us further filter our rows. Here we select three columns: `ID`, `Description`, and `LocationDescription`. Also, we want only rows where 
-* the value in the "Beat" column is "611"
-* the value in the "Arrest" column is "true"
-* the value in ICUR column is either "0486" or "0498"
+Just as `SELECT` filters the columns, the `WHERE` clause filters the rows. Note the use of `AND` and `OR` in the `WHERE` clause. As you might intuitively guess, `AND` and `OR` are logical operators that help us further filter our rows. Here we select three columns: `ID`, `Description`, and `Location.Description`. Also, we want only rows where 
+* the value in the `Beat` column is "611"
+* the value in the `Arrest` column is "true"
+* the value in the `ICUR` column is either "0486" or "0498"
 
-Importantly, note the use of single (not double) quotation marks in the WHERE line. Also, note how we set the "fetch" line to the variable a. 
+Importantly, note the use of single (not double) quotation marks in the `WHERE` line. The reason is that if we used double quotes, then R will think that the double quote signals the end of the query. Also note that `Location.Description` has a period in its name. The period has a special meaning in SQL that we will discuss later. We use the square brakets around the name to "protect" the column name, telling SQL to treat it as a column name.
+
+Also, note how we set the `fetch()` line to the variable `a`. 
 
 ```{r comment="", results='hold'} 
 res <- dbSendQuery(con, "
-                   SELECT ID,Description,LocationDescription
+                   SELECT ID, Description, [Location.Description]
                    FROM crime
-                   WHERE ((Beat=611) AND (Arrest='true')) AND
+                   WHERE ((Beat=611) AND 
+                         (Arrest='true')) AND
                          ((IUCR='0486') OR (IUCR='0498'))")
 a <- fetch(res, n = -1) # all the rows
 dbClearResult(res)
+# show the first few rows of the results
+a[1:3,]
 ```
 
-# Practice Exercises
-1. Select records from Beat 234
+# Exercises
+
+`r .exNum('Select records from Beat 234')`
+
+`r .exNum('Select Beat, District, Ward, and Community Area for all "ASSAULT"s')`. Remember that, since `Primary.Type` has a period in its name, you need to use square brackets like `[Primary.Type]`
+
+`r .exNum('Select records on assaults from Beat 234')`
+
+`r .exNum('Make a table in R of the number of assaults (IUCR 0560) by Ward')`
+
+# More SQL clauses
+
+We've already covered SQL clauses `SELECT`, `WHERE`, and `FROM`. The SQL function `COUNT(*)` and `GROUP BY` are also very useful. For example, the following query counts how many assaults (IUCR 0560) occurred by ward. `COUNT()` is a SQL "aggregate" function, a function that performs a calculation on a group of values and returns a single number. Other SQL aggregate functions include `AVG()`, `MIN()`, `MAX()`, and `SUM()`. This query will group all the records by `Ward` and then apply the aggregate function `COUNT()` and report that value in a column called `crimecount`.
 
 ```{r comment="", results='hold'} 
-res <- dbSendQuery(con, "
-          SELECT *
-          FROM crime
-          WHERE ((Beat=234))") 
-a <- fetch(res, n = -1) 
-dbClearResult(res)
-```
-
-2. Select Beat, District, Ward, and Community Area for all 'ASSAULT's
-
-```{r comment="", results='hold'} 
-res <- dbSendQuery(con, "
-                  SELECT Beat, District, Ward, CommunityArea, PrimaryType
-                  FROM crime
-                  WHERE ((PrimaryType='ASSAULT'))") 
-a <- fetch(res, n = -1) 
-dbClearResult(res)
-```
-
-3. Select records on assaults from Beat 234
-
-```{r comment="", results='hold'} 
-res <- dbSendQuery(con, "
-                    SELECT *
-                    FROM crime
-                    WHERE ((Beat=234) AND (PrimaryType='ASSAULT'))") 
-a <- fetch(res, n = -1) 
-dbClearResult(res)
-```
-
-4. Make a table in R of the number of assaults (IUCR 0560) by Ward.
-
-```{r comment="", results='hold'} 
-res <- dbSendQuery(con, "
-                  SELECT *
-                  FROM crime
-                  WHERE ((IUCR='0560') AND (PrimaryType='ASSAULT'))") 
-a <- fetch(res, n = -1) 
-dbClearResult(res)
-table(a$Ward)
-```
-
-Or, we could also try selecting all the IUCR codes and ward - and then subsetting the data through R.  "The system.time" R command allows us to see how long it takes to run the SQL query. 
-
-```{r comment="", results='hold'} 
-system.time(
-  {
-    res <- dbSendQuery(con, "
-                       SELECT IUCR,Ward
-                       FROM crime")
-    data <- fetch(res, n = -1)
-    dbClearResult(res)
-  })
-
-data1 <- subset(data, PrimaryType=="ASSAULT" & IUCR=="0560")
-```
-
-#More SQL commands
-
-We've already covered SQL commands such as SELECT and WHERE. The commands COUNT(*) and GROUP BY are also very useful. For example,
-
-```{r comment="", results='hold'} 
-system.time(
-{
 res <- dbSendQuery(con, "
    SELECT COUNT(*) AS crimecount,
           Ward
@@ -284,63 +251,24 @@ res <- dbSendQuery(con, "
    GROUP BY Ward")
 a <- fetch(res, n = -1)
 dbClearResult(res)
-})
+
+print(a)
 ```
 
-What does the GROUP BY command do?  What function does the COUNT(*) command have? 
+The `GROUP BY` clause is critical. If you forget it then the result is not well defined. That is, different implementations of SQL may produce different results. The rule you should remember is that "every non-aggregate column in the `SELECT` clause should appear in the `GROUP BY` clause." Here `Ward` is not part of the aggregate function `COUNT()` so it must appear in the `GROUP BY` clause.
 
 # Practice exercises
-1. Count the number of crimes by PrimaryType
+`r .exNum('Count the number of crimes by PrimaryType')`
 
-```{r comment="", results='hold'} 
-res <- dbSendQuery(con, "
-              SELECT COUNT(*) AS count, PrimaryType
-              FROM crime
-              GROUP BY PrimaryType")
-fetch(res, n = -1)
-dbClearResult(res)
-```
+`r .exNum('Count the number of crimes resulting in arrest')`
+
+`r .exNum('Count the number of crimes by LocationDescription. LocationDescription is the variable that tells us where (e.g., a parking lot, a barbershop, a fire station, a CTA train, or a motel) a crime occurred')`
 
 
-2. Count the number of crimes resulting in arrest
 
-```{r comment="", results='hold'} 
-res <- dbSendQuery(con, "
-                   SELECT COUNT(*) AS count, PrimaryType
-                   FROM crime
-                   WHERE Arrest='true'
-                   GROUP BY PrimaryType")
-fetch(res, n = -1)
-dbClearResult(res)
-```
+# More SQL
 
-
-Or, if we weren't interested in differentiating based on the PrimaryType, we could simply do the following:
-
-```{r comment="", results='hold'} 
-res <- dbSendQuery(con, "
-                   SELECT COUNT(*) AS count
-                   FROM crime
-                   WHERE Arrest='true'")
-fetch(res, n = -1)
-dbClearResult(res)
-```
-
-3. Count the number of crimes by LocationDescription.  LocationDescription is the variable that tells us where (meaning,e.g., a parking lot, a barbershop, a fire station, a CTA train, or a motel) a crime occurred.
-
-```{r comment="", results='hold'} 
-res <- dbSendQuery(con, "
-SELECT COUNT(*) AS count,
-                   LocationDescription
-                   FROM crime
-                   GROUP BY LocationDescription")
-fetch(res, n = -1)
-dbClearResult(res)
-```
-
-#More useful SQL tools
-
-Also, MAX, MIN, SUM, AVG are common (and useful) aggregating functions. the function ORDER BY sorts the results for us.  It's a bit like the SQL version of the sort() command.  Here is an illustration:
+`MAX`, `MIN`, `SUM`, `AVG` are common (and useful) aggregating functions. The `ORDER BY` clause sorts the results for us. It's the SQL version of the `sort()` command. Here is an illustration that gives the range of beat numbers in each policing district.
 
 ```{r comment="", results='hold'} 
 res <- dbSendQuery(con, "
@@ -353,8 +281,9 @@ res <- dbSendQuery(con, "
 fetch(res, n = -1)
 dbClearResult(res)
 ```
+Remember that the `GROUP BY` clause should include every element of the `SELECT` clause that is not involved with an aggregate function. We have `MIN()` and `MAX()` operating on `Beat`, but `District` is on its own and should be placed in the `GROUP BY` clause.
 
-Let's look at our Latitude and Longitude columns (which, as we find in a subsequent section, will be extremely useful for mapping data points).  The following query will give unexpected results for MAX. The problem is that there are empty values in some entries. 
+Let's look at our `Latitude` and `Longitude` columns (which, as we find in a subsequent section, will be extremely useful for mapping data points). The following query will give unexpected results.
 
 ```{r comment="", results='hold'} 
 res <- dbSendQuery(con, "
@@ -364,107 +293,214 @@ res <- dbSendQuery(con, "
           MAX(Longitude) AS max_lon,
           District
    FROM crime
-   WHERE (Latitude IS NOT NULL) AND
-         (Longitude IS NOT NULL)
    GROUP BY District
    ORDER BY District")
 fetch(res, n = -1)
 dbClearResult(res)
 ```
+The first problem is that we have some rows with blank values in `Longitude` and `Latitude`. Here are some of them.
+```{r comment="", results='hold'} 
+fetch(dbSendQuery(con,"SELECT * FROM crime WHERE Longitude=''"), n=3)
+dbClearResult(res)
+```
+Note the `X.Coordinate` and the `Y.Coordinate` columns. They should give the location per the State Plane Illinois East NAD 1983 projection, but in these rows they are empty.
 
+The second problem is that there are minimum latitudes of 36.61945 and minimum longitudes of -91.68657. That's near the Missouri/Arkansas border 500 miles south of Chicago!
+```{r comment="", results='hold'} 
+fetch(dbSendQuery(con,"SELECT * FROM crime where Latitude<36.61946"), n=3)
+dbClearResult(res)
+```
+Note that missing `X.Coordinate` and `Y.Coordinate` are getting mapped to some place far from Chicago.
 
-Note that row 41 has some problems. Our latitude and longitude values are both 0, which would occur in the middle of the Atlantic Ocean. Obviously, that coordinate location is not within Chicago. So, in all likelihood, we simply have missing coordinates data in a row like 41.  
-
-Note the XCoordinate and the YCoordinate columns. They simply give the location per the State Plane Illinois East NAD 1983 projection.
+We can tell SQLite to make the empty or missing values `NULL`, a more proper way to encode that these rows have missing coordinates. The `UPDATE` clause edits our table. R will read in `NULL` values as `NA`. After we do the update, we can rerun the `MIN()`, `MAX()` query. The dataset also has some latitudes and longitudes that are very close to 0 (and Chicago is quite far from the equator), but not exactly 0. We can make those `NULL` as well. We're also going to fix the `X.Coordinate` and `Y.Coordinate` columns.
 
 ```{r comment="", results='hold'} 
 res <- dbSendQuery(con, "
-   SELECT *
+   UPDATE crime SET Latitude=NULL
+   WHERE (Latitude='') OR (ABS(Latitude-0.0) < 0.01) OR (Latitude < 36.7)")
+dbClearResult(res)
+res <- dbSendQuery(con, "
+   UPDATE crime SET Longitude=NULL
+   WHERE (Longitude='') OR (ABS(Longitude-0.0) < 0.01) OR (Longitude < -91.6)")
+dbClearResult(res)
+res <- dbSendQuery(con, "
+   UPDATE crime SET [X.Coordinate]=NULL
+   WHERE ([X.Coordinate]='') OR ([X.Coordinate]=0)")
+dbClearResult(res)
+res <- dbSendQuery(con, "
+   UPDATE crime SET [Y.Coordinate]=NULL
+   WHERE ([Y.Coordinate]='') OR ([Y.Coordinate]=0)")
+dbClearResult(res)
+```
+
+Let's rerun that query and check that we get more sensible results.
+```{r comment="", results='hold'} 
+res <- dbSendQuery(con, "
+   SELECT MIN(Latitude)  AS min_lat,
+          MAX(Latitude)  AS max_lat,
+          MIN(Longitude) AS min_lon,
+          MAX(Longitude) AS max_lon,
+          District
    FROM crime
-   WHERE ROWID<=41")
+   GROUP BY District
+   ORDER BY District")
+fetch(res, n = -1)
+dbClearResult(res)
+```
+Now we have results that are more in line with where Chicago actually is. Make it a habit to do some checks of your data before doing too much analysis.
+
+And what city does the following plot have the shape of?
+Let's plot the location of these crimes. Plotting all 7 million would be overkill, so let's take a random sample of 10,000 crimes. Here's a SQL query that will do that. It uses some tricks we'll learn more about later including the use of `IN`, the use of subqueries (a query within a query), and `LIMIT`. Does the shape of the plot look right?
+```{r comment="", results='hold'} 
+res <- dbSendQuery(con, "
+   SELECT Longitude, Latitude 
+   FROM crime 
+   WHERE id IN (SELECT id FROM crime ORDER BY RANDOM() LIMIT 10000)")
+a <- fetch(res, n = -1)
+dbClearResult(res)
+
+plot(Latitude~Longitude, data=a, pch=".", xlab="Longitude", ylab="Latitude")
+```
+
+# Practice exercises
+
+`r .exNum('Plot the location of all "ASSAULT"s for Ward 22')`
+
+
+`r .exNum('What is the most common (Lat,Long) for assaults in Ward 22? Add the point to your plot using the points() command. The points() command is new. It is simply a function that draws a point (or sequence of points) at the specified coordinates')`
+
+
+# Solutions to the exercises
+
+1. `r .exerciseQuestions[1]`
+```{r comment="", results='hold'}
+res <- dbSendQuery(con, "
+          SELECT *
+          FROM crime
+          WHERE ((Beat=234))") 
+a <- fetch(res, n = -1) 
+dbClearResult(res)
+```
+
+
+2. `r .exerciseQuestions[2]`
+```{r comment="", results='hold'} 
+res <- dbSendQuery(con, "
+                  SELECT Beat, District, Ward, [Community.Area], [Primary.Type]
+                  FROM crime
+                  WHERE (([Primary.Type]='ASSAULT'))") 
+a <- fetch(res, n = -1) 
+dbClearResult(res)
+```
+
+3. `r .exerciseQuestions[3]`
+```{r comment="", results='hold'} 
+res <- dbSendQuery(con, "
+                    SELECT *
+                    FROM crime
+                    WHERE ((Beat=234) AND ([Primary.Type]='ASSAULT'))")
+a <- fetch(res, n = -1) 
+dbClearResult(res)
+```
+
+4. `r .exerciseQuestions[4]`
+```{r comment="", results='hold'} 
+# system.time() reports how long it takes to run the SQL query
+system.time(
+{
+   res <- dbSendQuery(con, "
+                      SELECT *
+                      FROM crime
+                      WHERE ((IUCR='0560') AND ([Primary.Type]='ASSAULT'))") 
+   a <- fetch(res, n = -1) 
+})
+dbClearResult(res)
+table(a$Ward)
+```
+Or, we could also try selecting all the IUCR codes and ward and then subsetting the data through R.
+```{r comment="", results='hold'} 
+system.time(
+{
+   res <- dbSendQuery(con, "
+                      SELECT IUCR, Ward, [Primary.Type]
+                      FROM crime")
+   data <- fetch(res, n = -1)
+   data <- subset(data, Primary.Type=="ASSAULT" & IUCR=="0560")
+})
+dbClearResult(res)
+```
+
+5. `r .exerciseQuestions[5]`
+```{r comment="", results='hold'} 
+res <- dbSendQuery(con, "
+              SELECT COUNT(*) AS count, [Primary.Type]
+              FROM crime
+              GROUP BY [Primary.Type]")
 fetch(res, n = -1)
 dbClearResult(res)
 ```
 
-Let's look at what line 41 is in the raw text that we read in:
-```{r comment="", results='hold'} 
-scan(what="",file="Crimes_-_2001_to_present-clean.csv",sep="\n",nlines=42)
-```
-
-We can tell SQLite to make the empty values NULL.  The UPDATE command edits our table. R will now read in the NULL values as NA.  After we do the update, we can rerun the MIN, MAX query. Note that some are our latitudes and longitudes are very close to 0, but not exactly 0; we can make those NULL as well. 
-
+6. `r .exerciseQuestions[6]`
 ```{r comment="", results='hold'} 
 res <- dbSendQuery(con, "
-   UPDATE crime SET XCoordinate=NULL
-   WHERE (XCoordinate='') OR (XCoordinate=0)")
-res <- dbSendQuery(con, "
-   UPDATE crime SET YCoordinate=NULL
-   WHERE (YCoordinate='') OR (YCoordinate=0)")
-res <- dbSendQuery(con, "
-   UPDATE crime SET Latitude=NULL
-   WHERE (Latitude='') OR (ABS(Latitude-0.0)<0.01)")
-res <- dbSendQuery(con, "
-   UPDATE crime SET Longitude=NULL
-   WHERE (Longitude='') OR (ABS(Longitude-0.0)<0.01)")
-```
-
-Let's reexamine the (X,Y) coordinates
-
-```{r comment="", results='hold'} 
-res <- dbSendQuery(con, "
-   SELECT ID,XCoordinate,YCoordinate,Latitude,Longitude
-   FROM crime")
-a <- fetch(res, n = -1)
-dbClearResult(res)
-a[1:10,]
-```
-
-And what city does the following plot have the shape of?
-
-```{r comment="", results='hold'} 
-i <- sample(1:nrow(a),10000)
-plot(a$Longitude[i],a$Latitude[i],pch=".",xlab="Longitude",ylab="Latitude")
-```
-
-# Practice exercises
-1. Plot the location of all 'ASSAULT's for Ward 22
-
-```{r comment="", results='hold'} 
-res <- dbSendQuery(con, "
-                   SELECT latitude,longitude
+                   SELECT COUNT(*) AS count, [Primary.Type]
                    FROM crime
-                   WHERE PrimaryType='ASSAULT' AND Ward='22'")
-a <- fetch(res, n = -1)
+                   WHERE Arrest='true'
+                   GROUP BY [Primary.Type]")
+fetch(res, n = -1)
 dbClearResult(res)
-plot(a$Longitude,a$Latitude,pch=".")
 ```
 
-
-2. What's the most common (Lat,Long) for assaults in Ward 22. Add the point to your plot using the points() command. The points() command is new.  It's simply a function that draws a point (or sequence of points) at the specified coordinates. 
+Or, if we weren't interested in differentiating based on the `Primary.Type`, we could simply do the following:
 
 ```{r comment="", results='hold'} 
 res <- dbSendQuery(con, "
-        SELECT COUNT(*) as crimecount,longitude, latitude
-        FROM crime
-        WHERE primarytype='ASSAULT' and ward='22'
-        GROUP BY longitude, latitude")
-a <- fetch(res, n=-1)
+                   SELECT COUNT(*) AS count
+                   FROM crime
+                   WHERE Arrest='true'")
+fetch(res, n = -1)
 dbClearResult(res)
-points(a[which.max(a$crimecount), 2:3],pch=16, col="salmon",cex=4)
-a[which.max(a$crimecount),2:3]
 ```
 
-#One More SQL Tip
 
-SQL sometimes has a hard time recognizing a column name with a period (.) in it.  For example, if you were to run the following query, you might get a message that there is no column called Crime.Type when, in fact, there is such a column in your dataset.
+7. `r .exerciseQuestions[7]`
+```{r comment="", results='hold'} 
 res <- dbSendQuery(con, "
-                   SELECT Crime.Type, Longitude, Latitude
-                   FROM oshkoshcrime") 
-fetch(res, n = 10)
+SELECT COUNT(*) AS count,
+                   [Location.Description]
+                   FROM crime
+                   GROUP BY [Location.Description]")
+fetch(res, n = -1)
+dbClearResult(res)
+```
 
-So, to get around this, just put brackets around Crime.Type so that the new query is:
+8. `r .exerciseQuestions[8]`
+```{r comment="", results='hold'} 
 res <- dbSendQuery(con, "
-                   SELECT [Crime.Type], Longitude, Latitude
-                   FROM oshkoshcrime") 
-fetch(res, n = 10)
-And, of course, you could also just change the column name to something without a period.
+                   SELECT Latitude, Longitude
+                   FROM crime
+                   WHERE [Primary.Type]='ASSAULT' AND Ward='22'")
+a <- fetch(res, n = -1)
+dbClearResult(res)
+plot(Latitude~Longitude, data=a, pch=".")
+```
+
+
+9. `r .exerciseQuestions[9]`
+```{r comment="", results='hold'} 
+res <- dbSendQuery(con, "
+        SELECT COUNT(*) as crimecount,
+               Longitude, Latitude
+        FROM crime
+        WHERE [Primary.Type]='ASSAULT' and Ward='22'
+        GROUP BY Longitude, Latitude")
+b <- fetch(res, n=-1)
+dbClearResult(res)
+
+plot(Latitude~Longitude, data=a, pch=".")
+points(b[which.max(b$crimecount), 2:3],
+       pch=16, 
+       col="salmon",
+       cex=4)
+b[which.max(b$crimecount), 2:3]
+```
