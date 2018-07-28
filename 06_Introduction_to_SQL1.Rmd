@@ -48,7 +48,11 @@ knitr::opts_chunk$set(echo=TRUE, cache=TRUE, cache.lazy=FALSE)
 }
 ```
 
-#Introduction to SQL
+<!-- To run this, first download the latest Chicago crime data from -->
+<!-- https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-present/ijzp-q8t2 -->
+<!-- and put the file in the current folder -->
+
+# Introduction
 
 Some datasets are far too large for R to handle by itself. Structured Query Language ("SQL") is a widely used international standard language for managing data stored in databases. There are numerous relational database management systems such as Oracle, Microsoft Access, and MySQL. We are going to use [SQLite](https://www.sqlite.org/index.html), which is probably the most widely deployed database system. SQLite is in your phone, car, airplanes, thermostats, and numerous applicances. We are going to hook up SQLite to R so that R can handle large datasets.
 
