@@ -135,7 +135,7 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
 
 <!-- HTML YAML header Ctrl-Shift-C to comment/uncomment -->
 <!-- --- -->
-<!-- title: "Introduction to SQL" -->
+<!-- title: "Introduction to SQL, Part 2" -->
 <!-- author: -->
 <!-- - Greg Ridgeway (gridge@upenn.edu) -->
 <!-- - Ruth Moyer (moyruth@upenn.edu) -->
@@ -156,7 +156,6 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
 <table>
 <thead>
 <tr class="header">
-<th align="left">Case.Number</th>
 <th align="left">Block</th>
 <th align="left">IUCR</th>
 <th align="left">Primary.Type</th>
@@ -167,7 +166,6 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">HX536570</td>
 <td align="left">040XX W 26TH ST</td>
 <td align="left">0560</td>
 <td align="left">ASSAULT</td>
@@ -176,7 +174,6 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
 <td align="left">1886384</td>
 </tr>
 <tr class="even">
-<td align="left">HX536595</td>
 <td align="left">089XX S SOUTH CHICAGO AVE</td>
 <td align="left">0498</td>
 <td align="left">BATTERY</td>
@@ -185,7 +182,6 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
 <td align="left">1846473</td>
 </tr>
 <tr class="odd">
-<td align="left">HX536553</td>
 <td align="left">052XX S HARPER AVE</td>
 <td align="left">2820</td>
 <td align="left">OTHER OFFENSE</td>
@@ -194,7 +190,6 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
 <td align="left">1870924</td>
 </tr>
 <tr class="even">
-<td align="left">HX539585</td>
 <td align="left">033XX N TROY ST</td>
 <td align="left">2825</td>
 <td align="left">OTHER OFFENSE</td>
@@ -203,7 +198,6 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
 <td align="left">1921848</td>
 </tr>
 <tr class="odd">
-<td align="left">HX536579</td>
 <td align="left">015XX W 107TH ST</td>
 <td align="left">1310</td>
 <td align="left">CRIMINAL DAMAGE</td>
@@ -212,7 +206,6 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
 <td align="left">1833732</td>
 </tr>
 <tr class="even">
-<td align="left">HX536562</td>
 <td align="left">0000X N LARAMIE AVE</td>
 <td align="left">2018</td>
 <td align="left">NARCOTICS</td>
@@ -221,7 +214,6 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
 <td align="left">1900044</td>
 </tr>
 <tr class="odd">
-<td align="left">HX536571</td>
 <td align="left">0000X N KEELER AVE</td>
 <td align="left">0554</td>
 <td align="left">ASSAULT</td>
@@ -230,7 +222,6 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
 <td align="left">1899920</td>
 </tr>
 <tr class="even">
-<td align="left">HX536560</td>
 <td align="left">026XX N ELSTON AVE</td>
 <td align="left">0560</td>
 <td align="left">ASSAULT</td>
@@ -239,7 +230,6 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
 <td align="left">1917685</td>
 </tr>
 <tr class="odd">
-<td align="left">HX536547</td>
 <td align="left">076XX S ABERDEEN ST</td>
 <td align="left">0486</td>
 <td align="left">BATTERY</td>
@@ -248,7 +238,6 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
 <td align="left">1854235</td>
 </tr>
 <tr class="even">
-<td align="left">HX536540</td>
 <td align="left">3XX N SHEFFIELD AVE</td>
 <td align="left">1811</td>
 <td align="left">NARCOTICS</td>
@@ -258,7 +247,7 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
 </tr>
 </tbody>
 </table>
-<p>Note that whenever <code>IUCR</code> is 0560, then <code>Primary.Type</code> is ASSAULT and <code>FBI.Code</code> is 08A. There is no reason to store the IUCR code, the primary crime type, and the FBI code all in the same file. We should keep a separate table that links the IUCR codes, the primary crime types, and the FBI codes, but that we can keep separately. Note that it is essential to store the IUCR code in the crime table. Both IUR codes 2018 and 1811 both link to NARCOTICS and FBI code 18. If we deleted IUCR from the crime tableand kept only the primary crime type, then we would lose some detailed information.</p>
+<p>Note that whenever <code>IUCR</code> is 0560, then <code>Primary.Type</code> is ASSAULT and <code>FBI.Code</code> is 08A. There is no reason to store the IUCR code, the primary crime type, and the FBI code all in the same file. We should keep a separate table that links the IUCR codes, the primary crime types, and the FBI codes, but that we can keep separately. Note that it is essential to store the IUCR code in the crime table. Both IUR codes 2018 and 1811 both link to NARCOTICS and FBI code 18. If we deleted IUCR from the crime table and kept only the primary crime type, then we would lose some detailed information.</p>
 <p>Let’s start by reconnecting to the Chicago crime database</p>
 <pre class="r"><code>library(sqldf)</code></pre>
 <pre><code>Loading required package: gsubfn</code></pre>
@@ -364,7 +353,7 @@ dbClearResult(res)</code></pre>
 65        676 2093    NARCOTICS       26 2014
 66        332 2093    NARCOTICS       26 2015</code></pre>
 <p>These are all narcotics cases, but we see that in some years, these charges are marked as FBI code 18 (crimes of production, sale, use of drugs) and sometimes 26 (a miscellaneous category) (see CPD’s <a href="http://gis.chicagopolice.org/clearmap_crime_sums/crime_types.html">crime type description</a>). FBI code 26 appears more commonly, but the FBI code 26 appears to phase out after 2015. 2091 is a narcotics code for “forfeit property”, 2092 is for “soliciting narcotics on a publicway,” and 2093 is for “found suspect narcotics.” It appears that CPD now interprets these crimes as being drug crimes. We’ll just use code 18 for these crimes.</p>
-<p>A similar story goes for IUCR crimes 1710, 1715, 1725, 1755, and 1780. These are all offenses involving children that prior to 2016 had been given the FBI miscellaneous code 26, but more recently has been coded as 20 (offenses againstfamily). We’ll code these using the more recent FBI code 20.</p>
+<p>A similar story goes for IUCR crimes 1710, 1715, 1725, 1755, and 1780. These are all offenses involving children that prior to 2016 had been given the FBI miscellaneous code 26, but more recently has been coded as 20 (offenses against family). We’ll code these using the more recent FBI code 20.</p>
 <pre class="r"><code>res &lt;- dbSendQuery(con, 
    &quot;SELECT COUNT(*) AS crimecount,
            IUCR,
@@ -538,7 +527,7 @@ dbClearResult(res)</code></pre>
 6         14 5114   NON-CRIMINAL       26 2016
 7          7 5114   NON-CRIMINAL       26 2017
 8          9 5114   NON-CRIMINAL       26 2018</code></pre>
-<p>With questions about IUCR to FBI codes resolved, let’s create the IUCR, primary type, and FBI code lookup table in our chicago crime database. We can use <code>dbWriteTable()</code> to post our data frame <code>a</code> to the database creating a new table called <code>iucr</code>.</p>
+<p>With questions about IUCR to FBI codes resolved, let’s create the IUCR, primary type, and FBI code lookup table in our Chicago crime database. We can use <code>dbWriteTable()</code> to post our data frame <code>a</code> to the database creating a new table called <code>iucr</code>.</p>
 <pre class="r"><code>if(dbExistsTable(con,&quot;iucr&quot;)) dbRemoveTable(con, &quot;iucr&quot;)
 # import the data frame into SQLite
 dbWriteTable(con, &quot;iucr&quot;, a,
@@ -554,9 +543,8 @@ dbListFields(con,&quot;iucr&quot;)</code></pre>
 4 0460       BATTERY      08B
 5 031A       ROBBERY       03</code></pre>
 <p>Everything looks okay. However, the dots in the column names are rather tiresome. We should take this opportunity to give them names that are more appropriate for working in SQL. Also, there was no need to pull the table into R, only to post it right back into the database. We can use a <code>CREATE TABLE</code> clause to create this lookup table instead.</p>
-<pre class="r"><code>if(dbExistsTable(con,&quot;iucr&quot;)) dbRemoveTable(con, &quot;iucr&quot;)</code></pre>
-<pre><code>Warning: Closing open result set, pending rows</code></pre>
-<pre class="r"><code>res &lt;- dbSendQuery(con, &quot;
+<pre class="r"><code>if(dbExistsTable(con,&quot;iucr&quot;)) dbRemoveTable(con, &quot;iucr&quot;)
+res &lt;- dbSendQuery(con, &quot;
                    CREATE TABLE iucr AS
                    SELECT DISTINCT IUCR as iucr,
                                    [Primary.Type] AS PrimaryType,
@@ -564,10 +552,11 @@ dbListFields(con,&quot;iucr&quot;)</code></pre>
                    FROM crime&quot;)</code></pre>
 <p>To finalize the lookup table, we just need to clear out those rows that we do not want, those involving FBI code 26 and the removal of the spaces for IUCR 5114.</p>
 <pre class="r"><code>res &lt;- dbSendQuery(con, &quot;
-                   DELETE FROM iucr
-                   WHERE (FBICode='26') AND
-                         (iucr IN ('1030','1035',
-                                   '1710','1715','1725','1755','1780','2091','2092','2093'))&quot;)
+   DELETE FROM iucr
+   WHERE (FBICode='26') AND
+         (iucr IN ('1030','1035',
+                   '1710','1715','1725','1755','1780',
+                   '2091','2092','2093'))&quot;)
 res &lt;- dbSendQuery(con, &quot;
                    DELETE FROM iucr
                    WHERE (iucr='5114') AND
@@ -732,7 +721,7 @@ paste(a,collapse=&quot;,&quot;)</code></pre>
                    FROM crime_old, DateFix
                    WHERE crime_old.ID=DateFix.ID&quot;)
 dbClearResult(res)</code></pre>
-<p>This query requires a bit of discussion. First, note that the <code>FROM</code> clause includes two tables, <code>crime_old</code> and <code>DateFix</code>. The <code>WHERE</code> clause tells SQLite how to link these two tables together. It says that if there is a row in <code>crime_old</code> with an particular <code>ID</code>, then it can find its associated row in the <code>DateFix</code> table by finding the matching value in the <code>DateFix</code>’s <code>ID</code> column. For every column in the <code>SELECT</code> clause, we’ve included the table from where SQLite should find the column. Technically we only need to prefix the column with the table name when there might be confusion. For example, both <code>crime_old</code> and <code>DateFix</code> have a column called <code>ID</code>. However, we like to be explicit in complicated queries to remind ourselves from where all the data comes. You can also see in this <code>SELECT</code> query why periods in column names cause problems. SQL uses the period to separate the table name from the column name. If we were to include <code>Case.Number</code> in a <code>SELECT</code> statement, then SQL would think we had a table called <code>Case</code> with a column called <code>Number</code>. Let’s fix this once and for all here by renaming all the columns with periods in their names. In the <code>SELECT</code> clause we have not included any of the columns with redundant information like <code>Primary.Type</code>, <code>FBI.Code</code>, and <code>Location</code>. Technically, <code>Beat</code>, <code>District</code>, <code>Ward</code>, and <code>Community.Area</code> are all redundant information once we have <code>Latitude</code> and <code>Longitude</code>. However, “spatial joins,” linking coordinates to spatial areas, is computationally expensive so that it is most likely more efficient to simply leave this redundant information here. Lastly, note that the first line is a <code>CREATE TABLE</code> statement that will store the results of this query in a new table called <code>crime</code>.</p>
+<p>This query requires a bit of discussion. First, note that the <code>FROM</code> clause includes two tables, <code>crime_old</code> and <code>DateFix</code>. The <code>WHERE</code> clause tells SQLite how to link these two tables together. It says that if there is a row in <code>crime_old</code> with a particular <code>ID</code>, then it can find its associated row in the <code>DateFix</code> table by finding the matching value in the <code>DateFix</code>’s <code>ID</code> column. For every column in the <code>SELECT</code> clause, we’ve included the table from where SQLite should find the column. Technically we only need to prefix the column with the table name when there might be confusion. For example, both <code>crime_old</code> and <code>DateFix</code> have a column called <code>ID</code>. However, we like to be explicit in complicated queries to remind ourselves from where all the data comes. You can also see in this <code>SELECT</code> query why periods in column names cause problems. SQL uses the period to separate the table name from the column name. If we were to include <code>Case.Number</code> in a <code>SELECT</code> statement, then SQL would think we had a table called <code>Case</code> with a column called <code>Number</code>. Let’s fix this once and for all here by renaming all the columns with periods in their names. In the <code>SELECT</code> clause we have not included any of the columns with redundant information like <code>Primary.Type</code>, <code>FBI.Code</code>, and <code>Location</code>. Technically, <code>Beat</code>, <code>District</code>, <code>Ward</code>, and <code>Community.Area</code> are all redundant information once we have <code>Latitude</code> and <code>Longitude</code>. However, “spatial joins,” linking coordinates to spatial areas, is computationally expensive so that it is most likely more efficient to simply leave this redundant information here. Lastly, note that the first line is a <code>CREATE TABLE</code> statement that will store the results of this query in a new table called <code>crime</code>.</p>
 <p>Let’s look at the newly cleaned up table.</p>
 <pre class="r"><code>res &lt;- dbSendQuery(con, &quot;
                    SELECT *
@@ -790,13 +779,13 @@ res &lt;- dbSendQuery(con, &quot;DROP TABLE DateFix&quot;)
 dbClearResult(res)
 dbListTables(con)</code></pre>
 <pre><code>[1] &quot;crime&quot; &quot;iucr&quot; </code></pre>
-<p>After all this work, the size of the <code>chicagocrime.db</code> database file can become quite large. Our file is now 2.7 Gb, much larger than the size of the file we downloaded from the City of Chicago open data site. Even though we have deleted the <code>crime_old</code> and <code>DateFix</code> tables, SQLite simply marks them as deleted, but doesn’t necessariy give up the space that it had allocated for their storage. It holds onto that space in case the user needs it. The <code>VACUUM</code> statement will clean up unused space, but it can take awhile. It is not essential, so run this when you won’t be working with your data for a little while.</p>
+<p>After all this work, the size of the <code>chicagocrime.db</code> database file can become quite large. Our file is now 2.7 Gb, much larger than the size of the file we downloaded from the City of Chicago open data site. Even though we have deleted the <code>crime_old</code> and <code>DateFix</code> tables, SQLite simply marks them as deleted, but doesn’t necessarily give up the space that it had allocated for their storage. It holds onto that space in case the user needs it. The <code>VACUUM</code> statement will clean up unused space, but it can take a while. It is not essential, so run this when you won’t be working with your data for a little while.</p>
 <pre class="r"><code>system.time(
 res &lt;- dbSendQuery(con, &quot;VACUUM&quot;)
 )
 dbClearResult(res)</code></pre>
 <pre><code>   user  system elapsed 
-   2.29   21.49   28.64 </code></pre>
+   3.36   27.37   37.53 </code></pre>
 <p>After <code>VACUUM</code> our <code>chicagocrime.db</code> file is now 1 Gb… much better.</p>
 </div>
 <div id="joining-data-across-tables" class="section level1">
@@ -826,7 +815,7 @@ data[1:10,]</code></pre>
 8    HY189988     08B
 9    HY190020      18
 10   HY189964     08B</code></pre>
-<p>For each record SQLite looks up the crime’s IUCR code in the <code>iucr</code> table and links in the FBI code. SQLite is fast. This query took 8.36 seconds, but this linking does take time especially for really large datasets and large lookup tables. For the above query, SQLite scans through the <code>iucr</code> table until it finds the right IUCR code. This is not very efficient. If you were to look up the word “query” in the dictionary, you would not start on page 1 and scan through every word until you arrived at “query”. Instead you would start about two-thirds of the way through the dictionary, see if the words are beforor after “query” and revise your search until you find the word. Rather than search hundreds of pages, you might only need to look at nine pages.</p>
+<p>For each record SQLite looks up the crime’s IUCR code in the <code>iucr</code> table and links in the FBI code. SQLite is fast. This query took 9.33 seconds, but this linking does take time especially for really large datasets and large lookup tables. For the above query, SQLite scans through the <code>iucr</code> table until it finds the right IUCR code. This is not very efficient. If you were to look up the word “query” in the dictionary, you would not start on page 1 and scan through every word until you arrived at “query”. Instead you would start about two-thirds of the way through the dictionary, see if the words are before or after “query” and revise your search until you find the word. Rather than search hundreds of pages, you might only need to look at nine pages.</p>
 <p>In the same way, we can create an “index” for the <code>iucr</code> table to help speed up the search. It does not always make the queries faster and can require storing a large index in some cases. Let’s try on this example.</p>
 <pre class="r"><code>res &lt;- dbSendQuery(con, &quot;
                    CREATE INDEX iucr_idx on iucr(iucr)&quot;)
@@ -844,8 +833,8 @@ system.time(
    data &lt;- fetch(res, n = -1)
 })
 dbClearResult(res)</code></pre>
-<p>That query now takes 8.13 seconds. Creating an index is not always worth it. If you have queries that are taking too long, it’s worth experimenting with creating an index to see if it helps.</p>
-<p>In the previous query we used the <code>WHERE</code> clause to join the two tables together. Most SQL programmers prefer using <code>JOIN</code> rather than using the <code>WHERE</code> clause. The primary reason is readabilty. The thinking is that the <code>WHERE</code> clause should really be about filtering which cases to include, while joining tables is quite a different operation. There are also several different kinds of joins. What should the query return if a crime has a IUCR code that does not appear in the <code>iucr</code> table? <code>JOIN</code>s more carefully define the desired behavior. Here we provide an example of an inner join.</p>
+<p>That query now takes 9.46 seconds. Creating an index is not always worth it. If you have queries that are taking too long, it’s worth experimenting with creating an index to see if it helps.</p>
+<p>In the previous query we used the <code>WHERE</code> clause to join the two tables together. Most SQL programmers prefer using <code>JOIN</code> rather than using the <code>WHERE</code> clause. The primary reason is readability. The thinking is that the <code>WHERE</code> clause should really be about filtering which cases to include, while joining tables is quite a different operation. There are also several different kinds of joins. What should the query return if a crime has an IUCR code that does not appear in the <code>iucr</code> table? <code>JOIN</code>s more carefully define the desired behavior. Here we provide an example of an inner join.</p>
 <pre class="r"><code>res &lt;- dbSendQuery(con, &quot;
                    SELECT crime.CaseNumber,
                           iucr.FBICode
