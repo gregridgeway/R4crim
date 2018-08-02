@@ -2,10 +2,10 @@
 title: "Dates and Times"
 author:
 - affiliation: University of Pennsylvania
-  email: gridge@upenn.edu
+  email: gridge@sas.upenn.edu
   name: Greg Ridgeway
 - affiliation: University of Pennsylvania
-  email: moyruth@upenn.edu
+  email: moyruth@sas.upenn.edu
   name: Ruth Moyer
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
