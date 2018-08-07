@@ -285,20 +285,35 @@ The full census of the United States occurs every ten years, but in between thos
 
 JSON (JavaScript Object Notation) is a very common protocol for moving data. The ACS provides a JSON access to its data. There are other ways of accessing ACS data, like downloading the entire ACS dataset, but we're going to use JSON so that you become familiar with how JSON works. Also, when we only need a small amount of information (just race data from particular census tracts) it can save a lot of effort when compared with downloading and processing the full ACS dataset.
 
+First, let's load the `rjson` library.
+```{r comment="", results='hold'}
 library(rjson)
-# access ACS data from JSON
-#   http://api.census.gov/data/2014/acs5/examples.html
-# number of US households in 2015 and 2014
+```
+Here's how you can access the ACS data on the number of US households in 2014 and 2015.
+```{r comment="", results='hold'}
 fromJSON(file="http://api.census.gov/data/2015/acs1/cprofile?get=NAME,CP02_2015_001E,CP02_2014_001E&for=us:*")
-# track down variables using https://www.socialexplorer.com/data/ACS2014_5yr/metadata/
-# total population in specific tracts
-fromJSON(file="http://api.census.gov/data/2014/acs5?get=B00001_001E&for=tract:204920,205110&in=state:06+county:037")
-# total population in all tracts in LA county
-fromJSON(file="http://api.census.gov/data/2014/acs5?get=B00001_001E&for=tract:*&in=state:06+county:037")
+```
 
-# get total (B03002001), non-hispanic white (B03002003), non-hispanic black (B03002004), hispanic (B03002012)
+Let's deconstruct this URL. First, we're accessing data from the 2015 ACS data using `http://api.census.gov/data/2015/acs1`. Second, we're accessing variables `SP02_2014_001E` and `SP02_2015_001E`, which contain the number of households in the United States. This we needed to track down, but the Social Explorer website, [https://www.socialexplorer.com/data/ACS2014_5yr/metadata/](https://www.socialexplorer.com/data/ACS2014_5yr/metadata/), makes this easier. Lastly, we asked `for=us:*`, meaning for the entire United States.
+
+If we want the total number of people in specific census tracts, then we can make this request.
+```{r comment="", results='hold'}
+fromJSON(file="http://api.census.gov/data/2014/acs5?get=B00001_001E&for=tract:204920,205110&in=state:06+county:037")
+```
+Here we have requested populationa data (variable `B00001_001E`) for two specific census tracts (204920 and 205110)  from California (state 06) in Los Angeles County (county 037).
+
+If we want the total population in all tracts in Los Angeles County, just change the tract list to an *.
+```{r comment="", results='hold'}
+fromJSON(file="http://api.census.gov/data/2014/acs5?get=B00001_001E&for=tract:*&in=state:06+county:037")
+```
+You can find a lot more examples at [http://api.census.gov/data/2014/acs5/examples.html](http://api.census.gov/data/2014/acs5/examples.html).
+
+Now let's get something more complete that we can merge into our geographic data. For each census tract in Los Angeles County, we will extract the total population (`B03002001`), the number of non-Hispanic white residents (`B03002003`), non-Hispanic black residents (`B03002004`), and Hispanic residents (`B03002012`).
+```{r comment="", results='hold'}
 dataRace <- fromJSON(file="http://api.census.gov/data/2014/acs5?get=B03002_001E,B03002_003E,B03002_004E,B03002_012E&for=tract:*&in=state:06+county:037")
-# convert to data frame, use stringsAsFactors to leave text as character strings
+```
+We will convert the list to a data frame, leaving out the first component of the list that has the column names and telling R not to convert the character strings to factors.
+```{r comment="", results='hold'}
 a <- data.frame(do.call(rbind,dataRace[-1]),
                 stringsAsFactors=FALSE)
 names(a) <- dataRace[[1]]
@@ -306,9 +321,12 @@ names(a)[1:4] <- c("total","white","black","hisp")
 dataRace <- a
 for(i in c("total","white","black","hisp"))
    dataRace[[i]] <- as.numeric(dataRace[[i]])
+# compute number of residents of other race groups
 dataRace$other <- with(dataRace,total-white-black-hisp)
+```
 
-# add race information to MS13 injunction area
+Now we have a data frame that links the census tract numbers to populations and race data. Let's add race information to the MS13 injunction data.
+```{r comment="", results='hold'}
 plot(st_geometry(subset(mapCens,inMS13)))
 plot(st_geometry(mapSZms13), border="red", lwd=3, add=TRUE)
 
@@ -326,6 +344,7 @@ plot(st_geometry(mapSZms13), border="red", lwd=3, add=TRUE)
 labs <- with(mapCens, paste0(round(100*pctHisp[inMS13]),"%"))
 text(st_coordinates(st_centroid(subset(mapCens,inMS13))),
      labels=labs, cex=0.5)
+```
 
 # Exercise
 `r .exNum('Create a map of all census tracts in the City of Los Angeles within 1 mile of one of the safety zones (you choose which safety zone)')`
