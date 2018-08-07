@@ -33,7 +33,7 @@ output:
 
 <!-- Make RMarkdown cache the results -->
 ```{r echo=FALSE}
-knitr::opts_chunk$set(echo=TRUE, cache=TRUE, cache.lazy=FALSE)
+knitr::opts_chunk$set(echo=TRUE, cache=TRUE, cache.lazy=FALSE, out.width='100%')
 ```
 
 <!-- A function for automating the numbering and wording of the exercise questions -->
@@ -43,11 +43,16 @@ knitr::opts_chunk$set(echo=TRUE, cache=TRUE, cache.lazy=FALSE)
 .exNum <- function(.questionText="") 
 {
    .counterExercise <<- .counterExercise+1
-   .exerciseQuestions <<- c(.exerciseQuestions, .questionText)
    .questionText <- gsub("@@", "`", .questionText)
+   .exerciseQuestions <<- c(.exerciseQuestions, .questionText)
    return(paste0(.counterExercise,". ",.questionText))
 }
+.exQ <- function(i)
+{
+   return( paste0(i,". ",.exerciseQuestions[i]) )
+}
 ```
+
 
 <!-- This document can't be created after running Lesson #8 SQL part 2. To recreate this document, first rerun Lesson #6 SQL Part 1. -->
 
