@@ -35,7 +35,7 @@ output:
 
 
 
-<!-- A function for autmomating the numbering and wording of the exercise questions -->
+<!-- A function for automating the numbering and wording of the exercise questions -->
 ```{r echo=FALSE}
 .counterExercise <- 0
 .exerciseQuestions <- NULL
@@ -43,9 +43,9 @@ output:
 {
    .counterExercise <<- .counterExercise+1
    .exerciseQuestions <<- c(.exerciseQuestions, .questionText)
+   .questionText <- gsub("@@", "`", .questionText)
    return(paste0(.counterExercise,". ",.questionText))
 }
-knitr::opts_chunk$set(echo=TRUE, cache=TRUE, cache.lazy=FALSE)
 ```
 
 

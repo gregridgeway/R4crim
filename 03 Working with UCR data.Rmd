@@ -29,14 +29,15 @@ output:
 <!-- --- -->
 <!-- PDF YAML header Ctrl-Shift-C to comment/uncomment -->
 
-<!-- A function for autmomating the numbering and wording of the exercise questions -->
+<!-- A function for automating the numbering and wording of the exercise questions -->
 ```{r echo=FALSE}
 .counterExercise <- 0
 .exerciseQuestions <- NULL
-.exNum <- function(questionText="") 
+.exNum <- function(.questionText="") 
 {
    .counterExercise <<- .counterExercise+1
    .exerciseQuestions <<- c(.exerciseQuestions, .questionText)
+   .questionText <- gsub("@@", "`", .questionText)
    return(paste0(.counterExercise,". ",.questionText))
 }
 ```
