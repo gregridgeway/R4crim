@@ -34,7 +34,7 @@ output:
 
 <!-- Make RMarkdown cache the results -->
 ```{r echo=FALSE}
-knitr::opts_chunk$set(echo=TRUE, cache=TRUE, cache.lazy=FALSE)
+knitr::opts_chunk$set(echo=TRUE, cache=TRUE, cache.lazy=FALSE, out.width='100%')
 ```
 
 <!-- A function for automating the numbering and wording of the exercise questions -->
@@ -44,11 +44,16 @@ knitr::opts_chunk$set(echo=TRUE, cache=TRUE, cache.lazy=FALSE)
 .exNum <- function(.questionText="") 
 {
    .counterExercise <<- .counterExercise+1
-   .exerciseQuestions <<- c(.exerciseQuestions, .questionText)
    .questionText <- gsub("@@", "`", .questionText)
+   .exerciseQuestions <<- c(.exerciseQuestions, .questionText)
    return(paste0(.counterExercise,". ",.questionText))
 }
+.exQ <- function(i)
+{
+   return( paste0(i,". ",.exerciseQuestions[i]) )
+}
 ```
+
 
 <!-- For this markdown to work, first run Intro to SQL Part 1 -->
 
@@ -211,7 +216,7 @@ With the new table `iucr` in the database complete the following exercises.
 
 `r .exNum('How many IUCR codes are there for "ASSAULT"?')`
 
-`r .exNum('Try doing the prior exercise again using COUNT(*) if you did not use it the first time')`
+`r .exNum('Try doing the prior exercise again using @@COUNT(*)@@ if you did not use it the first time')`
 
 
 # SQL dates
@@ -497,14 +502,16 @@ As a final exercise, which does not involve a subquery,
 # Solutions
 
 
-1. `r .exerciseQuestions[1]`
+`r .exQ(1)`
+
 ```{r comment="", results='hold'}
 res <- dbSendQuery(con, "SELECT * from iucr")
 fetch(res, n=-1)
 dbClearResult(res)
 ```
 
-2. `r .exerciseQuestions[2]`
+`r .exQ(2)`
+
 ```{r comment="", results='hold'}
 res <- dbSendQuery(con, "
    SELECT iucr
@@ -514,8 +521,8 @@ fetch(res, n=-1)
 dbClearResult(res)
 ```
 
+`r .exQ(3)`
 
-3. `r .exerciseQuestions[3]`
 ```{r comment="", results='hold'}
 res <- dbSendQuery(con, "
    SELECT *
@@ -525,8 +532,8 @@ fetch(res, n=-1)
 dbClearResult(res)
 ```
 
+`r .exQ(4)`
 
-4. `r .exerciseQuestions[4]`
 ```{r comment="", results='hold'}
 res <- dbSendQuery(con, "
    SELECT COUNT(*)
@@ -536,8 +543,8 @@ fetch(res, n=-1)
 dbClearResult(res)
 ```
 
+`r .exQ(5)`
 
-5. `r .exerciseQuestions[5]`
 ```{r comment="", results='hold'}
 res <- dbSendQuery(con, "
    SELECT COUNT(*)
@@ -550,8 +557,8 @@ fetch(res, n=-1)
 dbClearResult(res)
 ```
 
+`r .exQ(6)`
 
-6. `r .exerciseQuestions[6]`
 ```{r comment="", results='hold'}
 res <- dbSendQuery(con, "
    SELECT COUNT(*) AS crimecount,
@@ -569,8 +576,7 @@ subset(a, crimecount==max(crimecount))
 a[which.max(a$crimecount),]
 ```
 
-
-7. `r .exerciseQuestions[7]`
+`r .exQ(7)`
 
 ```{r comment="", results='hold'}
 #  count 1) assaults
