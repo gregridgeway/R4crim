@@ -10,7 +10,7 @@
 
 
 
-<meta name="date" content="2018-07-31" />
+<meta name="date" content="2018-08-07" />
 
 <title>Introduction to SQL, Part 2</title>
 
@@ -128,7 +128,7 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
 <address class="author_afil">
 University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="mailto:moyruth@upenn.edu">moyruth@upenn.edu</a></a>
 </address>
-<h4 class="date"><em>July 31, 2018</em></h4>
+<h4 class="date"><em>August 07, 2018</em></h4>
 
 </div>
 
@@ -139,7 +139,7 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
 <!-- author: -->
 <!-- - Greg Ridgeway (gridge@upenn.edu) -->
 <!-- - Ruth Moyer (moyruth@upenn.edu) -->
-<!-- date: "July 31, 2018" -->
+<!-- date: "August 07, 2018" -->
 <!-- output: -->
 <!--   pdf_document: -->
 <!--     latex_engine: pdflatex -->
@@ -149,7 +149,7 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
 <!-- --- -->
 <!-- PDF YAML header Ctrl-Shift-C to comment/uncomment -->
 <!-- Make RMarkdown cache the results -->
-<!-- A function for autmomating the numbering and wording of the exercise questions -->
+<!-- A function for automating the numbering and wording of the exercise questions -->
 <!-- For this markdown to work, first run Intro to SQL Part 1 -->
 <p>The crime table in our Chicago crime database is not ideal. We’re probably already unhappy about those dots in the column names. Also, it was overly complicated to extract the year from a date. There is also a lot of redundant information in the table.</p>
 <p>Let’s take a look at a few example rows.</p>
@@ -571,7 +571,7 @@ res &lt;- dbSendQuery(con, &quot;
 <li><p>Print out all of the rows in iucr</p></li>
 <li><p>Print out all the IUCR codes for “KIDNAPPING”</p></li>
 <li><p>How many IUCR codes are there for “ASSAULT”?</p></li>
-<li><p>Try doing the prior exercise again using COUNT(*) if you did not use it the first time</p></li>
+<li><p>Try doing the prior exercise again using <code>COUNT(*)</code> if you did not use it the first time</p></li>
 </ol>
 </div>
 <div id="sql-dates" class="section level1">
@@ -785,7 +785,7 @@ res &lt;- dbSendQuery(con, &quot;VACUUM&quot;)
 )
 dbClearResult(res)</code></pre>
 <pre><code>   user  system elapsed 
-   3.36   27.37   37.53 </code></pre>
+   3.66   30.36   44.55 </code></pre>
 <p>After <code>VACUUM</code> our <code>chicagocrime.db</code> file is now 1 Gb… much better.</p>
 </div>
 <div id="joining-data-across-tables" class="section level1">
@@ -815,7 +815,7 @@ data[1:10,]</code></pre>
 8    HY189988     08B
 9    HY190020      18
 10   HY189964     08B</code></pre>
-<p>For each record SQLite looks up the crime’s IUCR code in the <code>iucr</code> table and links in the FBI code. SQLite is fast. This query took 9.33 seconds, but this linking does take time especially for really large datasets and large lookup tables. For the above query, SQLite scans through the <code>iucr</code> table until it finds the right IUCR code. This is not very efficient. If you were to look up the word “query” in the dictionary, you would not start on page 1 and scan through every word until you arrived at “query”. Instead you would start about two-thirds of the way through the dictionary, see if the words are before or after “query” and revise your search until you find the word. Rather than search hundreds of pages, you might only need to look at nine pages.</p>
+<p>For each record SQLite looks up the crime’s IUCR code in the <code>iucr</code> table and links in the FBI code. SQLite is fast. This query took 9.34 seconds, but this linking does take time especially for really large datasets and large lookup tables. For the above query, SQLite scans through the <code>iucr</code> table until it finds the right IUCR code. This is not very efficient. If you were to look up the word “query” in the dictionary, you would not start on page 1 and scan through every word until you arrived at “query”. Instead you would start about two-thirds of the way through the dictionary, see if the words are before or after “query” and revise your search until you find the word. Rather than search hundreds of pages, you might only need to look at nine pages.</p>
 <p>In the same way, we can create an “index” for the <code>iucr</code> table to help speed up the search. It does not always make the queries faster and can require storing a large index in some cases. Let’s try on this example.</p>
 <pre class="r"><code>res &lt;- dbSendQuery(con, &quot;
                    CREATE INDEX iucr_idx on iucr(iucr)&quot;)
@@ -833,7 +833,7 @@ system.time(
    data &lt;- fetch(res, n = -1)
 })
 dbClearResult(res)</code></pre>
-<p>That query now takes 9.46 seconds. Creating an index is not always worth it. If you have queries that are taking too long, it’s worth experimenting with creating an index to see if it helps.</p>
+<p>That query now takes 13.35 seconds. Creating an index is not always worth it. If you have queries that are taking too long, it’s worth experimenting with creating an index to see if it helps.</p>
 <p>In the previous query we used the <code>WHERE</code> clause to join the two tables together. Most SQL programmers prefer using <code>JOIN</code> rather than using the <code>WHERE</code> clause. The primary reason is readability. The thinking is that the <code>WHERE</code> clause should really be about filtering which cases to include, while joining tables is quite a different operation. There are also several different kinds of joins. What should the query return if a crime has an IUCR code that does not appear in the <code>iucr</code> table? <code>JOIN</code>s more carefully define the desired behavior. Here we provide an example of an inner join.</p>
 <pre class="r"><code>res &lt;- dbSendQuery(con, &quot;
                    SELECT crime.CaseNumber,
@@ -1640,7 +1640,7 @@ dbClearResult(res)</code></pre>
 14 0551     ASSAULT     04A
 15 0556     ASSAULT     04A</code></pre>
 <ol start="4" style="list-style-type: decimal">
-<li>Try doing the prior exercise again using COUNT(*) if you did not use it the first time</li>
+<li>Try doing the prior exercise again using <code>COUNT(*)</code> if you did not use it the first time</li>
 </ol>
 <pre class="r"><code>res &lt;- dbSendQuery(con, &quot;
    SELECT COUNT(*)
