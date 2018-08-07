@@ -1,0 +1,798 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<gfc:FC_FeatureCatalogue xmlns:gfc="http://www.isotc211.org/2005/gfc">
+   <gmx:name xmlns:gmx="http://www.isotc211.org/2005/gmx">
+      <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Feature Catalog for the  Current Place State-based</gco:CharacterString>
+   </gmx:name>
+   <gmx:scope xmlns:gmx="http://www.isotc211.org/2005/gmx">
+      <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">The Current Place State-based shapefile contains a record for incorporated places, which are established to provide governmental functions for a concentration of people as opposed to a minor civil division (MCD), which generally is created to provide services or administer an area without regard, necessarily, to population. Places always nest within a state, but may extend across county and county subdivision boundaries. An incorporated place usually is a city, town, village, or borough, but can have other legal descriptions. CDPs are delineated for the decennial census as the statistical counterparts of incorporated places. CDPs are delineated to provide data for settled concentrations of population that are identifiable by name, but are not legally incorporated under the laws of the state in which they are located.</gco:CharacterString>
+   </gmx:scope>
+   <gmx:versionNumber xmlns:gmx="http://www.isotc211.org/2005/gmx">
+      <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">2014</gco:CharacterString>
+   </gmx:versionNumber>
+   <gmx:versionDate xmlns:gmx="http://www.isotc211.org/2005/gmx">
+      <gco:Date xmlns:gco="http://www.isotc211.org/2005/gco">2014-06-01</gco:Date>
+   </gmx:versionDate>
+   <gmx:language xmlns:gmx="http://www.isotc211.org/2005/gmx">
+      <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">eng</gco:CharacterString>
+   </gmx:language>
+   <gmx:characterSet xmlns:gmx="http://www.isotc211.org/2005/gmx">
+      <gmd:MD_CharacterSetCode xmlns:gmd="http://www.isotc211.org/2005/gmd"
+                               codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_CharacterSetCode"
+                               codeListValue="utf8"
+                               codeSpace="004">utf8
+            </gmd:MD_CharacterSetCode>
+   </gmx:characterSet>
+   <gfc:producer xmlns:xlink="http://www.w3.org/1999/xlink"
+                 xlink:href="https://www.ngdc.noaa.gov/docucomp/c5ceb003-1ed6-4126-8a16-bc08ce8fc267"
+                 xlink:title="U.S. Department of Commerce, U.S. Census Bureau, Geography Division, Geographic Products Branch"/>
+   <gfc:featureType>
+      <gfc:FC_FeatureType>
+         <gfc:typeName>
+            <gco:LocalName xmlns:gco="http://www.isotc211.org/2005/gco">PLACE.shp</gco:LocalName>
+         </gfc:typeName>
+         <gfc:definition>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Current Place State-based</gco:CharacterString>
+         </gfc:definition>
+         <gfc:isAbstract>
+            <gco:Boolean xmlns:gco="http://www.isotc211.org/2005/gco">false</gco:Boolean>
+         </gfc:isAbstract>
+         <gfc:featureCatalogue uuidref="2014_place.ea.iso.xml"/>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName xmlns:gco="http://www.isotc211.org/2005/gco">STATEFP</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Current state Federal Information Processing Series (FIPS) code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="unknown"/>
+               <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">National Standard Codes (ANSI INCITS 38-2009), Federal Information Processing Series (FIPS) - States/State Equivalents</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName xmlns:gco="http://www.isotc211.org/2005/gco">PLACEFP</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Current place Federal Information Processing Series (FIPS) code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="unknown"/>
+               <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">FederalInformation Processing Series Census Codes for Named Populated Places, Primary County Divisions, and other Locational Entities of the United States, Puerto Rico, and the Island Areas (Formerly FIPS 55-3)</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName xmlns:gco="http://www.isotc211.org/2005/gco">PLACENS</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Current place GNIS code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="unknown"/>
+               <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">INCITS 446:2008 (Geographic Names Information System (GNIS)), Identifying Attributes for Named Physical and Cultural Geographic Features (Except Roads and Highways) of the United States, Its Territories, Outlying Areas, and Freely Associated Areas, and the Waters of the Same to the Limit of the Twelve-Mile Statutory Zone</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definitionReference>
+                        <gfc:FC_DefinitionReference>
+                           <gfc:definitionSource>
+                              <gfc:FC_DefinitionSource>
+                                 <gfc:source>
+                                    <gmd:CI_Citation xmlns:gmd="http://www.isotc211.org/2005/gmd">
+                                       <gmd:title xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="inapplicable"/>
+                                       <gmd:date xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="unknown"/>
+                                       <gmd:citedResponsibleParty>
+                                          <gmd:CI_ResponsibleParty>
+                                             <gmd:organisationName>
+                                                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">U.S. Geological Survey (USGS)</gco:CharacterString>
+                                             </gmd:organisationName>
+                                             <gmd:role>
+                                                <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode"
+                                                                 codeListValue="resourceProvider"
+                                                                 codeSpace="001">resourceProvider
+                                                  </gmd:CI_RoleCode>
+                                             </gmd:role>
+                                          </gmd:CI_ResponsibleParty>
+                                       </gmd:citedResponsibleParty>
+                                    </gmd:CI_Citation>
+                                 </gfc:source>
+                              </gfc:FC_DefinitionSource>
+                           </gfc:definitionSource>
+                        </gfc:FC_DefinitionReference>
+                     </gfc:definitionReference>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName xmlns:gco="http://www.isotc211.org/2005/gco">GEOID</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Place identifier; a concatenation of Current state FIPS code and place FIPS code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="unknown"/>
+               <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="inapplicable"/>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">The GEOID attribute is a concatenation of: a) the state FIPS code, and b) the place FIPS code. No spaces are allowed between the two codes. The State FIPS code is taken from "National Standard Codes (ANSI INCITS 38-2009), Federal Information Processing Series(FIPS) - States". The place FIPS code is taken from FederalInformation Processing Series Census Codes for Named Populated Places, Primary County Divisions, and other Locational Entities of the United States, Puerto Rico, and the Island Areas (Formerly FIPS 55-3)</gco:CharacterString>
+                     </gfc:definition>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName xmlns:gco="http://www.isotc211.org/2005/gco">NAME</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Current place name</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="unknown"/>
+               <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="inapplicable"/>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Values for this attribute are composed of a set of place names. As such, they do not exist in a known, predefined set.</gco:CharacterString>
+                     </gfc:definition>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName xmlns:gco="http://www.isotc211.org/2005/gco">NAMELSAD</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Current name and the translated legal/statistical area description for place</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="unknown"/>
+               <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="inapplicable"/>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Current name and the translated legal/statistical area description for place</gco:CharacterString>
+                     </gfc:definition>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName xmlns:gco="http://www.isotc211.org/2005/gco">LSAD</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Current legal/statistical area description code for place</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="unknown"/>
+               <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">00</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Blank</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">21</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">borough (suffix)</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">25</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">city (suffix)</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">37</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">municipality (suffix)</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">43</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">town (suffix)</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">47</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">village (suffix)</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">53</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">city and borough (suffix)</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">55</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">comunidad (suffix)</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">57</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">census designated place (CDP) (suffix)</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">62</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">zona urbana (suffix)</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">CN</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">corporation (suffix)</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">MG</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">metropolitan government (suffix)</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">UC</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">urban county (suffix)</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">UG</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">unified government (suffix)</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName xmlns:gco="http://www.isotc211.org/2005/gco">CLASSFP</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Current Federal Information Processing Series (FIPS) class code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="unknown"/>
+               <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">C1</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">An active incorporated place that does not serve as a county subdivision</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">C2</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">An active incorporated place that is legally coextensive with a county subdivision but treated as independent of any county subdivision</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">C5</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">An active incorporated place that is independent of any county subdivision and serves as a county subdivision equivalent</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">C6</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">An active incorporated place that is coextensive with or approximates an Alaska Native village statistical area</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">C7</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">An incorporated place that is independent of any county</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">C8</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">The balance of a consolidated city excluding the separately incorporated place(s) within that consolidated government</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">C9</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">An inactive or nonfunctioning incorporated place</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">M2</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">A military or other defense installation entirely within a place</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">U1</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">A census designated place with an official federally recognized name</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">U2</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">A census designated place without an official federally recognized name</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName xmlns:gco="http://www.isotc211.org/2005/gco">PCICBSA</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Current metropolitan or micropolitan statistical area principal city indicator</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="unknown"/>
+               <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">N</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Geographic entity is not a principal city of a CBSA</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Y</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Geographic entity is a principal city of a CBSA</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName xmlns:gco="http://www.isotc211.org/2005/gco">PCINECTA</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Current New England city and town area principal city indicator</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="unknown"/>
+               <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">N</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Geographic entity is not a principal city of a NECTA</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Y</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Geographic entity is a principal city of a NECTA</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName xmlns:gco="http://www.isotc211.org/2005/gco">MTFCC</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">MAF/TIGER feature class code</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="unknown"/>
+               <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">G4110</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Incorporated place</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">G4210</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Census designated place</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName xmlns:gco="http://www.isotc211.org/2005/gco">FUNCSTAT</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Current functional status</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="unknown"/>
+               <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">A</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Active government providing primary general-purpose functions</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">B</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Active government that is partially consolidated with another government but with separate officials providing primary general-purpose functions</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">F</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Fictitious entity created to fill the Census Bureau geographic hierachy</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">I</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Inactive governemental unit that has the power to provide primary special-purpose functions</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">N</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Nonfunctioning legal entity</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">S</gco:CharacterString>
+                     </gfc:label>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Statistical entity</gco:CharacterString>
+                     </gfc:definition>
+                     <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                              xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName xmlns:gco="http://www.isotc211.org/2005/gco">ALAND</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Current land area (square meters)</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="unknown"/>
+               <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="inapplicable"/>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">
+                                            Range Domain Minimum: 0
+                                            Range Domain Maximum: 9,999,999,999,999</gco:CharacterString>
+                     </gfc:definition>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName xmlns:gco="http://www.isotc211.org/2005/gco">AWATER</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Current water area (square meters)</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="unknown"/>
+               <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="inapplicable"/>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">
+                                            Range Domain Minimum: 0
+                                            Range Domain Maximum: 9,999,999,999,999</gco:CharacterString>
+                     </gfc:definition>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName xmlns:gco="http://www.isotc211.org/2005/gco">INTPTLAT</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Current latitude of the internal point</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="unknown"/>
+               <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="inapplicable"/>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">
+                                            Range Domain Minimum: -90.000000
+                                            Range Domain Maximum: 90.000000</gco:CharacterString>
+                     </gfc:definition>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+         <gfc:carrierOfCharacteristics>
+            <gfc:FC_FeatureAttribute>
+               <gfc:memberName>
+                  <gco:LocalName xmlns:gco="http://www.isotc211.org/2005/gco">INTPTLON</gco:LocalName>
+               </gfc:memberName>
+               <gfc:definition>
+                  <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Current longitude of the internal point</gco:CharacterString>
+               </gfc:definition>
+               <gfc:cardinality xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="unknown"/>
+               <gfc:definitionReference xmlns:xlink="http://www.w3.org/1999/xlink" xlink:title="U.S. Census Bureau"
+                                        xlink:href="http://www.ngdc.noaa.gov/docucomp/eb139e38-ee29-4d59-b157-5e874d4420c4"/>
+               <gfc:listedValue>
+                  <gfc:FC_ListedValue>
+                     <gfc:label xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="inapplicable"/>
+                     <gfc:definition>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">
+                                            Range Domain Minimum: -180.000000
+                                            Range Domain Maximum: 180.000000</gco:CharacterString>
+                     </gfc:definition>
+                  </gfc:FC_ListedValue>
+               </gfc:listedValue>
+            </gfc:FC_FeatureAttribute>
+         </gfc:carrierOfCharacteristics>
+      </gfc:FC_FeatureType>
+   </gfc:featureType>
+</gfc:FC_FeatureCatalogue>
