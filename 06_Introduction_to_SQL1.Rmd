@@ -33,7 +33,7 @@ output:
 
 <!-- Make RMarkdown cache the results -->
 ```{r echo=FALSE}
-knitr::opts_chunk$set(echo=TRUE, cache=TRUE, cache.lazy=FALSE)
+knitr::opts_chunk$set(echo=TRUE, cache=TRUE, cache.lazy=FALSE, out.width='100%')
 ```
 
 <!-- A function for automating the numbering and wording of the exercise questions -->
@@ -43,9 +43,13 @@ knitr::opts_chunk$set(echo=TRUE, cache=TRUE, cache.lazy=FALSE)
 .exNum <- function(.questionText="") 
 {
    .counterExercise <<- .counterExercise+1
-   .exerciseQuestions <<- c(.exerciseQuestions, .questionText)
    .questionText <- gsub("@@", "`", .questionText)
+   .exerciseQuestions <<- c(.exerciseQuestions, .questionText)
    return(paste0(.counterExercise,". ",.questionText))
+}
+.exQ <- function(i)
+{
+   return( paste0(i,". ",.exerciseQuestions[i]) )
 }
 ```
 
@@ -263,11 +267,11 @@ print(a)
 The `GROUP BY` clause is critical. If you forget it then the result is not well defined. That is, different implementations of SQL may produce different results. The rule you should remember is that "every non-aggregate column in the `SELECT` clause should appear in the `GROUP BY` clause." Here `Ward` is not part of the aggregate function `COUNT()` so it must appear in the `GROUP BY` clause.
 
 # Practice exercises
-`r .exNum('Count the number of crimes by PrimaryType')`
+`r .exNum('Count the number of crimes by @@Primary.Type@@')`
 
 `r .exNum('Count the number of crimes resulting in arrest')`
 
-`r .exNum('Count the number of crimes by LocationDescription. LocationDescription is the variable that tells us where (e.g., a parking lot, a barbershop, a fire station, a CTA train, or a motel) a crime occurred')`
+`r .exNum('Count the number of crimes by @@Location.Description@@. @@LocationDescription@@ is the variable that tells us where (e.g., a parking lot, a barbershop, a fire station, a CTA train, or a motel) a crime occurred')`
 
 
 
@@ -372,12 +376,13 @@ plot(Latitude~Longitude, data=a, pch=".", xlab="Longitude", ylab="Latitude")
 `r .exNum('Plot the location of all "ASSAULT"s for Ward 22')`
 
 
-`r .exNum('What is the most common (Lat,Long) for assaults in Ward 22? Add the point to your plot using the points() command. The points() command is new. It is simply a function that draws a point (or sequence of points) at the specified coordinates')`
+`r .exNum('What is the most common (Lat,Long) for assaults in Ward 22? Add the point to your plot using the @@points()@@ function. @@points()@@ simply draws a point (or sequence of points) at the specified coordinates')`
 
 
 # Solutions to the exercises
 
-1. `r .exerciseQuestions[1]`
+`r .exQ(1)`
+
 ```{r comment="", results='hold'}
 res <- dbSendQuery(con, "
           SELECT *
@@ -388,7 +393,8 @@ dbClearResult(res)
 ```
 
 
-2. `r .exerciseQuestions[2]`
+`r .exQ(2)`
+
 ```{r comment="", results='hold'} 
 res <- dbSendQuery(con, "
                   SELECT Beat, District, Ward, [Community.Area], [Primary.Type]
@@ -398,7 +404,8 @@ a <- fetch(res, n = -1)
 dbClearResult(res)
 ```
 
-3. `r .exerciseQuestions[3]`
+`r .exQ(3)`
+
 ```{r comment="", results='hold'} 
 res <- dbSendQuery(con, "
                     SELECT *
@@ -408,7 +415,8 @@ a <- fetch(res, n = -1)
 dbClearResult(res)
 ```
 
-4. `r .exerciseQuestions[4]`
+`r .exQ(4)`
+
 ```{r comment="", results='hold'} 
 # system.time() reports how long it takes to run the SQL query
 system.time(
@@ -435,7 +443,8 @@ system.time(
 dbClearResult(res)
 ```
 
-5. `r .exerciseQuestions[5]`
+`r .exQ(5)`
+
 ```{r comment="", results='hold'} 
 res <- dbSendQuery(con, "
               SELECT COUNT(*) AS count, [Primary.Type]
@@ -445,7 +454,8 @@ fetch(res, n = -1)
 dbClearResult(res)
 ```
 
-6. `r .exerciseQuestions[6]`
+`r .exQ(6)`
+
 ```{r comment="", results='hold'} 
 res <- dbSendQuery(con, "
                    SELECT COUNT(*) AS count, [Primary.Type]
@@ -468,7 +478,8 @@ dbClearResult(res)
 ```
 
 
-7. `r .exerciseQuestions[7]`
+`r .exQ(7)`
+
 ```{r comment="", results='hold'} 
 res <- dbSendQuery(con, "
 SELECT COUNT(*) AS count,
@@ -479,7 +490,8 @@ fetch(res, n = -1)
 dbClearResult(res)
 ```
 
-8. `r .exerciseQuestions[8]`
+`r .exQ(8)`
+
 ```{r comment="", results='hold'} 
 res <- dbSendQuery(con, "
                    SELECT Latitude, Longitude
@@ -491,7 +503,8 @@ plot(Latitude~Longitude, data=a, pch=".")
 ```
 
 
-9. `r .exerciseQuestions[9]`
+`r .exQ(9)`
+
 ```{r comment="", results='hold'} 
 res <- dbSendQuery(con, "
         SELECT COUNT(*) as crimecount,
