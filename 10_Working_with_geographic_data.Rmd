@@ -300,11 +300,13 @@ If we want the total number of people in specific census tracts, then we can mak
 ```{r comment="", results='hold'}
 fromJSON(file="http://api.census.gov/data/2014/acs5?get=B00001_001E&for=tract:204920,205110&in=state:06+county:037")
 ```
-Here we have requested populationa data (variable `B00001_001E`) for two specific census tracts (204920 and 205110)  from California (state 06) in Los Angeles County (county 037).
+Here we have requested population data (variable `B00001_001E`) for two specific census tracts (204920 and 205110)  from California (state 06) in Los Angeles County (county 037).
 
-If we want the total population in all tracts in Los Angeles County, just change the tract list to an *.
+If we want the total population in each tract in Los Angeles County, just change the tract list to an *.
 ```{r comment="", results='hold'}
-fromJSON(file="http://api.census.gov/data/2014/acs5?get=B00001_001E&for=tract:*&in=state:06+county:037")
+a <- fromJSON(file="http://api.census.gov/data/2014/acs5?get=B00001_001E&for=tract:*&in=state:06+county:037")
+# there are over 2000 census tracts in LA County. Show the first 10
+a[1:10]
 ```
 You can find a lot more examples at [http://api.census.gov/data/2014/acs5/examples.html](http://api.census.gov/data/2014/acs5/examples.html).
 
@@ -326,16 +328,13 @@ dataRace$other <- with(dataRace,total-white-black-hisp)
 ```
 
 Now we have a data frame that links the census tract numbers to populations and race data. Let's add race information to the MS13 injunction data.
-```{r comment="", results='hold'}
-plot(st_geometry(subset(mapCens,inMS13)))
-plot(st_geometry(mapSZms13), border="red", lwd=3, add=TRUE)
-
+```{r comment="", results='hold', warning=FALSE}
 # match tract IDs and merge in % hispanic
 i <- match(mapCens$TRACTCE, dataRace$tract)
 mapCens$pctHisp <- with(dataRace[i,],
    ifelse(total>0 & !is.na(hisp), hisp/total, 0))
 
-# shade depending on percent hispanic
+# choose shade of gray depending on percent hispanic
 col <- with(mapCens, gray(pctHisp[inMS13]))
 plot(st_geometry(subset(mapCens,inMS13)), col=col)
 plot(st_geometry(mapSZms13), border="red", lwd=3, add=TRUE)
@@ -343,7 +342,8 @@ plot(st_geometry(mapSZms13), border="red", lwd=3, add=TRUE)
 # overlay with the percent hispanic
 labs <- with(mapCens, paste0(round(100*pctHisp[inMS13]),"%"))
 text(st_coordinates(st_centroid(subset(mapCens,inMS13))),
-     labels=labs, cex=0.5)
+     labels=labs,
+     cex=0.5)
 ```
 
 # Exercise
@@ -354,29 +354,6 @@ text(st_coordinates(st_centroid(subset(mapCens,inMS13))),
 `r .exNum('Add the polygon with your injunction zone')`
 
 `r .exNum('Add other injunction zones that intersect with your map')`
-
-
-mapVSCSZ <- subset(mapSZ, gang_name=="Venice Shoreline Crips")
-
-plot(st_geometry(st_buffer(mapVSCSZ, dist=5280)))
-plot(st_geometry(mapVSCSZ), add=TRUE)
-
-i <- st_intersects(mapCens, st_buffer(mapVSCSZ, dist=5280))
-mapCens$nearVSC <- lengths(st_intersects(mapCens,
-                                         st_buffer(mapVSCSZ, dist=5280))) > 0
-plot(st_geometry(subset(mapCens, nearVSC)), border="salmon", add=TRUE)
-
-dataRes <- fromJSON(file="http://api.census.gov/data/2014/acs5?get=B03002_001E&for=tract:*&in=state:06+county:037")
-dataRes <- data.frame(do.call(rbind, dataRes[-1]))
-names(dataRes) <- c("pop","state","county","tract")
-dataRes$pop <- as.numeric(dataRes$pop)
-
-i <- match(mapCens$TRACTCE, dataRes$tract)
-mapCens$pop <- dataRes$pop[i]
-
-labs <- with(mapCens, pop[nearVSC])
-text(st_coordinates(st_centroid(subset(mapCens,nearVSC))), labels=labs, cex=0.5)
-
 
 # Working with point data using Los Angeles crime data
 
@@ -932,16 +909,29 @@ plot(st_geometry(mapSZms13), border="red", lwd=3, add=TRUE)
 `r .exQ(8)`
 `r .exQ(9)`
 
-```{r comment="", results='hold'}
-i <- st_intersects(st_buffer(mapSZ[51,], dist=5280),
+```{r comment="", results='hold', warning=FALSE}
+# find census tracts within 1 mile of SZ #51
+iCens <- st_intersects(st_buffer(mapSZ[51,], dist=5280),
                    mapCens)[[1]]
-plot(st_geometry(mapCens[i,]))
+plot(st_geometry(mapCens[iCens,]))
 
+# get total population for each census tract
+dataRes <- fromJSON(file="http://api.census.gov/data/2014/acs5?get=B03002_001E&for=tract:*&in=state:06+county:037")
+dataRes <- data.frame(do.call(rbind, dataRes[-1]))
+names(dataRes) <- c("pop","state","county","tract")
+dataRes$pop <- as.numeric(dataRes$pop)
 
+# merge population with census tract data
+i <- match(mapCens$TRACTCE, dataRes$tract)
+mapCens$pop <- dataRes$pop[i]
 
+labs <- mapCens$pop[iCens]
+text(st_coordinates(st_centroid(mapCens[iCens,])), labels=labs, cex=0.5)
 plot(st_geometry(mapSZ[51,]), add=TRUE, border="red", lwd=4)
 
+# overlay the other intersecting injunctions
 i <- st_intersects(mapSZ[51,], mapSZ)[[1]]
+# don't include SZ #51 itself in the collection
 i <- setdiff(i, 51)
 plot(st_geometry(mapSZ[i,]), add=TRUE, border="purple", lwd=2)
 ```
