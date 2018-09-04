@@ -31,6 +31,9 @@ output:
 
 
 
+
+
+
 <!-- A function for automating the numbering and wording of the exercise questions -->
 ```{r echo=FALSE}
 .counterExercise <- 0
@@ -157,9 +160,9 @@ paste0(my.states)
 What does the `nchar()` function do?  The `paste()` function?  Does it make a difference to use `sep=""` or `collapse=","`? What about `paste0()`?
 
 ## Exercises
-`r exNum("Print all even numbers less than 100")`
-`r exNum("What is the mean of even numbers less than 100")`
-`r exNum('Have R put in alphabetical order \x60c("WA","DC","CA","PA","MD","VA","OH")\x60')` 
+`r .exNum("Print all even numbers less than 100")`
+`r .exNum("What is the mean of even numbers less than 100")`
+`r .exNum('Have R put in alphabetical order \x60c("WA","DC","CA","PA","MD","VA","OH")\x60')` 
 
 # Assignment of values to variables
 
@@ -215,11 +218,11 @@ state.names[i[1:3]]     # show me those three states
 Note that in the last example we used square brackets within square brackets. First, we asked R to give us the indices of the first three states in alphabetical order and that was `r i[1:3]`. Then R took those three values and plugged them into the second set of square brackets to show you the state names in those positions in the collection.
 
 ## Exercises
-`r exNum("What's the last state in the \x60state.names\x60?")`
-`r exNum('Pick out states that begin with "M" using their indices')`
-`r exNum("Pick out states where you have lived")`
-`r exNum("What's the last state in alphabetical order?")`
-`r exNum("What are the last three states in alphabetical order?")`
+`r .exNum("What's the last state in the \x60state.names\x60?")`
+`r .exNum('Pick out states that begin with "M" using their indices')`
+`r .exNum("Pick out states where you have lived")`
+`r .exNum("What's the last state in alphabetical order?")`
+`r .exNum("What are the last three states in alphabetical order?")`
 
 
 # Logical values and operations
@@ -305,9 +308,9 @@ sum(my.states %in% c("CA","OR","WA","AK","HI"))
 Note in the last line we used `sum()` to count for how many of the elements in `my.states` did `%in%` evaluate to be `TRUE`.
 
 ## Exercises
-`r exNum("Report \x60TRUE\x60 or \x60FALSE\x60 for each state depending on if you have lived there")`
-`r exNum("With \x60a <- 1:100\x60, pick out odd numbers between 50 and 75")`
-`r exNum("Use greater than less than signs to get all state names that begin with M")`
+`r .exNum("Report \x60TRUE\x60 or \x60FALSE\x60 for each state depending on if you have lived there")`
+`r .exNum("With \x60a <- 1:100\x60, pick out odd numbers between 50 and 75")`
+`r .exNum("Use greater than less than signs to get all state names that begin with M")`
 
 # Sampling
 The function `sample()` randomly shuffles a collection of values.
@@ -328,10 +331,10 @@ table(a)
 max(table(a)) # find out which value appears most frequently
 ```
 ## Exercises
-`r exNum("Use \x60sample()\x60 to estimate the probability of rolling a 6")`
-`r exNum("Use \x60sample()\x60 to estimate the probability that the sum of two die equal 7")`
-`r exNum("Use \x60sample()\x60 to select randomly five states without replacement")`
-`r exNum("Use \x60sample()\x60 to select randomly 1000 states with replacement")`
+`r .exNum("Use \x60sample()\x60 to estimate the probability of rolling a 6")`
+`r .exNum("Use \x60sample()\x60 to estimate the probability that the sum of two die equal 7")`
+`r .exNum("Use \x60sample()\x60 to select randomly five states without replacement")`
+`r .exNum("Use \x60sample()\x60 to select randomly 1000 states with replacement")`
     + Tabulate how often each state was selected
     + Which state was selected the least? Make R do this for you
 
@@ -439,12 +442,12 @@ ls()
 Assuming you are using R Studio, you can also see the objects stored in memory by clicking on the Environment tab.
 
 ## Exercises
-`r exNum('Fix \x60state.list\x60 so that "DC" is in "other" rather than "east"')`. Here are a few hints
+`r .exNum('Fix \x60state.list\x60 so that "DC" is in "other" rather than "east"')`. Here are a few hints
      + access "other" using `$`
      + combine things using `c()`
      + assign values using `<-`
      + remove values using `[]` with a negative index or using a logical statement
-`r exNum("Print out east and central states together sorted")`
+`r .exNum("Print out east and central states together sorted")`
 
 
 # Functions
@@ -480,9 +483,9 @@ IQR
 You can see that it computes the 0.25 quantile and the 0.75 quantile and uses `diff()` to compute their difference.
 
 ## Exercises
-`r exNum('Make a function \x60is.island(x)\x60 returns \x60TRUE\x60 if \x60x\x60 is an island')`. Islands are "HI", "FM", "MH", "PW", "AS", "GU", "MP", "PR", "VI", "UM". Borrow the template I used for `give.first.and.last()`. Then try using the `%in%` operator
-`r exNum("Count how many islands are within each region. Use an \x60sapply()\x60 (or two) and your new \x60is.island()\x60 function")`
-`r exNum("Which components of \x60b\x60 having missing values? Use \x60is.na()\x60")`. `b` was defined earlier
+`r .exNum('Make a function \x60is.island(x)\x60 returns \x60TRUE\x60 if \x60x\x60 is an island')`. Islands are "HI", "FM", "MH", "PW", "AS", "GU", "MP", "PR", "VI", "UM". Borrow the template I used for `give.first.and.last()`. Then try using the `%in%` operator
+`r .exNum("Count how many islands are within each region. Use an \x60sapply()\x60 (or two) and your new \x60is.island()\x60 function")`
+`r .exNum("Which components of \x60b\x60 having missing values? Use \x60is.na()\x60")`. `b` was defined earlier
 
 # Matrices and apply()
 
@@ -600,9 +603,9 @@ with(chicagoCrime, sort(table(Primary.Type[District==10])))
 Much easier to read and understand!
 
 ## Exercises
-`r exNum("Display three randomly selected rows")`
-`r exNum("Count \x60NA\x60s in each column")`
-`r exNum("Look up \x60Location.Description\x60, \x60Block\x60, \x60Beat\x60, and \x60Ward\x60 for those missing \x60Latitude\x60")`
+`r .exNum("Display three randomly selected rows")`
+`r .exNum("Count \x60NA\x60s in each column")`
+`r .exNum("Look up \x60Location.Description\x60, \x60Block\x60, \x60Beat\x60, and \x60Ward\x60 for those missing \x60Latitude\x60")`
 
 # For loops
 Sometimes we need to have R repeat certain tasks multiple times, such as marching through each row of a dataset and modifying values. For loops accomplish this. Later in this course we will be using Google Maps to extract information about addresses. So we might need to iterate through every row in the dataset, check whether the latitude and longitude are missing, and if missing try to retrieve the latitude and longitude from Google Maps. The last crime in the dataset missing coordinates is in row 9954.
@@ -697,11 +700,11 @@ chicagoCrime$google.maps.url <- paste("https://www.google.com/maps/place/",
 This took `r timeWithoutForLoop[3]` seconds. That's `r round(time4ForLoop[3]/timeWithoutForLoop[3],1)` times faster than the for loop.
 
 ## Exercises
-`r exNum('Use a for loop to create a variable \x60Coordinates\x60 that looks like "(X.Coordinate,Y.Coordinate)"')`
+`r .exNum('Use a for loop to create a variable \x60Coordinates\x60 that looks like "(X.Coordinate,Y.Coordinate)"')`
      + Use `paste()` with the `X.Coordinate` and `Y.Coordinate` variables
      + Remember the `sep=` option in `paste()`
      + You might find using the `with()` function to simplify your code and avoid having a lot of `chicagoCrime$`s
-`r exNum("Redo the previous exercise without using a for loop and compare computation time")`
+`r .exNum("Redo the previous exercise without using a for loop and compare computation time")`
 
 # More tabulating, aggregating, and breaking statistics down by group
 The variable `Arrest` indicates whether someone was arrested for the crime. Here are the first 10 values.
@@ -750,8 +753,8 @@ barplot(a$`(Arrest == "true")`,
 ```
 
 ## Exercises
-`r exNum('How many assaults occurred in the street? (\x60Location.Description=="STREET"\x60)')`. Try using `subset()` even though there are other ways
-`r exNum("What percentage of assaults occurred in the street by Ward?")`
+`r .exNum('How many assaults occurred in the street? (\x60Location.Description=="STREET"\x60)')`. Try using `subset()` even though there are other ways
+`r .exNum("What percentage of assaults occurred in the street by Ward?")`
 
 # Plotting Data
 
@@ -809,14 +812,14 @@ text(ifelse(tab<80, 180, tab-5),          # x-coord of text,
      adj=1)                               # right justify text
 ```
 
-# Exercises
-`r exNum("Make a barplot indicating how many states are in each region. Use \x60state.list\x60")`
-`r exNum("Identify the beat with the most crimes")`
-`r exNum("Identify the beat with the most domestic violence incidents")`
-`r exNum("Part 1 crimes are homicide, robbery, assault, arson, burglary, theft, sex offense, motor vehicle theft. Calculate the number of Part 1 crimes in Chicago")`
+## Exercises
+`r .exNum("Make a barplot indicating how many states are in each region. Use \x60state.list\x60")`
+`r .exNum("Identify the beat with the most crimes")`
+`r .exNum("Identify the beat with the most domestic violence incidents")`
+`r .exNum("Part 1 crimes are homicide, robbery, assault, arson, burglary, theft, sex offense, motor vehicle theft. Calculate the number of Part 1 crimes in Chicago")`
 
 # Solutions to the exercises 
-1. `r exerciseQuestions[1]`
+1. `r .exerciseQuestions[1]`
 ```{r comment=""}
 (1:49)*2
 ```
@@ -825,22 +828,22 @@ or
 seq(2,98,by=2)
 ```
 
-2. `r exerciseQuestions[2]`
+2. `r .exerciseQuestions[2]`
 ```{r comment=""}
 mean((1:49)*2)
 ```
 
-3. `r exerciseQuestions[3]`
+3. `r .exerciseQuestions[3]`
 ```{r comment=""}
 sort(c("WA","DC","CA","PA","MD","VA","OH"))
 ```
 
-4. `r exerciseQuestions[4]`
+4. `r .exerciseQuestions[4]`
 ```{r comment=""}
 state.names[51]
 ```
 
-5. `r exerciseQuestions[5]`
+5. `r .exerciseQuestions[5]`
 ```{r comment=""}
 state.names[c(7,8,21,24,28,32,35,46)]
 ```
@@ -853,13 +856,13 @@ Here's another possible answer that uses `substring` (which we haven't covered y
 state.names[substring(state.names, 1, 1)=="M"]
 ```
 
-6. `r exerciseQuestions[6]`
+6. `r .exerciseQuestions[6]`
 Of course, these may vary depending on where you have lived.
 ```{r comment=""}
 state.names[c(1, 4, 10, 26)]
 ```
 
-7. `r exerciseQuestions[7]`
+7. `r .exerciseQuestions[7]`
 ```{r comment=""}
 sort(state.names)[51]
 ```
@@ -868,29 +871,29 @@ or
 rev(sort(state.names))[1]
 ```
 
-8. `r exerciseQuestions[8]`
+8. `r .exerciseQuestions[8]`
 ```{r comment=""}
 rev(sort(state.names))[1:3]
 ```
 
-9. `r exerciseQuestions[9]`
+9. `r .exerciseQuestions[9]`
 ```{r comment=""}
 my.states <- c("PA", "NJ", "NY", "MD", "DE", "MA", "RI", "CT", "ME", "LA", "IN")
 state.names %in% my.states
 ```
 
-10. `r exerciseQuestions[10]`
+10. `r .exerciseQuestions[10]`
 ```{r comment=""}
 a <- 1:100
 a[a %% 2==1 & a>50 & a<75]
 ```
 
-11. `r exerciseQuestions[11]`
+11. `r .exerciseQuestions[11]`
 ```{r comment=""}
 state.names[state.names>"LZ" & state.names<"N"]
 ```
 
-12. `r exerciseQuestions[12]`
+12. `r .exerciseQuestions[12]`
 ```{r comment=""}
 a <- sample(1:6, size=100000, replace=TRUE)
 table(a)[6]/length(a)
@@ -904,7 +907,7 @@ Or
 mean(a==6)
 ```
 
-13. `r exerciseQuestions[13]`
+13. `r .exerciseQuestions[13]`
 ```{r comment=""}
 dice1 <- sample(1:6, size=1000, replace=TRUE)
 dice2 <- sample(1:6, size=1000, replace=TRUE)
@@ -912,12 +915,12 @@ doubleroll <- dice1 + dice2
 mean(doubleroll==7)   # should be close to 1/6 or 0.1666...
 ```
 
-14. `r exerciseQuestions[14]` (Answers will vary)
+14. `r .exerciseQuestions[14]` (Answers will vary)
 ```{r comment=""}
 sample(state.names, size=5, replace=FALSE)
 ```
 
-15. `r exerciseQuestions[15]`
+15. `r .exerciseQuestions[15]`
    + Tabulate how often each state was selected (Answers will vary)
 ```{r comment=""}
 a <- sample(state.names, size=1000, replace=TRUE)
@@ -929,7 +932,7 @@ table(a)
 sort(table(a))[1]
 ```
 
-16. `r exerciseQuestions[16]`
+16. `r .exerciseQuestions[16]`
 ```{r comment=""}
 state.list$east <- state.list$east[state.list$east!="DC"]
 state.list$other <- c(state.list$other, "DC")
@@ -942,7 +945,7 @@ state.list$other <- c(state.list$other, "DC")
 state.list
 ```
 
-17. `r exerciseQuestions[17]`
+17. `r .exerciseQuestions[17]`
 ```{r comment=""}
 sort(c(state.list$east, state.list$central))
 ```
@@ -951,7 +954,7 @@ Or
 with(state.list, sort(c(east, central)))
 ```
 
-18. `r exerciseQuestions[18]`
+18. `r .exerciseQuestions[18]`
 ```{r comment=""}
 is.island <- function(x)
 {
@@ -959,7 +962,7 @@ is.island <- function(x)
 }
 ```
 
-19. `r exerciseQuestions[19]`
+19. `r .exerciseQuestions[19]`
 
 First, this `lapply()` asks each state if they are an island.
 ```{r comment=""}
@@ -970,7 +973,7 @@ Now we want to count up how many `TRUE`s there are in each component, so wrap th
 sapply(lapply(state.list, is.island), sum)
 ```
 
-20. `r exerciseQuestions[20]`
+20. `r .exerciseQuestions[20]`
 ```{r comment=""}
 sapply(lapply(b, is.na), any)
 ```
@@ -980,12 +983,12 @@ b <- list(0:9, c("A","B","C"), c(TRUE,FALSE,NA))
 sapply(b, function(x) any(is.na(x)))
 ```
 
-21. `r exerciseQuestions[21]`
+21. `r .exerciseQuestions[21]`
 ```{r comment=""}
 chicagoCrime[sample(1:nrow(chicagoCrime), size=3),]
 ```
 
-22. `r exerciseQuestions[22]`
+22. `r .exerciseQuestions[22]`
 ```{r comment=""}
 sapply(lapply(chicagoCrime, is.na), sum)
 ```
@@ -994,7 +997,7 @@ Or
 sapply(chicagoCrime, function(x) sum(is.na(x)))
 ```
 
-23. `r exerciseQuestions[23]`
+23. `r .exerciseQuestions[23]`
 ```{r comment=""}
 i <- is.na(chicagoCrime$Latitude)
 # Let's just show the first 5 rows
@@ -1007,7 +1010,7 @@ subset(chicagoCrime, is.na(chicagoCrime$Latitude),
        select=c("Location.Description","Block","Beat","Ward"))[1:5,]
 ```
 
-24. `r exerciseQuestions[24]`
+24. `r .exerciseQuestions[24]`
 ```{r comment=""}
 system.time(
 for (i in 1:nrow(chicagoCrime))
@@ -1028,7 +1031,7 @@ for (i in 1:nrow(chicagoCrime))
 }
 )
 ```
-25. `r exerciseQuestions[25]`
+25. `r .exerciseQuestions[25]`
 ```{r comment=""}
 system.time(
 chicagoCrime$coords3 <- with(chicagoCrime, 
@@ -1036,25 +1039,25 @@ chicagoCrime$coords3 <- with(chicagoCrime,
 )
 ```
 
-26. `r exerciseQuestions[26]`
+26. `r .exerciseQuestions[26]`
 ```{r comment=""}
 with(subset(chicagoCrime, Primary.Type=="ASSAULT"), 
      sum(chicagoCrime$Location.Description=="STREET"))
 ```
 
-27. `r exerciseQuestions[27]`
+27. `r .exerciseQuestions[27]`
 ```{r comment=""}
 aggregate((Location.Description=="STREET")~Ward,
           data=subset(chicagoCrime, Primary.Type=="ASSAULT"),
           mean)
 ```
 
-28. `r exerciseQuestions[28]`
+28. `r .exerciseQuestions[28]`
 ```{r comment=""}
 barplot(sapply(state.list, length))
 ```
 
-29. `r exerciseQuestions[29]`
+29. `r .exerciseQuestions[29]`
 ```{r comment=""}
 names(rev(sort(table(chicagoCrime$Beat)))[1])
 ```
@@ -1063,13 +1066,13 @@ Or
 names(which.max(table(chicagoCrime$Beat)))
 ```
 
-30. `r exerciseQuestions[30]`
+30. `r .exerciseQuestions[30]`
 ```{r comment=""}
 with(subset(chicagoCrime, Description=="DOMESTIC BATTERY SIMPLE"),
      names(which.max(table(Beat))))
 ```
 
-31. `r exerciseQuestions[31]`
+31. `r .exerciseQuestions[31]`
 ```{r comment=""}
 sum(chicagoCrime$Primary.Type %in% c("HOMICIDE", "ROBBERY", "ASSAULT", "ARSON", 
                                      "BURGLARY", "THEFT", "SEX OFFENSE", 
