@@ -8,7 +8,7 @@ author:
   email: moyruth@upenn.edu
   name: Ruth Moyer
 - affiliation: University of Pennsylvania
-  email: gohl@sas.upenn.edu
+  email: gohl@upenn.edu
   name: Li Sian Goh
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
@@ -22,6 +22,7 @@ output:
 <!-- author: -->
 <!-- - Greg Ridgeway (gridge@upenn.edu) -->
 <!-- - Ruth Moyer (moyruth@upenn.edu) -->
+<!-- - Li Sian Goh (gohl@upenn.edu) -->
 <!-- date: "`r format(Sys.time(), '%B %d, %Y')`" -->
 <!-- output: -->
 <!--   pdf_document: -->
