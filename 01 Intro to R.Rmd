@@ -157,7 +157,7 @@ Take a look at the arrow `<-`. This is how you tell R to take the result of what
 nchar(my.states)
 paste(my.states, ", USA")
 paste(my.states, ", USA", sep="")
-paste0(my.states)
+paste0(my.states, ", USA")
 paste(my.states, collapse=",")
 ```
 The `nchar()` function counts how many characters are in each character string. The `paste()` function pastes character strings together. By default, `paste()` puts a space betweeen the strings being pasted together. It looks strange with that space after WV in "WV , USA". We can set the separator to be nothing (the empty string) by setting `sep=""`. `paste0()` is a shortcut for pasting with `sep=""`. Setting `collapse=","` combines all the text together, collapsing them into one string with a comma as a separator.
