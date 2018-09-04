@@ -152,7 +152,7 @@ The above examples have involved mostly numerical values in a vector. Here are s
 ```{r comment="", results='hold'}
 my.states <- c("WA","DC","CA","PA","MD","VA","OH")
 ```
-Take a look at the arrow `<-`. This is how you tell R to take the result of what is on the right and store it in an object named on the left. We're going to talk more about this arrow soon. Now let's run some new functions on this collection of postal codes.
+Take a look at the arrow `<-`, pronounced 'gets'. This is how you tell R to take the result of what is on the right and store it in an object named on the left. We're going to talk more about this arrow soon. Now let's run some new functions on this collection of postal codes.
 ```{r comment="", results='hold'}
 nchar(my.states)
 paste(my.states, ", USA")
