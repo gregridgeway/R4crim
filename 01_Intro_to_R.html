@@ -270,15 +270,15 @@ which.min(c(1,10,3,6,2,5,8,4,7,9)) # in which &quot;spot&quot; would we find it?
 <pre class="r"><code>nchar(my.states)
 paste(my.states, &quot;, USA&quot;)
 paste(my.states, &quot;, USA&quot;, sep=&quot;&quot;)
-paste(my.states, collapse=&quot;,&quot;)
-paste0(my.states)</code></pre>
+paste0(my.states)
+paste(my.states, collapse=&quot;,&quot;)</code></pre>
 <pre><code>[1] 2 2 2 2 2 2 2
 [1] &quot;WA , USA&quot; &quot;DC , USA&quot; &quot;CA , USA&quot; &quot;PA , USA&quot; &quot;MD , USA&quot; &quot;VA , USA&quot;
 [7] &quot;OH , USA&quot;
 [1] &quot;WA, USA&quot; &quot;DC, USA&quot; &quot;CA, USA&quot; &quot;PA, USA&quot; &quot;MD, USA&quot; &quot;VA, USA&quot; &quot;OH, USA&quot;
-[1] &quot;WA,DC,CA,PA,MD,VA,OH&quot;
-[1] &quot;WA&quot; &quot;DC&quot; &quot;CA&quot; &quot;PA&quot; &quot;MD&quot; &quot;VA&quot; &quot;OH&quot;</code></pre>
-<p>What does the <code>nchar()</code> function do? The <code>paste()</code> function? Does it make a difference to use <code>sep=&quot;&quot;</code> or <code>collapse=&quot;,&quot;</code>? What about <code>paste0()</code>?</p>
+[1] &quot;WA&quot; &quot;DC&quot; &quot;CA&quot; &quot;PA&quot; &quot;MD&quot; &quot;VA&quot; &quot;OH&quot;
+[1] &quot;WA,DC,CA,PA,MD,VA,OH&quot;</code></pre>
+<p>The <code>nchar()</code> function counts how many characters are in each character string. The <code>paste()</code> function pastes character strings together. By default, <code>paste()</code> puts a space betweeen the strings being pasted together. It looks strange with that space after WV in “WV , USA”. We can set the separator to be nothing (the empty string) by setting <code>sep=&quot;&quot;</code>. <code>paste0()</code> is a shortcut for pasting with <code>sep=&quot;&quot;</code>. Setting <code>collapse=&quot;,&quot;</code> combines all the text together, collapsing them into one string with a comma as a separator.</p>
 <div id="exercises" class="section level2">
 <h2>Exercises</h2>
 <ol style="list-style-type: decimal">
@@ -457,9 +457,9 @@ sample(1:10)
 sample(1:10)
 a &lt;- sample(1:1000,size=10) # pick 10 numbers between 1-1000
 a &lt;- sample(1:6,size=1000,replace=TRUE) # roll a die 1000 times</code></pre>
-<pre><code> [1]  6  4  2  9  7  1  5 10  3  8
- [1]  3  7  9 10  1  6  4  5  8  2
- [1]  4  6  1  2 10  9  3  5  8  7</code></pre>
+<pre><code> [1]  4  9  7  2  6  1 10  3  5  8
+ [1]  1  5  8  6  2  7  3  9 10  4
+ [1]  2  4  5  1  6  9  8  7 10  3</code></pre>
 <p>Notice that <code>sample()</code> has several options including <code>size=</code> to indicate how many to select and <code>replace=</code> to indicate whether to sample with or without replacement. You can access the help on the <code>sample()</code> function by typing <code>?sample</code> at the R prompt.</p>
 </div>
 <div id="tabulating" class="section level1">
@@ -469,8 +469,8 @@ a &lt;- sample(1:6,size=1000,replace=TRUE) # roll a die 1000 times</code></pre>
 max(table(a)) # find out which value appears most frequently</code></pre>
 <pre><code>a
   1   2   3   4   5   6 
-155 185 168 147 181 164 
-[1] 185</code></pre>
+158 162 177 169 174 160 
+[1] 177</code></pre>
 <div id="exercises-3" class="section level2">
 <h2>Exercises</h2>
 <ol start="12" style="list-style-type: decimal">
@@ -573,13 +573,13 @@ $central
 [15] &quot;WI&quot; &quot;WY&quot;</code></pre>
 <pre class="r"><code>lapply(state.list,sample,size=3,replace=FALSE)</code></pre>
 <pre><code>$west
-[1] &quot;ID&quot; &quot;AZ&quot; &quot;CA&quot;
+[1] &quot;CA&quot; &quot;AK&quot; &quot;HI&quot;
 
 $east
-[1] &quot;MD&quot; &quot;NH&quot; &quot;OH&quot;
+[1] &quot;FL&quot; &quot;VA&quot; &quot;NC&quot;
 
 $central
-[1] &quot;OK&quot; &quot;WI&quot; &quot;SD&quot;</code></pre>
+[1] &quot;KS&quot; &quot;SD&quot; &quot;ND&quot;</code></pre>
 <pre class="r"><code>sapply(state.list,length)</code></pre>
 <pre><code>   west    east central 
      11      24      16 </code></pre>
@@ -659,7 +659,7 @@ $other
 <pre><code>function (x, na.rm = FALSE, type = 7) 
 diff(quantile(as.numeric(x), c(0.25, 0.75), na.rm = na.rm, names = FALSE, 
     type = type))
-&lt;bytecode: 0x0000000016585f08&gt;
+&lt;bytecode: 0x000000001ca1bad8&gt;
 &lt;environment: namespace:stats&gt;</code></pre>
 <p>You can see that it computes the 0.25 quantile and the 0.75 quantile and uses <code>diff()</code> to compute their difference.</p>
 <div id="exercises-5" class="section level2">
@@ -677,48 +677,48 @@ diff(quantile(as.numeric(x), c(0.25, 0.75), na.rm = na.rm, names = FALSE,
 <pre class="r"><code>a &lt;- matrix(sample(1:5,size=12,replace=TRUE),nrow=4)
 a</code></pre>
 <pre><code>     [,1] [,2] [,3]
-[1,]    3    4    1
+[1,]    3    5    2
 [2,]    4    3    2
-[3,]    2    3    5
-[4,]    3    1    1</code></pre>
+[3,]    5    3    2
+[4,]    3    2    4</code></pre>
 <p>This matrix has two dimensions, 4 rows and 3 columns. You can use square brackets to select elements from the matrix.</p>
 <pre class="r"><code>a[1,2]     # element in first row, second column
 a[1,]      # the entire first row
 a[,2]      # the entire second column
 a[-1,-1]   # dropping the first row and first column
 a[3:4,2:3] # rows 3 &amp; 4, columns 2 &amp; 3</code></pre>
-<pre><code>[1] 4
-[1] 3 4 1
-[1] 4 3 3 1
+<pre><code>[1] 5
+[1] 3 5 2
+[1] 5 3 3 2
      [,1] [,2]
 [1,]    3    2
-[2,]    3    5
-[3,]    1    1
+[2,]    3    2
+[3,]    2    4
      [,1] [,2]
-[1,]    3    5
-[2,]    1    1</code></pre>
+[1,]    3    2
+[2,]    2    4</code></pre>
 <p>The numbers to the left of the comma index rows and the numbers to the right of the comma index columns. The <code>apply()</code> function, like the <code>lapply()</code> and <code>sapply()</code> functions, allows you to apply a function to all the rows or all the columns of a matrix. <code>apply()</code> needs the name of the matrix, whether you want to apply the function to the first dimension (rows) or the second dimension (columns), and the name of the function to apply.</p>
 <pre class="r"><code>apply(a, 1, sum)     # compute sum of each row
 apply(a, 2, sum)     # compute sum of each column
 apply(a, 1, mean)    # compute mean of each row
 apply(a, 1, summary) # summarize each row</code></pre>
-<pre><code>[1]  8  9 10  5
-[1] 12 11  9
-[1] 2.666667 3.000000 3.333333 1.666667
-            [,1] [,2]     [,3]     [,4]
-Min.    1.000000  2.0 2.000000 1.000000
-1st Qu. 2.000000  2.5 2.500000 1.000000
-Median  3.000000  3.0 3.000000 1.000000
-Mean    2.666667  3.0 3.333333 1.666667
-3rd Qu. 3.500000  3.5 4.000000 2.000000
-Max.    4.000000  4.0 5.000000 3.000000</code></pre>
+<pre><code>[1] 10  9 10  9
+[1] 15 13 10
+[1] 3.333333 3.000000 3.333333 3.000000
+            [,1] [,2]     [,3] [,4]
+Min.    2.000000  2.0 2.000000  2.0
+1st Qu. 2.500000  2.5 2.500000  2.5
+Median  3.000000  3.0 3.000000  3.0
+Mean    3.333333  3.0 3.333333  3.0
+3rd Qu. 4.000000  3.5 4.000000  3.5
+Max.    5.000000  4.0 5.000000  4.0</code></pre>
 <p>We can also create a new function right on the spot to compute something on each row or column. Let’s find the minimum and maximum values in each row and find out if all the values are greater than 1.</p>
 <pre class="r"><code>apply(a, 1, function(x) {c(min(x),max(x))}) # there is also a function range()
 apply(a, 1, function(x) {all(x&gt;1)})</code></pre>
 <pre><code>     [,1] [,2] [,3] [,4]
-[1,]    1    2    2    1
-[2,]    4    4    5    3
-[1] FALSE  TRUE  TRUE FALSE</code></pre>
+[1,]    2    2    2    2
+[2,]    5    4    5    4
+[1] TRUE TRUE TRUE TRUE</code></pre>
 </div>
 <div id="setting-the-working-directory" class="section level1">
 <h1>Setting the working directory</h1>
@@ -1630,7 +1630,7 @@ for(i in 1:nrow(chicagoCrime))
                                             &quot;,+Chicago,+IL&quot;,sep=&quot;&quot;)
 }
 )</code></pre>
-<p>Note that we’ve wrapped the for loop with a call to <code>system.time()</code>. This will keep the time on how long this for loop takes. When creating these notes on a laptop it took 0.58 seconds. Not bad. Much faster than having to type out these 10,000 URLs. However, if we had one million addresses, then this code is going to take much more time.</p>
+<p>Note that we’ve wrapped the for loop with a call to <code>system.time()</code>. This will keep the time on how long this for loop takes. When creating these notes on a laptop it took 0.53 seconds. Not bad. Much faster than having to type out these 10,000 URLs. However, if we had one million addresses, then this code is going to take much more time.</p>
 <p>In fact, in R for loops are <em>very</em> slow. They are so slow that R programmers attempt to avoid them whenever possible. We can actually accomplish the same task without using a for loop. <code>gsub()</code> will accept a whole collection of addresses and modify them all at once. <code>paste()</code> also will accept a collection of text values and paste them together with the other parts.</p>
 <pre class="r"><code>timeWithoutForLoop &lt;- system.time(
 {
@@ -1640,7 +1640,7 @@ chicagoCrime$google.maps.url &lt;- paste(&quot;https://www.google.com/maps/place
                                       &quot;,+Chicago,+IL&quot;,sep=&quot;&quot;)
 }
 )</code></pre>
-<p>This took 0.02 seconds. That’s 29 times faster than the for loop.</p>
+<p>This took 0.02 seconds. That’s 26.5 times faster than the for loop.</p>
 <div id="exercises-7" class="section level2">
 <h2>Exercises</h2>
 <ol start="24" style="list-style-type: decimal">
@@ -1900,14 +1900,14 @@ a[a %% 2==1 &amp; a&gt;50 &amp; a&lt;75]</code></pre>
 </ol>
 <pre class="r"><code>a &lt;- sample(1:6, size=100000, replace=TRUE)
 table(a)[6]/length(a)</code></pre>
-<pre><code>     6 
-0.1672 </code></pre>
+<pre><code>      6 
+0.16594 </code></pre>
 <p>Or</p>
 <pre class="r"><code>sum(a==6)/length(a)</code></pre>
-<pre><code>[1] 0.1672</code></pre>
+<pre><code>[1] 0.16594</code></pre>
 <p>Or</p>
 <pre class="r"><code>mean(a==6)</code></pre>
-<pre><code>[1] 0.1672</code></pre>
+<pre><code>[1] 0.16594</code></pre>
 <ol start="13" style="list-style-type: decimal">
 <li>Use <code>sample()</code> to estimate the probability that the sum of two die equal 7</li>
 </ol>
@@ -1915,12 +1915,12 @@ table(a)[6]/length(a)</code></pre>
 dice2 &lt;- sample(1:6, size=1000, replace=TRUE)
 doubleroll &lt;- dice1 + dice2
 mean(doubleroll==7)   # should be close to 1/6 or 0.1666...</code></pre>
-<pre><code>[1] 0.156</code></pre>
+<pre><code>[1] 0.164</code></pre>
 <ol start="14" style="list-style-type: decimal">
 <li>Use <code>sample()</code> to select randomly five states without replacement (Answers will vary)</li>
 </ol>
 <pre class="r"><code>sample(state.names, size=5, replace=FALSE)</code></pre>
-<pre><code>[1] &quot;OR&quot; &quot;TX&quot; &quot;KY&quot; &quot;HI&quot; &quot;AR&quot;</code></pre>
+<pre><code>[1] &quot;CA&quot; &quot;DC&quot; &quot;NY&quot; &quot;SC&quot; &quot;MT&quot;</code></pre>
 <ol start="15" style="list-style-type: decimal">
 <li>Use <code>sample()</code> to select randomly 1000 states with replacement</li>
 </ol>
@@ -1931,17 +1931,17 @@ mean(doubleroll==7)   # should be close to 1/6 or 0.1666...</code></pre>
 table(a)</code></pre>
 <pre><code>a
 AK AL AR AZ CA CO CT DC DE FL GA HI IA ID IL IN KS KY LA MA MD ME MI MN MO 
-14 10 18 18 28 13 21 21 26 19 19 17 26 13 21 19 17 23 13 25 26 19 26 18 17 
+21 24 19 15 18 12 23 19 17 12 13 20 27 24 21 13 27 23 26 19 17 21 14 22 19 
 MS MT NC ND NE NH NJ NM NV NY OH OK OR PA RI SC SD TN TX UT VA VT WA WI WV 
-25 19 20 16 25 19 23 23 25 23 18 18 19 10 16 28 13 12 21 19 18 25 18 17 23 
+23 23 17 22 15 18 18 20 23 27 21 24 16 18 16 18 26 21 24 18 16 14 12 21 22 
 WY 
-20 </code></pre>
+21 </code></pre>
 <ul>
 <li>Which state was selected the least? (Answers will vary)</li>
 </ul>
 <pre class="r"><code>sort(table(a))[1]</code></pre>
-<pre><code>AL 
-10 </code></pre>
+<pre><code>CO 
+12 </code></pre>
 <ol start="16" style="list-style-type: decimal">
 <li>Fix <code>state.list</code> so that “DC” is in “other” rather than “east”</li>
 </ol>
@@ -2033,30 +2033,30 @@ sapply(b, function(x) any(is.na(x)))</code></pre>
 <li>Display three randomly selected rows</li>
 </ol>
 <pre class="r"><code>chicagoCrime[sample(1:nrow(chicagoCrime), size=3),]</code></pre>
-<pre><code>          ID Case.Number                   Date               Block IUCR
-9791 9868419    HX518714 11/24/2014 12:30:00 PM 065XX S WESTERN AVE 0460
-8039 9871729    HX522206 11/27/2014 11:30:00 AM  096XX S HALSTED ST 0486
-3951 9878332    HX529282 12/03/2014 08:55:00 PM   055XX W CORTEZ ST 2024
-     Primary.Type             Description Location.Description Arrest
-9791      BATTERY                  SIMPLE           RESTAURANT  false
-8039      BATTERY DOMESTIC BATTERY SIMPLE            RESIDENCE  false
-3951    NARCOTICS     POSS: HEROIN(WHITE)            RESIDENCE   true
-     Domestic Beat District Ward Community.Area FBI.Code X.Coordinate
-9791    false  832        8   15             66      08B      1161532
-8039     true 2223       22   21             73      08B      1172717
-3951    false 1524       15   37             25       18      1139051
-     Y.Coordinate Year             Updated.On Latitude Longitude
-9791      1861424 2014 12/01/2014 12:41:33 PM 41.77542 -87.68339
-8039      1840878 2014 12/04/2014 12:50:41 PM 41.71880 -87.64300
-3951      1906410 2014 12/10/2014 12:42:02 PM 41.89931 -87.76472
-                          Location
-9791 (41.775420908, -87.683394137)
-8039 (41.718800734, -87.642995516)
-3951 (41.899305964, -87.764716528)
-                                                        google.maps.url
-9791 https://www.google.com/maps/place/06550 S WESTERN AVE,+Chicago,+IL
-8039  https://www.google.com/maps/place/09650 S HALSTED ST,+Chicago,+IL
-3951   https://www.google.com/maps/place/05550 W CORTEZ ST,+Chicago,+IL</code></pre>
+<pre><code>          ID Case.Number                   Date                  Block
+1619 9882232    HX533381 12/07/2014 11:50:00 AM 019XX S CHRISTIANA AVE
+9934 9868182    HX518449 11/24/2014 07:10:00 AM   048XX W MONTROSE AVE
+9844 9868829    HX518876 11/24/2014 10:50:00 AM        008XX E 81ST ST
+     IUCR    Primary.Type             Description Location.Description
+1619 1320 CRIMINAL DAMAGE              TO VEHICLE               STREET
+9934 1320 CRIMINAL DAMAGE              TO VEHICLE                OTHER
+9844 0486         BATTERY DOMESTIC BATTERY SIMPLE            APARTMENT
+     Arrest Domestic Beat District Ward Community.Area FBI.Code
+1619  false    false 1024       10   24             29       14
+9934  false    false 1624       16   45             15       14
+9844  false     true  631        6    8             44      08B
+     X.Coordinate Y.Coordinate Year             Updated.On Latitude
+1619      1154389      1889969 2014 12/14/2014 12:39:06 PM 41.85390
+9934      1143098      1928771 2014 12/01/2014 12:41:33 PM 41.96059
+9844      1183213      1851433 2014 12/02/2014 12:49:49 PM 41.74753
+     Longitude                      Location
+1619 -87.70882 (41.853897368, -87.708819293)
+9934 -87.74929   (41.9605922, -87.749292314)
+9844 -87.60423 (41.747527473, -87.604225033)
+                                                           google.maps.url
+1619 https://www.google.com/maps/place/01950 S CHRISTIANA AVE,+Chicago,+IL
+9934   https://www.google.com/maps/place/04850 W MONTROSE AVE,+Chicago,+IL
+9844        https://www.google.com/maps/place/00850 E 81ST ST,+Chicago,+IL</code></pre>
 <ol start="22" style="list-style-type: decimal">
 <li>Count <code>NA</code>s in each column</li>
 </ol>
@@ -2128,7 +2128,7 @@ for (i in 1:nrow(chicagoCrime))
 }
 )</code></pre>
 <pre><code>   user  system elapsed 
-   0.58    0.02    0.60 </code></pre>
+   0.55    0.00    0.55 </code></pre>
 <p>Or</p>
 <pre class="r"><code>system.time(
 for (i in 1:nrow(chicagoCrime)) 
@@ -2139,7 +2139,7 @@ for (i in 1:nrow(chicagoCrime))
 }
 )</code></pre>
 <pre><code>   user  system elapsed 
-   0.53    0.00    0.53 </code></pre>
+   0.55    0.00    0.55 </code></pre>
 <ol start="25" style="list-style-type: decimal">
 <li>Redo the previous exercise without using a for loop and compare computation time</li>
 </ol>
