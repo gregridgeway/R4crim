@@ -45,7 +45,7 @@ Let's try our luck at scraping one page.  As mentioned above, regular expression
 
 Go back to the html code. As you can see, there's a lot of material to search through in the html code - including the code for any advertisements that appear on a webpage.  
 
-In the html code, search for a movie name that appears on the webpage. Start with "The Purge: Election Year" as an example. That occurs on line 255 of the html code. We're trying to look for a pattern of characters and/or letters that always precedes any movie name in the html code.  Try another movie name such as "X Men: Apocalypse." That occurs on line 363 of the html code. In both instances, we can conclue that "movie" seems to precede each movie name in the html code. 
+In the html code, search for a movie name that appears on the webpage. Start with "The Purge: Election Year" as an example. That occurs on line 255 of the html code. We're trying to look for a pattern of characters and/or letters that always precedes any movie name in the html code.  Try another movie name such as "X Men: Apocalypse." That occurs on line 363 of the html code. In both instances, we can conclude that "movie" seems to precede each movie name in the html code. 
 
 We next want to grep, from a, all of the lines in which a movie name occurs. The variable "i" is an index variable that gives us every line where a movie name appears. 
 ```{r comment="", results='hold'}
