@@ -756,6 +756,26 @@ barplot(a$`(Arrest == "true")`,
         main      = "Arrest fraction for assaults")
 ```
 
+What if we want to make separate barplots for assault, battery, and theft? You could copy-and-paste the above code two more times and change ASSAULT to BATTERY and THEFT. While correct, this creates a lot of duplicative code, introduces more opportunities for errors, and is simply harder to maintain. this is where a for-loop would be very helpful. We can create a loop that goes through each of the three crime types and creates a plot for each one.
+
+```{r comment="", fig.width=6.5}
+par(mfrow=c(3,1)) # setup graphic window to make plots in 3 rows, 1 column
+for(crimeType in c("ASSAULT","BATTERY","THEFT"))
+{
+   a <- aggregate((Arrest=="true")~Ward, 
+                  data=subset(chicagoCrime,
+                              Primary.Type==crimeType), 
+                  mean)
+   barplot(a$`(Arrest == "true")`, 
+           names.arg = a$Ward,
+           cex.names = 0.5,
+           ylab      = "Fraction arrested",
+           xlab      = "Ward",
+           main      = paste("Arrest fraction for",
+                             tolower(crimeType)))
+}
+```
+
 ## Exercises
 `r .exNum('How many assaults occurred in the street? (\x60Location.Description=="STREET"\x60)')`. Try using `subset()` even though there are other ways
 `r .exNum("What percentage of assaults occurred in the street by Ward?")`
