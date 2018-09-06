@@ -593,7 +593,22 @@ Use `table()` and `sort()` to see what kinds of crimes are in this dataset.
 sort(table(chicagoCrime$Primary.Type))
 sort(table(chicagoCrime$Description))
 ```
-Note how we can use the `$` to extract just the `Primary.Type` and just the `Description` components of the dataset.
+Note how we can use the `$` to extract just the `Primary.Type` and just the `Description` components of the dataset. 
+
+Just using `chicagoCrime$District` will give us all the values in that column.
+```{r comment="",results='hold'}
+chicagoCrime$District
+```
+
+If we want only those rows for crimes which happen in Chicago's District 10:
+```{r comment="",results='hold'}
+chicagoCrime[chicagoCrime$District==10,]
+```
+
+If we want only those rows for crimes which happen in Chicago's District 10, but only look at the values in the column `Primary.Type`:
+```{r comment="",results='hold'}
+chicagoCrime$Primary.Type[chicagoCrime$District==10]
+```
 
 What kinds of crimes occur in Chicago's District 10?
 ```{r comment="", results='hold'}
@@ -724,6 +739,8 @@ a <- aggregate((Arrest=="true")~Ward, data=chicagoCrime, mean)
 a
 ```
 The first part of `aggregate()` gives an R formula for how we want the data broken up. On the left of the `~` is the outcome or feature that we want to study. Here it is whether or not `Arrest` has value true. To the right of the `~` is the feature by which we want to break down the arrests, ward in this case. Then we need to tell `aggregate()` in which data frame it can find `Arrest` and `Ward`. Lastly, we need to tell `aggregate()` what to do with the outcome we are studying. Here we are asking `aggregate()` to compute the mean so that we get an arrest percentage.
+
+As a result, we have a dataframe of two columns. In the left column, we have the ward number. In the right column, we have the fraction of crimes that result in an arrest: `Arrest=="true"`.
 
 We can use `barplot()` to compare arrest percentages by ward.
 ```{r comment="", fig.width=6.5}
