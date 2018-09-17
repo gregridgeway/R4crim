@@ -107,7 +107,7 @@ You can use double quotes or single quotes in R as long as you are consistent. W
 "Lou Gehrig's disease"
 'The officer shouted "halt!"'
 ```
-The backslashes in the above text "protect" the double quote, communicating to you and to R that the next double quote is not the end of the text, but a character that is actually part of the text you want to keep.
+The backslashes produced when you run the above text "protect" the double quote, communicating to you and to R that the next double quote is not the end of the text, but a character that is actually part of the text you want to keep.
 
 The `c()` function isn't the only way to make a collection of values in R. For example, placing a `:` between two numbers can return a collection of numbers in sequence. The functions `rep()` and `seq()` produce repeated values or sequences.
 ```{r comment="", results='hold'}
