@@ -10,7 +10,7 @@
 
 
 
-<meta name="date" content="2018-07-26" />
+<meta name="date" content="2018-09-18" />
 
 <title>Dates and Times</title>
 
@@ -92,6 +92,9 @@ img {
 .tabbed-pane {
   padding-top: 12px;
 }
+.html-widget {
+  margin-bottom: 20px;
+}
 button.code-folding-btn:focus {
   outline: none;
 }
@@ -122,13 +125,13 @@ $(document).ready(function () {
 <h1 class="title toc-ignore">Dates and Times</h1>
 <h4 class="author"><em>Greg Ridgeway</em></h4>
 <address class="author_afil">
-University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="mailto:gridge@upenn.edu">gridge@upenn.edu</a></a>
+University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="mailto:gridge@sas.upenn.edu">gridge@sas.upenn.edu</a></a>
 </address>
 <h4 class="author"><em>Ruth Moyer</em></h4>
 <address class="author_afil">
-University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="mailto:moyruth@upenn.edu">moyruth@upenn.edu</a></a>
+University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="mailto:moyruth@sas.upenn.edu">moyruth@sas.upenn.edu</a></a>
 </address>
-<h4 class="date"><em>July 26, 2018</em></h4>
+<h4 class="date"><em>September 18, 2018</em></h4>
 
 </div>
 
@@ -140,7 +143,7 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
 <!-- author: -->
 <!-- - Greg Ridgeway (gridge@upenn.edu) -->
 <!-- - Ruth Moyer (moyruth@upenn.edu) -->
-<!-- date: "July 26, 2018" -->
+<!-- date: "September 18, 2018" -->
 <!-- output: -->
 <!--   pdf_document: -->
 <!--     latex_engine: pdflatex -->
@@ -148,6 +151,7 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
 <!-- fontsize: 11pt -->
 <!-- fontfamily: mathpazo -->
 <!-- --- -->
+<!-- A function for automating the numbering and wording of the exercise questions -->
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
 <p>Working with dates and times is a lot different than working with the more familiar numbers. Months have different number of days. Sometimes we count hours of the day up to 12 and then start over. Sometimes we count hours up to 24 and then start over. Some years have 366 days. We have 24 times zones around the world. Twice a year we switch clocks for Daylight Saving Time, except in some places like Arizona. Arithmetic, such as adding one month to a date, is poorly defined. Which date is one month after January 31st? Is it February 28th? Or is it March 3rd?</p>
@@ -204,7 +208,14 @@ date(now())-b</code></pre>
 <pre><code>Time differences in days
 [1]  8  4  1 -3 -7
 Time differences in days
-[1] 1325 1329 1332 1336 1340</code></pre>
+[1] 1379 1383 1386 1390 1394</code></pre>
+<p>When subtracting dates, R will make a good guess for the unit of time to use in the result. Use <code>difftime()</code> if you want to be specific about the unit of time and not leave it up to R to decide.</p>
+<pre class="r"><code>difftime(b, mdy(&quot;12/01/2014&quot;), units = &quot;days&quot;)
+difftime(b, mdy(&quot;12/01/2014&quot;), units = &quot;hours&quot;)</code></pre>
+<pre><code>Time differences in days
+[1]  8  4  1 -3 -7
+Time differences in hours
+[1]  192   96   24  -72 -168</code></pre>
 <p>We can add time to the dates as well</p>
 <pre class="r"><code>b + dyears(1) # adds 365 days, does not increase year by 1
 b + ddays(31)</code></pre>
@@ -374,261 +385,261 @@ a[min(which(tzone==&quot;CST&quot;))]</code></pre>
 <li>On what date will Thanksgiving fall in 2020?</li>
 </ol>
 <pre class="r"><code>a &lt;- mdy(paste0(&quot;11/&quot;,1:30,&quot;/2020&quot;))
-a[wday(a,label=TRUE)==&quot;Thurs&quot;][4]</code></pre>
-<pre><code>[1] NA</code></pre>
+a[wday(a,label=TRUE)==&quot;Thu&quot;][4]</code></pre>
+<pre><code>[1] &quot;2020-11-26&quot;</code></pre>
 <ol start="3" style="list-style-type: decimal">
 <li>Make a function that takes as input a year and returns the date of Thanksgiving in that year.</li>
 </ol>
 <pre class="r"><code>tday &lt;- function(year)
 {
    a &lt;- mdy(paste0(&quot;11/&quot;,1:30,&quot;/&quot;,year))
-   return( a[wday(a,label=TRUE)==&quot;Thurs&quot;][4] )
+   return( a[wday(a,label=TRUE)==&quot;Thu&quot;][4] )
 }
 tday(2020)
 lapply(2020:2100, tday)</code></pre>
-<pre><code>[1] NA
+<pre><code>[1] &quot;2020-11-26&quot;
 [[1]]
-[1] NA
+[1] &quot;2020-11-26&quot;
 
 [[2]]
-[1] NA
+[1] &quot;2021-11-25&quot;
 
 [[3]]
-[1] NA
+[1] &quot;2022-11-24&quot;
 
 [[4]]
-[1] NA
+[1] &quot;2023-11-23&quot;
 
 [[5]]
-[1] NA
+[1] &quot;2024-11-28&quot;
 
 [[6]]
-[1] NA
+[1] &quot;2025-11-27&quot;
 
 [[7]]
-[1] NA
+[1] &quot;2026-11-26&quot;
 
 [[8]]
-[1] NA
+[1] &quot;2027-11-25&quot;
 
 [[9]]
-[1] NA
+[1] &quot;2028-11-23&quot;
 
 [[10]]
-[1] NA
+[1] &quot;2029-11-22&quot;
 
 [[11]]
-[1] NA
+[1] &quot;2030-11-28&quot;
 
 [[12]]
-[1] NA
+[1] &quot;2031-11-27&quot;
 
 [[13]]
-[1] NA
+[1] &quot;2032-11-25&quot;
 
 [[14]]
-[1] NA
+[1] &quot;2033-11-24&quot;
 
 [[15]]
-[1] NA
+[1] &quot;2034-11-23&quot;
 
 [[16]]
-[1] NA
+[1] &quot;2035-11-22&quot;
 
 [[17]]
-[1] NA
+[1] &quot;2036-11-27&quot;
 
 [[18]]
-[1] NA
+[1] &quot;2037-11-26&quot;
 
 [[19]]
-[1] NA
+[1] &quot;2038-11-25&quot;
 
 [[20]]
-[1] NA
+[1] &quot;2039-11-24&quot;
 
 [[21]]
-[1] NA
+[1] &quot;2040-11-22&quot;
 
 [[22]]
-[1] NA
+[1] &quot;2041-11-28&quot;
 
 [[23]]
-[1] NA
+[1] &quot;2042-11-27&quot;
 
 [[24]]
-[1] NA
+[1] &quot;2043-11-26&quot;
 
 [[25]]
-[1] NA
+[1] &quot;2044-11-24&quot;
 
 [[26]]
-[1] NA
+[1] &quot;2045-11-23&quot;
 
 [[27]]
-[1] NA
+[1] &quot;2046-11-22&quot;
 
 [[28]]
-[1] NA
+[1] &quot;2047-11-28&quot;
 
 [[29]]
-[1] NA
+[1] &quot;2048-11-26&quot;
 
 [[30]]
-[1] NA
+[1] &quot;2049-11-25&quot;
 
 [[31]]
-[1] NA
+[1] &quot;2050-11-24&quot;
 
 [[32]]
-[1] NA
+[1] &quot;2051-11-23&quot;
 
 [[33]]
-[1] NA
+[1] &quot;2052-11-28&quot;
 
 [[34]]
-[1] NA
+[1] &quot;2053-11-27&quot;
 
 [[35]]
-[1] NA
+[1] &quot;2054-11-26&quot;
 
 [[36]]
-[1] NA
+[1] &quot;2055-11-25&quot;
 
 [[37]]
-[1] NA
+[1] &quot;2056-11-23&quot;
 
 [[38]]
-[1] NA
+[1] &quot;2057-11-22&quot;
 
 [[39]]
-[1] NA
+[1] &quot;2058-11-28&quot;
 
 [[40]]
-[1] NA
+[1] &quot;2059-11-27&quot;
 
 [[41]]
-[1] NA
+[1] &quot;2060-11-25&quot;
 
 [[42]]
-[1] NA
+[1] &quot;2061-11-24&quot;
 
 [[43]]
-[1] NA
+[1] &quot;2062-11-23&quot;
 
 [[44]]
-[1] NA
+[1] &quot;2063-11-22&quot;
 
 [[45]]
-[1] NA
+[1] &quot;2064-11-27&quot;
 
 [[46]]
-[1] NA
+[1] &quot;2065-11-26&quot;
 
 [[47]]
-[1] NA
+[1] &quot;2066-11-25&quot;
 
 [[48]]
-[1] NA
+[1] &quot;2067-11-24&quot;
 
 [[49]]
-[1] NA
+[1] &quot;2068-11-22&quot;
 
 [[50]]
-[1] NA
+[1] &quot;2069-11-28&quot;
 
 [[51]]
-[1] NA
+[1] &quot;2070-11-27&quot;
 
 [[52]]
-[1] NA
+[1] &quot;2071-11-26&quot;
 
 [[53]]
-[1] NA
+[1] &quot;2072-11-24&quot;
 
 [[54]]
-[1] NA
+[1] &quot;2073-11-23&quot;
 
 [[55]]
-[1] NA
+[1] &quot;2074-11-22&quot;
 
 [[56]]
-[1] NA
+[1] &quot;2075-11-28&quot;
 
 [[57]]
-[1] NA
+[1] &quot;2076-11-26&quot;
 
 [[58]]
-[1] NA
+[1] &quot;2077-11-25&quot;
 
 [[59]]
-[1] NA
+[1] &quot;2078-11-24&quot;
 
 [[60]]
-[1] NA
+[1] &quot;2079-11-23&quot;
 
 [[61]]
-[1] NA
+[1] &quot;2080-11-28&quot;
 
 [[62]]
-[1] NA
+[1] &quot;2081-11-27&quot;
 
 [[63]]
-[1] NA
+[1] &quot;2082-11-26&quot;
 
 [[64]]
-[1] NA
+[1] &quot;2083-11-25&quot;
 
 [[65]]
-[1] NA
+[1] &quot;2084-11-23&quot;
 
 [[66]]
-[1] NA
+[1] &quot;2085-11-22&quot;
 
 [[67]]
-[1] NA
+[1] &quot;2086-11-28&quot;
 
 [[68]]
-[1] NA
+[1] &quot;2087-11-27&quot;
 
 [[69]]
-[1] NA
+[1] &quot;2088-11-25&quot;
 
 [[70]]
-[1] NA
+[1] &quot;2089-11-24&quot;
 
 [[71]]
-[1] NA
+[1] &quot;2090-11-23&quot;
 
 [[72]]
-[1] NA
+[1] &quot;2091-11-22&quot;
 
 [[73]]
-[1] NA
+[1] &quot;2092-11-27&quot;
 
 [[74]]
-[1] NA
+[1] &quot;2093-11-26&quot;
 
 [[75]]
-[1] NA
+[1] &quot;2094-11-25&quot;
 
 [[76]]
-[1] NA
+[1] &quot;2095-11-24&quot;
 
 [[77]]
-[1] NA
+[1] &quot;2096-11-22&quot;
 
 [[78]]
-[1] NA
+[1] &quot;2097-11-28&quot;
 
 [[79]]
-[1] NA
+[1] &quot;2098-11-27&quot;
 
 [[80]]
-[1] NA
+[1] &quot;2099-11-26&quot;
 
 [[81]]
-[1] NA</code></pre>
+[1] &quot;2100-11-25&quot;</code></pre>
 </div>
 
 
