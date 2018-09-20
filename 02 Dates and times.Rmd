@@ -113,6 +113,12 @@ b-mdy("12/01/2014")
 date(now())-b
 ```
 
+When subtracting dates, R will make a good guess for the unit of time to use in the result. Use `difftime()` if you want to be specific about the unit of time and not leave it up to R to decide.
+```{r comment="", results='hold'}
+difftime(b, mdy("12/01/2014"), units = "days")
+difftime(b, mdy("12/01/2014"), units = "hours")
+```
+
 We can add time to the dates as well
 ```{r comment="", results='hold'}
 b + dyears(1) # adds 365 days, does not increase year by 1
@@ -175,7 +181,7 @@ a[min(which(tzone=="CST"))]
 2. On what date will Thanksgiving fall in 2020?
 ```{r comment="", results='hold'}
 a <- mdy(paste0("11/",1:30,"/2020"))
-a[wday(a,label=TRUE)=="Thurs"][4]
+a[wday(a,label=TRUE)=="Thu"][4]
 ```
 
 3. Make a function that takes as input a year and returns the date of Thanksgiving in that year.
@@ -183,7 +189,7 @@ a[wday(a,label=TRUE)=="Thurs"][4]
 tday <- function(year)
 {
    a <- mdy(paste0("11/",1:30,"/",year))
-   return( a[wday(a,label=TRUE)=="Thurs"][4] )
+   return( a[wday(a,label=TRUE)=="Thu"][4] )
 }
 tday(2020)
 lapply(2020:2100, tday)
