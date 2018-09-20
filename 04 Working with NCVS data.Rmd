@@ -146,6 +146,8 @@ with(dataInc13, table(V4014,V4015))
 # Creating a dataframe and weights with NCVS incident data
 Next, we can create a 2012 incident dataframe. Importantly, the 2012 data contain incidents that occurred in 2012 as well as 2011 but were all self-reported to the Census Bureau in 2012. Likewise, the 2013 data contain incidents that occurred in 2012 as well as 2013.  If we wanted to analyze crime that occurred in only 2012, we'd subset the data to include only 2012. We will combine the 2012 and 2013 incident dataframes and then subset this new dataframe so that we exclude 2011 and 2013. As we can see in the Codebook PDF, the variable V4015 refers to the year of occurrence.
 
+`rbind` binds rows. This is good for when the columns in two datasets are exactly the same.
+
 ```{r comment="", results='hold'}
 dataInc <- rbind(dataInc12,dataInc13)
 table(dataInc$V4015) # year crime occured
@@ -167,7 +169,7 @@ dataInc$V4016[dataInc$V4016>=997] <- NA
 
 Also, BJS analyses of NCVS data generally use weights because NCVS is survey data. There are three NCVS weight categories: household, personal, and incident. 
 
-For more information about NCVS weights, consult the [helpful summary](https://www.icpsr.umich.edu/icpsrweb/NACJD/NCVS/accuracy.jsp).
+For more information about NCVS weights, consult the section on Weighting Information found at this ICPSR resource guide to the NCVS: (https://www.icpsr.umich.edu/icpsrweb/NACJD/NCVS/accuracy.jsp).
 
 To that extent, let's update the weight for series crimes and create a "date year" weight.
 ```{r comment="", results='hold'}
