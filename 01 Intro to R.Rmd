@@ -303,7 +303,7 @@ The R operator `%in%` asks each value on the left whether or not it is a member 
 a %in% c(3,7,10)
 
 my.states <- c("MD","OH","VA","CA","WA","DC")
-# do these states touch the Pacific Ocean?
+# do the above states touch the Pacific Ocean? (Make a list of states that touch the Pacific Ocean and compare with my.states)
 my.states %in% c("CA","OR","WA","AK","HI")
 # how many of these states touch the Pacific Ocean?
 sum(my.states %in% c("CA","OR","WA","AK","HI"))
