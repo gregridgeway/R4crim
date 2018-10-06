@@ -213,7 +213,10 @@ Let's make the "month allocated" uniform, and using regular expressions, delete 
 ```{r comment="", results='hold'}
 table(dataHH$V2130)
 dataHH$V2130 <- gsub("\\(0", "\\(", dataHH$V2130)
+table(dataHH$V2130)
 ```
+When you view the table again, you can see that the original 21 months listed were condensed into 12.
+
 Next, create a 2012 data year person data frame. We need to first fix incompatible factor/numeric in 2012/2013.  The factor levels in 2012 look like "(1) Yes", but in 2013 are just "1."
 
 ```{r comment="", results='hold'}
