@@ -225,23 +225,24 @@ sum(ucr$rape)
 i <- grep("NEW YORK",ucr$AGENCY)
 ucr[i,]
 ```
-Note what the i (indexing variable) does - it is a list of the row numbers in the ucr dataframe that have "NEW YORK" somewhere in the agency column. As you can see, there are 4 agencies that have "New York" in their name. 
+Note what the `i` (indexing variable) does - it is a list of the row numbers in the `ucr` dataframe that have "NEW YORK" somewhere in the agency column. As you can see, there are `r length(i)` agencies that have "New York" in their name. 
 
-4a. Next, make a little dataframe of just "New Jersey"; how many rows is it? There are two ways to do the dataframe
+4a. Next, make a data frame of just "New Jersey". How many rows does it have? 
 
+Here are two different ways to create the dataframe
 ```{r comment="", results='hold'}
-nj <- ucr[grep("New Jersey", ucr$STATE),]  
+nj <- ucr[grep("New Jersey", ucr$STATE),]
+nrow(nj)
 ```
-
 Or, 
 ```{r comment="", results='hold'}
 nj2 <- subset(ucr, STATE=="(29) New Jersey")
+nrow(nj2)
 ```
 
 4b. How many murders, robberies, etc.?
 ```{r comment="", results='hold'}
 sum(nj$murder)
-
 sum(nj$robbery)
 ```
 4c. How would you find out the average burglary rate/person in New Jersey? per 100,000?
@@ -249,30 +250,24 @@ sum(nj$robbery)
 ```{r comment="", results='hold'}
 sum(nj$murder)/sum(nj$POP)
 
-(sum(nj$murder)/sum(nj$POP)*100000)
+sum(nj$murder)/sum(nj$POP)*100000
 ```
 
 4d. Add a new column to your dataset for the burglary rate for each agency. Sort your dataset by order of burglary rate.
 
 ```{r comment="", results='hold'}
-
 nj$burglaryrate <- (nj$burglary/nj$POP)*100000
-
 nj[order(nj$burglaryrate),]
-
 nj[rev(order(nj$burglaryrate)),]
 ```
 
-We have a bit of a snag. Look at the burglary rate column. You'll notice some  NaN and Inf values. Get rid of them:
+We have a bit of a snag. Look at the burglary rate column. You'll notice some `NaN` and `Inf` values. Get rid of them:
 
 ```{r comment="", results='hold'}
-nj.new <- subset(nj, !is.nan(burglaryrate))
-
-nj.new <- subset(nj.new, !is.infinite(burglaryrate))
+nj.new <- subset(nj, !is.nan(burglaryrate) & !is.infinite(burglaryrate))
 ```
 Now sort the dataset by burglary rate:
-
 ```{r comment="", results='hold'}
 nj.new[rev(order(nj.new$burglaryrate)),]
 ```
-Why do you think some of Agencies are at the top of the list?  Hint: take a look at the population column.
+Why do you think some of the agencies are at the top of the list?  Hint: take a look at the population column.
