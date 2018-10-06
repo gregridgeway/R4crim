@@ -71,7 +71,7 @@ is(da35021.0001)
 ```
 ...and, sure enough, it is a new R data frame, presumably containing the 2012 UCR data. Let's take a look inside the dataset to see what we have.
 
-Let's look at the first two rows. Each row describes the features of one law enforcement agency. You will see that there are a lot of features recorded in the data, `r ncol(da35021.0001)` features to be precise. Unfortunately, the variable names are not very helpful. Several you can figure out by looking at the data within the column. Clearly, `V2` indicates the state where the law enforcement agency is located. `V10` looks like some kind of date. `V26` gives the name of the agency. But most of the rest are rather mysterious.
+Let's look at the first two rows. Each row describes the features of one law enforcement agency. You will see that there are a lot of features recorded in the data, `r ncol(da35021.0001)`, which shows 1448 features to be precise. Unfortunately, the variable names are not very helpful. Several you can figure out by looking at the data within the column. Clearly, `V2` indicates the state where the law enforcement agency is located. `V10` looks like some kind of date. `V26` gives the name of the agency. But most of the rest are rather mysterious.
 ```{r comment="", results='hold'}
 da35021.0001[1:2,]
 ```
