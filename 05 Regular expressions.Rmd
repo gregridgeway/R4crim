@@ -311,7 +311,7 @@ gsub("^\\(?([0-9]{3})(\\) |-)?([0-9]{3})-?([0-9]{4})","\\1-\\3-\\4",dataText)
 ```
 Note that register 2 captures whatever text matches the optional text `(\\) |-)`. That's why you don't see `\\2` in the replacement pattern.
 
-Now let's go back to that regular expression we used to standardize the NCVS crime types, `gsub("\\(([1-9])\\)", "(0\\1)", data.inc$V4529)`. You can now see what it is doing: find a single digit number inside parentheses, store that number in register 1, replace it with the same number but with a leading 0.
+Now let's go back to that regular expression we used to standardize the NCVS crime types, `gsub("\\(([1-9])\\)", "(0\\1)", dataInc$V4529)`. You can now see what it is doing: find a single digit number inside parentheses, store that number in register 1, replace it with the same number but with a leading 0.
 
 ### Class exercise
 `r .exNum('Add commas to these numbers \x60c("9453","2332","4645","1234")\x60.')` That is, make these numbers look like 9,453 and 2,332 and so on. Fill in the find pattern and replacement pattern in `gsub("", "", c("9453","2332","4645","1234"))`
