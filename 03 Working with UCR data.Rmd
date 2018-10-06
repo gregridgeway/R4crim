@@ -225,7 +225,7 @@ sum(ucr$rape)
 i <- grep("NEW YORK",ucr$AGENCY)
 ucr[i,]
 ```
-Note what the i (indexing variable) does - it is a list of the row numbers in the ucr dataframe that have "NEW YORK" somewhere in the agency column.
+Note what the i (indexing variable) does - it is a list of the row numbers in the ucr dataframe that have "NEW YORK" somewhere in the agency column. As you can see, there are 4 agencies that have "New York" in their name. 
 
 4a. Next, make a little dataframe of just "New Jersey"; how many rows is it? There are two ways to do the dataframe
 
