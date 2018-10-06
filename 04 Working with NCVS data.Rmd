@@ -217,7 +217,7 @@ dataHH$V2130 <- gsub("\\(0", "\\(", dataHH$V2130)
 Next, create a 2012 data year person data frame. We need to first fix incompatible factor/numeric in 2012/2013.  The factor levels in 2012 look like "(1) Yes", but in 2013 are just "1."
 
 ```{r comment="", results='hold'}
-i <- sapply(data.pers12,levels)                        #gives factor levels for each variable 
+i <- sapply(dataPers12,levels)                        #gives factor levels for each variable 
 i <- i[!sapply(i,is.null)]                             #gives factor levels for each factor variable
                                                        #for non-factor variables, i returns a null result
 i <- sapply(i, function(x) all(substring(x,1,1)=="(")) #store in i those variables where the first                                                               #character of factor levels is "(""
@@ -226,8 +226,8 @@ var.fix <- names(i)[i]                                 #this gives us the name o
 
 for(xj in var.fix) #create a for-loop to fix these variable names. for each value "xj" in var.fix
 {
-   data.pers12[,xj] <- gsub("\\(([0-9]+)\\).*","\\1",data.pers12[,xj]) #remove the words that follow the                                                                         #numbers in parentheses
-   data.pers12[,xj] <- as.numeric(data.pers12[,xj]) #convert the numbers in parentheses to just numeric                                                       #variables, which present as numbers w/o parentheses
+   dataPers12[,xj] <- gsub("\\(([0-9]+)\\).*","\\1",dataPers12[,xj]) #remove the words that follow the                                                                         #numbers in parentheses
+   dataPers12[,xj] <- as.numeric(dataPers12[,xj]) #convert the numbers in parentheses to just numeric                                                       #variables, which present as numbers w/o parentheses
 }
 ```
 
