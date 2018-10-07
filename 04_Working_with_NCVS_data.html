@@ -10,7 +10,7 @@
 
 
 
-<meta name="date" content="2018-07-26" />
+<meta name="date" content="2018-10-07" />
 
 <title>Working with National Crime Victimization Survey Data</title>
 
@@ -92,6 +92,9 @@ img {
 .tabbed-pane {
   padding-top: 12px;
 }
+.html-widget {
+  margin-bottom: 20px;
+}
 button.code-folding-btn:focus {
   outline: none;
 }
@@ -128,19 +131,22 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
 <address class="author_afil">
 University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="mailto:moyruth@upenn.edu">moyruth@upenn.edu</a></a>
 </address>
-<h4 class="date"><em>July 26, 2018</em></h4>
+<h4 class="author"><em>Li Sian Goh</em></h4>
+<address class="author_afil">
+University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="mailto:gohl@upenn.edu">gohl@upenn.edu</a></a>
+</address>
+<h4 class="date"><em>October 07, 2018</em></h4>
 
 </div>
 
 
 <!-- HTML YAML header Ctrl-Shift-C to comment/uncomment -->
-<!-- PDF YAML header Ctrl-Shift-C to comment/uncomment -->
 <!-- --- -->
 <!-- title: "Working with National Crime Victimization Survey Data" -->
 <!-- author: -->
 <!-- - Greg Ridgeway (gridge@upenn.edu) -->
 <!-- - Ruth Moyer (moyruth@upenn.edu) -->
-<!-- date: "July 26, 2018" -->
+<!-- date: "October 07, 2018" -->
 <!-- output: -->
 <!--   pdf_document: -->
 <!--     latex_engine: pdflatex -->
@@ -148,7 +154,8 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
 <!-- fontsize: 11pt -->
 <!-- fontfamily: mathpazo -->
 <!-- --- -->
-<!-- A function for autmomating the numbering and wording of the exercise questions -->
+<!-- PDF YAML header Ctrl-Shift-C to comment/uncomment -->
+<!-- A function for automating the numbering and wording of the exercise questions -->
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
 <p>Through our work with the UCR, we’ve already discussed reported crime. Nonetheless, not all crimes are reported to the police. Also, sometimes the UCR doesn’t provide us with specific information about a victim-involved crime incident such as whether the victim knew the offenders or the location of the crime incident.</p>
@@ -160,7 +167,7 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
 <p>The University of Michigan consolidates the NCVS data into a format that is easily accessible in R. We will be using 2012 and 2013 NCVS data.</p>
 <p>First, we will download the NCVS 2012 data, <a href="http://www.icpsr.umich.edu/icpsrweb/NACJD/studies/34650">ICPSR 34650</a>. We will need to download the following files, DS1, DS2, DS3, DS4, and DS5 in R format. Also, download DS0, the Codebook (which is in PDF format). We will refer to the codebook frequently. As for the DS1, DS2, DS3, DS4, and DS5 files, we are interested in the .rda files.</p>
 <p>Next, downoad the NCVS 2013 data, <a href="http://www.icpsr.umich.edu/icpsrweb/NACJD/studies/35164">ICPSR 35164</a>. Same drill as above - retrieve DS1, DS2, DS3, DS4, and DS5 in R format.</p>
-<p>All told you should have ten .rda files, and one PDF codebook. For now, we won’t be using the DS5 files that much. Also, the file names are admittedly a bit unwieldy with all the numbers so it might be a good idea to change the names to something that will help you quickly distinguish among all the files. We’ve created subfolders called NCVS2012 and NCVS2013 that contains the files extracted from the data download. Here are the files we have in our NCVS2012 and NCVS2013 subfolders.</p>
+<p>All told you should have ten .rda files, and one PDF codebook. The codebook is extremely important for understanding what the variable names stand for, and you should become familiar with it as soon as you can. For now, we won’t be using the DS5 files that much. Also, the file names are admittedly a bit unwieldy with all the numbers so it might be a good idea to change the names to something that will help you quickly distinguish among all the files. We’ve created subfolders called NCVS2012 and NCVS2013 that contains the files extracted from the data download. Here are the files we have in our NCVS2012 and NCVS2013 subfolders.</p>
 <pre class="r"><code>list.files(&quot;NCVS2012/&quot;,recursive = TRUE)</code></pre>
 <pre><code> [1] &quot;34650-Codebook.pdf&quot;               &quot;34650-descriptioncitation.pdf&quot;   
  [3] &quot;34650-manifest.txt&quot;               &quot;34650-related_literature.txt&quot;    
@@ -347,7 +354,8 @@ V4014           2012 2013
 </div>
 <div id="creating-a-dataframe-and-weights-with-ncvs-incident-data" class="section level1">
 <h1>Creating a dataframe and weights with NCVS incident data</h1>
-<p>Next, we can create a 2012 incident dataframe. Importantly, the 2012 data contain incidents that occurred in 2012 as well as 2011 but were all self-reported to the Census Bureau in 2012. Likewise, the 2013 data contain incidents that occurred in 2012 as well as 2013. If we wanted to analyze crime that occurred in only 2012, we’d subset the data to include only 2012. We will combine the 2012 and 2013 incident dataframes and then subset this new dataframe so that we exclude 2011 and 2013. As we can see in the Codebook PDF, the variable V4015 refers to the year of occurrence.</p>
+<p>Next, we can create a 2012 incident dataframe. Importantly, the 2012 data contain incidents that occurred in 2012 as well as 2011 but were all self-reported to the Census Bureau in 2012. Likewise, the 2013 data contain incidents that occurred in 2012 as well as 2013. If we wanted to analyze crime that occurred in only 2012, we’d subset the data to include only 2012. We will combine the 2012 and 2013 incident dataframes and then subset this new dataframe so that we exclude 2011 and 2013. As we can see in the Codebook PDF, the variable V4015 refers to the year of occurrence. (Helpful hint: the numbering of the variables correlate to the numbering of the dataframe. The incident-level file is DS4. Many of the variables in DS4 are V4XXX.)</p>
+<p><code>rbind</code> binds rows. This is good for when the columns in two datasets are exactly the same.</p>
 <pre class="r"><code>dataInc &lt;- rbind(dataInc12,dataInc13)
 table(dataInc$V4015) # year crime occured
 dataInc &lt;- subset(dataInc, V4015==2012)</code></pre>
@@ -356,17 +364,17 @@ dataInc &lt;- subset(dataInc, V4015==2012)</code></pre>
 2687 8917 5338 </code></pre>
 <p>We will also want to exclude crime that happens outside the United States or crimes for which we do not know the location (NA). According to the Codebook, V4022 refers to location.</p>
 <pre class="r"><code>dataInc &lt;- subset(dataInc, (V4022!=&quot;(1) Outside U.S.&quot;) | is.na(V4022))</code></pre>
-<p>A lot of crimes happen in a series. The BJS convention is to include up to 10 occurrences in a series crime</p>
+<p>A lot of crimes happen in a series. The BJS convention is to include up to 10 occurrences in a series crime.</p>
 <pre class="r"><code>i &lt;- with(dataInc, which((V4019==&quot;(2) No (is series)&quot;) &amp; (V4016&gt;=11) &amp; (V4016&lt;=996)))
 dataInc$V4016[i] &lt;- 10
 dataInc$V4016[dataInc$V4016&gt;=997] &lt;- NA</code></pre>
-<p>Also, BJS analyses of NCVS data generally use weights because NCVS is survey data. There are three NCVS weight categories: household, personal, and incident.</p>
-<p>For more information about NCVS weights, consult the <a href="https://www.icpsr.umich.edu/icpsrweb/NACJD/NCVS/accuracy.jsp">helpful summary</a>.</p>
+<p>Also, BJS analyses of NCVS data generally use weights because NCVS is survey data. We want to weight the survey data so that they are representative of the wider U.S. population! There are three NCVS weight categories: household, personal, and incident.</p>
+<p>For more information about NCVS weights, consult the section on Weighting Information found at this ICPSR resource guide to the NCVS: (<a href="https://www.icpsr.umich.edu/icpsrweb/NACJD/NCVS/accuracy.jsp" class="uri">https://www.icpsr.umich.edu/icpsrweb/NACJD/NCVS/accuracy.jsp</a>).</p>
 <p>To that extent, let’s update the weight for series crimes and create a “date year” weight.</p>
 <pre class="r"><code>i &lt;- which(dataInc$V4019==&quot;(2) No (is series)&quot;)
 dataInc$WGTVICDY &lt;- dataInc$WGTVICCY
 dataInc$WGTVICDY[i] &lt;- with(dataInc, WGTVICDY[i] * V4016[i])</code></pre>
-<p>We can also tabulate total weight by crime type to estimate the count of a crime. As the Codebook instrucs, <code>V4529</code> is the variable for crime type.</p>
+<p>We can also tabulate total weight by crime type to estimate the count of a crime. As the Codebook instructs, <code>V4529</code> is the variable for crime type.</p>
 <pre class="r"><code>aggregate(WGTVICDY~V4529, data=dataInc, sum)</code></pre>
 <pre><code>                      V4529    WGTVICDY
 1       (01) Completed rape   74309.666
@@ -464,7 +472,8 @@ aggregate(WGTVICDY~V4529, data=dataInc, sum)</code></pre>
 dataHH &lt;- subset(dataHH, YEARQ&gt;=2012.1 &amp; YEARQ&lt;=2013.2)</code></pre>
 <p>Let’s make the “month allocated” uniform, and using regular expressions, delete “0s” following parentheses.</p>
 <pre class="r"><code>table(dataHH$V2130)
-dataHH$V2130 &lt;- gsub(&quot;\\(0&quot;, &quot;\\(&quot;, dataHH$V2130)</code></pre>
+dataHH$V2130 &lt;- gsub(&quot;\\(0&quot;, &quot;\\(&quot;, dataHH$V2130)
+table(dataHH$V2130)</code></pre>
 <pre><code>
   (01) January  (02) February     (03) March     (04) April       (05) May 
          10602          10567          10695          10614          10511 
@@ -475,16 +484,27 @@ dataHH$V2130 &lt;- gsub(&quot;\\(0&quot;, &quot;\\(&quot;, dataHH$V2130)</code><
      (4) April        (5) May       (6) June       (7) July     (8) August 
          10720          10661          10603              0              0 
  (9) September 
-             0 </code></pre>
+             0 
+
+  (1) January  (10) October (11) November (12) December  (2) February 
+        21214         10692         10597         10630         21140 
+    (3) March     (4) April       (5) May      (6) June      (7) July 
+        21397         21334         21172         21262         10572 
+   (8) August (9) September 
+        10624         10678 </code></pre>
+<p>When you view the table again, you can see that the original 21 months listed were condensed into 12.</p>
 <p>Next, create a 2012 data year person data frame. We need to first fix incompatible factor/numeric in 2012/2013. The factor levels in 2012 look like “(1) Yes”, but in 2013 are just “1.”</p>
-<pre class="r"><code>i &lt;- sapply(dataPers12, levels)
-i &lt;- i[!sapply(i,is.null)]
-i &lt;- sapply(i, function(x) all(substring(x,1,1)==&quot;(&quot;))
-var.fix &lt;- names(i)[i]
-for(xj in var.fix)
+<pre class="r"><code>i &lt;- sapply(dataPers12,levels)                        #gives factor levels for each variable 
+i &lt;- i[!sapply(i,is.null)]                             #gives factor levels for each factor variable
+                                                       #for non-factor variables, i returns a null result
+i &lt;- sapply(i, function(x) all(substring(x,1,1)==&quot;(&quot;)) #store in i those variables where the first                                                               #character of factor levels is &quot;(&quot;&quot;
+var.fix &lt;- names(i)[i]                                 #this gives us the name of variables 
+                                                       #where factor levels begin with &quot;(&quot;. 
+
+for(xj in var.fix) #create a for-loop to fix these variable names. for each value &quot;xj&quot; in var.fix
 {
-   dataPers12[,xj] &lt;- gsub(&quot;\\(([0-9]+)\\).*&quot;, &quot;\\1&quot;, dataPers12[,xj])
-   dataPers12[,xj] &lt;- as.numeric(dataPers12[,xj])
+   dataPers12[,xj] &lt;- gsub(&quot;\\(([0-9]+)\\).*&quot;,&quot;\\1&quot;,dataPers12[,xj]) #remove the words that follow the                                                                         #numbers in parentheses
+   dataPers12[,xj] &lt;- as.numeric(dataPers12[,xj]) #convert the numbers in parentheses to just numeric                                                       #variables, which present as numbers w/o parentheses
 }</code></pre>
 <p>Then, stack the 2012 and 2013 data frames using <code>rbind()</code>.</p>
 <pre class="r"><code>dataPers &lt;- rbind(dataPers12, dataPers13)
@@ -677,462 +697,6 @@ temp[order(-temp$ratio),]</code></pre>
 9        (10) At rob w aslt 70.307297  29.69270  0.4223275
 7     (08) At rob inj s asl 77.083202  22.91680  0.2972995
 3    (03) Sex aslt w s aslt 81.337349  18.66265  0.2294475</code></pre>
-</div>
-<div id="using-the-ncvs" class="section level1">
-<h1>Using the NCVS</h1>
-<div id="describe-the-context-of-assaults.-for-example-where-did-they-occur" class="section level2">
-<h2>Describe the context of assaults. For example, where did they occur?</h2>
-<p>As with all of these problems, it is very important to refer to the Codebook to find out relevant variables. Note that Variable <code>V4024</code> refers to “Where did the incident happen?” and <code>V4529</code> refers to the offense type. We first need to determine which <code>V4529</code> values refer to some form of assault. When working with any open-ended criminological question, use your own judgment as to which crimes to include. For example, some researchers would exclude a verbal threat of assault, whereas others would include that as assault.</p>
-<pre class="r"><code># first fix (x) -&gt; (0x)
-dataInc$V4024 &lt;- gsub(&quot;\\(([1-9])\\)&quot;, &quot;(0\\1)&quot;, dataInc$V4024)
-aggregate(WGTVICDY~V4024,
-          data=subset(dataInc,V4529 %in% c(&quot;(11) Ag aslt w injury&quot;, 
-                                           &quot;(14) Simp aslt w inj&quot;,
-                                           &quot;(12) At ag aslt w wea&quot;,
-                                           &quot;(17) Asl wo weap, wo inj&quot;, 
-                                           &quot;(20) Verbal thr aslt&quot;, 
-                                           &quot;(13) Thr aslt w weap&quot;)),
-          sum)</code></pre>
-<pre><code>                    V4024   WGTVICDY
-1    (01) R/hme-own dwell 895253.205
-2     (02) R/hme-det bldg  13818.172
-3     (03) R/home-vac/2nd   3345.423
-4      (04) R/hme-htl/mtl   2678.604
-5      (05) N/hme-own yrd 627290.985
-6     (06) N/hme apt hall  68571.278
-7    (07) N/hme-on street 402878.734
-8     (08) Frn/hme-at hme 329857.288
-9   (09) Frn/hme-yard etc 175975.087
-10  (10) Frn/hme-apt hall  11980.909
-11    (11) Frn/hme-on str  64148.308
-12     (12) Comm-rest/bar 226789.749
-13            (14) Office  44540.780
-14  (15) Park-parking etc 106711.649
-15      (16) Park-noncomm 195867.551
-16      (17) Park-apt etc  72970.815
-17  (18) Schl-school bldg 641275.172
-18  (19) Schl-school prop 257785.610
-19   (20) Open-apt yd etc 167461.781
-20    (21) Open-on street 742446.681
-21   (22) Open-pub transp  53745.259
-22       (23) Other-other 684124.062
-23              (24) Bank   4260.630
-24       (25) Gas station  38900.674
-25    (26) Other comm bld 139386.966
-26 (27) Factory/warehouse  85912.831</code></pre>
-</div>
-<div id="when-did-the-assaults-occur" class="section level2">
-<h2>When did the assaults occur?</h2>
-<p>As our Codebook tells us, Variable <code>V4021B</code> refers to “About what time did incident occur?” and <code>V4014</code> refers to “Month incident occurred.” Let’s use both variables to answer this question.</p>
-<pre class="r"><code># first fix (x) -&gt; (0x)
-dataInc$V4021B &lt;- gsub(&quot;\\(([1-9])\\)&quot;, &quot;(0\\1)&quot;, dataInc$V4021B)
-dataInc$V4014  &lt;- gsub(&quot;\\(([1-9])\\)&quot;, &quot;(0\\1)&quot;, dataInc$V4014)
-
-aggregate(WGTVICDY~V4021B,
-          data=subset(dataInc,V4529 %in% c(&quot;(11) Ag aslt w injury&quot;,
-                                           &quot;(14) Simp aslt w inj&quot;,
-                                           &quot;(12) At ag aslt w wea&quot;,
-                                           &quot;(17) Asl wo weap, wo inj&quot;,
-                                           &quot;(20) Verbal thr aslt&quot;,
-                                           &quot;(13) Thr aslt w weap&quot;)),
-          sum)
-
-aggregate(WGTVICDY~V4014,
-          data=subset(dataInc,V4529 %in% c(&quot;(11) Ag aslt w injury&quot;,
-                                           &quot;(14) Simp aslt w inj&quot;,
-                                           &quot;(12) At ag aslt w wea&quot;,
-                                           &quot;(17) Asl wo weap, wo inj&quot;,
-                                           &quot;(20) Verbal thr aslt&quot;,
-                                           &quot;(13) Thr aslt w weap&quot;)),
-          sum)</code></pre>
-<pre><code>                  V4021B   WGTVICDY
-1      (01) Aft 6am-12am  763433.22
-2      (02) Aft 12am-3pm 1047850.17
-3       (03) Aft 3pm-6pm 1062739.25
-4    (04) DK time of day  427090.11
-5       (05) Aft 6pm-9pm  911527.24
-6      (06) Aft 9pm-12pm  694262.33
-7      (07) Aft 12pm-6am  674975.82
-8  (08) DK time of night  138008.36
-9      (09) DK day/night  324487.36
-10          (98) Residue   13604.34
-            V4014 WGTVICDY
-1    (01) January 590263.0
-2   (02) February 411182.4
-3      (03) March 408158.0
-4      (04) April 606052.6
-5        (05) May 616605.2
-6       (06) June 485787.1
-7       (07) July 454993.5
-8     (08) August 456887.9
-9  (09) September 477749.5
-10   (10) October 476838.6
-11  (11) November 604212.7
-12  (12) December 469247.8</code></pre>
-</div>
-<div id="who-was-the-offender" class="section level2">
-<h2>Who was the offender?</h2>
-<p>Variable <code>V4241</code> refers to “Single Offender Stranger” whereas <code>V4245</code> refers to “Single Offender - How Did Respondent Know Offender?”, and <code>V4248</code> refers to “Number of Offenders (Multiple Offenders).”</p>
-<pre class="r"><code>aggregate(WGTVICDY~V4241,
-          data=subset(dataInc,V4529 %in% c(&quot;(11) Ag aslt w injury&quot;,
-                                           &quot;(14) Simp aslt w inj&quot;,
-                                           &quot;(12) At ag aslt w wea&quot;,
-                                           &quot;(17) Asl wo weap, wo inj&quot;,
-                                           &quot;(20) Verbal thr aslt&quot;,
-                                           &quot;(13) Thr aslt w weap&quot;)),
-          sum)
-
-# first fix (x) -&gt; (0x)
-dataInc$V4245 &lt;- gsub(&quot;\\(([1-9])\\)&quot;, &quot;(0\\1)&quot;, dataInc$V4245)
-aggregate(WGTVICDY~V4245,
-          data=subset(dataInc,V4529 %in% c(&quot;(11) Ag aslt w injury&quot;,
-                                           &quot;(14) Simp aslt w inj&quot;,
-                                           &quot;(12) At ag aslt w wea&quot;,
-                                           &quot;(17) Asl wo weap, wo inj&quot;,
-                                           &quot;(20) Verbal thr aslt&quot;,
-                                           &quot;(13) Thr aslt w weap&quot;)),
-          sum)</code></pre>
-<pre><code>              V4241   WGTVICDY
-1 (1) Knew/had seen 3459931.87
-2      (2) Stranger 1129235.51
-3     (3) Dont know   16781.76
-4       (8) Residue  126404.01
-                         V4245   WGTVICDY
-1                  (01) Spouse 246425.763
-2               (02) Ex-spouse  53212.088
-3         (03) Par or step-par  93048.639
-4         (04) R child or step  96929.110
-5          (05) Brother/sister 117660.581
-6          (06) Other relative 119478.930
-7        (07) Boy/girlfrnd, ex 352536.575
-8            (08) Friend or ex 346111.873
-9         (09) Roommate, board  48208.790
-10             (10) Schoolmate 410076.775
-11               (11) Neighbor 326835.377
-12        (12) Customer/client  46448.351
-13        (13) Oth nonrelative 339474.224
-14                (14) Patient 120334.109
-15 (15) Supervisor(cur/former)  13914.878
-16   (16) Employee(cur/former)  19300.210
-17   (17) Coworker(cur/former) 219160.371
-18   (18) Teacher/school staff   9264.828
-19                (98) Residue 134325.538</code></pre>
-<p>The codebook tells us that with the multi-offender variable <code>V4248</code>, “97” does not mean 97 offenders. It means “don’t know.” 98 actually means “missing”. 99 means “out of universe”, which really means that the response was out of range. We mark as missing any values greater than or equal to 97.</p>
-<pre class="r"><code>dataInc$V4248[dataInc$V4248&gt;=97] &lt;- NA
-aggregate(WGTVICDY~V4248,
-          data=subset(dataInc,V4529 %in% c(&quot;(11) Ag aslt w injury&quot;,
-                                           &quot;(14) Simp aslt w inj&quot;,
-                                           &quot;(12) At ag aslt w wea&quot;,
-                                           &quot;(17) Asl wo weap, wo inj&quot;,
-                                           &quot;(20) Verbal thr aslt&quot;,
-                                           &quot;(13) Thr aslt w weap&quot;)),
-          sum)</code></pre>
-<pre><code>   V4248   WGTVICDY
-1      2 309205.579
-2      3 201404.388
-3      4  85858.774
-4      5  71762.656
-5      6  25225.004
-6      7  24943.423
-7      8  26335.800
-8     10   2856.740
-9     12   3285.894
-10    15  60584.531
-11    20  53590.187
-12    30   2726.227
-13    96  18440.345</code></pre>
-</div>
-<div id="what-sort-of-weapons-were-used" class="section level2">
-<h2>What sort of weapons were used?</h2>
-<p>As the Codebook shows, Variables <code>V4051</code>-<code>V4059</code> list types of weapons. Because it’s a bit difficult to interpret the output in R with just the variable names, let’s create new variables with better names.</p>
-<pre class="r"><code>dataInc$handgun     &lt;- dataInc$V4051
-dataInc$otherGun    &lt;- dataInc$V4052
-dataInc$knife       &lt;- dataInc$V4053
-dataInc$sharpObject &lt;- dataInc$V4054
-dataInc$bluntObject &lt;- dataInc$V4055
-dataInc$other       &lt;- dataInc$V4056
-dataInc$unknownGun  &lt;- dataInc$V4057
-dataInc$hit         &lt;- dataInc$V4059
-
-assault &lt;- subset(dataInc, V4529 %in% c(&quot;(11) Ag aslt w injury&quot;, 
-                                        &quot;(14) Simp aslt w inj&quot;,
-                                        &quot;(12) At ag aslt w wea&quot;,
-                                        &quot;(17) Asl wo weap, wo inj&quot;, 
-                                        &quot;(20) Verbal thr aslt&quot;, 
-                                        &quot;(13) Thr aslt w weap&quot;))
-
-with(subset(assault, handgun    ==&quot;(1) Yes&quot;), sum(WGTVICDY))
-with(subset(assault, otherGun   ==&quot;(1) Yes&quot;), sum(WGTVICDY))
-with(subset(assault, unknownGun ==&quot;(1) Yes&quot;), sum(WGTVICDY))
-with(subset(assault, knife      ==&quot;(1) Yes&quot;), sum(WGTVICDY))
-with(subset(assault, sharpObject==&quot;(1) Yes&quot;), sum(WGTVICDY))
-with(subset(assault, bluntObject==&quot;(1) Yes&quot;), sum(WGTVICDY))
-with(subset(assault, hit        ==&quot;(1) Yes&quot;), sum(WGTVICDY))
-with(subset(assault, other      ==&quot;(1) Yes&quot;), sum(WGTVICDY))</code></pre>
-<pre><code>[1] 221323.2
-[1] 18237.02
-[1] 2949.832
-[1] 250788.1
-[1] 45798.08
-[1] 265465.8
-[1] 2395996
-[1] 143223.9</code></pre>
-<p>If you find yourself copying and pasting essentially the same code over and over again like this, there is a better way. You should think about using a loop or <code>sapply()</code>. A loop or <code>sapply()</code> might run faster on your computer, but more importantly they are easier to read, maintain, and less likely to create errors.</p>
-<p>Here’s a for-loop example.</p>
-<pre class="r"><code>for(x in c(&quot;handgun&quot;,&quot;otherGun&quot;,&quot;unknownGun&quot;,&quot;knife&quot;,&quot;sharpObject&quot;,&quot;bluntObject&quot;,&quot;hit&quot;,&quot;other&quot;))
-{
-   print(x)
-   print(sum(assault$WGTVICDY[!is.na(assault[,x]) &amp; assault[,x]==&quot;(1) Yes&quot;]))
-}</code></pre>
-<p>And here’s another for-loop example using expressions.</p>
-<pre class="r"><code>for(x in c(&quot;handgun&quot;,&quot;otherGun&quot;,&quot;unknownGun&quot;,&quot;knife&quot;,&quot;sharpObject&quot;,&quot;bluntObject&quot;,&quot;hit&quot;,&quot;other&quot;))
-{
-   print(x)
-   subsetExpression &lt;- parse(text=paste(x,'==&quot;(1) Yes&quot;'))
-   with(subset(assault, eval(subsetExpression)), print(sum(WGTVICDY)))
-}</code></pre>
-<p>Or use <code>sapply()</code> and <code>by()</code>.</p>
-<pre class="r"><code>sapply(c(&quot;handgun&quot;,&quot;otherGun&quot;,&quot;unknownGun&quot;,&quot;knife&quot;,&quot;sharpObject&quot;,&quot;bluntObject&quot;,&quot;hit&quot;,&quot;other&quot;),
-       function(x) by(assault$WGTVICDY, assault[,x], sum))</code></pre>
-</div>
-<div id="were-the-police-called" class="section level2">
-<h2>Were the police called?</h2>
-<p>Note that <code>V4399</code> refers to “Reported to Police”.</p>
-<pre class="r"><code>aggregate(WGTVICDY~V4399, data=assault, sum)</code></pre>
-<pre><code>          V4399   WGTVICDY
-1       (1) Yes 2672833.68
-2        (2) No 3266825.18
-3 (3) Dont know   64705.82
-4   (8) Residue   53613.53</code></pre>
-</div>
-<div id="how-many-victims-used-firearms-defensively" class="section level2">
-<h2>How many victims used firearms defensively?</h2>
-<p>As the Codebook tells us, <code>V4147</code> asks whether the victim was threatened with a gun.</p>
-<pre class="r"><code>aggregate(WGTVICDY~V4147, data=assault, sum)</code></pre>
-<pre><code>    V4147   WGTVICDY
-1  (0) No 3524132.97
-2 (1) Yes   37942.75</code></pre>
-</div>
-<div id="how-many-victims-by-race-and-crime-type" class="section level2">
-<h2>How many victims by race and crime type</h2>
-<p>First, let’s use all the racial groups in the dataset.</p>
-<pre class="r"><code># merge in race
-a &lt;- merge(dataInc,
-           dataPers[,c(&quot;IDPER&quot;,&quot;YEARQ&quot;,
-                       &quot;V3023A&quot;,        # race
-                       &quot;V3024&quot;)],       # and get hispanic, while we're at it
-           by=c(&quot;IDPER&quot;,&quot;YEARQ&quot;),
-           all.x=TRUE)
-
-# check that the number of rows and columns look right
-dim(dataInc)</code></pre>
-<pre><code>[1] 8852  963</code></pre>
-<pre class="r"><code>dim(a) # should have same # rows, but 2 extra columns</code></pre>
-<pre><code>[1] 8852  965</code></pre>
-<pre class="r"><code># rename V3023A to be more readable as &quot;race&quot;
-names(a)[names(a)==&quot;V3023A&quot;] &lt;- &quot;race&quot;
-
-dataInc &lt;- a
-
-# 98s are missing values
-dataInc$race[dataInc$race==98] &lt;- NA
-
-# recode race as a factor variable
-dataInc$race &lt;- factor(dataInc$race, levels=1:20,
-                       labels=c(&quot;White&quot;, &quot;Black&quot;, &quot;AmerInd&quot;, &quot;Asian&quot;,
-                                &quot;HawaiianPacificIslander&quot;, &quot;WhiteBlack&quot;,
-                                &quot;WhiteAmerIndian&quot;, &quot;WhiteAsian&quot;, &quot;WhiteHawaiian&quot;,
-                                &quot;BlackAmerIndian&quot;, &quot;BlackAsian&quot;, 
-                                &quot;BlackHawaiianPacificIslander&quot;,        
-                                &quot;AmericanIndianAsian&quot;, 
-                                &quot;AsianHawaiianPacificIslander&quot;, &quot;WBAmerInd&quot;, 
-                                &quot;WBAsian&quot;, &quot;WAmerIndAsian&quot;, &quot;WAsianHawaiian&quot;, 
-                                &quot;2or3races&quot;, &quot;4or5 races&quot;))
-aggregate(WGTVICDY~race, data=dataInc, FUN=sum)</code></pre>
-<pre><code>                           race     WGTVICDY
-1                         White 20325363.491
-2                         Black  3922621.250
-3                       AmerInd   391752.018
-4                         Asian   717279.445
-5       HawaiianPacificIslander   145000.471
-6                    WhiteBlack   159275.922
-7               WhiteAmerIndian   431686.215
-8                    WhiteAsian   128478.066
-9                 WhiteHawaiian    34286.279
-10              BlackAmerIndian    44587.209
-11                   BlackAsian     5431.531
-12 AsianHawaiianPacificIslander    14399.561
-13                    WBAmerInd    32562.096
-14                WAmerIndAsian     3253.276
-15               WAsianHawaiian     2530.258
-16                    2or3races     5028.427
-17                   4or5 races    27588.216</code></pre>
-<pre class="r"><code># break down race and crime type
-a &lt;- aggregate(WGTVICDY~V4529+race, data=dataInc, FUN=sum)
-# reshape and just show the first four columns here
-reshape(a, timevar=&quot;race&quot;, idvar=&quot;V4529&quot;, direction=&quot;wide&quot;)[,1:4]</code></pre>
-<pre><code>                      V4529 WGTVICDY.White WGTVICDY.Black WGTVICDY.AmerInd
-1       (01) Completed rape     103280.959      12643.248               NA
-2       (02) Attempted rape      17775.773       1288.593               NA
-3    (03) Sex aslt w s aslt      46987.050             NA               NA
-4    (04) Sex aslt w m aslt       1612.130             NA               NA
-5     (05) Rob w inj s aslt     115894.521      12594.761               NA
-6     (06) Rob w inj m aslt      78902.277      15950.122        39247.457
-7        (07) Rob wo injury     194556.360      31047.979               NA
-8     (08) At rob inj s asl      22603.790       6365.360               NA
-9     (09) At rob inj m asl      18955.182      14245.997               NA
-10       (10) At rob w aslt     103657.632      31357.316               NA
-11    (11) Ag aslt w injury     285893.771      72627.882         4239.840
-12    (12) At ag aslt w wea     206706.450      47414.402         8553.009
-13     (13) Thr aslt w weap     272847.708     111649.084         8715.912
-14     (14) Simp aslt w inj     785679.784     114291.382        11886.947
-15     (15) Sex aslt wo inj      29951.777       2628.551               NA
-16    (16) Unw sex wo force      15992.059             NA               NA
-17 (17) Asl wo weap, wo inj    1567340.159     291080.022        17449.707
-18     (18) Verbal thr rape      13393.918             NA        21818.327
-19    (19) Ver thr sex aslt       8290.007       7079.775               NA
-20     (20) Verbal thr aslt    1533465.127     350969.780        10830.742
-21     (21) Purse snatching       9321.731       6668.807               NA
-22     (22) At purse snatch       3006.697       2215.912               NA
-23      (23) Pocket picking      95832.610      22775.079               NA
-24     (31) Burg, force ent     832635.810     318494.080        10461.118
-25    (32) Burg, ent wo for    1447606.070     142141.885        41339.995
-26     (33) Att force entry     503437.423     160314.905        13766.940
-27     (40) Motor veh theft     329864.267      98815.835         6295.737
-28    (41) At mtr veh theft     125090.201      32724.272               NA
-29         (54) Theft &lt; $10     898305.920     117303.794        20156.929
-30       (55) Theft $10-$49    2282637.533     360916.388        31806.394
-31      (56) Theft $50-$249    3843351.899     688365.830        82053.571
-32         (57) Theft $250+    2962503.394     556873.416        31067.968
-33      (58) Theft value NA    1011664.176     231612.551        26315.302
-34     (59) Attempted theft     556319.326      60164.243         5746.124</code></pre>
-<p>As the results indicate, the crime with the greatest number of victims, regardless of race, is generally Theft $50-$249.</p>
-<p>Let’s also consider the most common crimes that affect Hispanics (binary variable Y/N):</p>
-<pre class="r"><code>names(dataInc)[names(dataInc)==&quot;V3024&quot;] &lt;- &quot;hispanic&quot;
-# recode &quot;8&quot; as missing
-dataInc$hispanic[dataInc$hispanic==8] &lt;- NA
-# 1=Yes, 2=No 
-dataInc$hispanic &lt;- factor(dataInc$hispanic, levels=1:2, labels=c(&quot;Yes&quot;,&quot;No&quot;))
-aggregate(WGTVICDY~hispanic, data=dataInc, FUN=sum)</code></pre>
-<pre><code>  hispanic WGTVICDY
-1      Yes  4301807
-2       No 22065485</code></pre>
-<pre class="r"><code>a &lt;- aggregate(WGTVICDY~V4529+hispanic, data=dataInc, FUN=sum)
-a[order(a$WGTVICDY),]</code></pre>
-<pre><code>                      V4529 hispanic    WGTVICDY
-3    (04) Sex aslt w m aslt      Yes    1612.130
-17     (21) Purse snatching      Yes    2970.145
-8     (09) At rob inj m asl      Yes    4488.080
-33   (04) Sex aslt w m aslt       No    4903.651
-2       (02) Attempted rape      Yes    4957.303
-14     (15) Sex aslt wo inj      Yes    6881.510
-51     (22) At purse snatch       No    7272.660
-7     (08) At rob inj s asl      Yes   10479.560
-1       (01) Completed rape      Yes   10780.821
-50     (21) Purse snatching       No   13020.393
-48    (19) Ver thr sex aslt       No   15369.782
-45    (16) Unw sex wo force       No   15992.059
-37    (08) At rob inj s asl       No   18489.591
-5     (06) Rob w inj m aslt      Yes   19204.230
-18      (23) Pocket picking      Yes   21016.080
-4     (05) Rob w inj s aslt      Yes   22696.666
-44     (15) Sex aslt wo inj       No   25698.818
-38    (09) At rob inj m asl       No   33008.007
-11    (12) At ag aslt w wea      Yes   34179.950
-9        (10) At rob w aslt      Yes   37448.047
-47     (18) Verbal thr rape       No   39745.499
-32   (03) Sex aslt w s aslt       No   46987.050
-23    (41) At mtr veh theft      Yes   48049.885
-6        (07) Rob wo injury      Yes   54986.206
-31      (02) Attempted rape       No   56184.924
-10    (11) Ag aslt w injury      Yes   58664.051
-24         (54) Theft &lt; $10      Yes   78977.110
-13     (14) Simp aslt w inj      Yes  102626.228
-52      (23) Pocket picking       No  105402.016
-34    (05) Rob w inj s aslt       No  106025.744
-12     (13) Thr aslt w weap      Yes  109611.202
-39       (10) At rob w aslt       No  111408.964
-22     (40) Motor veh theft      Yes  113997.226
-29     (59) Attempted theft      Yes  117863.216
-57    (41) At mtr veh theft       No  117946.953
-30      (01) Completed rape       No  118351.788
-35    (06) Rob w inj m aslt       No  122548.659
-21     (33) Att force entry      Yes  163024.403
-36       (07) Rob wo injury       No  180400.544
-20    (32) Burg, ent wo for      Yes  192780.336
-19     (31) Burg, force ent      Yes  205536.893
-28      (58) Theft value NA      Yes  236546.647
-41    (12) At ag aslt w wea       No  236876.001
-16     (20) Verbal thr aslt      Yes  268343.527
-42     (13) Thr aslt w weap       No  311799.803
-40    (11) Ag aslt w injury       No  326684.444
-56     (40) Motor veh theft       No  366280.935
-15 (17) Asl wo weap, wo inj      Yes  377860.765
-25       (55) Theft $10-$49      Yes  437121.328
-55     (33) Att force entry       No  548327.924
-63     (59) Attempted theft       No  568288.519
-27         (57) Theft $250+      Yes  724332.870
-26      (56) Theft $50-$249      Yes  834770.816
-43     (14) Simp aslt w inj       No  852355.509
-53     (31) Burg, force ent       No 1009750.102
-58         (54) Theft &lt; $10       No 1036162.053
-62      (58) Theft value NA       No 1132953.330
-54    (32) Burg, ent wo for       No 1562012.064
-46 (17) Asl wo weap, wo inj       No 1627775.178
-49     (20) Verbal thr aslt       No 1751201.548
-59       (55) Theft $10-$49       No 2457732.889
-61         (57) Theft $250+       No 3061290.705
-60      (56) Theft $50-$249       No 4077236.982</code></pre>
-</div>
-<div id="find-crime-types-that-disproportionately-affect-black-victims" class="section level2">
-<h2>Find crime types that disproportionately affect black victims</h2>
-<p>As the below analysis finds, the crimes that disproportionately affect black victims compared to white victims are Verbal Threat of Sexual Assault, Attempted robbery with injury, Attempted Purse Snatching, and Purse Snatching.</p>
-<pre class="r"><code>a &lt;- aggregate(WGTVICDY~V4529+race, data=dataInc, FUN=sum)
-a &lt;- subset(a, race %in% c(&quot;Black&quot;,&quot;White&quot;))
-temp &lt;- reshape(a, timevar=&quot;race&quot;, idvar=&quot;V4529&quot;, direction=&quot;wide&quot;)
-temp[is.na(temp)] &lt;- 0
-names(temp) &lt;- c(&quot;crimeType&quot;,&quot;White&quot;,&quot;Black&quot;)
-
-temp$White &lt;- with(temp, 100*White/sum(White))
-temp$Black &lt;- with(temp, 100*Black/sum(Black))
-temp$ratio &lt;- temp$Black/temp$White
-temp[order(-temp$ratio),]</code></pre>
-<pre><code>                  crimeType        White       Black     ratio
-19    (19) Ver thr sex aslt  0.040786513  0.18048582 4.4251347
-9     (09) At rob inj m asl  0.093258761  0.36317544 3.8942770
-22     (22) At purse snatch  0.014792833  0.05649058 3.8187804
-21     (21) Purse snatching  0.045862557  0.17000895 3.7069226
-13     (13) Thr aslt w weap  1.342400140  2.84628765 2.1202975
-24     (31) Burg, force ent  4.096535888  8.11941964 1.9820209
-26     (33) Att force entry  2.476892593  4.08693307 1.6500243
-10       (10) At rob w aslt  0.509991529  0.79939700 1.5674711
-27     (40) Motor veh theft  1.622919401  2.51912761 1.5522198
-8     (08) At rob inj s asl  0.111209772  0.16227313 1.4591625
-28    (41) At mtr veh theft  0.615438938  0.83424501 1.3555285
-11    (11) Ag aslt w injury  1.406586262  1.85151401 1.3163174
-23      (23) Pocket picking  0.471492727  0.58060867 1.2314266
-12    (12) At ag aslt w wea  1.016987715  1.20874280 1.1885520
-33      (58) Theft value NA  4.977348505  5.90453515 1.1862812
-20     (20) Verbal thr aslt  7.544588945  8.94732775 1.1859265
-6     (06) Rob w inj m aslt  0.388196141  0.40661895 1.0474575
-32         (57) Theft $250+ 14.575401789 14.19646151 0.9740014
-17 (17) Asl wo weap, wo inj  7.711252788  7.42054874 0.9623013
-31      (56) Theft $50-$249 18.909142271 17.54861829 0.9280494
-7        (07) Rob wo injury  0.957209743  0.79151100 0.8268940
-30       (55) Theft $10-$49 11.230488123  9.20089821 0.8192786
-14     (14) Simp aslt w inj  3.865514063  2.91364816 0.7537544
-29         (54) Theft &lt; $10  4.419630281  2.99044406 0.6766277
-1       (01) Completed rape  0.508138312  0.32231630 0.6343082
-5     (05) Rob w inj s aslt  0.570196550  0.32108023 0.5631045
-34     (59) Attempted theft  2.737069507  1.53377651 0.5603718
-25    (32) Burg, ent wo for  7.122165715  3.62364540 0.5087842
-15     (15) Sex aslt wo inj  0.147361579  0.06701006 0.4547322
-2       (02) Attempted rape  0.087456112  0.03285030 0.3756204
-3    (03) Sex aslt w s aslt  0.231174463  0.00000000 0.0000000
-4    (04) Sex aslt w m aslt  0.007931615  0.00000000 0.0000000
-16    (16) Unw sex wo force  0.078680311  0.00000000 0.0000000
-18     (18) Verbal thr rape  0.065897559  0.00000000 0.0000000</code></pre>
-</div>
 </div>
 
 
