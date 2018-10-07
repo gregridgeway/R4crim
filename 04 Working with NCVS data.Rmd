@@ -15,11 +15,9 @@ output:
   html_document:
     css: htmlstyle.css
 ---
-
-
 <!-- HTML YAML header Ctrl-Shift-C to comment/uncomment -->
 
-<!-- PDF YAML header Ctrl-Shift-C to comment/uncomment -->
+
 <!-- --- -->
 <!-- title: "Working with National Crime Victimization Survey Data" -->
 <!-- author: -->
@@ -33,6 +31,12 @@ output:
 <!-- fontsize: 11pt -->
 <!-- fontfamily: mathpazo -->
 <!-- --- -->
+<!-- PDF YAML header Ctrl-Shift-C to comment/uncomment -->
+
+
+
+
+
 
 
 
@@ -323,242 +327,4 @@ temp$ratio <- temp$female/temp$male
 temp[order(-temp$ratio),]
 ```
 
-# Using the NCVS
-
-## Describe the context of assaults. For example, where did they occur? 
-
-As with all of these problems, it is very important to refer to the Codebook to find out relevant variables. Note that Variable `V4024` refers to "Where did the incident happen?" and `V4529` refers to the offense type. We first need to determine which `V4529` values refer to some form of assault. When working with any open-ended criminological question, use your own judgment as to which crimes to include. For example, some researchers would exclude a verbal threat of assault, whereas others would include that as assault.
-
-```{r comment="", results='hold'}
-# first fix (x) -> (0x)
-dataInc$V4024 <- gsub("\\(([1-9])\\)", "(0\\1)", dataInc$V4024)
-aggregate(WGTVICDY~V4024,
-          data=subset(dataInc,V4529 %in% c("(11) Ag aslt w injury", 
-                                           "(14) Simp aslt w inj",
-                                           "(12) At ag aslt w wea",
-                                           "(17) Asl wo weap, wo inj", 
-                                           "(20) Verbal thr aslt", 
-                                           "(13) Thr aslt w weap")),
-          sum)
-```
-
-## When did the assaults occur? 
-
-As our Codebook tells us, Variable `V4021B` refers to "About what time did incident occur?" and `V4014` refers to "Month incident occurred." Let's use both variables to answer this question.
-
-```{r comment="", results='hold'}
-# first fix (x) -> (0x)
-dataInc$V4021B <- gsub("\\(([1-9])\\)", "(0\\1)", dataInc$V4021B)
-dataInc$V4014  <- gsub("\\(([1-9])\\)", "(0\\1)", dataInc$V4014)
-
-aggregate(WGTVICDY~V4021B,
-          data=subset(dataInc,V4529 %in% c("(11) Ag aslt w injury",
-                                           "(14) Simp aslt w inj",
-                                           "(12) At ag aslt w wea",
-                                           "(17) Asl wo weap, wo inj",
-                                           "(20) Verbal thr aslt",
-                                           "(13) Thr aslt w weap")),
-          sum)
-
-aggregate(WGTVICDY~V4014,
-          data=subset(dataInc,V4529 %in% c("(11) Ag aslt w injury",
-                                           "(14) Simp aslt w inj",
-                                           "(12) At ag aslt w wea",
-                                           "(17) Asl wo weap, wo inj",
-                                           "(20) Verbal thr aslt",
-                                           "(13) Thr aslt w weap")),
-          sum)
-```
-
-## Who was the offender?
-
-Variable `V4241` refers to "Single Offender Stranger" whereas `V4245` refers to "Single Offender - How Did Respondent Know Offender?", and `V4248` refers to "Number of Offenders (Multiple Offenders)."
-
-```{r comment="", results='hold'}
-
-aggregate(WGTVICDY~V4241,
-          data=subset(dataInc,V4529 %in% c("(11) Ag aslt w injury",
-                                           "(14) Simp aslt w inj",
-                                           "(12) At ag aslt w wea",
-                                           "(17) Asl wo weap, wo inj",
-                                           "(20) Verbal thr aslt",
-                                           "(13) Thr aslt w weap")),
-          sum)
-
-# first fix (x) -> (0x)
-dataInc$V4245 <- gsub("\\(([1-9])\\)", "(0\\1)", dataInc$V4245)
-aggregate(WGTVICDY~V4245,
-          data=subset(dataInc,V4529 %in% c("(11) Ag aslt w injury",
-                                           "(14) Simp aslt w inj",
-                                           "(12) At ag aslt w wea",
-                                           "(17) Asl wo weap, wo inj",
-                                           "(20) Verbal thr aslt",
-                                           "(13) Thr aslt w weap")),
-          sum)
-
-```
-
-The codebook tells us that with the multi-offender variable `V4248`, "97" does not mean 97 offenders. It means "don't know." 98 actually means "missing". 99 means "out of universe", which really means that the response was out of range. We mark as missing any values greater than or equal to 97. 
-
-```{r comment="", results='hold'}
-dataInc$V4248[dataInc$V4248>=97] <- NA
-aggregate(WGTVICDY~V4248,
-          data=subset(dataInc,V4529 %in% c("(11) Ag aslt w injury",
-                                           "(14) Simp aslt w inj",
-                                           "(12) At ag aslt w wea",
-                                           "(17) Asl wo weap, wo inj",
-                                           "(20) Verbal thr aslt",
-                                           "(13) Thr aslt w weap")),
-          sum)
-```
-
-## What sort of weapons were used?
-
-As the Codebook shows, Variables `V4051`-`V4059` list types of weapons. Because it's a bit difficult to interpret the output in R with just the variable names, let's create new variables with better names.
-
-```{r comment="", results='hold'}
-dataInc$handgun     <- dataInc$V4051
-dataInc$otherGun    <- dataInc$V4052
-dataInc$knife       <- dataInc$V4053
-dataInc$sharpObject <- dataInc$V4054
-dataInc$bluntObject <- dataInc$V4055
-dataInc$other       <- dataInc$V4056
-dataInc$unknownGun  <- dataInc$V4057
-dataInc$hit         <- dataInc$V4059
-
-assault <- subset(dataInc, V4529 %in% c("(11) Ag aslt w injury", 
-                                        "(14) Simp aslt w inj",
-                                        "(12) At ag aslt w wea",
-                                        "(17) Asl wo weap, wo inj", 
-                                        "(20) Verbal thr aslt", 
-                                        "(13) Thr aslt w weap"))
-
-with(subset(assault, handgun    =="(1) Yes"), sum(WGTVICDY))
-with(subset(assault, otherGun   =="(1) Yes"), sum(WGTVICDY))
-with(subset(assault, unknownGun =="(1) Yes"), sum(WGTVICDY))
-with(subset(assault, knife      =="(1) Yes"), sum(WGTVICDY))
-with(subset(assault, sharpObject=="(1) Yes"), sum(WGTVICDY))
-with(subset(assault, bluntObject=="(1) Yes"), sum(WGTVICDY))
-with(subset(assault, hit        =="(1) Yes"), sum(WGTVICDY))
-with(subset(assault, other      =="(1) Yes"), sum(WGTVICDY))
-```
-
-If you find yourself copying and pasting essentially the same code over and over again like this, there is a better way. You should think about using a loop or `sapply()`. A loop or `sapply()` might run faster on your computer, but more importantly they are easier to read, maintain, and less likely to create errors.
-
-Here's a for-loop example.
-```{r comment="", results='hide'}
-for(x in c("handgun","otherGun","unknownGun","knife","sharpObject","bluntObject","hit","other"))
-{
-   print(x)
-   print(sum(assault$WGTVICDY[!is.na(assault[,x]) & assault[,x]=="(1) Yes"]))
-}
-```
-
-And here's another for-loop example using expressions.
-```{r comment="", results='hide'}
-for(x in c("handgun","otherGun","unknownGun","knife","sharpObject","bluntObject","hit","other"))
-{
-   print(x)
-   subsetExpression <- parse(text=paste(x,'=="(1) Yes"'))
-   with(subset(assault, eval(subsetExpression)), print(sum(WGTVICDY)))
-}
-```
-
-Or use `sapply()` and `by()`.
-```{r comment="", results='hide'}
-sapply(c("handgun","otherGun","unknownGun","knife","sharpObject","bluntObject","hit","other"),
-       function(x) by(assault$WGTVICDY, assault[,x], sum))
-```
-
-
-## Were the police called?
-Note that `V4399` refers to "Reported to Police".
-
-```{r comment="", results='hold'}
-aggregate(WGTVICDY~V4399, data=assault, sum)
-```
-
-## How many victims used firearms defensively?
-
-As the Codebook tells us, `V4147` asks whether the victim was threatened with a gun.
-
-```{r comment="", results='hold'}
-aggregate(WGTVICDY~V4147, data=assault, sum)
-```
-
-
-## How many victims by race and crime type
-First, let's use all the racial groups in the dataset.
-
-```{r comment=""}
-# merge in race
-a <- merge(dataInc,
-           dataPers[,c("IDPER","YEARQ",
-                       "V3023A",        # race
-                       "V3024")],       # and get hispanic, while we're at it
-           by=c("IDPER","YEARQ"),
-           all.x=TRUE)
-
-# check that the number of rows and columns look right
-dim(dataInc)
-dim(a) # should have same # rows, but 2 extra columns
-
-# rename V3023A to be more readable as "race"
-names(a)[names(a)=="V3023A"] <- "race"
-
-dataInc <- a
-
-# 98s are missing values
-dataInc$race[dataInc$race==98] <- NA
-
-# recode race as a factor variable
-dataInc$race <- factor(dataInc$race, levels=1:20,
-                       labels=c("White", "Black", "AmerInd", "Asian",
-                                "HawaiianPacificIslander", "WhiteBlack",
-                                "WhiteAmerIndian", "WhiteAsian", "WhiteHawaiian",
-                                "BlackAmerIndian", "BlackAsian", 
-                                "BlackHawaiianPacificIslander",        
-                                "AmericanIndianAsian", 
-                                "AsianHawaiianPacificIslander", "WBAmerInd", 
-                                "WBAsian", "WAmerIndAsian", "WAsianHawaiian", 
-                                "2or3races", "4or5 races"))
-aggregate(WGTVICDY~race, data=dataInc, FUN=sum)
-
-# break down race and crime type
-a <- aggregate(WGTVICDY~V4529+race, data=dataInc, FUN=sum)
-# reshape and just show the first four columns here
-reshape(a, timevar="race", idvar="V4529", direction="wide")[,1:4]
-```
-
-As the results indicate, the crime with the greatest number of victims, regardless of race, is generally Theft $50-$249.
-
-Let's also consider the most common crimes that affect Hispanics (binary variable Y/N):
-
-```{r comment=""}
-names(dataInc)[names(dataInc)=="V3024"] <- "hispanic"
-# recode "8" as missing
-dataInc$hispanic[dataInc$hispanic==8] <- NA
-# 1=Yes, 2=No 
-dataInc$hispanic <- factor(dataInc$hispanic, levels=1:2, labels=c("Yes","No"))
-aggregate(WGTVICDY~hispanic, data=dataInc, FUN=sum)
-a <- aggregate(WGTVICDY~V4529+hispanic, data=dataInc, FUN=sum)
-a[order(a$WGTVICDY),]
-```
-
-## Find crime types that disproportionately affect black victims
-
-As the below analysis finds, the crimes that disproportionately affect black victims compared to white victims are Verbal Threat of Sexual Assault, Attempted robbery with injury, Attempted Purse Snatching, and Purse Snatching.
-
-```{r comment="", results='hold'}
-a <- aggregate(WGTVICDY~V4529+race, data=dataInc, FUN=sum)
-a <- subset(a, race %in% c("Black","White"))
-temp <- reshape(a, timevar="race", idvar="V4529", direction="wide")
-temp[is.na(temp)] <- 0
-names(temp) <- c("crimeType","White","Black")
-
-temp$White <- with(temp, 100*White/sum(White))
-temp$Black <- with(temp, 100*Black/sum(Black))
-temp$ratio <- temp$Black/temp$White
-temp[order(-temp$ratio),]
-```
 
