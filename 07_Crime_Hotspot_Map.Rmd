@@ -128,7 +128,7 @@ chicago.map +
 ```
 It doesn't look terribly useful because it is just a giant red splotch. These are all the points where a crime occurred. There's no density to show us the high crime or low crime areas. But, we're making process with getting points onto a map!
 
-Let's instead try plotting hexagonal bins. Why hexagons? It turns out that squares tend to have problems in the corners. The precision is low there and our eye tends to get drawn to the parallel lines the square grid makes. Ideally, we want to use a shape that has a small perimeter-to-area ratio. Circles have the smallest perimeter-to-area ratio, but we can't use circles to tile over the map. Hexagons fall in between squares and circles.
+Let's instead try plotting hexagonal bins, which the `hexbin` package let us do. Why hexagons? It turns out that squares tend to have problems in the corners. The precision is low there and our eye tends to get drawn to the parallel lines the square grid makes. Ideally, we want to use a shape that has a small perimeter-to-area ratio. Circles have the smallest perimeter-to-area ratio, but we can't use circles to tile over the map. Hexagons fall in between squares and circles.
 
 ```{r comment="", results='hold'}
 chicago.map +
