@@ -59,7 +59,7 @@ knitr::opts_chunk$set(echo=TRUE, cache=TRUE, cache.lazy=FALSE, out.width='100%')
 
 # Introduction
 
-Some datasets are far too large for R to handle by itself. Structured Query Language ("SQL") is a widely used international standard language for managing data stored in databases. There are numerous relational database management systems such as Oracle, Microsoft Access, and MySQL. We are going to use [SQLite](https://www.sqlite.org/index.html), which is probably the most widely deployed database system. SQLite is in your phone, car, airplanes, thermostats, and numerous applicances. We are going to hook up SQLite to R so that R can handle large datasets.
+Some datasets are far too large for R to handle by itself. Structured Query Language ("SQL") is a widely used international standard language for managing data stored in a relational databases management system. A relational database management system itself is an approach to managing data using a structure that can be contrasted against the 'flat file' approach we have been using thus far with R. Why use SQL? R doesn't work very well with really huge datasets. A relational database management system offers a way of storing large amounts of information more efficiently and reducing the size of the dataset that we are working with. There are numerous relational database management systems such as Oracle, Microsoft Access, and MySQL. We are going to use [SQLite](https://www.sqlite.org/index.html), which is probably the most widely deployed database system. SQLite is in your phone, car, airplanes, thermostats, and numerous applicances. We are going to hook up SQLite to R so that R can handle large datasets.
 
 These are some basic clauses in a SQL query that we will explore:
 
@@ -200,7 +200,7 @@ fetch(res, n = 10) # just the first 10 rows
 dbClearResult(res)
 ```
 
-Here, we set `n=10` so the first 10 rows are displayed. By convention, setting `n=-1`, will display all your rows. Really large SQL queries can be memory-intensive. So if your dataset is over 25 lines long (which it probably is.....that's why you're using SQL!), you have to make sure that you set the value in the fetch line to something reasonable to display.
+What we've done here is to create an object called `res`. `res` contains the results of our query. Then, we `fetch` those results. Wtihin `fetch`, we set `n=10` so the first 10 rows are displayed. By convention, setting `n=-1`, will display all your rows. Really large SQL queries can be memory-intensive. So if your dataset is over 25 lines long (which it probably is.....that's why you're using SQL!), you have to make sure that you set the value in the fetch line to something reasonable to display.
 
 However, suppose that your dataset is over 1 million rows, and you want to work with all of them.  You can set the `fetch` line to something like `mydata <- fetch(res, n=-1)`. 
 
