@@ -7,6 +7,9 @@ author:
 - affiliation: University of Pennsylvania
   email: moyruth@upenn.edu
   name: Ruth Moyer
+- affiliation: University of Pennsylvania
+  email: gohl@upenn.edu
+  name: Li Sian Goh
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
   html_document:
