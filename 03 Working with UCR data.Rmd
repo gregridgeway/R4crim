@@ -36,16 +36,20 @@ output:
 .exNum <- function(.questionText="") 
 {
    .counterExercise <<- .counterExercise+1
-   .exerciseQuestions <<- c(.exerciseQuestions, .questionText)
    .questionText <- gsub("@@", "`", .questionText)
+   .exerciseQuestions <<- c(.exerciseQuestions, .questionText)
    return(paste0(.counterExercise,". ",.questionText))
+}
+.exQ <- function(i)
+{
+   return( paste0(i,". ",.exerciseQuestions[i]) )
 }
 ```
 
 # Introduction
 Published by the FBI, the Uniform Crime Reports (UCR) is a yearly collection of official data on crime in the United States. Approximately 18,000 individual city, university and college, county, state, tribal, and federal law enforcement agencies report data to the FBI. Some agencies are more consistent than other agencies with reporting their data to the FBI. For example, you may find a handful of very rural counties that have no data in, e.g,. 2012, but have data in 2014. 
 
-Earlier in the semester, we worked with one dataset from the UCR, Law Enforcement officers Killed and Assaulted (LEOKA). Now, we're working with a different portion of the UCR, "Offenses Known and Clearances by Arrest." The University of Michigan converts this data into a format that is easy-to-use in R. Download the [2012 UCR data](http://www.icpsr.umich.edu/icpsrweb/NACJD/studies/35021) to your computer. As of October 2017, the Offenses Known and Clearances by Arrest ("OKCA") Data is available for up to 2016. We have called our subfolder `UCR2012` and here are the files in our subfolder. Yours should look the same.
+Earlier, we worked with one dataset from the UCR, Law Enforcement officers Killed and Assaulted (LEOKA). Now, we're working with a different portion of the UCR, "Offenses Known and Clearances by Arrest." The University of Michigan converts this data into a format that is easy-to-use in R. Download the [2012 UCR data](http://www.icpsr.umich.edu/icpsrweb/NACJD/studies/35021) to your computer. As of October 2018, the Offenses Known and Clearances by Arrest ("OKCA") Data is available for up to 2017. We have called our subfolder `UCR2012` and here are the files in our subfolder. Yours should look the same.
 
 ```{r comment="", results='hold'}
 list.files("UCR2012/", recursive=TRUE)
@@ -210,69 +214,81 @@ i <- grep("LOS ANGELES",ucr$AGENCY)
 ucr[i,]
 ```
 
-# Class exercises
+# Exercises
 
-1. How many car thefts reported to the police?
+`r .exNum('How many car thefts reported to the police?')`
+
+`r .exNum('How many rapes reported to the police?')`
+
+`r .exNum('Pick out all agencies that have "New York" in their name?')`
+
+`r .exNum('Next, make a data frame of just "New Jersey". How many rows does it have?')`
+
+`r .exNum('How many murders occurred in New Jersey? How many robberies?')`
+
+`r .exNum('Find the burglary rate/person in New Jersey? per 100,000?')`
+
+`r .exNum('Add a new column to your dataset for the burglary rate for each agency. Sort your dataset by order of burglary rate.')`
+
+
+# Solutions to the exercises
+`r .exQ(1)`
 ```{r comment="", results='hold'}
 sum(ucr$gta)
 ```
-2. How many rapes reported to the police?
+
+`r .exQ(2)`
 ```{r comment="", results='hold'}
 sum(ucr$rape)
 ```
-3. Pick out all agencies that have "New York" in their name?
+
+`r .exQ(3)`
 ```{r comment="", results='hold'}
 i <- grep("NEW YORK",ucr$AGENCY)
 ucr[i,]
 ```
-Note what the i (indexing variable) does - it is a list of the row numbers in the ucr dataframe that have "NEW YORK" somewhere in the agency column.
+Note what the `i` (indexing variable) does - it is a list of the row numbers in the `ucr` dataframe that have "NEW YORK" somewhere in the agency column. As you can see, there are `r length(i)` agencies that have "New York" in their name. 
 
-4a. Next, make a little dataframe of just "New Jersey"; how many rows is it? There are two ways to do the dataframe
-
+`r .exQ(4)`
+Here are two different ways to create the dataframe
 ```{r comment="", results='hold'}
-nj <- ucr[grep("New Jersey", ucr$STATE),]  
+nj <- ucr[grep("New Jersey", ucr$STATE),]
+nrow(nj)
 ```
-
 Or, 
 ```{r comment="", results='hold'}
 nj2 <- subset(ucr, STATE=="(29) New Jersey")
+nrow(nj2)
 ```
 
-4b. How many murders, robberies, etc.?
+`r .exQ(5)`
 ```{r comment="", results='hold'}
 sum(nj$murder)
-
 sum(nj$robbery)
 ```
-4c. How would you find out the average burglary rate/person in New Jersey? per 100,000?
 
+`r .exQ(6)`
 ```{r comment="", results='hold'}
 sum(nj$murder)/sum(nj$POP)
 
-(sum(nj$murder)/sum(nj$POP)*100000)
+sum(nj$murder)/sum(nj$POP)*100000
 ```
 
-4d. Add a new column to your dataset for the burglary rate for each agency. Sort your dataset by order of burglary rate.
-
+`r .exQ(7)`
 ```{r comment="", results='hold'}
-
 nj$burglaryrate <- (nj$burglary/nj$POP)*100000
-
-nj[order(nj$burglaryrate),]
-
-nj[rev(order(nj$burglaryrate)),]
+head(nj[order(nj$burglaryrate),])
+tail(nj[order(nj$burglaryrate),])
 ```
 
-We have a bit of a snag. Look at the burglary rate column. You'll notice some  NaN and Inf values. Get rid of them:
+We have a bit of a snag. Look at the burglary rate column. You'll notice some `NaN` and some `Inf` values too. Let's remove those from the dataset.
 
 ```{r comment="", results='hold'}
-nj.new <- subset(nj, !is.nan(burglaryrate))
-
-nj.new <- subset(nj.new, !is.infinite(burglaryrate))
+njNew <- subset(nj, !is.nan(burglaryrate) & !is.infinite(burglaryrate))
 ```
 Now sort the dataset by burglary rate:
-
 ```{r comment="", results='hold'}
-nj.new[rev(order(nj.new$burglaryrate)),]
+head(njNew[order(njNew$burglaryrate),])
+tail(njNew[order(njNew$burglaryrate),])
 ```
-Why do you think some of Agencies are at the top of the list?  Hint: take a look at the population column.
+Why do you think some of the agencies are at the top of the list?  Hint: take a look at the population column.
