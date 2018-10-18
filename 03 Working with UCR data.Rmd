@@ -137,7 +137,7 @@ ucr <- data.frame(ORI   =as.character(da35021.0001$V3),
 
 Importantly, our UCR OKCA data covers only what the FBI calls "Part I" crimes. Part I crimes are Murder, Rape, Robbery, Larceny, Motor Vehicle Theft, Assaults (Aggravated), and Burglary. 
 
-So for each of the 15,862 agencies, we can count up the number of Murders as follows:
+So for each of the 15,862 agencies, we can count up the number of Murders as follows. `ACT NUM MURDER` refers to the actual number of murders. 
 ```{r comment="", results='hold'}
 var.names <- grep("ACT NUM MURDER",var.lookup,value=TRUE)
 var.names <- names(var.names)
