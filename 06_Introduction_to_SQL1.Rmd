@@ -203,7 +203,7 @@ fetch(res, n = 10) # just the first 10 rows
 dbClearResult(res)
 ```
 
-What we've done here is to create an object called `res`. `res` contains the results of our query. Then, we `fetch` those results. Wtihin `fetch`, we set `n=10` so the first 10 rows are displayed. By convention, setting `n=-1`, will display all your rows. Really large SQL queries can be memory-intensive. So if your dataset is over 25 lines long (which it probably is.....that's why you're using SQL!), you have to make sure that you set the value in the fetch line to something reasonable to display.
+What we've done here is to create an object called `res`. `res` contains the results of our query. Then, we `fetch` those results. Within `fetch`, we set `n=10` so the first 10 rows are displayed. By convention, setting `n=-1`, will display all your rows. Really large SQL queries can be memory-intensive. So if your dataset is over 25 lines long (which it probably is.....that's why you're using SQL!), you have to make sure that you set the value in the fetch line to something reasonable to display.
 
 However, suppose that your dataset is over 1 million rows, and you want to work with all of them.  You can set the `fetch` line to something like `mydata <- fetch(res, n=-1)`. 
 
