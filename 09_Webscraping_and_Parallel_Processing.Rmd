@@ -16,7 +16,7 @@ Let's go to the webpage for the following url: http://www.the-numbers.com/box-of
 
 This page contains information about the movies that were shown in theaters on July 4, 2016 and the amount of money (in dollars) that each of those movies grossed that day. 
 
-Make sure you can see the html code for this page using the methods described above. Next, scan the html code into R; as you can see, the url of the webpage that you want to scrape goes within the quotes. For many websites the following method will scan the html code into R:
+Make sure you can see the html code for this page using the methods described above.  Next, scan the html code into R; as you can see, the url of the webpage that you want to scrape goes within the quotes. `scan`, which we have used before, is a basic function that reads in text. For many websites the following method will scan the html code into R:
 
 ```{r comment="", results='hold'} 
 a <- scan("http://www.the-numbers.com/box-office-chart/daily/2016/07/04",what="",sep="\n")
@@ -34,16 +34,18 @@ a1 <- strsplit(a1,"\n")[[1]]
 
 Also, Mac users often encounter snags with the scan() command. For example, you might get "403 Forbidden" errors.  If so, use this approach:
 
+```{r comment="",results='hold'}
 library(httr) # this goes at the top
 resp <- GET(url.text, user_agent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/537.13+ (KHTML, like Gecko) Version/5.1.7 Safari/534.57.2"))
 a <- content(resp, as="text")
 a <- strsplit(a,"\n")[[1]]
+```
 
 #Scraping one page
 
 Let's try our luck at scraping one page.  As mentioned above, regular expressions will be indispensible to this process. We've already scanned in the html code for July 4, 2016 and assigned it the variable name "a." 
 
-Go back to the html code. As you can see, there's a lot of material to search through in the html code - including the code for any advertisements that appear on a webpage.  
+Go back to the html code. As you can see, there's a lot of material to search through in the html code - including the code for any advertisements that appear on a webpage. There is a lot of junk. So how do we throw out this junk without getting rid of valuable data?
 
 In the html code, search for a movie name that appears on the webpage. Start with "The Purge: Election Year" as an example. That occurs on line 255 of the html code. We're trying to look for a pattern of characters and/or letters that always precedes any movie name in the html code.  Try another movie name such as "X Men: Apocalypse." That occurs on line 363 of the html code. In both instances, we can conclude that "movie" seems to precede each movie name in the html code. 
 
@@ -105,14 +107,14 @@ if(i.table.end-i.table.start > 5)
 }
 ```
 
-We can then start a dataframe where movie names are the first column. The next column can be the gross for each movie:
+We can then put the names of these movies in a dataframe, `data0`. This dataframe currently has only one column. 
 
 ```{r comment="", results='hold'}
 data0 <- data.frame(movie=gsub("<[^>]*>","",a[i]))
 data0
 ```
 
-Let's add a "gross" column to the dataframe. Look at the html code. You'll notice that the gross information falls two lines below where the movie name is. Therefore, instead of i, we'll use i+2. Also, we'll remove the dollar signs and make gross numeric (that way we can sum the grosses or do any other quantitative analysis we want)
+Let's add a "gross" column to the dataframe. Look at the html code. You'll notice that the gross information falls two lines below where the movie name is. Therefore, instead of i, we'll use i+2. Also, we'll remove the dollar signs and make gross numeric. That way, we will be able to sum the grosses or do any other quantitative analysis we want.
 
 ```{r comment="", results='hold'}
 data0$gross <- gsub("<[^>]*>","",a[i+2])
@@ -125,7 +127,7 @@ Take a look at the webpage and compare it to the dataset you've now created. Do 
 
 We've successfully scraped data for just one day.  But, now we want to web scrape from the numbers.com site: (1) each "daily" page showing the daily movie gross data for every day (2) that occurred on or between January 1, 2010 and October 1, 2016. That means we're going to be web scraping well over 2,000 pages of data.  As a result, we'll have to use of for-loops. 
 
-Before we go any further, however, we first need to create a "date-based" dataframe where we'll place our web scraped data. First, use R (and the lubridate package) to generate a sequence of dates (see ?seq.POSIXit).
+Before we go any further, however, we first need to create a "date-based" dataframe where we'll place our web scraped data. First, use R (and the lubridate package) to generate a sequence of dates.
 
 ```{r comment="", results='hold'}
 library(lubridate)
