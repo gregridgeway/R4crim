@@ -125,7 +125,7 @@ Take a look at the webpage and compare it to the dataset you've now created. Do 
 
 #Scraping Multiple Pages
 
-We've successfully scraped data for just one day.  But, now we want to web scrape from the numbers.com site: (1) each "daily" page showing the daily movie gross data for every day (2) that occurred on or between January 1, 2010 and October 1, 2016. That means we're going to be web scraping well over 2,000 pages of data.  As a result, we'll have to use of for-loops. 
+We've successfully scraped data for just one day.  But, now we want to web scrape from the numbers.com site: (1) each "daily" page showing the daily movie gross data for every day (2) that occurred on or between January 1, 2010 and October 1, 2016. That means we're going to be web scraping well over 2,000 pages of data.  As a result, we'll have to make use of for-loops. 
 
 Before we go any further, however, we first need to create a "date-based" dataframe where we'll place our web scraped data. First, use R (and the lubridate package) to generate a sequence of dates.
 
