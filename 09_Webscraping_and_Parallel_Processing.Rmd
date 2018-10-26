@@ -142,11 +142,18 @@ Let's look at the first couple of rows of `dates.list`:
 head(dates.list)
 ```
 
-We're going to use a vector of data frames to collect the results. Therefore results[[i]] will contain the movie data for date i.The following for-loop will likely take more than ten minutes to run. To that extent, before running the entire for-loop, it may be a good idea to temporarily set the dates to a short period of time (e.g., a month or two) just to verify that your code is functioning properly. Once you've concluded that the code is doing what you want it to do, you can set the dates so that the for-loop runs for the entire 6+ year period.  
+Now, we have a dataframe (`dates.list`) where each row represents one date. The first column is the complete date, and subsequent columns represent a particular element of the date i.e. year, month, day. But for each day `dates.list`, we have information on multiple movies showing that day, and the gross for each movie. So a single dataframe will not be sufficient to store all that information. We're going to use a vector of data frames to collect the results. As you may or may not recall, a vector is defined as a sequence of data elements of the same type. The elements of this vector will be dataframes. 
+
+This vector will be `results`, which we create by using the `vector` command. `results` will be empty at first: 
 
 ```{r comment="", results='hold'}
 
 results <- vector("list",nrow(dates.list))
+```
+
+Then, we fill `results` using a for-loop such that `results[[i]]` will contain the movie data for date i. The following for-loop will likely take more than ten minutes to run. To that extent, before running the entire for-loop, it may be a good idea to temporarily set the dates to a short period of time (e.g., a month or two) just to verify that your code is functioning properly. Once you've concluded that the code is doing what you want it to do, you can set the dates so that the for-loop runs for the entire 6+ year period.  
+
+```{r comment="", results='hold'}
 
 for(i.date in 1:nrow(dates.list))
 {
@@ -155,12 +162,12 @@ for(i.date in 1:nrow(dates.list))
                        months[i.date],"/",
                        days[i.date],"\n",sep=""))
   
-  url.text <- paste("http://www.the-numbers.com/box-office-chart/daily/",
+  url.text <- paste("http://www.the-numbers.com/box-office-chart/daily/", 
                     dates.list$years[i.date],"/",
                     dates.list$months[i.date],"/",
                     dates.list$days[i.date],
                     sep="")
-  #note that we used the way the date is formatted in the url as a means to       obtain all of the urls for each    individual date
+  #note that we used the way the date is formatted in the url as a means to       obtain all of the urls for each individual date
   a <- scan(url.text,what="",sep="\n")
   
   # search for the table
@@ -197,7 +204,7 @@ for(i.date in 1:nrow(dates.list))
 Also, after the very last bracket in your for-loop, you can place the following lines of code. First, you'll have to install the mailR package (see https://github.com/rpremraj/mailR). These lines of code will give you an email notification when the for-loop is done running. 
 ```{r comment="", results='hold'}
 library(mailR)
-send.mail(from = "gregridgeway@gmail.com",
+send.mail(from = "gregridgeway@gmail.com", #replace with your email address
           to = c("gregridgeway@gmail.com"),
           subject = "Movies",
           body = "R has finished downloading all the movie data",
