@@ -131,10 +131,10 @@ Before we go any further, however, we first need to create a "date-based" datafr
 
 ```{r comment="", results='hold'}
 library(lubridate)
-dates.list <- data.frame(date=seq(ymd("2010-01-01"),ymd("2016-10-01"),by="days"))
-dates.list$years  <- year(dates.list$date)
-dates.list$months <- sprintf("%02d",month(dates.list$date))
-dates.list$days   <- sprintf("%02d",day(dates.list$date))
+dates.list <- data.frame(date=seq(ymd("2010-01-01"),ymd("2016-10-01"),by="days")) #create a sequence of all days from Jan 1, 2010 to Oct 1, 2016, put in dataframe
+dates.list$years  <- year(dates.list$date) #add a column 'year' to dataframe, consisting of the year of each date
+dates.list$months <- sprintf("%02d",month(dates.list$date)) #add a column 'month' to dataframe, consisting of the month of each date
+dates.list$days   <- sprintf("%02d",day(dates.list$date)) #add a column 'day' to dataframe, consisting of the day (of the month) of each date 
 ```
 
 We're going to use a vector of data frames to collect the results. Therefore results[[i]] will contain the movie data for date i.The following for-loop will likely take more than ten minutes to run. To that extent, before running the entire for-loop, it may be a good idea to temporarily set the dates to a short period of time (e.g., a month or two) just to verify that your code is functioning properly. Once you've concluded that the code is doing what you want it to do, you can set the dates so that the for-loop runs for the entire 6+ year period.  
