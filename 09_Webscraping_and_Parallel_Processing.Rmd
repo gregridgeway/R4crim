@@ -157,11 +157,12 @@ Then, we fill `results` using a for-loop such that `results[[i]]` will contain t
 
 for(i.date in 1:nrow(dates.list))
 {
-  # print out our progress
+  # lines 161-164 is code to print out our progress 
+  #as the for-loop fills each element for a particular day with movie gross data
   with(dates.list, cat(years[i.date],"/",
                        months[i.date],"/",
                        days[i.date],"\n",sep=""))
-  
+  #get the url for movie gross each day
   url.text <- paste("http://www.the-numbers.com/box-office-chart/daily/", 
                     dates.list$years[i.date],"/",
                     dates.list$months[i.date],"/",
