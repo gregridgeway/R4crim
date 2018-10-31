@@ -1,0 +1,718 @@
+---
+title: "Extracting data from text and geocoding"
+author:
+- affiliation: University of Pennsylvania
+  email: gridge@upenn.edu
+  name: Greg Ridgeway
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    css: htmlstyle.css
+---
+
+<!-- HTML YAML header Ctrl-Shift-C to comment/uncomment -->
+
+
+<!-- --- -->
+<!-- title: "Extracting data from text and geocoding" -->
+<!-- author: -->
+<!-- - Greg Ridgeway (gridge@upenn.edu) -->
+<!-- date: "`r format(Sys.time(), '%B %d, %Y')`" -->
+<!-- output: -->
+<!--   pdf_document: -->
+<!--     latex_engine: pdflatex -->
+<!--   html_document: default -->
+<!-- fontsize: 11pt -->
+<!-- fontfamily: mathpazo -->
+<!-- --- -->
+
+<!-- PDF YAML header Ctrl-Shift-C to comment/uncomment -->
+
+<!-- Make RMarkdown cache the results -->
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo=TRUE, cache=TRUE, cache.lazy=FALSE, out.width='100%')
+```
+
+<!-- A function for automating the numbering and wording of the exercise questions -->
+```{r echo=FALSE}
+.counterExercise <- 0
+.exerciseQuestions <- NULL
+.exNum <- function(.questionText="") 
+{
+   .counterExercise <<- .counterExercise+1
+   .questionText <- gsub("@@", "`", .questionText)
+   .exerciseQuestions <<- c(.exerciseQuestions, .questionText)
+   return(paste0(.counterExercise,". ",.questionText))
+}
+.exQ <- function(i)
+{
+   return( paste0(i,". ",.exerciseQuestions[i]) )
+}
+```
+
+library(lubridate)
+library(pdftools)
+library(jsonlite)
+library(ggmap)
+library(sf)
+
+# Introduction
+
+In this section, we are going to explore officer-involved shootings (OIS) in Philadelphia. The Philadelphia Police Department posts a lot of information about officer-involved shootings online going back to 2007. Have a look at their [OIS webpage](http://www.phillypolice.com/ois/). While a lot of information has been posted to the webpage, more information is buried in pdf files associated with each of the incidents. In order for us to explore these data, we are going to scrape the basic information from the webpage, have R dig into the pdf files for any incidents missing incident dates, clean up addresses using regular expressions, geocode the addresses to latitude/longitude using the OpenStreetMap geocoder and the ArcGIS geocoder (using JSON), and then make maps describing the shootings.
+
+# Scraping the OIS data
+
+Let's start by grabbing the raw HTML from the PPD OIS webpage
+```{r comment="", results='hold'}
+a <- scan("http://www.phillypolice.com/ois/", what="", sep="\n")
+```
+`scan()` is a very simple function that just pulls in text from a file or URL. It does not attempt to do any formatting. `what=""` tells `scan()` to treat what it is reading in as text and `sep="\n"` tells `scan()` to break the text apart whenever it encounters a line feed character.
+
+The first several elements of `a` are just HTML code setting up the page.
+```{r comment="", results='hold'}
+a[1:4]
+```
+But further on down you will find HTML code containing the OIS information that we seek. Let's look at one of the 2018 OISs.
+```{r comment="", results='hold'}
+i <- grep("id=\"2018-2954", a)
+a[i + 0:9]
+```
+For the data from 2013-2018, each table row related to an OIS starts with something like `<tr id="2018-2954">`. The very next row contains the URL of the pdf containing more detailed data. The third row contains the date and the fourth row contains the address. There are additional cells indicating injuries and how the shooting was adjudicated, but we will not work with these in this exercise.
+
+Note that if we want the date, it is always two elements after the `<tr>` tag. We can use `gsub()` to strip away the unwanted HTML tags.
+```{r comment="", results='hold'}
+a[i + 2]
+gsub("<[^>]*>","",a[i + 2])
+```
+
+We'll use this same strategy for all of the shootings and for the OISs id, date, location, and URL. Start by using  `grep()` to find all of the lines of HTML code that start off a row for an OIS form 2013-2018 (the data for OISs before 2013 look a little different).
+```{r comment="", results='hold'}
+i <- grep("id=\"201(3|4|5|6|7|8)",a)
+ois <- data.frame(
+  id      =gsub("<[^>]*>", "", a[i+1]),
+  date    =gsub("<[^>]*>", "", a[i+2]),
+  location=gsub("<[^>]*>", "", a[i+3]),
+  url     =gsub("<td><a href=\"(.*)\" class=.*", "\\1", a[i+1]),
+  stringsAsFactors=FALSE)
+```
+
+For shootings between 2007-2012, the table provides no incident date and the incident location is 2 elements after the `<tr>` tag rather than 3.
+```{r comment="", results='hold'}
+i <- grep("id=\"20(07|08|09|10|11|12)",a)
+temp <- data.frame(
+  id      =gsub("<[^>]*>","",a[i+1]),
+  date    =NA,
+  location=gsub("<[^>]*>","",a[i+2]),
+  url     =gsub("<td><a href=\"(.*)\" class=.*","\\1",a[i+1]),
+  stringsAsFactors=FALSE)
+```
+
+Now we can stack all the data from 2007-2018 together and clear out some extra spaces in the `id` column.
+```{r comment="", results='hold'}
+ois <- rbind(ois, temp)
+ois$id<- gsub(" ","",ois$id)
+ois[1:5,]
+```
+
+Everything from the PPD OIS page is now neatly stored in an R data frame.
+
+We will need the full URL (rather than the relative URL) for all the pdf files.
+```{r comment="", results='hold'}
+ois$url <- paste0("http://www.phillypolice.com", ois$url)
+```
+
+A couple of the entries have problematic `id`, some easily fixed.
+```{r comment="", results='hold'}
+grep("^[^-]*$", ois$id, value=TRUE)
+ois$id[ois$id=="1630"] <- "16-30"
+ois$id[ois$id=="1730"] <- "17-30"
+ois$id[ois$id=="1822"] <- "18-22"
+```
+A few other OISs with missing `id` are a little harder to figure out.
+```{r comment="", results='hold'}
+subset(ois, id=="")
+```
+The Willows Avenue OIS has a missing `id`, but the one before it has `id` 14-12 and the one after it has `id` 14-16.
+```{r comment="", results='hold'}
+i <- grep("5100 block of Willows Avenue", ois$location)
+ois[(i-1):(i+1),]
+```
+Let's see if there is a pdf for 14-13, 14-14, or 14-15.
+```{r comment="", results='hold'}
+a <- try(scan("http://www.phillypolice.com/assets/crime-maps-stats/officer-involved-shootings/14-13.pdf", what=""))
+a <- try(scan("http://www.phillypolice.com/assets/crime-maps-stats/officer-involved-shootings/14-14.pdf", what=""))
+a <- try(scan("http://www.phillypolice.com/assets/crime-maps-stats/officer-involved-shootings/14-15.pdf", what=""))
+```
+Okay! So the OIS's `id` must be 14-15. We'll fix the URL to the associated pdf file too.
+```{r comment="", results='hold'}
+ois$id[ois$location=="5100 block of Willows Avenue " & ois$date=="04/22/2014 "] <- "14-15"
+ois$url[ois$id=="14-15"] <- "http://www.phillypolice.com/assets/crime-maps-stats/officer-involved-shootings/14-15.pdf"
+```
+The problem with the remaining two addresses are the smart quotes around "A" and "B" in the street name. 
+```{r comment="", results='hold'}
+i <- which(ois$id=="")
+ois[c((i[1]-1):(i[1]+1),(i[2]-1):(i[2]+1)), 1:3]
+```
+Before 2013, the names of the pdf files combined the OIS id and the location. But smart quotes can cause problems in URLs and file names. This is what likely caused a problem here. I made some guesses about what the pdf file name must be and found pdfs for ["10-65 B and Ontario St.pdf"](http://www.phillypolice.com/assets/crime-maps-stats/officer-involved-shootings/2010/10-65%20B%20and%20Ontario%20St.pdf) and ["10-76 A and Louden St.pdf"](http://www.phillypolice.com/assets/crime-maps-stats/officer-involved-shootings/2010/10-76%20A%20and%20Louden%20St.pdf). So, the `id` right after OIS 10-60 is 10-65 and the `id` right after OIS 10-74 is 10-76. We can clean up the locations and the URLs too.
+```{r comment="", results='hold'}
+ois$id[1 + which(ois$id=="10-60")] <- "10-65"
+ois$id[1 + which(ois$id=="10-74")] <- "10-76"
+
+ois$location[ois$id=="10-65"] <- "B St and Ontario St"
+ois$location[ois$id=="10-76"] <- "A St and Louden St"
+
+ois$url[ois$id=="10-65"] <- "http://www.phillypolice.com/assets/crime-maps-stats/officer-involved-shootings/2010/10-65 B and Ontario St.pdf"
+ois$url[ois$id=="10-76"] <- "http://www.phillypolice.com/assets/crime-maps-stats/officer-involved-shootings/2010/10-76 A and Louden St.pdf"
+```
+
+Many of the locations have odd looking characters.
+```{r comment="", results='hold'}
+grep("&", ois$location, value=TRUE)
+```
+HTML represents certain special characters with special codes. For example, "&amp;" is the ampersand, "&quot;" is a quote, and "&nbsp;" is a non-breaking space, a space that always keeps the word before and after the space on the same line. HTML special characters always start with a & and end with ;. Let's clean up these HTML codes and also remove any extra leading or trailing spaces from the location.
+
+```{r comment="", results='hold'}
+ois$location <- gsub("&quot;",  "",    ois$location)
+ois$location <- gsub("&amp;",   "and", ois$location)
+ois$location <- gsub("^ *| *$", "",    ois$location)
+```
+
+Some of the URLs have HTML codes in them too. These need to be replaced with & or R will not be able to find these pdf files.
+```{r comment="", results='hold'}
+# An example URL with an HTML codes in it
+ois$url[ois$id=="07-53"]
+ois$url <- gsub("&amp;", "&", ois$url)
+```
+
+Lastly, let's reformat the dates using the `lubridate` package.
+```{r comment="", results='hold'}
+library(lubridate)
+ois$date <- mdy(ois$date)
+```
+
+Now our data frame `ois` should have all its IDs, with properly formatted dates, clean locations, and correct URLs indicating the location of the pdf files with details about the shootings.
+```{r comment="", results='hold'}
+head(ois)
+```
+
+# Extracting data from pdf files
+
+All of the OISs in 2012 and earlier are missing the incident dates. 
+```{r comment=""}
+# pick the first two OISs in each year
+a <- ois$id[ois$id<"13-00"]
+a <- sapply(split(a, substr(a, 1, 2)), function(x) x[1:2])
+subset(ois, id %in% sort(as.character(a)))[,1:3]
+```
+However, the pdf documents describing the incident contains the date of the incident. Rather than reading all the pdf files and transcribing the dates, we are going to have R do all the work.
+
+The package `pdftools` includes functions for exploring pdf files. Let's load the library and have a look at one of the pdf files describing incident 07-01.
+```{r comment="", results='hold'}
+library(pdftools)
+pdfFilename0701 <- "http://www.phillypolice.com/assets/crime-maps-stats/officer-involved-shootings/2007/07-01 4400 N 17 ST.pdf"
+pdfText0701 <- pdf_text(pdfFilename0701)
+pdfText0701
+```
+`pdf_text()` extracts all the raw text from the pdf file. Right at the beginning of the file we can see a date, 1/1/07. That's what we want. Note that there are scattered `\r\n` throughout. These are carriage return (`\r`) and line feed (`\n`) characters that signal the end of a line. The old printers would look for these characters to move the printer head back to the beginning of a line (carriage return) and advance the page to the next line (line feed). Nowadays, those same characters are still used to denote the end of a line. However, PCs use `\r\n`, Unix systems use `\n`, older Macs used `\r`, but Mac OS X adopted the Unix standard `\n`. Expect any of these combinations in data files. I have this running on a PC, so I am going to use those `\r\n` to separate the lines and isolate the date.
+```{r comment=""}
+a <- strsplit(pdfText0701, split = "\r\n")[[1]]
+a
+```
+Now let's apply the `mdy()` function to `a`. Now most of the text looks nothing like dates, so for those `mdy()` will just give us an `NA`. But for the properly formatted dates, we will get a date object back.
+```{r comment=""}
+a <- mdy(a)
+a
+```
+In this case, only one of the lines had a proper date, but it is possible that some document might have more than one. So we will record just the first one using `sort(a)[1]`. By default, `sort()` tosses all the `NA`s.
+
+Let's put this all together. We will look through each OIS, read its pdf file, save the text in a new column in `ois`.
+
+```{r comment=""}
+ois$text <- NA
+for(i in 1:nrow(ois))
+{
+   a <- pdf_text(ois$url[i])
+   # in case there is more than one page, collapse all pages together
+   a <- paste(a, collapse="\r\n")
+   ois$text[i] <- a
+}
+```
+Now our `ois` data frame has columns: `r paste(names(ois), collapse=", ")`.
+
+Right now the row for OIS 07-01 has a missing date.
+```{r comment=""}
+subset(ois, id=="07-01")[,1:3]
+```
+
+For any OIS that is missing the date, extract the date from the pdf text. 
+```{r comment="", warning=FALSE}
+for(i in which(is.na(ois$date)))
+{
+   # try to find dates, take the first valid date
+   a <- strsplit(ois$text[i], split = "\r\n")[[1]]
+   a <- sort(mdy(a))[1]
+
+   ois$date[i] <- as.character(a)
+}
+```
+And let's check what happened to the date for OIS 07-01.
+```{r comment=""}
+subset(ois, id=="07-01")[,1:3]
+```
+And let's check that we have all valid dates
+```{r comment=""}
+sum(is.na(ymd(ois$date)))
+```
+
+As another check, let's make sure that all the OISs with `id` starting with 07 have dates in 2007, OISs with `id` starting with 08 have dates in 2008, and so on.
+```{r comment=""}
+aggregate(year(date) ~ substr(id,1,2),
+          data=ois,
+          FUN=unique)
+```
+Yes, every incidents' `id` matches with the year derived from the date. This doesn't guarantee that all the dates were extracted correctly, but it is a good check to catch any obvious errors.
+
+Without having to transcribe dates from pdf files, we have now filled in all the dates!
+
+# Geocoding the OIS locations
+
+Our OIS data frame has the address for every incident, but to be more useful we really need the geographical coordinates. If we had the coordinates, then we could put them on a map, tabulate how many incident occur within an area, calculate distances, and answer geographical questions about these data.
+
+Geocoding is the process of converting a text description of a location (typically and address or intersection) to obtain geographic coordinates (often longitude/latitude, but other coordinate systems are also possible). Google Maps currently reigns supreme in this area. Google Maps understand very general descriptions of locations. You can ask for the coordinates of something like "bobbys burger palace near UPenn" and it will understand that "UPenn" means the University of Pennsylvania and that "bobbys burger palace" is celebrity chef Bobby Flay's fast food burger joint. Unfortunately, as of June 2018 Google Maps now requires a credit card in order to access its geocoding service. Previously, anyone could geocode up to 2,500 locations per day without needing to register. 
+
+These technologies are still rapidly evolving, so it is most important to learn how to learn to use these tools. We will use the OpenStreetMap geocoder and the ArcGIS geocoder to give you the sense of how to work with them.
+
+Many web data sources use a standardized language for providing data. JSON (JavaScript Object Notation) is quite common and both OpenStreetMap and ArcGIS use JSON. 
+
+The URL for OpenStreetMap has the form
+`http://nominatim.openstreetmap.org/search/3718%20Locust%20Walk,%20Philadelphia,%20PA?format=json&addressdetails=1&limit=1`
+
+You can see the address for Penn's McNeil Building embedded in this URL. Spaces need to be replaced with `%20` (the space character has ASCII code 20). Let's see what data we get back from this URL.
+
+```{r comment="", results='hold'}
+scan("http://nominatim.openstreetmap.org/search/3718%20Locust%20Walk,%20Philadelphia,%20PA?format=json&addressdetails=1&limit=1",
+     what="", sep="\n")
+```
+It is messy, but readable. You can see embedded in this text the `lat` and `lon` for this address. You can also see that it should not be too hard for a machine to extract these coordinates, and the rest of the information here, from this block of text. This is the point of JSON, producing data in a format that a human could understand in a small batch, but a machine could pr
+ocess fast and easily.
+
+Fortunately, the `jsonlite` R package facilitates the conversion of JSON text like this into convenient R objects.
+```{r comment="", results='hold'}
+library(jsonlite)
+fromJSON("http://nominatim.openstreetmap.org/search/3718%20Locust%20Walk,%20Philadelphia,%20PA?format=json&addressdetails=1&limit=1")
+```
+`fromJSON()` converts the results from the OpenStreetMap geocoder to a row in a data frame. The JSON tags turn into column names and the values are placed as data in a row.
+
+The major drawback of the OpenStreetMap geocoder is that it does not handle intersections. If we try to geocode "38th St and Walnut St", the results come back empty.
+```{r comment="", results='hold'}
+fromJSON("http://nominatim.openstreetmap.org/search/38th%20St%20and%20Walnut%20St,%20Philadelphia,%20PA?format=json&addressdetails=1&limit=1")
+```
+
+This is where the ArcGIS geocoder comes in handy. The ArcGIS geocoder also works with JSON but the URL construction is a little different. Here we get several results, but clearly the first one is the one that we want. It is also the one that has the highest `score`.
+```{r comment="", results='hold'}
+fromJSON("https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&singleLine=38th%20St%20and%20Walnut%20St,%20Philadelphia,%20PA&outFields=Match_addr,Addr_type")
+```
+
+To make geocoding using these two services a little more convenient, we can create two functions that automate the process of taking an address, filling in `%20` for spaces in the appropriate URL, and retrieving the JSON results from the geocoding service.
+
+```{r comment="", results='hold'}
+geocodeOSM <- function(address)
+{
+   a <- gsub(" +", "\\%20", address)
+   a <- paste0("http://nominatim.openstreetmap.org/search/",
+               a,
+               "?format=json&addressdetails=0&limit=1")
+   return( fromJSON(a) )
+}
+
+geocodeARCGIS <- function(address)
+{
+   a <- gsub(" +", "\\%20", address)
+   a <- paste0("https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&singleLine=",
+               a,
+               "&outFields=Match_addr,Addr_type")
+   return( fromJSON(a) )
+}
+```
+
+Let's test out `geocodeOSM()` by pulling up a up a map of the geocoded coordinates.
+```{r comment="", message=FALSE}
+library(ggmap)
+gc.upenn <- geocodeOSM("3718 Locust Walk, Philadelphia, PA")
+boundbox <- c(as.numeric(gc.upenn$lon)-0.004,
+              as.numeric(gc.upenn$lat)-0.002,
+              as.numeric(gc.upenn$lon)+0.004,
+              as.numeric(gc.upenn$lat)+0.002)
+b <-  get_map(location = boundbox,
+              maptype = "terrain", # or "toner" or "watercolor"
+              source = "stamen")
+ggmap(b)
+```
+This map shows a map of the western part of the Penn campus with 3718 Locust Walk (the square building near the center of the map) near the center of the map.
+
+We are almost ready to throw all of our addresses at these geocoders, but let's first make sure the addresses look okay. Several OISs are missing locations.
+```{r comment="", results='hold'}
+i <- which(ois$location %in% c("","withheld","Withheld"))
+ois$text[i]
+```
+
+Several of these text descriptions of the incidents contain the locaiton information. Let's fill those in
+```{r comment="", results='hold'}
+ois$location[ois$id=="16-18"] <- "3200 block of Wellington Street"
+ois$location[ois$id=="10-06"] <- "Howard and Grange Street"
+ois$location[ois$id=="08-06"] <- "200 block of Clapier Street"
+ois$location[ois$id=="08-18"] <- "900 block of E. Slocum Street"
+ois$location[ois$id=="08-30"] <- "700 block of W. Rockland Street"
+ois$location[ois$id=="08-40"] <- "5400 Jefferson Street"
+ois$location[ois$id=="08-60"] <- "3000 Memphis Street"
+ois$location[ois$id=="08-70"] <- "1300 block of S. 29th Street"
+ois$location[ois$id=="08-74"] <- "5600 block of N. Mascher Street"
+```
+While browsing locations sometimes you might come across ones that aren't quite right, this one for example. fixing.
+```{r comment="", results='hold'}
+# This one was just "51st Arch"
+ois$location[ois$id=="07-19"] <- "51st St and Arch"
+```
+
+The text of this incident indicates that Philadelphia PD officers were not involved in the shooting.
+```{r comment="", results='hold'}
+ois$text[ois$id=="17-08"]
+ois <- subset(ois, id != "17-08")
+```
+
+Several of the addresses are of the form "5400 block of Erdick St". I want these to get geocoded to the middle of the block. So I'm going to change addresses like these to be like "5450 Erdick St".
+
+```{r comment="", results='hold'}
+# put "blocks" at the midpoint
+ois$location <- gsub("00 block( of)?", "50", ois$location, ignore.case=TRUE)
+ois$location <- gsub("unit bl(oc)?k( of)?", "50", ois$location, ignore.case=TRUE)
+# and one additional cleanup "Rear Alley of 300 block of N. 55th Street"
+ois$location <- gsub("Rear Alley of |near ", "", ois$location, ignore.case = TRUE)
+```
+
+Now let's run all of the addresses through the OpenStreetMap geocoder. We could have geocoded all these addresses with the more simple code `lapply(a, geocodeOSM)`. However, if the JSON connection to the OpenStreetMap website fails for even one of the addresses (likely if you have a poor internet connection), then the whole `lapply()` function fails. With the for-loop implementation, if the connection fails, then `gcOIS` still keeps all of the prior geocoding results and you can restart the for-loop at the point where it failed.
+```{r comment="", results='hold'}
+# add city and state to each address to improve geocoding accuracy
+a <- paste0(ois$location,", Philadelphia, PA")
+
+# create a list to store the geocoding results
+gcOIS <- vector("list", nrow(ois))
+for(i in 1:nrow(ois))
+{
+   gcOIS[[i]] <- geocodeOSM(a[i])
+   if(length(gcOIS[[i]]) == 0)
+   {
+      cat("Could not geocode address #",i,":",a[i],"\n")
+   }
+}
+```
+Geocoding failed on several addresses. Some of them are fairly predictable as they are formatted poorly (e.g. Harbison Ave -Phila, Philadelphia, PA). Many others fail because they are intersections and OpenStreeMap does not handle intersections (yet). So let's send the addresses that OpenStreetMap could not geocode to the ArcGIS geocoder.
+```{r comment="", results='hold'}
+for(i in which(sapply(gcOIS, length)==0))
+{
+   gcOIS[[i]] <- geocodeARCGIS(a[i])
+}
+```
+
+Now `gcOIS` has some of the geocoding results from OpenStreetMap and some from ArcGIS. The results are in different formats. The ArcGIS results have a component named `candidates`. So we'll use the presence/absence of a `candidates` component to figure out which geocoding service delivered the results. Then we can extract the longitude, latitude, and some additional features. The ArcGIS geocoder gives numerous results, but we will just take the top scoring one, which is the most likely match.
+```{r comment="", results='hold'}
+b <- lapply(gcOIS, function(x)
+{
+   if(is.null(x$candidates)) # OSM
+   {
+      a <- data.frame(lon=as.numeric(x$lon),
+                      lat=as.numeric(x$lat),
+                      score=as.numeric(x$importance),
+                      loctype=paste(x$class, x$type, sep=":"),
+                      method="osm",
+                      addressGeo=x$display_name,
+                      stringsAsFactors = FALSE)
+   } else # ArcGIS
+   {
+      a <- data.frame(lon=x$candidates$location[1,"x"],
+                      lat=x$candidates$location[1,"y"],
+                      score=x$candidates$score[1],
+                      loctype=x$candidates$attributes$Addr_type[1],
+                      method="arcgis",
+                      addressGeo=x$candidates$attributes$Match_addr[1],
+                      stringsAsFactors = FALSE)
+   }
+   return(a)
+})
+gcOIS <- do.call(rbind, b)
+# add a column containing the original address
+gcOIS <- cbind(gcOIS, addressOrig = a)
+head(gcOIS)
+```
+Now it appears that we have longitude and latitude for every incident. We should check that they all look sensible.
+```{r comment="", results='hold'}
+stem(gcOIS$lat)
+stem(gcOIS$lon)
+```
+While almost all the points have latitude around 39 and 40 and longitude around -75, several incidents appear to occur at (-89.11, 32.88). Look that up on Google Maps and you will find Philadelphia, Mississippi.
+```{r comment="", results='hold'}
+subset(gcOIS, lon < -80)
+```
+
+Maybe the ArcGIS geocoder can do a better job.
+```{r comment="", results='hold'}
+i <- which(gcOIS$lon < -80)
+b <- lapply(gcOIS$addressOrig[i], geocodeARCGIS)
+
+b <- lapply(b, function(x)
+{
+   data.frame(lon=x$candidates$location[1,"x"],
+              lat=x$candidates$location[1,"y"],
+              score=x$candidates$score[1],
+              loctype=x$candidates$attributes$Addr_type[1],
+              method="arcgis",
+              addressGeo=x$candidates$attributes$Match_addr[1],
+              stringsAsFactors = FALSE)
+})
+b <- do.call(rbind, b)
+# replace just some of the columns with the values in b
+gcOIS[i, names(b)] <- b
+gcOIS[i,]
+```
+
+There's no perfect way to check the geocoding results aside from checking each individual point and verify with a map that it lands on the right spot. We can do things like check for strange outliers like we did just now to find that some incidents were mapped to Mississippi. We can spot check a few locations with a map.
+
+```{r comment="", message=FALSE}
+iMap <- which(ois$id %in% c("18-01","13-14","07-13"))
+for(i in iMap)
+{
+   boundbox <- with(gcOIS[i,],
+                    c(lon-0.0025, lat-0.0015, lon+0.0025, lat+0.0015))
+   b <-  get_map(location = boundbox,
+                 scale = "auto",
+                 maptype = "toner",
+                 source = "stamen")
+   print(ggmap(b,extent="normal") +
+            geom_point(aes(x=lon,y=lat), color="red", size=3, data=gcOIS[i,]) +
+            ggtitle(ois$location[i]))
+}
+```
+The first and last of these were geocoded correctly. I looked up 2850 Kensington in Google Maps to verify its location and you can see that the red dot in the last map is right at the intersection of 13th and Pike. However, the middle one is off by a bit. You can see Arrott St and Frankford St, but the dot is not at their intersection. The address shown in the map title is missing an "and" between "Arrott Street" and "Frankford Avenue". So where did geocoding place out point?
+
+```{r comment="", results='hold'}
+gcOIS[iMap,]
+```
+Note that the `loctype` for the first address is "house" and `loctype` is "StreetInt" for the last address. Those are indications that the geocoding was accurate to very specific locations. But for the second address the `loctype` is "residential". It found Arrott St in the Frankford neighborhood of Philadelphia, because OpenStreetMap did not understand that we were looking for an intersection.
+
+Ideally we want geocoding to get us to a house, intersection, or address. If `loctype` is residential, locality, city, or streetname then this indicates that the geocoding did not get us to a very specific location.
+```{r comment="", results='hold'}
+sort(table(gcOIS$loctype))
+```
+Several of these are very specific locations (office, shop, building, station, house, PointAddress, StreetAddress, StreetInt). Many others are not specific at all (highway, neighborhood, city, Locality, StreetName). Each of these needs to be revisited. Let's examine one these here. Let's look at those geocodeddown to `loctype="Streetname"`.
+```{r comment="", results='hold'}
+i <- which(gcOIS$loctype=="StreetName")
+gcOIS[i,]
+```
+We can see that the problem for many of these is simply bad addresses. Some are intersections that are missing the "and" between the two streets. Let's read into the incident at Harbison Ave to see if we can learn more.
+```{r comment="", results='hold'}
+ois$text[ois$location=="Harbison Ave -Phila"]
+```
+The text describes the path of the suspect moving south on Torresdale and turning west on Bridge. Let's pull up a map of this area. I've overlayed the path of the suspect on top of the map. The officers describe the suspect moving "south" on Torresdale and "west" on Bridge because the I95 and the Delaware River are just south of this area and run more east-west here. So thinking that I95 run north-south and that the Delaware River is the east boundary of Philadelphia, officers may decribe someone running "west" on Bridge St as running away from I95 and the Delaware River.
+```{r comment="", results='hold', message=FALSE}
+ggmap(get_map(c(-75.0691987,40.0138755), zoom = 16)) +
+   geom_path(aes(x=x, y=y),
+             data=data.frame(x=c(-75.068621,-75.070423,-75.070594),y=c(40.013570,40.013184,40.013710)),
+             color="red",
+             size= 2, alpha=0.5, arrow=arrow(length=unit(0.1,"inches")))
+```
+It took some investigation, but we can fix this address too. Here's how we can fix the two addresses that we've identified fixes for so far. The rest are left as an exercise. `textConnection()` is a nice trick for making a small data frame right inside a script. I'm going to make two columns, one with the original address and one with the correction or improved address.
+```{r comment="", results='hold', message=FALSE}
+a <- textConnection(
+"addressOrig,addressFix
+Arrott Street Frankford Avenue,Arrott Street and Frankford Avenue
+Harbison Ave -Phila,Bridge St and Ditman St")
+a <- read.csv(a, stringsAsFactors = FALSE)
+b <- lapply(paste0(a$addressFix,", Philadelphia, PA"), geocodeARCGIS)
+b <- lapply(b, function(x)
+{
+   data.frame(lon=x$candidates$location[1,"x"],
+              lat=x$candidates$location[1,"y"],
+              score=x$candidates$score[1],
+              loctype=x$candidates$attributes$Addr_type[1],
+              method="arcgis",
+              addressGeo=x$candidates$attributes$Match_addr[1],
+              stringsAsFactors = FALSE)
+})
+b <- do.call(rbind, b)
+i <- match(a$addressOrig, ois$location)
+gcOIS[i,names(b)] <- b
+gcOIS[i,]
+```
+Both appear to be fixed. `addressGeo` appears correct and the `loctype` is now `StreetInt`. All good signs.
+
+We'll proceed as if we're satisfied with our geocoding even though you know you have more work to do to fix some of those non-specific geocoding problems. We close this section with a map of the city of Philadelphia and the locations of all officer involved shootings.
+
+```{r comment="", results='hold', message=FALSE}
+mapPhilly <- get_map(c(-75.288486,39.868285,-74.950965,40.138251),
+                      source ="stamen")
+ggmap(mapPhilly, extent="normal") +
+  geom_point(aes(x=lon,y=lat), data=gcOIS,
+             color="red",
+             alpha=0.5)
+```
+
+# Working with shapefiles and spatial joins
+
+# load PPD shapefile
+# review the directions at the top of the script for acquiring the shapefile
+#    modify the path to the .shp file if needed here
+#    like "Boundaries-PSA/Police_Service_Areas.shp"
+PPDmap <- st_read("Boundaries_PSA/Boundaries_PSA.shp")
+
+# plot the map
+plot(st_geometry(PPDmap))
+axis(side=1)
+axis(side=2)
+a <- st_coordinates(st_centroid(PPDmap))
+text(a[,1],a[,2],PPDmap$PSA_NUM,cex=0.7)
+
+# explore the PPDmap object
+#   PPDmap is an "simple features" type object
+# tell us what "is" PPDmap
+is(PPDmap)
+# what's in PPDmap
+PPDmap[1:3,]
+# what is the "geometry" component?
+is(PPDmap$geometry[1])
+# what does the first polygon look like?
+st_coordinates(PPDmap$geometry[1])
+# how are these polygons stored?
+a <- st_coordinates(PPDmap$geometry[1])
+lines(a[,1],a[,2],col="red",lwd=3)
+a <- st_coordinates(PPDmap$geometry[7])
+lines(a[,1],a[,2],col="green",lwd=3)
+
+# what is PPDmap's "coordinate reference system"?
+st_crs(PPDmap)
+# lcc=Lambert Conic Conformal
+# NAD83=North American Datum
+# WGS84=World Geodetic System
+#    earth is not an ellipsoid but within some regions it is close
+
+# Might need to transform to longlat so geocoded points can be overlaid
+#   Projection parameters from proj4js
+#   http://spatialreference.org/ref/epsg/
+
+# Pennsylvania South projection
+PPDmap <- st_transform(PPDmap, crs=st_crs("+init=epsg:2272"))
+st_crs(PPDmap)
+# Pseudo-Mercator projection (Google Maps, ESRI, OpenStreetMaps)
+PPDmap <- st_transform(PPDmap, crs=st_crs("+init=epsg:3857"))
+st_crs(PPDmap) # note units
+# same, but now measures of distance will be in feet
+PPDmap <- st_transform(PPDmap, crs=st_crs("+init=epsg:3857 +units=us-ft"))
+st_crs(PPDmap) # note units
+# back to standard latitude/longitude
+PPDmap <- st_transform(PPDmap, crs=st_crs("+init=epsg:4326"))
+st_crs(PPDmap) # note units
+
+# now both PPD data and polygons are on the same scale
+plot(st_geometry(PPDmap), axes=TRUE)
+points(lat~lon, data=gc.ois, col="red", pch=16)
+
+# tabulate by police service area (PSA)
+#   convert gc.ois to an sf object
+a <- st_as_sf(gc.ois, coords=c("lon","lat"),
+              crs=st_crs("+init=epsg:4326"))
+
+plot(st_geometry(PPDmap))
+plot(st_geometry(a), add=TRUE, col="red", pch=16)
+gc.ois <- a
+
+# match each polygon in PPDmap to each point
+#    warnings about planar coordinates, EPSG 2272 gives more accurate results
+PSAlookup <- st_join(gc.ois, PPDmap[,"PSA_NUM"])
+PSAlookup[1:3,]
+
+sort(table(PSAlookup$PSA))
+i <- which(PSAlookup$PSA_NUM=="192")
+plot(st_geometry(gc.ois[i,]), add=TRUE, col="green", pch=16)
+i <- which(PSAlookup$PSA_NUM=="221")
+plot(st_geometry(gc.ois[i,]), add=TRUE, col="blue", pch=16)
+
+# shootings in the same district as UPenn
+#  get UPenn coordinates
+gc.upenn[,c("lon","lat")]
+#  map them to the spatial coordinates
+a <- st_as_sf(gc.upenn, coords=c("lon","lat"), crs=st_crs("+init=epsg:4326"))
+st_join(a, PPDmap)
+# now we see Penn is in district 183
+i <- which(PSAlookup$PSA_NUM=="183")
+# plot with Penn colors
+plot(st_geometry(gc.ois[i,]), add=TRUE, col="red", bg="blue", pch=21)
+
+# read more about incidents in PSA 183
+a <- ois[PSAlookup$PSA_NUM=="183" & !is.na(PSAlookup$PSA_NUM),]
+a
+
+
+
+# color PPDmap by number of shootings
+plot(st_geometry(PPDmap))
+
+# how many shootings in each PSA?
+a <- table(PSAlookup$PSA_NUM)
+# merge the shooting count into the PPDmap data
+i <- match(PPDmap$PSA_NUM, names(a))
+names(a)[i]
+PPDmap$PSA_NUM
+PPDmap$nShoot <- a[i]
+
+hist(a)
+
+# break the shooting count into categories
+a <- cut(PPDmap$nShoot,
+         breaks=c(0,1,5,10,15,20,25,30),
+         right=FALSE)
+# use "heat colors"
+col <- rev(heat.colors(7,1))
+# or generate a range of red colors
+# col <- rgb(seq(0,1,length=7),0,0,1)
+# as.numeric will convert the factors in to integers 1-7
+col[as.numeric(a)]
+
+# create the map, color the regions by their n.shoot category
+plot(st_geometry(PPDmap), col=col[as.numeric(a)], border=NA)
+# add the number of shootings
+a <- st_coordinates(st_centroid(PPDmap))
+text(a[,1], a[,2], PPDmap$nShoot)
+
+
+# save the final version
+save(gc.ois, file="PPD OIS geocode.RData")
+
+# to restart working with the data without having to rerun everything
+library(lubridate)
+setwd("Z:/Penn/CRIM602/data/PhillyOIS")
+load("PPD OIS geocode.RData")
+load("PPD OIS.RData")
+
+
+
+
+
+
+
+# Exercises
+`r .exNum('Find the largest and smallest safety zones (use @@st_area(mapSZ)@@)')`
+
+`r .exNum('Plot all the safety zones. Color the largest in one color and the smallest in another color')`
+
+`r .exNum('Use @@st_overlaps(mapSZ, mapSZ, sparse=FALSE)@@ or @@print(st_overlaps(mapSZ, mapSZ, sparse=TRUE), n=Inf, max_nb=Inf)@@ to find two safety zones that overlap (not just touch at the edges)')`
+
+`r .exNum('With the two safety zones that you found in the previous question, plot using three different colors the first safety zone, second safety zone, and their intersection (hint: use @@st_intersection()@@)')`
+
+
+
+
+# Solutions to the exercises
+`r .exQ(1)`
+
+```{r comment="", results='hold'}
+```
+
