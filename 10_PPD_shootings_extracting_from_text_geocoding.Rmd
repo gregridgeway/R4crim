@@ -1,32 +1,33 @@
 ---
 title: "Extracting data from text and geocoding"
 author:
-- affiliation: University of Pennsylvania
-  email: gridge@upenn.edu
-  name: Greg Ridgeway
+- Greg Ridgeway (gridge@upenn.edu)
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
-  html_document:
-    css: htmlstyle.css
+  pdf_document:
+    latex_engine: pdflatex
+  html_document: default
+fontsize: 11pt
+fontfamily: mathpazo
 ---
 
-<!-- HTML YAML header Ctrl-Shift-C to comment/uncomment -->
-
+<!-- PDF YAML header Ctrl-Shift-C to comment/uncomment -->
 
 <!-- --- -->
 <!-- title: "Extracting data from text and geocoding" -->
 <!-- author: -->
-<!-- - Greg Ridgeway (gridge@upenn.edu) -->
+<!-- - affiliation: University of Pennsylvania -->
+<!--   email: gridge@upenn.edu -->
+<!--   name: Greg Ridgeway -->
 <!-- date: "`r format(Sys.time(), '%B %d, %Y')`" -->
 <!-- output: -->
-<!--   pdf_document: -->
-<!--     latex_engine: pdflatex -->
-<!--   html_document: default -->
-<!-- fontsize: 11pt -->
-<!-- fontfamily: mathpazo -->
+<!--   html_document: -->
+<!--     css: htmlstyle.css -->
 <!-- --- -->
 
-<!-- PDF YAML header Ctrl-Shift-C to comment/uncomment -->
+<!-- HTML YAML header Ctrl-Shift-C to comment/uncomment -->
+
+
 
 <!-- Make RMarkdown cache the results -->
 ```{r echo=FALSE}
@@ -338,11 +339,11 @@ geocodeARCGIS <- function(address)
 Let's test out `geocodeOSM()` by pulling up a up a map of the geocoded coordinates.
 ```{r comment="", message=FALSE}
 library(ggmap)
-gc.upenn <- geocodeOSM("3718 Locust Walk, Philadelphia, PA")
-boundbox <- c(as.numeric(gc.upenn$lon)-0.004,
-              as.numeric(gc.upenn$lat)-0.002,
-              as.numeric(gc.upenn$lon)+0.004,
-              as.numeric(gc.upenn$lat)+0.002)
+gcPenn <- geocodeOSM("3718 Locust Walk, Philadelphia, PA")
+boundbox <- c(as.numeric(gcPenn$lon)-0.004,
+              as.numeric(gcPenn$lat)-0.002,
+              as.numeric(gcPenn$lon)+0.004,
+              as.numeric(gcPenn$lat)+0.002)
 b <-  get_map(location = boundbox,
               maptype = "terrain", # or "toner" or "watercolor"
               source = "stamen")
@@ -517,16 +518,23 @@ The text describes the path of the suspect moving south on Torresdale and turnin
 ggmap(get_map(c(-75.0691987,40.0138755), zoom = 16)) +
    geom_path(aes(x=x, y=y),
              data=data.frame(x=c(-75.068621,-75.070423,-75.070594),y=c(40.013570,40.013184,40.013710)),
-             color="red",
-             size= 2, alpha=0.5, arrow=arrow(length=unit(0.1,"inches")))
+             color="red", size=2, alpha=0.5, 
+             arrow=arrow(length=unit(0.1,"inches"))) + 
+   theme(plot.title = element_blank(),
+         axis.title.x = element_blank(),
+         axis.title.y = element_blank())
 ```
 It took some investigation, but we can fix this address too. Here's how we can fix the two addresses that we've identified fixes for so far. The rest are left as an exercise. `textConnection()` is a nice trick for making a small data frame right inside a script. I'm going to make two columns, one with the original address and one with the correction or improved address.
-```{r comment="", results='hold', message=FALSE}
+```{r comment="",  message=FALSE}
 a <- textConnection(
 "addressOrig,addressFix
 Arrott Street Frankford Avenue,Arrott Street and Frankford Avenue
 Harbison Ave -Phila,Bridge St and Ditman St")
 a <- read.csv(a, stringsAsFactors = FALSE)
+# make sure the original addresses match, no NAs!
+i <- match(a$addressOrig, ois$location)
+i
+
 b <- lapply(paste0(a$addressFix,", Philadelphia, PA"), geocodeARCGIS)
 b <- lapply(b, function(x)
 {
@@ -539,11 +547,16 @@ b <- lapply(b, function(x)
               stringsAsFactors = FALSE)
 })
 b <- do.call(rbind, b)
-i <- match(a$addressOrig, ois$location)
 gcOIS[i,names(b)] <- b
 gcOIS[i,]
 ```
 Both appear to be fixed. `addressGeo` appears correct and the `loctype` is now `StreetInt`. All good signs.
+
+Let's create new longitude/latitude columns in our `ois` data frame so that one object contains all of our essential data.
+```{r comment="", results='hold', message=FALSE}
+ois$lon <- gcOIS$lon
+ois$lat <- gcOIS$lat
+```
 
 We'll proceed as if we're satisfied with our geocoding even though you know you have more work to do to fix some of those non-specific geocoding problems. We close this section with a map of the city of Philadelphia and the locations of all officer involved shootings.
 
@@ -553,166 +566,206 @@ mapPhilly <- get_map(c(-75.288486,39.868285,-74.950965,40.138251),
 ggmap(mapPhilly, extent="normal") +
   geom_point(aes(x=lon,y=lat), data=gcOIS,
              color="red",
-             alpha=0.5)
+             alpha=0.5) + 
+   theme(axis.title.x = element_blank(),
+         axis.title.y = element_blank())
 ```
 
-# Working with shapefiles and spatial joins
+# Working with shapefiles and coordinate systems
 
-# load PPD shapefile
-# review the directions at the top of the script for acquiring the shapefile
-#    modify the path to the .shp file if needed here
-#    like "Boundaries-PSA/Police_Service_Areas.shp"
-PPDmap <- st_read("Boundaries_PSA/Boundaries_PSA.shp")
+The Philadelphia Police Department divides the city into Police Service Areas (PSAs). The city provides a *shapefile*, a file containing geographic data, that describes the boundaries of the PSAs at Philadelphia's [open data site](https://www.opendataphilly.org/dataset/police-service-areas). R can read these files using the `st_read()` function provided in the `sf` (simple features) package.
+```{r comment="", results='hold', message=FALSE}
+library(sf)
+PPDmap <- st_read("10_shapefiles_and_data/Boundaries_PSA.shp")
+```
+`PPDmap` is an `sf` (simple features) object. It is not unlike a data frame, but it can contain a column containing geographic information associated with a row of other data. Here are the two columns in `PPDmap` that are of primary interest.
+```{r comment="", results='hold', message=FALSE}
+PPDmap[,c("PSA_NUM","geometry")]
+```
+The first column shows the PSA number and the second column shows a truncated description of the geometry associated with this row. In this case, `geometry` contains the coordinates of the boundary of the PSA for each row. Use `st_geometry()` to extract the polygons to make a plot.
+```{r comment="", results='hold', message=FALSE}
+plot(st_geometry(PPDmap))
+axis(side=1) # add x-axis
+axis(side=2) # add y-axis
+# extra the center points of each PSA
+a <- st_coordinates(st_centroid(st_geometry(PPDmap)))
+# add the PSA number to the plot
+text(a[,1], a[,2], PPDmap$PSA_NUM, cex=0.5)
+```
 
-# plot the map
+We can extra the actual coordinates of one of the polygons if we wish.
+```{r comment="", message=FALSE}
+a <- st_coordinates(PPDmap$geometry[1])
+head(a)
+tail(a)
+```
+And we can use those coordinates to add additional features to our plot
+```{r comment="", message=FALSE}
 plot(st_geometry(PPDmap))
 axis(side=1)
 axis(side=2)
-a <- st_coordinates(st_centroid(PPDmap))
-text(a[,1],a[,2],PPDmap$PSA_NUM,cex=0.7)
-
-# explore the PPDmap object
-#   PPDmap is an "simple features" type object
-# tell us what "is" PPDmap
-is(PPDmap)
-# what's in PPDmap
-PPDmap[1:3,]
-# what is the "geometry" component?
-is(PPDmap$geometry[1])
-# what does the first polygon look like?
-st_coordinates(PPDmap$geometry[1])
-# how are these polygons stored?
+a <- st_coordinates(st_centroid(st_geometry(PPDmap)))
+text(a[,1], a[,2], PPDmap$PSA_NUM, cex=0.5)
 a <- st_coordinates(PPDmap$geometry[1])
-lines(a[,1],a[,2],col="red",lwd=3)
-a <- st_coordinates(PPDmap$geometry[7])
-lines(a[,1],a[,2],col="green",lwd=3)
+lines(a[,1], a[,2], col="red", lwd=3)
+```
+So this highlighted in red PSA 77 in the southern end of Philadelphia. Note that R issued some warnings about our centroid locations. We will return to that in a moment.
 
-# what is PPDmap's "coordinate reference system"?
+Rather than extracting coordinates to add a feature to a plot, `subset()` provides an easier method.
+```{r comment="", message=FALSE}
+plot(st_geometry(PPDmap))
+axis(side=1)
+axis(side=2)
+a <- st_coordinates(st_centroid(st_geometry(PPDmap)))
+text(a[,1], a[,2], PPDmap$PSA_NUM, cex=0.5)
+plot(st_geometry(subset(PPDmap, PSA_NUM=="077")),
+     add=TRUE, border="red")
+plot(st_geometry(subset(PPDmap, PSA_NUM=="183")),
+     add=TRUE, border="green")
+```
+Setting `add=TRUE` in the last two calls to `plot()` asks R to overlay the current plot with these additional objects.
+
+Now, back to those warnings we received about calculating centroids with longitude/latitude data. Geographic datasets that describe locations on the surface of the earth have a "coordinate reference system" (CRS). Let's extract the CRS for `PPDmap`.
+```{r comment="", results='hold', message=FALSE}
 st_crs(PPDmap)
-# lcc=Lambert Conic Conformal
-# NAD83=North American Datum
-# WGS84=World Geodetic System
-#    earth is not an ellipsoid but within some regions it is close
+```
+The `proj4string` tells us that the coordinate system used to describe the PPD boundaries is longitude/latitude. Specifically, it uses the World Geodetic System 1984 (WGS84) maintained by the United States National Geospatial-Intelligence Agency, one of several standards to aid in navigation and geography. The European Petroleum Survey Group (EPSG) maintains a catalog of different coordinate systems (should be no surprise that oil exploration has driven the development of high quality geolocation standards). They have assigned the standard longitude/latitude coordinate system to be [EPSG4326]((http://spatialreference.org/ref/epsg/4326/). You can find the full collection of coordinate systems at [spatialreference.org](http://spatialreference.org/ref/epsg/).
 
-# Might need to transform to longlat so geocoded points can be overlaid
-#   Projection parameters from proj4js
-#   http://spatialreference.org/ref/epsg/
+Many of us are comfortable with the longitude/latitude angular coordinate systems. However, the distance covered by a degree of longitude shrinks as you move towards the poles and only equals the distance covered by a degree of latitude at the equator. In addition, the earth is not very spherical so the coordinate system used for computing distances on the earth surface might need to depend on where you are on the earth surface. 
 
-# Pennsylvania South projection
+Almost all web mapping tools (Google Maps, ESRI, OpenStreetMaps) use the pseudo-Mercator projection ([EPSG3857](http://spatialreference.org/ref/epsg/3857/)). Let's convert our PPD map to that coordinate system.
+```{r comment="", results='hold', message=FALSE}
+PPDmap <- st_transform(PPDmap, crs=st_crs("+init=epsg:3857"))
+st_crs(PPDmap)
+```
+Note that the `proj4string` now indicates that this is a Mercator projection with distance measured in meters (`+units=m`). Now if we ask for the centroids of the PSAs, we get more accurate centroids and no warnings from R.
+```{r comment="", results='hold', message=FALSE}
+st_centroid(st_geometry(PPDmap))
+```
+We can use the same projection, but modify it so that distances are measured in feet.
+```{r comment="", results='hold', message=FALSE}
+PPDmap <- st_transform(PPDmap, crs=st_crs("+init=epsg:3857 +units=us-ft"))
+st_crs(PPDmap)
+```
+There is a special coordinate system for every part of the world. A useful coordinate system for the Philadelphia area is [EPSG2272](http://spatialreference.org/ref/epsg/2272/). Let's convert our PPD map to that coordinate system.
+```{r comment="", results='hold', message=FALSE}
 PPDmap <- st_transform(PPDmap, crs=st_crs("+init=epsg:2272"))
 st_crs(PPDmap)
-# Pseudo-Mercator projection (Google Maps, ESRI, OpenStreetMaps)
-PPDmap <- st_transform(PPDmap, crs=st_crs("+init=epsg:3857"))
-st_crs(PPDmap) # note units
-# same, but now measures of distance will be in feet
-PPDmap <- st_transform(PPDmap, crs=st_crs("+init=epsg:3857 +units=us-ft"))
-st_crs(PPDmap) # note units
-# back to standard latitude/longitude
+```
+This coordinate system is the Lambert Conic Conformal (LCC). This particular projection of the `PPDmap` is tuned to provide good precision for the southern part of Pennsylvania and distances are measured in feet (note the `+units=us-ft` tag in the `proj4string`).
+
+Let's transform back to longitude/latitude. It really is best to work using a different coordinate system, but I'm going to stick with longitude/latitude so that the values make a little more sense to us. Also at the scale of Philadelphia, we're just using the centroid calculation to figure out where to put labels.
+```{r comment="", results='hold', message=FALSE}
 PPDmap <- st_transform(PPDmap, crs=st_crs("+init=epsg:4326"))
-st_crs(PPDmap) # note units
-
-# now both PPD data and polygons are on the same scale
+```
+Now both PPD data and polygons are on the same scale
+```{r comment="", results='hold', message=FALSE}
 plot(st_geometry(PPDmap), axes=TRUE)
-points(lat~lon, data=gc.ois, col="red", pch=16)
+points(lat~lon, data=gcOIS, col=rgb(1,0,0,0.5), pch=16)
+```
+To make the dots a little transparent, I've used the `rgb()` function with which you can mix red, green, and blue colors and set the transparency. The `1` tells `rgb()` to use maximum red. The two `0`s tell `rgb()` to use no green or blue. The 0.5 tells `rgb()` to make the dots halfway transparent.
 
-# tabulate by police service area (PSA)
-#   convert gc.ois to an sf object
-a <- st_as_sf(gc.ois, coords=c("lon","lat"),
-              crs=st_crs("+init=epsg:4326"))
+# Spatial joins
 
-plot(st_geometry(PPDmap))
-plot(st_geometry(a), add=TRUE, col="red", pch=16)
-gc.ois <- a
+Spatial joins is the process of linking two data sources by their geography. For the case of the OIS data, we want to know how many OISs occurred in each PSA. To do this we need to drop each OIS point location into the PSA polygons and have R tell us in which polygon did each OIS land.
 
-# match each polygon in PPDmap to each point
-#    warnings about planar coordinates, EPSG 2272 gives more accurate results
-PSAlookup <- st_join(gc.ois, PPDmap[,"PSA_NUM"])
-PSAlookup[1:3,]
+First we need to convert our `ois` data frame to an `sf` object, communicating to R that the `lon` and `lat` columns are special. At this stage we also have to communicate in what coordinate system are the `lon` and `lat` values. `st_as_sf()` converts an R object into an `sf` object.
+```{r comment="", results='hold', message=FALSE}
+ois <- st_as_sf(ois, 
+                coords=c("lon","lat"),
+                crs=st_crs("+init=epsg:4326"))
+# check that everything looks okay
+plot(st_geometry(PPDmap), axes=TRUE)
+plot(st_geometry(ois), add=TRUE, col=rgb(1,0,0,0.5), pch=16)
+```
+`st_join()` will match each row in `ois` to each polygon in PSA. I just want the `PSA_NUM` column out of the `PPDmap`.
+```{r comment="", results='hold', message=FALSE}
+PSAlookup <- st_join(ois, PPDmap[,"PSA_NUM"])
+PSAlookup[1:3, c("id","date","location","PSA_NUM","geometry")]
+```
+Now our `PSAlookup` contains everything from `ois` but also adds a new column `PSA_NUM`.
 
-sort(table(PSAlookup$PSA))
-i <- which(PSAlookup$PSA_NUM=="192")
-plot(st_geometry(gc.ois[i,]), add=TRUE, col="green", pch=16)
-i <- which(PSAlookup$PSA_NUM=="221")
-plot(st_geometry(gc.ois[i,]), add=TRUE, col="blue", pch=16)
+Let's examine the PSAs with the most OISs and highlight them on the map.
 
-# shootings in the same district as UPenn
-#  get UPenn coordinates
-gc.upenn[,c("lon","lat")]
-#  map them to the spatial coordinates
-a <- st_as_sf(gc.upenn, coords=c("lon","lat"), crs=st_crs("+init=epsg:4326"))
-st_join(a, PPDmap)
-# now we see Penn is in district 183
-i <- which(PSAlookup$PSA_NUM=="183")
-# plot with Penn colors
-plot(st_geometry(gc.ois[i,]), add=TRUE, col="red", bg="blue", pch=21)
-
-# read more about incidents in PSA 183
-a <- ois[PSAlookup$PSA_NUM=="183" & !is.na(PSAlookup$PSA_NUM),]
+```{r comment="", message=FALSE}
+a <- rev(sort(table(PSAlookup$PSA)))
 a
 
+plot(st_geometry(PPDmap), axes=TRUE)
+# plot the OISs in the PSA with the most OISs
+i <- which(PSAlookup$PSA_NUM==names(a)[1])
+plot(st_geometry(PSAlookup[i,]), add=TRUE, col=rgb(0,1,0,0.5), pch=16)
+# plot the OISs in the PSA with the second most OISs
+i <- which(PSAlookup$PSA_NUM==names(a)[2])
+plot(st_geometry(PSAlookup[i,]), add=TRUE, col=rgb(0,0,1,0.5), pch=16)
+```
 
+Let's identify which OISs occurred in the same PSA as the University of Pennsylvania. We've already geocoded Penn and have its coordinates.
+```{r comment="", message=FALSE}
+gcPenn
+#  map them to the spatial coordinates
+gcPenn$lon <- as.numeric(gcPenn$lon)
+gcPenn$lat <- as.numeric(gcPenn$lat)
+st_join(st_as_sf(gcPenn,
+                 coords=c("lon","lat"),
+                 crs=st_crs("+init=epsg:4326")),
+        PPDmap)
+```
+Now we see that Penn is in PSA 183 and we can highlight those points on the map.
+```{r comment="", message=FALSE}
+plot(st_geometry(PPDmap), axes=TRUE)
+i <- which(PSAlookup$PSA_NUM=="183")
+plot(st_geometry(PSAlookup[i,]), add=TRUE, col=rgb(1,0,0,0.5), pch=16)
+```
 
-# color PPDmap by number of shootings
-plot(st_geometry(PPDmap))
-
+Lastly, we will tabulate the number of OISs in each PSA and color the map by the number of OISs.
+```{r comment="", message=FALSE}
 # how many shootings in each PSA?
 a <- table(PSAlookup$PSA_NUM)
+a
+
 # merge the shooting count into the PPDmap data
 i <- match(PPDmap$PSA_NUM, names(a))
-names(a)[i]
-PPDmap$PSA_NUM
 PPDmap$nShoot <- a[i]
+PPDmap[1:3,]
+```
+We can see that `PPDmap` now has a new `nShoot` column. A histogram will show what kinds of counts we observe in the PSAs.
+```{r comment="", message=FALSE}
+hist(a, xlab="Number of OISs", ylab="Number of PSAs", main="")
+```
 
-hist(a)
-
-# break the shooting count into categories
+Let's discretize the OIS counts into a few categories.
+```{r comment="", message=FALSE}
 a <- cut(PPDmap$nShoot,
          breaks=c(0,1,5,10,15,20,25,30),
          right=FALSE)
-# use "heat colors"
+a
+```
+`cut()` converts all of the individual counts into categories, like [1,5) or [25,30). For each of these categories we will associate a color for the map. `heat.colors()` will generate a sequence of colors in the yellow, orange, red range.
+```{r comment="", message=FALSE}
 col <- rev(heat.colors(7,1))
-# or generate a range of red colors
-# col <- rgb(seq(0,1,length=7),0,0,1)
-# as.numeric will convert the factors in to integers 1-7
-col[as.numeric(a)]
+col
+```
+These are eight digit codes describing the color. The first two digits correspond to red, digits three and four correspond to green, digits five and six correspond to blue, and the last two digits correspond to transparency. These are hexadecimal numbers (base 16). Hexadecimal numbers use the digits 0-9, like normal decimal system numbers, and then denote 10 as A, 11 as B, on up to 15 as F. So FF as a decimal is $15 \times 16 + 15 = 255$, which is the maximum value for a two digit hexadecimal. The hexadecimal 80 as a decimal is $8 \times 16 + 0 = 128$, which is in the middle of the range 0 to 255. So the first color code, FFFF80FF, means maximum red, maximum green, half blue, and not transparent at all. This mixture is known more commonly as "yellow".
 
-# create the map, color the regions by their n.shoot category
+Now we need to select the right color for each PSA. If I apply `as.numeric()` to `a`, then all the [0,1) will convert to 1, the [1,5) will convert to 2, and so on up to [25,30) converting to 7. So `col[as.numeric(a)]` will pick out the right color for each PSA. Now create the map coloring each PSA using the right color.
+```{r comment="", message=FALSE}
 plot(st_geometry(PPDmap), col=col[as.numeric(a)], border=NA)
-# add the number of shootings
+# add the number of shootings to the map
 a <- st_coordinates(st_centroid(PPDmap))
-text(a[,1], a[,2], PPDmap$nShoot)
+text(a[,1], a[,2], PPDmap$nShoot, cex=0.5)
+```
+Those PSAs with the least shootings are a very pale yellow. As we examine PSAs with a greater number of OISs, their colors get redder and redder.
 
+# Summary
+We started with just a web page linking to a collection of pdf files. We used regular expressions to extract everything we could from the web page tables. We had R "read" the pdf files to extract the dates that were not readily available. We geocoded the stops so that we could put them on a map. Finally, we could tabulate by PSA the number of OISs and map those as well.
 
-# save the final version
-save(gc.ois, file="PPD OIS geocode.RData")
-
-# to restart working with the data without having to rerun everything
-library(lubridate)
-setwd("Z:/Penn/CRIM602/data/PhillyOIS")
-load("PPD OIS geocode.RData")
-load("PPD OIS.RData")
-
-
-
-
-
-
+If you've worked through all of this, then I would recommend that you save your objects, using `save(ois, PSAlookup, gcOIS, file="PPDOIS.RData")`. That way you will not have to scrape everything off the web again or redo any geocoding.
 
 # Exercises
-`r .exNum('Find the largest and smallest safety zones (use @@st_area(mapSZ)@@)')`
+`r .exNum('Revisit the geocoding section discussing geocoding errors. Examine the OISs that have not been geocoded to specific locations. Fix their addresses and redo the geocoding of these OISs to improve the accuracy of the data.')`
 
-`r .exNum('Plot all the safety zones. Color the largest in one color and the smallest in another color')`
+`r .exNum('Identify officer-involved shootings that resulted in the offender being transported to the Hospital at the University of Pennsylvania. Create a map marking the location of HUP, the location of officer-involved shootings resulting in the offender being transported to HUP, and the locations of all other shootings.')`
 
-`r .exNum('Use @@st_overlaps(mapSZ, mapSZ, sparse=FALSE)@@ or @@print(st_overlaps(mapSZ, mapSZ, sparse=TRUE), n=Inf, max_nb=Inf)@@ to find two safety zones that overlap (not just touch at the edges)')`
-
-`r .exNum('With the two safety zones that you found in the previous question, plot using three different colors the first safety zone, second safety zone, and their intersection (hint: use @@st_intersection()@@)')`
-
-
-
-
-# Solutions to the exercises
-`r .exQ(1)`
-
-```{r comment="", results='hold'}
-```
+`r .exNum('For each shooting determine which hospital treated the offender. Use @@st_distance()@@ to determine what percentage of those shot in an OIS went to the closest hospital.')`
 
