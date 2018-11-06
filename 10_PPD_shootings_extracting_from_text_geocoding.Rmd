@@ -144,7 +144,7 @@ a <- try(scan("http://www.phillypolice.com/assets/crime-maps-stats/officer-invol
 a <- try(scan("http://www.phillypolice.com/assets/crime-maps-stats/officer-involved-shootings/14-14.pdf", what=""))
 a <- try(scan("http://www.phillypolice.com/assets/crime-maps-stats/officer-involved-shootings/14-15.pdf", what=""))
 ```
-Okay! So the OIS's `id` must be 14-15. We'll fix the URL to the associated pdf file too.
+You should receive errors for 14-13 and 14-14, so the OIS's `id` must be 14-15. We'll fix the URL to the associated pdf file too.
 ```{r comment="", results='hold'}
 ois$id[ois$location=="5100 block of Willows Avenue " & ois$date=="04/22/2014 "] <- "14-15"
 ois$url[ois$id=="14-15"] <- "http://www.phillypolice.com/assets/crime-maps-stats/officer-involved-shootings/14-15.pdf"
