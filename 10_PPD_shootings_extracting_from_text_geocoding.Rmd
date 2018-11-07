@@ -1,33 +1,31 @@
 ---
 title: "Extracting data from text and geocoding"
 author:
-- Greg Ridgeway (gridge@upenn.edu)
+- affiliation: University of Pennsylvania
+  email: gridge@upenn.edu
+  name: Greg Ridgeway
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
-  pdf_document:
-    latex_engine: pdflatex
-  html_document: default
-fontsize: 11pt
-fontfamily: mathpazo
+  html_document:
+    css: htmlstyle.css
 ---
 
-<!-- PDF YAML header Ctrl-Shift-C to comment/uncomment -->
+<!-- HTML YAML header Ctrl-Shift-C to comment/uncomment -->
 
 <!-- --- -->
 <!-- title: "Extracting data from text and geocoding" -->
 <!-- author: -->
-<!-- - affiliation: University of Pennsylvania -->
-<!--   email: gridge@upenn.edu -->
-<!--   name: Greg Ridgeway -->
+<!-- - Greg Ridgeway (gridge@upenn.edu) -->
 <!-- date: "`r format(Sys.time(), '%B %d, %Y')`" -->
 <!-- output: -->
-<!--   html_document: -->
-<!--     css: htmlstyle.css -->
+<!--   pdf_document: -->
+<!--     latex_engine: pdflatex -->
+<!--   html_document: default -->
+<!-- fontsize: 11pt -->
+<!-- fontfamily: mathpazo -->
 <!-- --- -->
 
-<!-- HTML YAML header Ctrl-Shift-C to comment/uncomment -->
-
-
+<!-- PDF YAML header Ctrl-Shift-C to comment/uncomment -->
 
 <!-- Make RMarkdown cache the results -->
 ```{r echo=FALSE}
@@ -50,12 +48,6 @@ knitr::opts_chunk$set(echo=TRUE, cache=TRUE, cache.lazy=FALSE, out.width='100%')
    return( paste0(i,". ",.exerciseQuestions[i]) )
 }
 ```
-
-library(lubridate)
-library(pdftools)
-library(jsonlite)
-library(ggmap)
-library(sf)
 
 # Introduction
 
@@ -515,7 +507,11 @@ ois$text[ois$location=="Harbison Ave -Phila"]
 ```
 The text describes the path of the suspect moving south on Torresdale and turning west on Bridge. Let's pull up a map of this area. I've overlayed the path of the suspect on top of the map. The officers describe the suspect moving "south" on Torresdale and "west" on Bridge because the I95 and the Delaware River are just south of this area and run more east-west here. So thinking that I95 run north-south and that the Delaware River is the east boundary of Philadelphia, officers may decribe someone running "west" on Bridge St as running away from I95 and the Delaware River.
 ```{r comment="", results='hold', message=FALSE}
-ggmap(get_map(c(-75.0691987,40.0138755), zoom = 16)) +
+ggmap(get_map(location = c(-75.0691987-0.0025, 40.0138755-0.0015, -75.0691987+0.0025, 40.0138755+0.0015),
+              scale = "auto",
+              maptype = "toner",
+              source = "stamen"),
+      extent="normal") +
    geom_path(aes(x=x, y=y),
              data=data.frame(x=c(-75.068621,-75.070423,-75.070594),y=c(40.013570,40.013184,40.013710)),
              color="red", size=2, alpha=0.5, 
