@@ -569,7 +569,7 @@ ggmap(mapPhilly, extent="normal") +
 
 # Working with shapefiles and coordinate systems
 
-The Philadelphia Police Department divides the city into Police Service Areas (PSAs). The city provides a *shapefile*, a file containing geographic data, that describes the boundaries of the PSAs at Philadelphia's [open data site](https://www.opendataphilly.org/dataset/police-service-areas). R can read these files using the `st_read()` function provided in the `sf` (simple features) package.
+The Philadelphia Police Department divides the city into Police Service Areas (PSAs). The city provides a *shapefile*, a file containing geographic data, that describes the boundaries of the PSAs at Philadelphia's [open data site](https://www.opendataphilly.org/dataset/police-service-areas). R can read these files using the `st_read()` function provided in the `sf` (simple features) package. Even though `st_read()` appears to only be accessing `Boundaries_PSA.shp`, you should have all of the `Boundaries_PSA` files in your `10_shapefiles_and_data` folder. The other files have information that `st_read()` needs, like the coordinate system stored in `Boundaries_PSA.prj`. If you do not have all `Boundaries_PSA` files in your folder, then in a few lines you will get errors like "the sfc object should have crs set," meaning that the Coordinate Reference System (CRS) is missing.
 ```{r comment="", results='hold', message=FALSE}
 library(sf)
 PPDmap <- st_read("10_shapefiles_and_data/Boundaries_PSA.shp")
