@@ -207,7 +207,7 @@ THE US Census Bureau provides numerous useful geographic data files. We will use
 
 First, we will extract an outline of the city. The file `tl_2014_06_place.shp` file is a TIGER line file, created in 2014, for state number 6 (California is 6th in alphabetical order), and contains all of the places (cities and towns). Here's the entire state.
 ```{r comment="", results='hold'}
-mapCAplaces <- st_read("10_shapefiles_and_data/tl_2014_06_place.shp")
+mapCAplaces <- st_read("11_shapefiles_and_data/tl_2014_06_place.shp")
 plot(st_geometry(mapCAplaces))
 ```
 
