@@ -186,6 +186,10 @@ res <- dbSendQuery(con, "
                    FROM crime")
 ```
 
+Now when you look at the table, you can see that the column names have been updated
+```{r comment="", results='hold'} 
+fetch(dbSendQuery(con, "SELECT * FROM iucr LIMIT 5"))
+```
 
 To finalize the lookup table, we just need to clear out those rows that we do not want, those involving FBI code 26 and the removal of the spaces for IUCR 5114.
 ```{r comment="", results='hold', cache=FALSE, warning=FALSE}
