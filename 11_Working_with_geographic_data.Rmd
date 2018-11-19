@@ -219,7 +219,7 @@ plot(st_geometry(mapLA))
 
 Now let's load in the census tracts for all of California.
 ```{r comment="", results='hold'}
-mapCens <- st_read("10_shapefiles_and_data/tl_2014_06_tract.shp")
+mapCens <- st_read("11_shapefiles_and_data/tl_2014_06_tract.shp")
 ```
 
 `mapCens` contains polygons for all census tracts in California. That's a lot more than we need. we just need the ones that overlap with Los Angeles. `st_intersects()` can help us determine which census tracts are in Los Angeles. However, the following gives us a warning about assuming planar coordinates.
@@ -360,7 +360,7 @@ text(st_coordinates(st_centroid(subset(mapCens,inMS13))),
 The Los Angeles Police Department (LAPD) posts all of its crime data at [Los Angeles' open data portal](https://data.lacity.org/A-Safe-City/Crime-Data-from-2010-to-Present/y8tr-7khq).
 
 ```{r comment="", results='hold'}
-dataCrime <- read.csv("10_shapefiles_and_data/Crime_Data_from_2010_to_Present.csv.gz",
+dataCrime <- read.csv("11_shapefiles_and_data/Crime_Data_from_2010_to_Present.csv.gz",
                       as.is=TRUE)
 ```
 The data have a `Location` variable, but we need to communicate to R that this variable has geographic information. Right now, R just thinks this variable is plain text. Using regular expressions we can extract latitude and longitude.
@@ -585,7 +585,7 @@ With the southern MS13 safety zone extracted, let's explore the streets in this 
 
 Let's load the street map for Los Angeles County, the county that contains the city of Los Angeles. The file we'll use here is `tl_2014_06037_roads.shp`. The naming convention says that this is a TIGER line file, from 2014, for state 06 (California), for county 037 (Los Angeles County), containing roads. Los Angeles County is large and this file has over 140,000 street segments. It can take a little while to load and project.
 ```{r comment="", results='hold'}
-mapLAstreet <- st_read("10_shapefiles_and_data/tl_2014_06037_roads.shp")
+mapLAstreet <- st_read("11_shapefiles_and_data/tl_2014_06037_roads.shp")
 # make sure we use the same projection as the injunction map
 mapLAstreet <- st_transform(mapLAstreet, st_crs(mapSZms13s))
 mapLAstreet[1:3,]
