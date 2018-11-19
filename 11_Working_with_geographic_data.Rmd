@@ -75,7 +75,7 @@ library(lubridate)
 ```
 All of the spatial functions in the `sf` package have a prefix `st_`(spatial/temporal). We'll first read in `allinjunction.shp`, a shapefile containing the geographic definition of Los Angeles gang injunctions. You should have a collection of four files related to `allinjunctions`, a .dbf file, a .prj file, a .shx file, and a .shp file. even though the `st_read()` function appears to just ask for the .shp file, you need to have all four files in the same folder.
 ```{r comment="", results='hold'} 
-mapSZ <- st_read("10_shapefiles_and_data/allinjunctions.shp")
+mapSZ <- st_read("11_shapefiles_and_data/allinjunctions.shp")
 ```
 Let's take a look at what we have read in. `mapSZ` has a lot of data packed into it that we will explore. To make the plot we need to ask R to just extract the geometry.
 ```{r comment="", results='hold'} 
