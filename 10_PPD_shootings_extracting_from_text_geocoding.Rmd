@@ -650,9 +650,9 @@ st_crs(PPDmap)
 ```
 This coordinate system is the Lambert Conic Conformal (LCC). This particular projection of the `PPDmap` is tuned to provide good precision for the southern part of Pennsylvania and distances are measured in feet (note the `+units=us-ft` tag in the `proj4string`).
 
-Let's transform back to longitude/latitude. It really is best to work using a different coordinate system, but I'm going to stick with longitude/latitude so that the values make a little more sense to us. Also at the scale of Philadelphia, we're just using the centroid calculation to figure out where to put labels.
+Let's transform back to longitude/latitude. It really is best to work using a different coordinate system, but I'm going to stick with longitude/latitude so that the values make a little more sense to us. Also at the scale of Philadelphia, we're just using the centroid calculation to figure out where to put labels. `st_transform()` does allow you to just use the EPSG code by itself.
 ```{r comment="", results='hold', message=FALSE}
-PPDmap <- st_transform(PPDmap, crs=st_crs("+init=epsg:4326"))
+PPDmap <- st_transform(PPDmap, crs=4326)
 ```
 Now both PPD data and polygons are on the same scale
 ```{r comment="", results='hold', message=FALSE}
