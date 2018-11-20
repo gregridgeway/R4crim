@@ -135,6 +135,7 @@ It doesn't look terribly useful because it is just a giant red splotch. These ar
 
 Let's instead try plotting hexagonal bins, which the `hexbin` package let us do. Why hexagons? It turns out that squares tend to have problems in the corners. The precision is low there and our eye tends to get drawn to the parallel lines the square grid makes. Ideally, we want to use a shape that has a small perimeter-to-area ratio. Circles have the smallest perimeter-to-area ratio, but we can't use circles to tile over the map. Hexagons fall in between squares and circles.
 
+Note: when you run the following lines of code, you will get the following message: "Coordinate system already present. Adding new coordinate system, which will replace the existing one." Don't panic, this message is supposed to appear. 
 ```{r comment="", results='hold'}
 chicago.map +
   coord_cartesian() +
