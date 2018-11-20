@@ -57,14 +57,16 @@ knitr::opts_chunk$set(echo=TRUE, cache=TRUE, cache.lazy=FALSE, out.width='100%')
 # Introduction
 
 Geographic data includes 
-* point - crime locations, locations of patrol cars
-* lines - roads, paths, routes
-* polygons - city boundaries, areas within 1000 ft of a school
+
+ * point - crime locations, locations of patrol cars
+ * lines - roads, paths, routes
+ * polygons - area within city boundaries, areas within 1000 ft of a school
+
 Geographic data also include the data that go along with each of these shapes such as the area or length of the geographic object, the name of the object (e.g. City of Los Angeles), and other characteristics of the geography (e.g. population, date established).
 
 Many questions about crime and the justice system involve the use of geographic data. In this section we will work toward answering questions about the race distribution of residents inside Los Angeles gang injunction zones, the number of crimes with 100 feet of Wilshire Blvd, and examine crimes near Metrorail stations.
 
-We will be learning how to use the `sf` package for managing spatial data, the `rgeos` package for manipulating spatial objects, and the `rjson` package to look at modern methods for accessing data.
+We will be learning how to use the `sf` package for managing spatial data, the `rgeos` package for manipulating spatial objects, and the `jsonlite` package to look at modern methods for accessing data.
 
 # Exploring Los Angeles gang injunction maps
 
@@ -87,7 +89,7 @@ We've added the x and y axis so that you note the scale. We can check how the ge
 ```{r comment="", results='hold'} 
 st_crs(mapSZ)
 ```
-Of greatest importance is to notice that the projection is not latitude and longitude, although this is clearly the case from the previous plot, and that the unit of measurement is in feet. Whenever we compute a distance or area with these data, the units will be in feet or square feet.
+Of greatest importance is to notice that the projection is not latitude and longitude, although this is clearly the case from the previous plot. The coordinate system is the Lambert Conic Conformal (LCC) tuned specifically for the Los Angeles area (that's what the lat/lon parameters are doing here). This coordinate system is oriented for the North American continental plate (NAD83), so precise that this coordinate system moves as North America tectonic plate moves (2cm per year!). Also note that the unit of measurement is in feet. Whenever we compute a distance or area with these data, the units will be in feet or square feet.
 
 Let's examine the data attached to each polygon. Here are the first three rows.
 ```{r comment="", results='hold'} 
@@ -270,6 +272,10 @@ plot(st_geometry(mapLA), add=TRUE, border="red", lwd=3)
 Which census tracts cover the MS13 safety zone?
 ```{r comment="", results='hold'}
 st_intersects(mapSZms13, mapCens)
+```
+
+```{r comment="", results='hold'}
+st_intersects(mapSZms13, mapCens)
 mapCens$inMS13 <- FALSE
 mapCens$inMS13[st_intersects(mapSZms13, mapCens)[[1]]] <- TRUE
 plot(st_geometry(subset(mapCens, inMS13)))
@@ -283,42 +289,42 @@ plot(st_geometry(mapSZms13), border="red", lwd=3, add=TRUE)
 
 The full census of the United States occurs every ten years, but in between those surveys the Census Bureau collects data through the American Community Survey (ACS) by selecting a sample of households. These surveys have a lot of information about people and neighborhoods. We are just going to use the ACS to gather race data on the residents within census tracts.
 
-JSON (JavaScript Object Notation) is a very common protocol for moving data. The ACS provides a JSON access to its data. There are other ways of accessing ACS data, like downloading the entire ACS dataset, but we're going to use JSON so that you become familiar with how JSON works. Also, when we only need a small amount of information (just race data from particular census tracts) it can save a lot of effort when compared with downloading and processing the full ACS dataset.
+JSON (JavaScript Object Notation) is a very common protocol for moving data. The ACS provides JSON access to its data. There are other ways of accessing ACS data, like downloading the entire ACS dataset, but we're going to use JSON so that you become familiar with how JSON works. Also, when we only need a small amount of information (just race data from particular census tracts) it can save a lot of effort when compared with downloading and processing the full ACS dataset.
 
-First, let's load the `rjson` library.
-```{r comment="", results='hold'}
-library(rjson)
+First, let's load the `jsonlite` library.
+```{r comment="", results='hold', warning=FALSE}
+library(jsonlite)
 ```
 Here's how you can access the ACS data on the number of US households in 2014 and 2015.
-```{r comment="", results='hold'}
-fromJSON(file="http://api.census.gov/data/2015/acs1/cprofile?get=NAME,CP02_2015_001E,CP02_2014_001E&for=us:*")
+```{r comment="", results='hold', warning=FALSE}
+fromJSON(readLines("http://api.census.gov/data/2015/acs1/cprofile?get=NAME,CP02_2015_001E,CP02_2014_001E&for=us:*"))
 ```
+(`fromJSON()` should not need `readLines()`, but the `jsonlite` version at this time has a problem hitting URLs directly).
 
 Let's deconstruct this URL. First, we're accessing data from the 2015 ACS data using `http://api.census.gov/data/2015/acs1`. Second, we're accessing variables `SP02_2014_001E` and `SP02_2015_001E`, which contain the number of households in the United States. This we needed to track down, but the Social Explorer website, [https://www.socialexplorer.com/data/ACS2014_5yr/metadata/](https://www.socialexplorer.com/data/ACS2014_5yr/metadata/), makes this easier. Lastly, we asked `for=us:*`, meaning for the entire United States.
 
 If we want the total number of people in specific census tracts, then we can make this request.
-```{r comment="", results='hold'}
-fromJSON(file="http://api.census.gov/data/2014/acs5?get=B00001_001E&for=tract:204920,205110&in=state:06+county:037")
+```{r comment="", results='hold', warning=FALSE}
+fromJSON(readLines("http://api.census.gov/data/2014/acs5?get=B00001_001E&for=tract:204920,205110&in=state:06+county:037"))
 ```
 Here we have requested population data (variable `B00001_001E`) for two specific census tracts (204920 and 205110)  from California (state 06) in Los Angeles County (county 037).
 
 If we want the total population in each tract in Los Angeles County, just change the tract list to an *.
-```{r comment="", results='hold'}
-a <- fromJSON(file="http://api.census.gov/data/2014/acs5?get=B00001_001E&for=tract:*&in=state:06+county:037")
+```{r comment="", results='hold', warning=FALSE}
+a <- fromJSON(readLines("http://api.census.gov/data/2014/acs5?get=B00001_001E&for=tract:*&in=state:06+county:037"))
 # there are over 2000 census tracts in LA County. Show the first 10
-a[1:10]
+a[1:10,]
 ```
 You can find a lot more examples at [http://api.census.gov/data/2014/acs5/examples.html](http://api.census.gov/data/2014/acs5/examples.html).
 
 Now let's get something more complete that we can merge into our geographic data. For each census tract in Los Angeles County, we will extract the total population (`B03002001`), the number of non-Hispanic white residents (`B03002003`), non-Hispanic black residents (`B03002004`), and Hispanic residents (`B03002012`).
-```{r comment="", results='hold'}
-dataRace <- fromJSON(file="http://api.census.gov/data/2014/acs5?get=B03002_001E,B03002_003E,B03002_004E,B03002_012E&for=tract:*&in=state:06+county:037")
+```{r comment="", results='hold', warning=FALSE}
+dataRace <- fromJSON(readLines("http://api.census.gov/data/2014/acs5?get=B03002_001E,B03002_003E,B03002_004E,B03002_012E&for=tract:*&in=state:06+county:037"))
 ```
 We will convert the list to a data frame, leaving out the first component of the list that has the column names and telling R not to convert the character strings to factors.
 ```{r comment="", results='hold'}
-a <- data.frame(do.call(rbind,dataRace[-1]),
-                stringsAsFactors=FALSE)
-names(a) <- dataRace[[1]]
+a <- data.frame(dataRace[-1,], stringsAsFactors=FALSE)
+names(a) <- dataRace[1,]
 names(a)[1:4] <- c("total","white","black","hisp")
 dataRace <- a
 for(i in c("total","white","black","hisp"))
@@ -375,13 +381,12 @@ dataCrime <- subset(dataCrime, !is.na(lat))
 
 Now that we have separate latitude and longitude, we can convert our dataframe into a simple features spatial object.
 ```{r comment="", results='hold'}
-dataCrime <- st_as_sf(dataCrime, coords=c("lon","lat"))
+dataCrime <- st_as_sf(dataCrime, 
+                      coords=c("lon","lat"),
+                      crs=4326)
 ```
+Setting `crs=4326` tells R that this spatial object has coordinates in latitude and longitude. We can either give the coordinate system using the longer form `"+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"` or try to remember that [EPSG 4326](http://www.spatialreference.org/ref/epsg/4326/) refers to latitude and longitude.
 
-We need to tell R that this spatial object has coordinates in latitude and longitude. We can either give the coordinate system using the longer form `"+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0"` or try to remember that [EPSG 4269](# from http://www.spatialreference.org/ref/epsg/2229/) refers to latitude and longitude.
-```{r comment="", results='hold'}
-st_crs(dataCrime) <- "+init=epsg:4269"
-```
 
 Now we need to reproject the data into the coordinate system to match the injunction safety zone map.
 ```{r comment="", results='hold'}
@@ -462,7 +467,8 @@ dataCrimeMS13$Date.Occurred <- mdy(dataCrimeMS13$Date.Occurred)
 a <- aggregate(DR.Number~place1+year(Date.Occurred),
                data=subset(dataCrimeMS13,
                            year(Date.Occurred)<2018),
-               length)
+               length,
+               drop=FALSE)
 a <- reshape(a, timevar="place1", idvar="year(Date.Occurred)", direction="wide")
 names(a) <- c("year","buffer","outside","SZ")
 # normalize to the average crime count over the period
@@ -834,7 +840,7 @@ plot(st_geometry(mapRFKschool), border="purple", add=TRUE, lwd=3)
 KML (keyhole markup language) is a standard way that Google Maps stores geographic information (Keyhole was a company that Google acquired, renaming their product Google Earth). You can convert any of the maps you make in R to KML format and post them to Google Maps.
 
 ```{r comment="", results='as.is'}
-a <- st_transform(mapSZms13, st_crs("+proj=longlat +datum=WGS84"))
+a <- st_transform(mapSZms13, crs=4326)
 st_write(a, 
          dsn="ms13.kml", 
          layer= "ms13", 
@@ -916,8 +922,8 @@ iCens <- st_intersects(st_buffer(mapSZ[51,], dist=5280),
 plot(st_geometry(mapCens[iCens,]))
 
 # get total population for each census tract
-dataRes <- fromJSON(file="http://api.census.gov/data/2014/acs5?get=B03002_001E&for=tract:*&in=state:06+county:037")
-dataRes <- data.frame(do.call(rbind, dataRes[-1]))
+dataRes <- fromJSON(readLines("http://api.census.gov/data/2014/acs5?get=B03002_001E&for=tract:*&in=state:06+county:037"))
+dataRes <- data.frame(dataRes[-1,])
 names(dataRes) <- c("pop","state","county","tract")
 dataRes$pop <- as.numeric(dataRes$pop)
 
@@ -1007,17 +1013,4 @@ length(unlist(i))
 length(st_intersects(st_buffer(mapRFKschool, dist=500),
                      dataCrimeMS13s)[[1]])
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
 
