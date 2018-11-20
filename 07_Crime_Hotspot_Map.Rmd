@@ -75,14 +75,13 @@ con <- dbConnect(SQLite(), dbname="chicagocrime.db")
 ```
 
 Let's run a SQL query to extract the two columns, `Latitude` and `Longitude` from our crime database, creating a datafame with one row for each crime incident in the dataset.
-
 ```{r comment="", results='hold'} 
 res <- dbSendQuery(con, "
                    SELECT Latitude, Longitude
                    FROM crime
                    WHERE Latitude  IS NOT NULL AND
                          Longitude IS NOT NULL")
-a <- fetch(res, n = -1)
+dataAllcrime <- fetch(res, n = -1)
 dbClearResult(res)
 ```
 
@@ -94,7 +93,7 @@ res <- dbSendQuery(con, "
                    WHERE [Primary.Type]='ASSAULT' AND
                          Latitude  IS NOT NULL AND
                          Longitude IS NOT NULL")
-b <- fetch(res, n = -1)
+dataAssaults <- fetch(res, n = -1)
 dbClearResult(res)
 ```
 
@@ -105,29 +104,32 @@ library(ggmap)
 library(hexbin)
 ```
 
-Next, we'll need to get a map of Chicago. The `ggmap` package enables us to obtain a Google Maps map. Try changing the zoom level. Experiment with moving the legend.
+Next, we'll need to get a map of Chicago. Google Maps used to be readily available through `ggmap`, but as of June 2018 the account requirements became more complicated for Google Maps. We will use other map services instead here. Stamen is a design organization that provides maps of several styles. Here we define the bounding box for the City of Chicago.
 
-If you type `?get_map` or type `?ggmap`, you'll see a range of different options for your map. Instead of doing `maptype="satellite"` try `maptype="hybrid"`.
-
-```{r comment="", results='hold'}
-chicago.map <- ggmap(get_map("Chicago", 
-                             zoom = 11, 
-                             maptype = "satellite"),
-                     extent="device",
-                     legend="topright")
+```{r comment="", results='hold', message=FALSE}
+chicago.map <- ggmap(get_map(c(-88.0, 41.6, -87.5, 42.1), source="stamen"))
 chicago.map
 ```
 
-Let's plot as points on the Chicago map, a random sample of 100,000 rows from our dataset. 
+There are other styles of Stamen maps including `toner`
+```{r comment="", results='hold', message=FALSE}
+print(ggmap(get_map(c(-88.0, 41.6, -87.5, 42.1), source="stamen", maptype="toner")))
+```
 
+and `watercolor`.
+```{r comment="", results='hold', message=FALSE}
+print(ggmap(get_map(c(-88.0, 41.6, -87.5, 42.1), source="stamen", maptype="watercolor")))
+```
+
+Let's plot as points on the Chicago map, a random sample of 100,000 rows from our dataset. 
 ```{r comment="", results='hold'}
-i <- sample(1:nrow(a),100000)
+i <- sample(1:nrow(dataAllcrime), 100000)
 chicago.map +
   geom_point(aes(x=Longitude,y=Latitude), 
-             data=a[i,],
-             alpha=0.5, 
-             color="darkred", 
-             size = 1)
+             data  = dataAllcrime[i,],
+             alpha = 0.5, 
+             color = "darkred", 
+             size  = 1)
 ```
 It doesn't look terribly useful because it is just a giant red splotch. These are all the points where a crime occurred. There's no density to show us the high crime or low crime areas. But, we're making process with getting points onto a map!
 
@@ -137,8 +139,8 @@ Let's instead try plotting hexagonal bins, which the `hexbin` package let us do.
 chicago.map +
   coord_cartesian() +
   stat_binhex(aes(x=Longitude, y=Latitude),
-              bins=60, 
-              data = a)
+              bins = 60, 
+              data = dataAllcrime)
 ```
 
 Or try the following. Setting `alpha=2/4` makes the bins a little more transparent. Try comparing with `alpha=1/4` or `alpha=3/4`.
@@ -147,9 +149,9 @@ Or try the following. Setting `alpha=2/4` makes the bins a little more transpare
 chicago.map +
   coord_cartesian() +
   stat_binhex(aes(x=Longitude, y=Latitude),
-              bins=60, 
-              alpha = 2/4, 
-              data = a)
+              bins  = 60, 
+              alpha = 0.5, 
+              data  = dataAllcrime)
 ```
 
 The previous map was a default monochromatic color (blue). You can change the color gradient. To see what colors are available, type `colors()`.
@@ -158,9 +160,9 @@ The previous map was a default monochromatic color (blue). You can change the co
 chicago.map +
   coord_cartesian() +
   stat_binhex(aes(x=Longitude, y=Latitude),
-              bins=60, 
-              alpha = 2/4, 
-              data = a) +
+              bins  = 60, 
+              alpha = 0.5, 
+              data = dataAllcrime) +
   scale_fill_gradient('Crime Density',
                       low="springgreen",
                       high="hotpink")
@@ -169,13 +171,13 @@ chicago.map +
 You can also do a map that shows the high crime areas in a way that is akin to elevation on a topographic map. The more concentrated the concentric areas, the higher the crime (or, in the case of a topographic map, the higher the terrain). Note that a plot using `stat_density2d()` requires a lot of memory. That's why it's a good idea to use a sample of cases.
 
 ```{r comment="", results='hold'}
-i <- sample(1:nrow(a),100000)
+i <- sample(1:nrow(dataAllcrime),100000)
 chicago.map +
   stat_density2d(aes(x=Longitude,y=Latitude),
                  bins = 5, 
-                 data = a[i,], 
+                 data = dataAllcrime[i,], 
                  geom = 'density2d',
-                 col='white')
+                 col  = 'white')
 ```
 
 Let's make a hotspot map with a gradient, red for high crime and green for low crime. 
@@ -185,11 +187,11 @@ chicago.map +
   stat_density2d(aes(x=Longitude, y=Latitude,
                      fill=..level..,
                      alpha=..level..),
-                 data = a[i,], 
+                 data = dataAllcrime[i,], 
                  geom = 'polygon') +
   scale_fill_gradient('Crime Density',
-                      low="green",
-                      high="red") +
+                      low  = "green",
+                      high = "red") +
   scale_alpha(range = c(.4, .75), 
               guide = FALSE) +
   guides(fill = guide_colorbar(barwidth = 1.5, barheight = 10))
@@ -202,11 +204,11 @@ chicago.map +
                      fill=..level..,
                      alpha=..level..),
                  bins = 20,
-                 data = a[i,],
+                 data = dataAllcrime[i,],
                  geom = 'polygon') +
   scale_fill_gradient('Crime Density',
-                      low="green",
-                      high="red") +
+                      low  = "green",
+                      high = "red") +
   scale_alpha(range = c(.4, .75),
               guide = FALSE) +
   guides(fill = guide_colorbar(barwidth = 1.5, barheight = 10))
@@ -231,7 +233,7 @@ res <- dbSendQuery(con, "
                    WHERE [Primary.Type]='MOTOR VEHICLE THEFT' AND
                          Latitude  IS NOT NULL AND
                          Longitude IS NOT NULL")
-b <- fetch(res, n = -1)
+dataCarTheft <- fetch(res, n = -1)
 dbClearResult(res)
 
 for(year0 in 2005:2017)
@@ -244,7 +246,7 @@ for(year0 in 2005:2017)
                      size = 2,
                      bins = 4,
                      geom = 'polygon',
-                     data = subset(b,year==year0)) +
+                     data = subset(dataCarTheft, year==year0)) +
        scale_fill_gradient(year0) +
        scale_alpha(range = c(.4, .75), guide = FALSE) +
        guides(fill = guide_colorbar(barwidth = 1.5, barheight = 10))
@@ -254,4 +256,4 @@ for(year0 in 2005:2017)
 
 ```
 
-Many cities other than Chicago have accessible incident-level data so that you can try to make a hotspot map. Cities include Jersey City, Philadelphia, Los Angeles, Seattle, San Francisco, Baltimore, and Washington, DC. To work with the data from some of these cities, it's necessary to learn some tricks to clean up the dataset.
+Many cities other than Chicago have accessible incident-level data so that you can try to make a hotspot map. Cities include Jersey City, Philadelphia, Los Angeles, Seattle, San Francisco, Baltimore, and Washington, DC.
