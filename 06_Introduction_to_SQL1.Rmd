@@ -159,7 +159,7 @@ a <- read.table("Crimes_-_2001_to_present-clean.csv",
                 sep=";",nrows=5,header=TRUE)
 # ask SQLite what data type it plans to use to store each column (eg number, text)
 variabletypes <- dbDataType(con, a)
-# make sure IUCR and Ward are stored as TEXT
+# make sure these features are stored as TEXT
 variabletypes["IUCR"] <- "TEXT"
 variabletypes["Ward"] <- "TEXT"
 variabletypes["District"] <- "TEXT"
