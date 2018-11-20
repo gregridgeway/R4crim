@@ -10,7 +10,7 @@
 
 
 
-<meta name="date" content="2018-11-19" />
+<meta name="date" content="2018-11-20" />
 
 <title>Working with Geographic Data</title>
 
@@ -127,11 +127,7 @@ $(document).ready(function () {
 <address class="author_afil">
 University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="mailto:gridge@upenn.edu">gridge@upenn.edu</a></a>
 </address>
-<h4 class="author"><em>Ruth Moyer</em></h4>
-<address class="author_afil">
-University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="mailto:moyruth@upenn.edu">moyruth@upenn.edu</a></a>
-</address>
-<h4 class="date"><em>November 19, 2018</em></h4>
+<h4 class="date"><em>November 20, 2018</em></h4>
 
 </div>
 
@@ -141,8 +137,7 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
 <!-- title: "Working with Geographic Data" -->
 <!-- author: -->
 <!-- - Greg Ridgeway (gridge@upenn.edu) -->
-<!-- - Ruth Moyer (moyruth@upenn.edu) -->
-<!-- date: "November 19, 2018" -->
+<!-- date: "November 20, 2018" -->
 <!-- output: -->
 <!--   pdf_document: -->
 <!--     latex_engine: pdflatex -->
@@ -841,6 +836,8 @@ labs &lt;- data.frame(t(labs))
 plot(st_geometry(mapSZms13s), border=&quot;red&quot;, lwd=1)
 plot(st_geometry(mapMS13street), add=TRUE)
 plot(st_geometry(mapSZms13s), border=&quot;red&quot;, lwd=3, add=TRUE)
+
+#add street names to map
 for(i in 1:nrow(labs))
 {
    text(labs$x[i], labs$y[i],

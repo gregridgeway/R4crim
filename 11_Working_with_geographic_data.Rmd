@@ -4,9 +4,6 @@ author:
 - affiliation: University of Pennsylvania
   email: gridge@upenn.edu
   name: Greg Ridgeway
-- affiliation: University of Pennsylvania
-  email: moyruth@upenn.edu
-  name: Ruth Moyer
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
   html_document:
@@ -20,7 +17,6 @@ output:
 <!-- title: "Working with Geographic Data" -->
 <!-- author: -->
 <!-- - Greg Ridgeway (gridge@upenn.edu) -->
-<!-- - Ruth Moyer (moyruth@upenn.edu) -->
 <!-- date: "`r format(Sys.time(), '%B %d, %Y')`" -->
 <!-- output: -->
 <!--   pdf_document: -->
