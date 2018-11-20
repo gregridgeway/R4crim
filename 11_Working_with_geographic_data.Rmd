@@ -669,6 +669,8 @@ labs <- data.frame(t(labs))
 plot(st_geometry(mapSZms13s), border="red", lwd=1)
 plot(st_geometry(mapMS13street), add=TRUE)
 plot(st_geometry(mapSZms13s), border="red", lwd=3, add=TRUE)
+
+#add street names to map
 for(i in 1:nrow(labs))
 {
    text(labs$x[i], labs$y[i],
