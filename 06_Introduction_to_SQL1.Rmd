@@ -18,12 +18,12 @@ output:
 
 <!-- HTML YAML header Ctrl-Shift-C to comment/uncomment -->
 
-
 <!-- --- -->
 <!-- title: "Introduction to SQL" -->
 <!-- author: -->
 <!-- - Greg Ridgeway (gridge@upenn.edu) -->
 <!-- - Ruth Moyer (moyruth@upenn.edu) -->
+<!-- - Li Sian Goh (gohl@upenn.edu) -->
 <!-- date: "`r format(Sys.time(), '%B %d, %Y')`" -->
 <!-- output: -->
 <!--   pdf_document: -->
@@ -33,6 +33,7 @@ output:
 <!-- fontfamily: mathpazo -->
 <!-- --- -->
 <!-- PDF YAML header Ctrl-Shift-C to comment/uncomment -->
+
 
 <!-- Make RMarkdown cache the results -->
 ```{r echo=FALSE}
