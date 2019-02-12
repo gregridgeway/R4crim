@@ -169,7 +169,7 @@ chicago.map +
                       high="hotpink")
 ```
 
-You can also do a map that shows the high crime areas in a way that is akin to elevation on a topographic map. The more concentrated the concentric areas, the higher the crime (or, in the case of a topographic map, the higher the terrain). Note that a plot using `stat_density2d()` requires a lot of memory. That's why it's a good idea to use a sample of cases.
+You can also create a map that shows the high crime areas in a way that is akin to elevation on a topographic map. The more concentrated the concentric areas, the higher the crime (or, in the case of a topographic map, the higher the terrain). Note that a plot using `stat_density2d()` requires a lot of memory. That's why it's a good idea to use a sample of cases.
 
 ```{r comment="", results='hold'}
 i <- sample(1:nrow(dataAllcrime),100000)
@@ -215,7 +215,7 @@ chicago.map +
   guides(fill = guide_colorbar(barwidth = 1.5, barheight = 10))
 ```
 
-Let's do hotspot maps with just motor vehicle theft, and let's make a map for each year between 2005 and 2014. Note the line with the SQL function `SUBSTR()`. The `SUBSTR()` command helps us grab a section of a string. Here's an example. Take a look at the `Date` column in our initial dataset. 
+Let's create hotspot maps with just motor vehicle theft, and let's make a map for each year between 2005 and 2014. Note the line with the SQL function `SUBSTR()`. The `SUBSTR()` command helps us grab a section of a string. Here's an example. Take a look at the `Date` column in our initial dataset. 
 ```{r comment="", results='hold'}
 res <- dbSendQuery(con, "SELECT Date 
                          FROM crime
