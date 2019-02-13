@@ -10,7 +10,7 @@
 
 
 
-<meta name="date" content="2019-02-12" />
+<meta name="date" content="2019-02-13" />
 
 <title>Webscraping and Parallel Processing</title>
 
@@ -194,7 +194,7 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
 <address class="author_afil">
 University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="mailto:moyruth@upenn.edu">moyruth@upenn.edu</a></a>
 </address>
-<h4 class="date"><em>February 12, 2019</em></h4>
+<h4 class="date"><em>February 13, 2019</em></h4>
 
 </div>
 
@@ -205,7 +205,7 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
 <!-- author: -->
 <!-- - Greg Ridgeway (gridge@upenn.edu) -->
 <!-- - Ruth Moyer (moyruth@upenn.edu) -->
-<!-- date: "February 12, 2019" -->
+<!-- date: "February 13, 2019" -->
 <!-- output: -->
 <!--   pdf_document: -->
 <!--     latex_engine: pdflatex -->
@@ -505,7 +505,8 @@ gsub(&quot;-&quot;, &quot;/&quot;, dates2scrape[1:5])</code></pre>
 <p>Our plan is to construct a for loop within which we will construct a URL from <code>dates2scrape</code>, pull down the HTML code from that URL, scrape the movie data into a data frame, and then combine the each day’s data frame into one data frame will all of the movie data. First we create a list that will contain each day’s data frame.</p>
 <pre class="r"><code>results &lt;- vector(&quot;list&quot;, length(dates2scrape))</code></pre>
 <p>On iteration <code>i</code> of our for loop we will store that day’s movie data frame in <code>results[[i]]</code>. The following for loop can take several minutes to run and its speed will depend on your network connection and how responsive the web site is. Before running the entire for loop, it may be a good idea to temporarily set the dates to a short period of time (e.g., a month or two) just to verify that your code is functioning properly. Once you’ve concluded that the code is doing what you want it to do, you can set the dates so that the for loop runs for the entire analysis period.</p>
-<pre class="r"><code>for(iDate in 1:length(dates2scrape))
+<pre class="r"><code>timeStart &lt;- Sys.time() # record the starting time
+for(iDate in 1:length(dates2scrape))
 {
    # uncomment the next line to display progress
    #    useful to know how much is done/left to go
@@ -529,7 +530,11 @@ gsub(&quot;-&quot;, &quot;/&quot;, dates2scrape[1:5])</code></pre>
    data0$date  &lt;- dates2scrape[iDate]
     
    results[[iDate]] &lt;- data0
-}</code></pre>
+}
+# calculate how long it took
+timeEnd &lt;- Sys.time()
+timeEnd-timeStart</code></pre>
+<pre><code>Time difference of 18.32121 mins</code></pre>
 <p>Let’s look at the first 3 lines of the first and last 3 days.</p>
 <pre class="r"><code>lapply(head(results,n=3), head, n=3)
 lapply(tail(results,n=3), head, n=3)</code></pre>
@@ -614,7 +619,7 @@ system.time( # time how long this takes
   }
 )</code></pre>
 <pre><code>   user  system elapsed 
-   0.03    0.00   20.43 </code></pre>
+   0.00    0.00   20.11 </code></pre>
 <pre class="r"><code># set up R to use 2 processors
 library(doParallel)
 cl &lt;- makeCluster(2)
@@ -629,7 +634,7 @@ system.time( # time how long this takes
   }
 )</code></pre>
 <pre><code>   user  system elapsed 
-   0.00    0.00   10.28 </code></pre>
+   0.02    0.00   10.11 </code></pre>
 <pre class="r"><code>stopCluster(cl)</code></pre>
 <p>Sure enough, the parallel implementation was able to complete 20 seconds worth of sleeping in only 10 seconds. To set up code to run in parallel, the key steps are to set up the cluster of processors using <code>makeCluster()</code> and to tell parallel <code>foreach()</code> to use that cluster of processors with <code>registerDoParallel()</code>. Note that the key difference between the two <code>foreach()</code> statements is that the first <code>foreach()</code> is followed by a <code>%do%</code> while the second is followed by a <code>%dopar%</code>. When <code>foreach()</code> sees the <code>%dopar%</code> it will check what was setup in the <code>registerDoParallel()</code> call and spread the computation among those processors.</p>
 <p>Note that the <code>foreach()</code> differs a little bit in its syntax compared with our previous use of for loops. While for loops have the syntax <code>for(i in 1:10)</code> the syntax for <code>foreach()</code> looks like <code>foreach(i=1:10)</code> and is followed by a <code>%do%</code> or a <code>%dopar%</code>. Lastly, note that the final step inside the <code>{ }</code> following a <code>foreach()</code> is a <code>return()</code> statement. <code>foreach()</code> will take the returned values of each of the iterations and assemble them into a single list by default. In the following <code>foreach()</code> we’ve added <code>.combine=rbind</code> to the <code>foreach()</code> so that the final results will be stacked into one data frame, avoiding the need for a separate <code>do.call()</code> like we used previously.</p>
@@ -664,8 +669,8 @@ timeEnd &lt;- Sys.time()
 timeEnd-timeStart
 
 stopCluster(cl)</code></pre>
-<pre><code>Time difference of 2.483931 mins</code></pre>
-<p>This code makes use of 8 processors. Unlike our 2 second sleep example, this script won’t run 8 times faster. This is mostly due to the fact each processor still needs to wait its turn in order to pull down its webpage from the internet. Still you should observe the parallel version finishing much sooner than the first version. In just a few lines of code and a few minutes of waiting, you now have almost a decade worth of movie data.</p>
+<pre><code>Time difference of 2.363656 mins</code></pre>
+<p>This code makes use of 8 processors. Unlike our 2 second sleep example, this script may or may not run 8 times faster. This is mostly due to the fact each processor still needs to wait its turn in order to pull down its webpage from the internet. Still you should observe the parallel version finishing much sooner than the first version. In just a few lines of code and a few minutes of waiting, you now have almost a decade worth of movie data.</p>
 <p>Parallelization introduces two complications. The first is that if anything goes wrong in this script, then the whole <code>foreach()</code> fails. For example, let’s say that after scraping movie data from 2000-2016 you briefly lose your internet connection. If this happens, then <code>scan()</code> fails and the whole <code>foreach()</code> ends with an error, tossing all of your already complete computation. To avoid this you need to either be sure you have a solid internet connection, or wrap the call to <code>scan()</code> in a <code>try()</code> and a <code>while</code> loop that is smart enough to wait a few seconds and try the scan again rather than fail completely. A second, and minor issue, is that you cannot print to the screen from inside a parallelized <code>foreach()</code>. So there’s no printing the progress of the computation to the screen. This can leave you wondering if your script is still working. You can set an <code>outfile</code> parameter when creating your cluster of processors, like <code>makecluster(8, outfile=&quot;log.txt&quot;)</code>. Any output that R prints will be redirected to this log.txt file. Remember that all the processors will be at different steps and they will all be dumping output to log.txt. It can be difficult to determine which process is responsible for which line of output, but at least you will know that your script is progressing.</p>
 <p>It’s probably wise at this point to save <code>movieData</code> so that you won’t have to rerun this in the future.</p>
 <pre class="r"><code>save(movieData, file=&quot;movieData.RData&quot;, compress=TRUE)</code></pre>
