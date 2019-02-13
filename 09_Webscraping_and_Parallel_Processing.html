@@ -220,7 +220,7 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
 <h1>Introduction</h1>
 <p>At the end of our discussion about regular expressions, we introduced the concept of web scraping. Not all online data is in a tidy, downloadable format such as a .csv or .RData file. Yet, patterns in the underlying HTML code and regular expressions together provide a valuable way to “scrape” data off of a webpage. Here, we’re going to work through an example of webscraping. We’re going to get data on ticket sales of every movie, for every day going back to 2010.</p>
 <p>As a preliminary matter, some R packages, such as <code>rvest</code>, can help with web scraping. Eventually you may wish to explore webscraping packages. For now, we are going to work with basic fundamentals so that you have the most flexibility to extract data from most websites.</p>
-<p>First, you will need to make sure that you can access the underlying HTML code for the webpage that you want to scrape. If you’re using Firefox, you can simply right click on a webpage and then click “View Page Source.” If you’re using Microsoft Edge, you can right click on the webpage, click “View Source” and then look at the “Debugger” tab. In Safari select “Preferences” under the “Safari”tab, select the “Advanced”&quot; tab, check “Show Develop menu”, and then whenever viewing a page you can right click and select “show page source”.</p>
+<p>First, you will need to make sure that you can access the underlying HTML code for the webpage that you want to scrape. If you’re using Firefox, you can simply right click on a webpage and then click “View Page Source.” If you’re using Microsoft Edge, you can right click on the webpage, click “View Source” and then look at the “Debugger” tab. In Safari select “Preferences” under the “Safari” tab, select the “Advanced” tab, check “Show Develop menu”, and then whenever viewing a page you can right click and select “show page source”.</p>
 <p>Have a look at the webpage <a href="http://www.the-numbers.com/box-office-chart/daily/2018/07/04" class="uri">http://www.the-numbers.com/box-office-chart/daily/2018/07/04</a>. This page contains information about the movies that were shown in theaters on July 4, 2018 and the amount of money (in dollars) that each of those movies grossed that day.</p>
 <p>Have a look at the HTML code by looking at the page source for this page using the methods described above. The first 10 lines should look something like this:</p>
 <pre><code>     &lt;!DOCTYPE html&gt;
@@ -252,7 +252,7 @@ University of Pennsylvania<br><a class="author_email" href="mailto:#"><a href="m
      &lt;td  class=&quot;data&quot;&gt;(2)&lt;/td&gt;
      &lt;td&gt;&lt;b&gt;&lt;a href=&quot;/movie/Incredibles-2#tab=box-office&quot;&gt;Incredibles 2&lt;/a&gt;&lt;/b&gt;&lt;/td&gt;</code></pre>
 <p>Here you can see the data! You can see the movie name, ticket sales, number of theaters, and more. It’s all wrapped in a lot of HTML code to make it look pretty on a web page, but for our purposes we just want to pull those numbers out.</p>
-<p><code>scan()</code> is a basic R function for reading in text, from the keyboard, from files, from the web, … however data might arrive. Giving <code>scan()</code> a URL causes <code>scan()</code> to pull down the HTML code for that page and return it to you. Let’s try on on one page of movie data.</p>
+<p><code>scan()</code> is a basic R function for reading in text, from the keyboard, from files, from the web, … however data might arrive. Giving <code>scan()</code> a URL causes <code>scan()</code> to pull down the HTML code for that page and return it to you. Let’s try one page of movie data.</p>
 <pre class="r"><code>a &lt;- scan(&quot;http://www.the-numbers.com/box-office-chart/daily/2018/07/04&quot;,
           what=&quot;&quot;, sep=&quot;\n&quot;)
 # examine the first few lines
@@ -262,10 +262,11 @@ a[1:5]</code></pre>
 [3] &quot;&lt;head&gt;&quot;                                                                                  
 [4] &quot;&lt;!-- Global site tag (gtag.js) - Google Analytics --&gt;&quot;                                   
 [5] &quot;&lt;script async src=\&quot;https://www.googletagmanager.com/gtag/js?id=UA-1343128-1\&quot;&gt;&lt;/script&gt;&quot;</code></pre>
-<p><code>what=&quot;&quot;</code> tells <code>scan()</code> to expect plain text and <code>sep=&quot;\n&quot;</code> tells <code>scan()</code> to separate each element when it reaches a line feed character, signalling the end of a line.</p>
+<p><code>what=&quot;&quot;</code> tells <code>scan()</code> to expect plain text and <code>sep=&quot;\n&quot;</code> tells <code>scan()</code> to separate each element when it reaches a line feed character, signaling the end of a line.</p>
 <p>Some websites are more complex or use different text encoding. For example, using <code>scan()</code> on <a href="https://stores.org/stores-top-retailers-2017/" class="uri">https://stores.org/stores-top-retailers-2017/</a> produces unintelligible text. The <code>GET()</code> function from the <code>httr</code> package can sometimes resolve this.</p>
-<pre class="r"><code>library(httr)
-resp &lt;- GET(&quot;https://stores.org/stores-top-retailers-2017/&quot;)
+<pre class="r"><code>library(httr)</code></pre>
+<pre><code>Warning: package 'httr' was built under R version 3.5.2</code></pre>
+<pre class="r"><code>resp &lt;- GET(&quot;https://stores.org/stores-top-retailers-2017/&quot;)
 a1 &lt;- content(resp, as=&quot;text&quot;)
 a1 &lt;- strsplit(a1,&quot;\n&quot;)[[1]]
 cat(a1[1:10], sep=&quot;\n&quot;)</code></pre>
@@ -279,7 +280,7 @@ cat(a1[1:10], sep=&quot;\n&quot;)</code></pre>
 
 
 &lt;meta charset=&quot;UTF-8&quot; /&gt;</code></pre>
-<p>Also, some Mac users will encounter snags with both of these methods and receive “403 Forbidden” errors while their Mac colleague righ tnext to them on the same network will not. I have not figure dout why this happens, but have found that making R masquerade as different browser sometimes works.</p>
+<p>Also, some Mac users will encounter snags with both of these methods and receive “403 Forbidden” errors while their Mac colleague right next to them on the same network will not. I have not figured out why this happens, but have found that making R masquerade as different browser sometimes works.</p>
 <pre class="r"><code>resp &lt;- GET(&quot;https://stores.org/stores-top-retailers-2017/&quot;, 
             user_agent(&quot;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/537.13+ (KHTML, like Gecko) Version/5.1.7 Safari/534.57.2&quot;))
 a1 &lt;- content(resp, as=&quot;text&quot;)
@@ -287,7 +288,7 @@ a1 &lt;- strsplit(a1,&quot;\n&quot;)[[1]]</code></pre>
 </div>
 <div id="scraping-one-page" class="section level1">
 <h1>Scraping one page</h1>
-<p>Now that we have stored in the variable <code>a</code> the HTML code for one day’s movie data in R, let’s apply some regular expressions to extract some data.will be indispensible to this process. The HTML code includes a lot of lines that do not involve data that interests us. There is code for making the page look nice and code for presenting advertisements. Let’s start by finding the lines that have the movie names in them.</p>
+<p>Now that we have stored in the variable <code>a</code> the HTML code for one day’s movie data in R, let’s apply some regular expressions to extract the data. The HTML code includes a lot of lines that do not involve data that interests us. There is code for making the page look nice and code for presenting advertisements. Let’s start by finding the lines that have the movie names in them.</p>
 <p>Going back to the HTML code, I noticed that both the line with <em>Jurassic Park</em> and <em>Incredible 2</em> have the sequence of characters “#tab=box-office”. By finding a pattern of characters that always precedes the text that interests us, we can use it to grep the lines we want. Let’s find every line that has “#tab=box-office” in it.</p>
 <pre class="r"><code>i &lt;- grep(&quot;#tab=box-office&quot;, a)
 i</code></pre>
@@ -346,7 +347,7 @@ i</code></pre>
 [47] &quot;&lt;td&gt;&lt;b&gt;&lt;a href=\&quot;/movie/Summer-of-67#tab=box-office\&quot;&gt;Summer of 67&lt;/a&gt;&lt;/b&gt;&lt;/td&gt;&quot;                                               
 [48] &quot;&lt;td&gt;&lt;b&gt;&lt;a href=\&quot;/movie/Chappaquiddick#tab=box-office\&quot;&gt;Chappaquiddick&lt;/a&gt;&lt;/b&gt;&lt;/td&gt;&quot;                                           </code></pre>
 <p>Double checking and indeed the first line here is <em>Jurassic Park: Fallen Kingdom</em> and the last line is <em>Chappaquiddick</em>. This matches what is on the web page. We now are quite close to having a list of movies that played in theaters on July 4, 2018. However, as you can see, we have a lot of excess symbols and HTML code to eliminate before we can have a neat list of movie names.</p>
-<p>HTML tags are always have the form <code>&lt;some code here&gt;</code>. Therefore, any text between a less than and greater than symbol we should remove. Here’s a regular expression that will look for a <code>&lt;</code> followed by a bunch of characters that are not <code>&gt;</code> followed by the HTMl tag ending <code>&gt;</code>… and <code>gsub()</code> will delete them.</p>
+<p>HTML tags are always have the form <code>&lt;some code here&gt;</code>. Therefore, any text between a less than and greater than symbol we should remove. Here’s a regular expression that will look for a <code>&lt;</code> followed by a bunch of characters that are not <code>&gt;</code> followed by the HTML tag ending <code>&gt;</code>… and <code>gsub()</code> will delete them.</p>
 <pre class="r"><code>gsub(&quot;&lt;[^&gt;]*&gt;&quot;, &quot;&quot;, a[i])</code></pre>
 <pre><code> [1] &quot;Jurassic World: Fallen Kingdom&quot;     
  [2] &quot;Incredibles 2&quot;                      
@@ -396,8 +397,8 @@ i</code></pre>
 [46] &quot;Super Troopers 2&quot;                   
 [47] &quot;Summer of 67&quot;                       
 [48] &quot;Chappaquiddick&quot;                     </code></pre>
-<p>Perfect! Now we just have movie names. You’ll see some movie names have strange symbols, like <code>&amp;hellip;</code>. That’s the HTML code for horizontal ellipses or “…”. These make the text look prettier on a webpage, but you might need to do more work with <code>gsub()</code> if it is important that these movie names look right.</p>
-<p>Let’s put these movie names in a dataframe, <code>data0</code>. This dataframe currently has only one column.</p>
+<p>Perfect! Now we just have movie names. You’ll see some movie names have strange symbols, like <code>&amp;hellip;</code>. That’s the HTML code for horizontal ellipses or “…”. These make the text look prettier on a webpage, but you might need to do more work with <code>gsub()</code> if it is important that these movie names look right. Some movies, like <em>Ocean’s 8</em> and <em>Won’t You Be My Neighbor</em>, have strange text in place of the apostrophe. This is because <code>scan()</code> has made some assumptions about the character set used for reading the text on the page… and it turns out that it is not quite right for some special symbols like smart quotes. If we add the parameter <code>fileEncoding=&quot;UTF-8&quot;</code>, then R will know to interpret the text it is reading using UTF8, a more complete set of characters that includes newer symbols like the euro sign, nicer looking characters like smart quotes, and many non-Latin alphabets.</p>
+<p>Let’s put these movie names in a data frame, <code>data0</code>. This data frame currently has only one column.</p>
 <pre class="r"><code>data0 &lt;- data.frame(movie=gsub(&quot;&lt;[^&gt;]*&gt;&quot;, &quot;&quot;, a[i]))</code></pre>
 <p>Now we also want to get the daily gross for each movie. Let’s take another look at the HTML code for <em>Jurassic Park</em>.</p>
 <pre class="r"><code>a[i[1]:(i[1]+8)]</code></pre>
@@ -483,14 +484,24 @@ tail(data0)</code></pre>
 <div id="scraping-multiple-pages" class="section level1">
 <h1>Scraping Multiple Pages</h1>
 <p>We’ve now successfully scraped data for one day. This is usually the hardest part. But if we have R code that can correctly scrape one day’s worth of data <em>and</em> the website is consistent across days, then it is simple to adapt our code to work for <em>all</em> days. So let’s get all movie data from January 1, 2010 through December 31, 2018. That means we’re going to be web scraping over 3,200 pages of data.</p>
-<p>First note that the URL for July 4, 2018 was <code>http://www.the-numbers.com/box-office-chart/daily/2018/07/04</code>. We can extract data from any other date by using the same URL, but changing the ending to match the date that we want. Importantly, note that the 07 and the 04 in the URL must have the leading 0 for the URL to return the correct page.</p>
+<p>First note that the URL for July 4, 2018 was</p>
+<p><code>http://www.the-numbers.com/box-office-chart/daily/2018/07/04</code></p>
+<p>We can extract data from any other date by using the same URL, but changing the ending to match the date that we want. Importantly, note that the 07 and the 04 in the URL must have the leading 0 for the URL to return the correct page.</p>
 <p>To start, let’s make a list of all the dates that we intend to scrape.</p>
-<pre class="r"><code>library(lubridate)
-# create a sequence of all days to scrape
-dates2scrape &lt;- seq(ymd(&quot;2010-01-01&quot;), ymd(&quot;2010-01-05&quot;), by=&quot;days&quot;)</code></pre>
+<pre class="r"><code>library(lubridate)</code></pre>
+<pre><code>
+Attaching package: 'lubridate'</code></pre>
+<pre><code>The following object is masked from 'package:base':
+
+    date</code></pre>
+<pre class="r"><code># create a sequence of all days to scrape
+dates2scrape &lt;- seq(ymd(&quot;2010-01-01&quot;), ymd(&quot;2018-12-31&quot;), by=&quot;days&quot;)</code></pre>
 <p>Now <code>dates2scrape</code> contains a collection of all the dates with movie data that we wish to scrape.</p>
-<pre class="r"><code>dates2scrape[1:5]</code></pre>
-<pre><code>[1] &quot;2010-01-01&quot; &quot;2010-01-02&quot; &quot;2010-01-03&quot; &quot;2010-01-04&quot; &quot;2010-01-05&quot;</code></pre>
+<pre class="r"><code>dates2scrape[1:5]
+# gsub() can change the - to / to match the appearance of the numbers.com URL
+gsub(&quot;-&quot;, &quot;/&quot;, dates2scrape[1:5])</code></pre>
+<pre><code>[1] &quot;2010-01-01&quot; &quot;2010-01-02&quot; &quot;2010-01-03&quot; &quot;2010-01-04&quot; &quot;2010-01-05&quot;
+[1] &quot;2010/01/01&quot; &quot;2010/01/02&quot; &quot;2010/01/03&quot; &quot;2010/01/04&quot; &quot;2010/01/05&quot;</code></pre>
 <p>Our plan is to construct a for loop within which we will construct a URL from <code>dates2scrape</code>, pull down the HTML code from that URL, scrape the movie data into a data frame, and then combine the each day’s data frame into one data frame will all of the movie data. First we create a list that will contain each day’s data frame.</p>
 <pre class="r"><code>results &lt;- vector(&quot;list&quot;, length(dates2scrape))</code></pre>
 <p>On iteration <code>i</code> of our for loop we will store that day’s movie data frame in <code>results[[i]]</code>. The following for loop can take several minutes to run and its speed will depend on your network connection and how responsive the web site is. Before running the entire for loop, it may be a good idea to temporarily set the dates to a short period of time (e.g., a month or two) just to verify that your code is functioning properly. Once you’ve concluded that the code is doing what you want it to do, you can set the dates so that the for loop runs for the entire analysis period.</p>
@@ -504,8 +515,8 @@ dates2scrape &lt;- seq(ymd(&quot;2010-01-01&quot;), ymd(&quot;2010-01-05&quot;),
    urlText &lt;- paste0(&quot;http://www.the-numbers.com/box-office-chart/daily/&quot;,
                      gsub(&quot;-&quot;, &quot;/&quot;, dates2scrape[iDate]))
 
-   # read in the HTML code
-   a &lt;- scan(urlText, what=&quot;&quot;, sep=&quot;\n&quot;)
+   # read in the HTML code... now using UTF8
+   a &lt;- scan(urlText, what=&quot;&quot;, sep=&quot;\n&quot;, fileEncoding=&quot;UTF-8&quot;)
 
    # find movies
    i &lt;- grep(&quot;#tab=box-office&quot;, a)
@@ -541,28 +552,30 @@ lapply(tail(results,n=3), head, n=3)</code></pre>
 3                     Sherlock Holmes  7349035 2010-01-03
 
 [[1]]
-                                movie    gross       date
-1                              Avatar 17381129 2010-01-03
-2 Alvin and the Chipmunks: Th&amp;hellip;  7818116 2010-01-03
-3                     Sherlock Holmes  7349035 2010-01-03
+                 movie    gross       date
+1              Aquaman 18632907 2018-12-29
+2 Mary Poppins Returns  9541501 2018-12-29
+3            Bumblebee  7502014 2018-12-29
 
 [[2]]
-                                movie   gross       date
-1                              Avatar 8094554 2010-01-04
-2                     Sherlock Holmes 2911461 2010-01-04
-3 Alvin and the Chipmunks: Th&amp;hellip; 2217825 2010-01-04
+                 movie    gross       date
+1              Aquaman 16440551 2018-12-30
+2 Mary Poppins Returns  8224343 2018-12-30
+3            Bumblebee  6603471 2018-12-30
 
 [[3]]
-               movie   gross       date
-1             Avatar 7327233 2010-01-05
-2    Sherlock Holmes 2702422 2010-01-05
-3 Itâ\200\231s Complicated 1738255 2010-01-05</code></pre>
+                 movie    gross       date
+1              Aquaman 10011638 2018-12-31
+2 Mary Poppins Returns  6666586 2018-12-31
+3            Bumblebee  4241953 2018-12-31</code></pre>
 <p>Looks like we got them all. Now let’s combine them into one big data frame. This use of <code>do.call()</code> is a short hand way of saying <code>rbind(results[[1]], results[[2]], ...)</code>.</p>
 <pre class="r"><code>movieData &lt;- do.call(rbind, results)
+
+# check that the number of rows and dates seem reasonable
 nrow(movieData)
 range(movieData$date)</code></pre>
-<pre><code>[1] 212
-[1] &quot;2010-01-01&quot; &quot;2010-01-05&quot;</code></pre>
+<pre><code>[1] 144520
+[1] &quot;2010-01-01&quot; &quot;2018-12-31&quot;</code></pre>
 <p>If you ran that for loop to gather nearly a decade’s worth of data, most likely you walked away from your computer to do something more interesting than watch it print out dates. In these situations, I like to send myself a message when it is complete. The <code>mailR</code> package is a convenient way to send yourself an email. If you fill it in with your email, username, and password, the following code will send you an email when the script reaches this point.</p>
 <pre class="r"><code>library(mailR)
 send.mail(from = &quot;&quot;, #replace with your email address
@@ -580,10 +593,13 @@ send.mail(from = &quot;&quot;, #replace with your email address
 </div>
 <div id="parallel-computing" class="section level1">
 <h1>Parallel Computing</h1>
-<p>Since 1965 Moore’s Law has predicted the power of computation over time. Moore’s Law predicted the doubling of transistors about every two years.Moore’s prediction has held true for decades. However, to get that speed the transistors were made smaller and smaller. Moore’s Law cannot continue indefinitely. The diameter of a silicon atom is 0.2nm. Transistors today contain less than 70 atoms and some transistor dimensions are between 10nm and 40nm. Since 2012, computing power has not changed greatly signalling that we might be getting close to the end of Moore’s Law, at least with silicon-based computing. What has changed is the widespread use of multiprocessor and multicore processors. Rather than having a single processor, a typical laptop might have an 8 or 16 core processor (meaning they have 8 or 16 processors that share some resources like high speed memory).</p>
+<p>Since 1965 Moore’s Law has predicted the power of computation over time. Moore’s Law predicted the doubling of transistors about every two years. Moore’s prediction has held true for decades. However, to get that speed the transistors were made smaller and smaller. Moore’s Law cannot continue indefinitely. The diameter of a silicon atom is 0.2nm. Transistors today contain less than 70 atoms and some transistor dimensions are between 10nm and 40nm. Since 2012, computing power has not changed greatly signaling that we might be getting close to the end of Moore’s Law, at least with silicon-based computing. What has changed is the widespread use of multiprocessor and multicore processors. Rather than having a single processor, a typical laptop might have an 8 or 16 core processor (meaning they have 8 or 16 processors that share some resources like high speed memory).</p>
 <p>R can guess how many cores your computer has on hand.</p>
-<pre class="r"><code>library(doParallel)
-detectCores()</code></pre>
+<pre class="r"><code>library(doParallel)</code></pre>
+<pre><code>Loading required package: foreach</code></pre>
+<pre><code>Loading required package: iterators</code></pre>
+<pre><code>Loading required package: parallel</code></pre>
+<pre class="r"><code>detectCores()</code></pre>
 <pre><code>[1] 8</code></pre>
 <p>Having access to multiple cores allows you to write scripts that send different tasks to different processors to work on simultaneously. While one processor is busy scraping the data for January 1st, the second can get to work on January 2nd, and another can work on January 3rd. All the processors will be fighting over the one connection you have to the internet, but they can <code>grep()</code> and <code>gsub()</code> at the same time other processors are working on other dates.</p>
 <p>To write a script to work in parallel, you will need the <code>doParallel</code> and <code>foreach</code> packages. Let’s first test whether parallelization actually speed things up. We’ve made two foreach loops below. In both of them each iteration of the loop does not really do anything except pause for 2 seconds. The first loop, which does not use parallelization, includes 10 iterations and so should take 20 seconds to run. The second foreach loop looks the same, except right before the foreach loop we have told R to make use of two of the computer’s processors rather than the default of one processor. This should cause one processor to sleep for 2 seconds 5 times and the other processor to sleep for 2 seconds 5 times. and should take about 10 seconds.</p>
@@ -598,7 +614,7 @@ system.time( # time how long this takes
   }
 )</code></pre>
 <pre><code>   user  system elapsed 
-   0.01    0.00   20.25 </code></pre>
+   0.03    0.00   20.43 </code></pre>
 <pre class="r"><code># set up R to use 2 processors
 library(doParallel)
 cl &lt;- makeCluster(2)
@@ -613,9 +629,9 @@ system.time( # time how long this takes
   }
 )</code></pre>
 <pre><code>   user  system elapsed 
-    0.0     0.0    10.2 </code></pre>
+   0.00    0.00   10.28 </code></pre>
 <pre class="r"><code>stopCluster(cl)</code></pre>
-<p>Sure enough, the parallel implemntation was able to complete 20 seconds worth of sleeping in only 10 seconds. To set up code to run in parallel, the key steps are to set up the cluster of processors using <code>makeCluster()</code> and to tell parallel <code>foreach()</code> to use that cluster of processors with <code>registerDoParallel()</code>. Note that the key difference between the two <code>foreach()</code> statements is that the first <code>foreach()</code> is followed by a <code>%do%</code> while the second is followed by a <code>%dopar%</code>. When <code>foreach()</code> sees the <code>%dopar%</code> it will check what was setup in the <code>registerDoParallel()</code> call and spread the computation among those processors.</p>
+<p>Sure enough, the parallel implementation was able to complete 20 seconds worth of sleeping in only 10 seconds. To set up code to run in parallel, the key steps are to set up the cluster of processors using <code>makeCluster()</code> and to tell parallel <code>foreach()</code> to use that cluster of processors with <code>registerDoParallel()</code>. Note that the key difference between the two <code>foreach()</code> statements is that the first <code>foreach()</code> is followed by a <code>%do%</code> while the second is followed by a <code>%dopar%</code>. When <code>foreach()</code> sees the <code>%dopar%</code> it will check what was setup in the <code>registerDoParallel()</code> call and spread the computation among those processors.</p>
 <p>Note that the <code>foreach()</code> differs a little bit in its syntax compared with our previous use of for loops. While for loops have the syntax <code>for(i in 1:10)</code> the syntax for <code>foreach()</code> looks like <code>foreach(i=1:10)</code> and is followed by a <code>%do%</code> or a <code>%dopar%</code>. Lastly, note that the final step inside the <code>{ }</code> following a <code>foreach()</code> is a <code>return()</code> statement. <code>foreach()</code> will take the returned values of each of the iterations and assemble them into a single list by default. In the following <code>foreach()</code> we’ve added <code>.combine=rbind</code> to the <code>foreach()</code> so that the final results will be stacked into one data frame, avoiding the need for a separate <code>do.call()</code> like we used previously.</p>
 <p>With all this in mind, let’s web scrape the movie data using multiple processors:</p>
 <pre class="r"><code>cl &lt;- makeCluster(8)
@@ -629,7 +645,7 @@ movieData &lt;-
    urlText &lt;- paste0(&quot;http://www.the-numbers.com/box-office-chart/daily/&quot;,
                      gsub(&quot;-&quot;, &quot;/&quot;, dates2scrape[iDate]))
 
-   a &lt;- scan(urlText, what=&quot;&quot;, sep=&quot;\n&quot;)
+   a &lt;- scan(urlText, what=&quot;&quot;, sep=&quot;\n&quot;, fileEncoding=&quot;UTF-8&quot;)
    i &lt;- grep(&quot;#tab=box-office&quot;, a)
    
    data0 &lt;- data.frame(movie=gsub(&quot;&lt;[^&gt;]*&gt;&quot;, &quot;&quot;, a[i]),
@@ -639,12 +655,18 @@ movieData &lt;-
     
   return(data0)
 }
+
+# change HTML codes to something prettier
+movieData$movie &lt;- gsub(&quot;&amp;hellip;&quot;, &quot;...&quot;, movieData$movie)
+
 # calculate how long it took
 timeEnd &lt;- Sys.time()
 timeEnd-timeStart
 
 stopCluster(cl)</code></pre>
-<p>This code makes use of 8 processors. Unlike our 2 second sleep example, this script won’t run 8 times faster. This is mostly due to the fact each processor still needs to wait its turn in order to pull down its webpage from the internet. Parallelization introduces two complications. The first is that if anything goes wrong in this script, then the whole <code>foreach()</code> fails. For example, let’s say that after scraping movie data from 2000-2016 you briefly lose your internet connection. If this happens, then <code>scan()</code> fails and the whole <code>foreach()</code> ends with an error, tossing all of your already complete computation. To avoid this you need to either be sure you have a solid internet connection, or wrap the call to <code>scan()</code> in a <code>try()</code> and a <code>while</code> loop that is smart enough to wait a few seconds and try the scan again rather than fail completely. A second, and minor issue, is that you cannot print to the screen from inside a parallelized <code>foreach()</code>. So there’s no printing the progress of the computation to the screen. this can leave you wondering if your script is still working. You can set an <code>outfile</code> parameter when creating your cluster of processors, like <code>makecluster(8, outfile=&quot;log.txt&quot;)</code>. Any output that R prints will be redirected to this log.txt file. Remember that all the processors will be at different steps and they will all be dumping output to log.txt. It can be difficult to determine which process is responsible for which line of output, but at least you will know that your script is progressing.</p>
+<pre><code>Time difference of 2.483931 mins</code></pre>
+<p>This code makes use of 8 processors. Unlike our 2 second sleep example, this script won’t run 8 times faster. This is mostly due to the fact each processor still needs to wait its turn in order to pull down its webpage from the internet. Still you should observe the parallel version finishing much sooner than the first version. In just a few lines of code and a few minutes of waiting, you now have almost a decade worth of movie data.</p>
+<p>Parallelization introduces two complications. The first is that if anything goes wrong in this script, then the whole <code>foreach()</code> fails. For example, let’s say that after scraping movie data from 2000-2016 you briefly lose your internet connection. If this happens, then <code>scan()</code> fails and the whole <code>foreach()</code> ends with an error, tossing all of your already complete computation. To avoid this you need to either be sure you have a solid internet connection, or wrap the call to <code>scan()</code> in a <code>try()</code> and a <code>while</code> loop that is smart enough to wait a few seconds and try the scan again rather than fail completely. A second, and minor issue, is that you cannot print to the screen from inside a parallelized <code>foreach()</code>. So there’s no printing the progress of the computation to the screen. This can leave you wondering if your script is still working. You can set an <code>outfile</code> parameter when creating your cluster of processors, like <code>makecluster(8, outfile=&quot;log.txt&quot;)</code>. Any output that R prints will be redirected to this log.txt file. Remember that all the processors will be at different steps and they will all be dumping output to log.txt. It can be difficult to determine which process is responsible for which line of output, but at least you will know that your script is progressing.</p>
 <p>It’s probably wise at this point to save <code>movieData</code> so that you won’t have to rerun this in the future.</p>
 <pre class="r"><code>save(movieData, file=&quot;movieData.RData&quot;, compress=TRUE)</code></pre>
 </div>
@@ -652,30 +674,32 @@ stopCluster(cl)</code></pre>
 <h1>Fun With Movie Data</h1>
 <p>You can use the dataset to answer questions such as “which movie yielded the largest gross?”</p>
 <pre class="r"><code>movieData[which.max(movieData$gross),]</code></pre>
-<pre><code>    movie    gross       date
-47 Avatar 25835551 2010-01-02</code></pre>
+<pre><code>                               movie     gross       date
+92116 Star Wars Ep. VII: The Forc... 119119282 2015-12-18</code></pre>
 <p>Which ten movies had the largest total gross during the period this dataset covers?</p>
 <pre class="r"><code>a &lt;- aggregate(gross~movie, data=movieData, sum)
 a[order(-a$gross)[1:10],]</code></pre>
-<pre><code>                                 movie    gross
-9                               Avatar 83912475
-30                     Sherlock Holmes 42226364
-5  Alvin and the Chipmunks: Th&amp;hellip; 38960368
-19                  Itâ\200\231s Complicated 22003445
-31                      The Blind Side 13505210
-45                       Up in the Air 12446164
-39           The Princess and the Frog 11057186
-14 Did You Hear About the Morg&amp;hellip;  5734370
-22                                Nine  4680198
-18                            Invictus  4540647</code></pre>
+<pre><code>                              movie     gross
+1890 Star Wars Ep. VII: The Forc... 935642689
+319                   Black Panther 700059566
+222          Avengers: Infinity War 678815482
+853  Harry Potter and the Deathl... 676012289
+1077                 Jurassic World 652198010
+1891 Star Wars Ep. VIII: The Las... 620181382
+2208 The Hunger Games: Mockingja... 618859787
+1998                   The Avengers 618839615
+974                   Incredibles 2 608581744
+2448 The Twilight Saga: Breaking... 573611870</code></pre>
 <p>Which days of the week yielded the largest total gross?</p>
 <pre class="r"><code>aggregate(gross~wday(date, label=TRUE), data=movieData, sum)</code></pre>
-<pre><code>  wday(date, label = TRUE)    gross
-1                      Sun 49150408
-2                      Mon 19196757
-3                      Tue 17743978
-4                      Fri 83031371
-5                      Sat 86616959</code></pre>
+<pre><code>  wday(date, label = TRUE)       gross
+1                      Sun 18341970220
+2                      Mon  7754234000
+3                      Tue  7779629491
+4                      Wed  6676148038
+5                      Thu  6361523338
+6                      Fri 22188960970
+7                      Sat 26626155478</code></pre>
 <p>Now that you have movie data and in a previous section you assembled Chicago crime data, combine the two datasets so that you can answer the question “what happens to crime when big movies come out?”</p>
 </div>
 
