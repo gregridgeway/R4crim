@@ -291,33 +291,31 @@ First, let's load the `jsonlite` library.
 ```{r comment="", results='hold', warning=FALSE}
 library(jsonlite)
 ```
-Here's how you can access the ACS data on the number of US households in 2014 and 2015.
+Here's how you can access the ACS data on the total population of the United States in 2017. 
 ```{r comment="", results='hold', warning=FALSE}
-fromJSON(readLines("http://api.census.gov/data/2015/acs1/cprofile?get=NAME,CP02_2015_001E,CP02_2014_001E&for=us:*"))
+fromJSON("https://api.census.gov/data/2017/acs/acs5?get=NAME,B01001_001E&for=us:*")
 ```
-(`fromJSON()` should not need `readLines()`, but the `jsonlite` version at this time has a problem hitting URLs directly).
-
-Let's deconstruct this URL. First, we're accessing data from the 2015 ACS data using `http://api.census.gov/data/2015/acs1`. Second, we're accessing variables `SP02_2014_001E` and `SP02_2015_001E`, which contain the number of households in the United States. This we needed to track down, but the Social Explorer website, [https://www.socialexplorer.com/data/ACS2014_5yr/metadata/](https://www.socialexplorer.com/data/ACS2014_5yr/metadata/), makes this easier. Lastly, we asked `for=us:*`, meaning for the entire United States.
+Let's deconstruct this URL. First, we're accessing data from the 2017 ACS data using `http://api.census.gov/data/2017/acs/`. Second, we're  using the date from the ACS sample collected over the last five years to estimate the total population... that's the `acs5` part. Third, we're accessing variable `B01001_001E`, which contains an estimate (the E at the end is for estimate) of the number of people in the United States. This we needed to track down, but the Social Explorer website, [https://www.socialexplorer.com/data/ACS2017_5yr/metadata/](https://www.socialexplorer.com/data/ACS2017_5yr/metadata/), makes this easier. Lastly, we asked `for=us:*`, meaning for the entire United States.
 
 If we want the total number of people in specific census tracts, then we can make this request.
 ```{r comment="", results='hold', warning=FALSE}
-fromJSON(readLines("http://api.census.gov/data/2014/acs5?get=B00001_001E&for=tract:204920,205110&in=state:06+county:037"))
+fromJSON("https://api.census.gov/data/2017/acs/acs5?get=B01001_001E&for=tract:204920,205110&in=state:06+county:037")
 ```
-Here we have requested population data (variable `B00001_001E`) for two specific census tracts (204920 and 205110)  from California (state 06) in Los Angeles County (county 037).
+Here we have requested population data (variable `B01001_001E`) for two specific census tracts (204920 and 205110)  from California (state 06) in Los Angeles County (county 037).
 
 If we want the total population in each tract in Los Angeles County, just change the tract list to an *.
 ```{r comment="", results='hold', warning=FALSE}
-a <- fromJSON(readLines("http://api.census.gov/data/2014/acs5?get=B00001_001E&for=tract:*&in=state:06+county:037"))
+a <- fromJSON("https://api.census.gov/data/2017/acs/acs5?get=B01001_001E&for=tract:*&in=state:06+county:037")
 # there are over 2000 census tracts in LA County. Show the first 10
 a[1:10,]
 ```
-You can find a lot more examples at [http://api.census.gov/data/2014/acs5/examples.html](http://api.census.gov/data/2014/acs5/examples.html).
+You can find a lot more examples at [https://api.census.gov/data/2017/acs/acs5/examples.html](https://api.census.gov/data/2017/acs/acs5/examples.html).
 
 Now let's get something more complete that we can merge into our geographic data. For each census tract in Los Angeles County, we will extract the total population (`B03002001`), the number of non-Hispanic white residents (`B03002003`), non-Hispanic black residents (`B03002004`), and Hispanic residents (`B03002012`).
 ```{r comment="", results='hold', warning=FALSE}
-dataRace <- fromJSON(readLines("http://api.census.gov/data/2014/acs5?get=B03002_001E,B03002_003E,B03002_004E,B03002_012E&for=tract:*&in=state:06+county:037"))
+dataRace <- fromJSON("https://api.census.gov/data/2017/acs/acs5?get=B03002_001E,B03002_003E,B03002_004E,B03002_012E&for=tract:*&in=state:06+county:037")
 ```
-We will convert the list to a data frame, leaving out the first component of the list that has the column names and telling R not to convert the character strings to factors.
+We will convert the matrix to a data frame, leaving out the first row of the matrix that has the column names and telling R not to convert the character strings to factors.
 ```{r comment="", results='hold'}
 a <- data.frame(dataRace[-1,], stringsAsFactors=FALSE)
 names(a) <- dataRace[1,]
@@ -920,7 +918,7 @@ iCens <- st_intersects(st_buffer(mapSZ[51,], dist=5280),
 plot(st_geometry(mapCens[iCens,]))
 
 # get total population for each census tract
-dataRes <- fromJSON(readLines("http://api.census.gov/data/2014/acs5?get=B03002_001E&for=tract:*&in=state:06+county:037"))
+dataRes <- fromJSON("https://api.census.gov/data/2017/acs/acs5?get=B01001_001E&for=tract:*&in=state:06+county:037")
 dataRes <- data.frame(dataRes[-1,])
 names(dataRes) <- c("pop","state","county","tract")
 dataRes$pop <- as.numeric(dataRes$pop)
