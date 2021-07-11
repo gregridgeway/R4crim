@@ -625,30 +625,30 @@ Now, back to those warnings we received about calculating centroids with longitu
 ```{r comment="", results='hold', message=FALSE}
 st_crs(PPDmap)
 ```
-The `proj4string` tells us that the coordinate system used to describe the PPD boundaries is longitude/latitude. Specifically, it uses the World Geodetic System 1984 (WGS84) maintained by the United States National Geospatial-Intelligence Agency, one of several standards to aid in navigation and geography. The European Petroleum Survey Group (EPSG) maintains a catalog of different coordinate systems (should be no surprise that oil exploration has driven the development of high quality geolocation standards). They have assigned the standard longitude/latitude coordinate system to be [EPSG4326]((http://spatialreference.org/ref/epsg/4326/). You can find the full collection of coordinate systems at [spatialreference.org](http://spatialreference.org/ref/epsg/).
+The the coordinate system used to describe the PPD boundaries is the World Geodetic System 1984 (WGS84) maintained by the United States National Geospatial-Intelligence Agency, one of several standards to aid in navigation and geography. The European Petroleum Survey Group (EPSG) maintains a catalog of different coordinate systems (should be no surprise that oil exploration has driven the development of high quality geolocation standards). They have assigned the standard longitude/latitude coordinate system to be [EPSG4326]((http://spatialreference.org/ref/epsg/4326/). You can find the full collection of coordinate systems at [spatialreference.org](http://spatialreference.org/ref/epsg/). You can see in the output above a reference to EPSG 4326.
 
 Many of us are comfortable with the longitude/latitude angular coordinate systems. However, the distance covered by a degree of longitude shrinks as you move towards the poles and only equals the distance covered by a degree of latitude at the equator. In addition, the earth is not very spherical so the coordinate system used for computing distances on the earth surface might need to depend on where you are on the earth surface. 
 
 Almost all web mapping tools (Google Maps, ESRI, OpenStreetMaps) use the pseudo-Mercator projection ([EPSG3857](http://spatialreference.org/ref/epsg/3857/)). Let's convert our PPD map to that coordinate system.
 ```{r comment="", results='hold', message=FALSE}
-PPDmap <- st_transform(PPDmap, crs=st_crs("+init=epsg:3857"))
+PPDmap <- st_transform(PPDmap, crs=3857)
 st_crs(PPDmap)
 ```
-Note that the `proj4string` now indicates that this is a Mercator projection with distance measured in meters (`+units=m`). Now if we ask for the centroids of the PSAs, we get more accurate centroids and no warnings from R.
+The CRS now indicates that this is a Mercator projection with distance measured in meters (`UNIT["Meter",1]`). Now if we ask for the centroids of the PSAs, we get more accurate centroids and no warnings from R.
 ```{r comment="", results='hold', message=FALSE}
 st_centroid(st_geometry(PPDmap))
 ```
-We can use the same projection, but modify it so that distances are measured in feet.
+We can use the same projection, but modify it so that distances are measured in feet. You should see that the `UNIT[]` has changed to Foot_US.
 ```{r comment="", results='hold', message=FALSE}
 PPDmap <- st_transform(PPDmap, crs=st_crs("+init=epsg:3857 +units=us-ft"))
 st_crs(PPDmap)
 ```
 There is a special coordinate system for every part of the world. A useful coordinate system for the Philadelphia area is [EPSG2272](http://spatialreference.org/ref/epsg/2272/). Let's convert our PPD map to that coordinate system.
 ```{r comment="", results='hold', message=FALSE}
-PPDmap <- st_transform(PPDmap, crs=st_crs("+init=epsg:2272"))
+PPDmap <- st_transform(PPDmap, crs=2272)
 st_crs(PPDmap)
 ```
-This coordinate system is the Lambert Conic Conformal (LCC). This particular projection of the `PPDmap` is tuned to provide good precision for the southern part of Pennsylvania and distances are measured in feet (note the `+units=us-ft` tag in the `proj4string`).
+This coordinate system is the Lambert Conic Conformal (LCC). This particular projection of the `PPDmap` is tuned to provide good precision for the southern part of Pennsylvania (note the parallel coordinates are at the latitude of southern Pennsylvania and the meridian is a little west of Philadelphia) and distances are measured in feet (note the `UNIT` tag in the CRS description).
 
 Let's transform back to longitude/latitude. It really is best to work using a different coordinate system, but I'm going to stick with longitude/latitude so that the values make a little more sense to us. Also at the scale of Philadelphia, we're just using the centroid calculation to figure out where to put labels. `st_transform()` does allow you to just use the EPSG code by itself.
 ```{r comment="", results='hold', message=FALSE}
@@ -669,7 +669,7 @@ First we need to convert our `ois` data frame to an `sf` object, communicating t
 ```{r comment="", results='hold', message=FALSE}
 ois <- st_as_sf(ois, 
                 coords=c("lon","lat"),
-                crs=st_crs("+init=epsg:4326"))
+                crs=4326)
 # check that everything looks okay
 plot(st_geometry(PPDmap), axes=TRUE)
 plot(st_geometry(ois), add=TRUE, col=rgb(1,0,0,0.5), pch=16)
@@ -704,7 +704,7 @@ gcPenn$lon <- as.numeric(gcPenn$lon)
 gcPenn$lat <- as.numeric(gcPenn$lat)
 st_join(st_as_sf(gcPenn,
                  coords=c("lon","lat"),
-                 crs=st_crs("+init=epsg:4326")),
+                 crs=4326),
         PPDmap)
 ```
 Now we see that Penn is in PSA 183 and we can highlight those points on the map.
