@@ -1,32 +1,34 @@
 ---
 title: "Working with Geographic Data"
 author:
-- affiliation: University of Pennsylvania
-  email: gridge@upenn.edu
-  name: Greg Ridgeway
+- Greg Ridgeway (gridge@upenn.edu)
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
-  html_document:
-    css: htmlstyle.css
+  pdf_document:
+    latex_engine: pdflatex
+  html_document: default
+fontsize: 11pt
 ---
 
-<!-- HTML YAML header Ctrl-Shift-C to comment/uncomment -->
-
+<!-- PDF YAML header Ctrl-Shift-C to comment/uncomment -->
 
 <!-- --- -->
 <!-- title: "Working with Geographic Data" -->
 <!-- author: -->
-<!-- - Greg Ridgeway (gridge@upenn.edu) -->
+<!-- - affiliation: University of Pennsylvania -->
+<!--   email: gridge@upenn.edu -->
+<!--   name: Greg Ridgeway -->
 <!-- date: "`r format(Sys.time(), '%B %d, %Y')`" -->
 <!-- output: -->
-<!--   pdf_document: -->
-<!--     latex_engine: pdflatex -->
-<!--   html_document: default -->
-<!-- fontsize: 11pt -->
-<!-- fontfamily: mathpazo -->
+<!--   html_document: -->
+<!--     css: htmlstyle.css -->
+<!-- editor_options:  -->
+<!--   chunk_output_type: console -->
 <!-- --- -->
 
-<!-- PDF YAML header Ctrl-Shift-C to comment/uncomment -->
+<!-- HTML YAML header Ctrl-Shift-C to comment/uncomment -->
+
+
 
 <!-- Make RMarkdown cache the results -->
 ```{r echo=FALSE}
@@ -85,7 +87,7 @@ We've added the x and y axis so that you note the scale. We can check how the ge
 ```{r comment="", results='hold'} 
 st_crs(mapSZ)
 ```
-Of greatest importance is to notice that the projection is not latitude and longitude, although this is clearly the case from the previous plot. The coordinate system is the Lambert Conic Conformal (LCC) tuned specifically for the Los Angeles area (that's what the lat/lon parameters are doing here). This coordinate system is oriented for the North American continental plate (NAD83), so precise that this coordinate system moves as North America tectonic plate moves (2cm per year!). Also note that the unit of measurement is in feet. Whenever we compute a distance or area with these data, the units will be in feet or square feet.
+Of greatest importance is to notice that the projection is not latitude and longitude, although this is clearly the case from the previous plot. The coordinate system is the Lambert Conic Conformal (LCC) tuned specifically for the Los Angeles area. This coordinate system is oriented for the North American continental plate (NAD83), so precise that this coordinate system moves as North America tectonic plate moves (2cm per year!). Also note that the unit of measurement is in feet. Whenever we compute a distance or area with these data, the units will be in feet or square feet.
 
 Let's examine the data attached to each polygon. Here are the first three rows.
 ```{r comment="", results='hold'} 
@@ -203,9 +205,9 @@ plot(st_geometry(mapSZmapBuf), col="green")
 
 THE US Census Bureau provides numerous useful geographic data files. We will use their TIGER files to get a map of the City of Los Angeles and we will get the census tracts that intersect with the city. Once you know an area's census tract, you can obtain data on the population of the area. All of the tiger files are available at [https://www.census.gov/cgi-bin/geo/shapefiles/index.php](https://www.census.gov/cgi-bin/geo/shapefiles/index.php).
 
-First, we will extract an outline of the city. The file `tl_2014_06_place.shp` file is a TIGER line file, created in 2014, for state number 6 (California is 6th in alphabetical order), and contains all of the places (cities and towns). Here's the entire state.
+First, we will extract an outline of the city. The file `tl_2019_06_place.shp` file is a TIGER line file, created in 2019, for state number 6 (California is 6th in alphabetical order), and contains all of the places (cities and towns). Here's the entire state.
 ```{r comment="", results='hold'}
-mapCAplaces <- st_read("11_shapefiles_and_data/tl_2014_06_place.shp")
+mapCAplaces <- st_read("11_shapefiles_and_data/tl_2019_06_place.shp")
 plot(st_geometry(mapCAplaces))
 ```
 
@@ -217,7 +219,7 @@ plot(st_geometry(mapLA))
 
 Now let's load in the census tracts for all of California.
 ```{r comment="", results='hold'}
-mapCens <- st_read("11_shapefiles_and_data/tl_2014_06_tract.shp")
+mapCens <- st_read("11_shapefiles_and_data/tl_2019_06_tract.shp")
 ```
 
 `mapCens` contains polygons for all census tracts in California. That's a lot more than we need. we just need the ones that overlap with Los Angeles. `st_intersects()` can help us determine which census tracts are in Los Angeles. However, the following gives us a warning about assuming planar coordinates.
@@ -271,9 +273,9 @@ st_intersects(mapSZms13, mapCens)
 ```
 
 ```{r comment="", results='hold'}
-st_intersects(mapSZms13, mapCens)
+a <- st_intersects(mapSZms13, mapCens)
 mapCens$inMS13 <- FALSE
-mapCens$inMS13[st_intersects(mapSZms13, mapCens)[[1]]] <- TRUE
+mapCens$inMS13[a[[1]]] <- TRUE
 plot(st_geometry(subset(mapCens, inMS13)))
 plot(st_geometry(mapSZms13), border="red", lwd=3, add=TRUE)
 ```
@@ -291,33 +293,33 @@ First, let's load the `jsonlite` library.
 ```{r comment="", results='hold', warning=FALSE}
 library(jsonlite)
 ```
-Here's how you can access the ACS data on the total population of the United States in 2017. 
+Here's how you can access the ACS data on the total population of the United States in 2019. 
 ```{r comment="", results='hold', warning=FALSE}
-fromJSON("https://api.census.gov/data/2017/acs/acs5?get=NAME,B01001_001E&for=us:*")
+fromJSON("https://api.census.gov/data/2019/acs/acs5?get=NAME,B01001_001E&for=us:*")
 ```
-Let's deconstruct this URL. First, we're accessing data from the 2017 ACS data using `http://api.census.gov/data/2017/acs/`. Second, we're  using the date from the ACS sample collected over the last five years to estimate the total population... that's the `acs5` part. Third, we're accessing variable `B01001_001E`, which contains an estimate (the E at the end is for estimate) of the number of people in the United States. This we needed to track down, but the Social Explorer website, [https://www.socialexplorer.com/data/ACS2017_5yr/metadata/](https://www.socialexplorer.com/data/ACS2017_5yr/metadata/), makes this easier. Lastly, we asked `for=us:*`, meaning for the entire United States.
+Let's deconstruct this URL. First, we're accessing data from the 2019 ACS data using `http://api.census.gov/data/2019/acs/`. Second, we're  using the date from the ACS sample collected over the last five years to estimate the total population... that's the `acs5` part. Third, we're accessing variable `B01001_001E`, which contains an estimate (the E at the end is for estimate) of the number of people in the United States. This we needed to track down, but the Social Explorer website, [https://www.socialexplorer.com/data/ACS2019_5yr/metadata/](https://www.socialexplorer.com/data/ACS2019_5yr/metadata/), makes this easier. Lastly, we asked `for=us:*`, meaning for the entire United States.
 
 If we want the total number of people in specific census tracts, then we can make this request.
 ```{r comment="", results='hold', warning=FALSE}
-fromJSON("https://api.census.gov/data/2017/acs/acs5?get=B01001_001E&for=tract:204920,205110&in=state:06+county:037")
+fromJSON("https://api.census.gov/data/2019/acs/acs5?get=B01001_001E&for=tract:204920,205110&in=state:06+county:037")
 ```
 Here we have requested population data (variable `B01001_001E`) for two specific census tracts (204920 and 205110)  from California (state 06) in Los Angeles County (county 037).
 
 If we want the total population in each tract in Los Angeles County, just change the tract list to an *.
 ```{r comment="", results='hold', warning=FALSE}
-a <- fromJSON("https://api.census.gov/data/2017/acs/acs5?get=B01001_001E&for=tract:*&in=state:06+county:037")
+a <- fromJSON("https://api.census.gov/data/2019/acs/acs5?get=B01001_001E&for=tract:*&in=state:06+county:037")
 # there are over 2000 census tracts in LA County. Show the first 10
 a[1:10,]
 ```
-You can find a lot more examples at [https://api.census.gov/data/2017/acs/acs5/examples.html](https://api.census.gov/data/2017/acs/acs5/examples.html).
+You can find a lot more examples at [https://api.census.gov/data/2019/acs/acs5/examples.html](https://api.census.gov/data/2019/acs/acs5/examples.html).
 
 Now let's get something more complete that we can merge into our geographic data. For each census tract in Los Angeles County, we will extract the total population (`B03002001`), the number of non-Hispanic white residents (`B03002003`), non-Hispanic black residents (`B03002004`), and Hispanic residents (`B03002012`).
 ```{r comment="", results='hold', warning=FALSE}
-dataRace <- fromJSON("https://api.census.gov/data/2017/acs/acs5?get=B03002_001E,B03002_003E,B03002_004E,B03002_012E&for=tract:*&in=state:06+county:037")
+dataRace <- fromJSON("https://api.census.gov/data/2019/acs/acs5?get=B03002_001E,B03002_003E,B03002_004E,B03002_012E&for=tract:*&in=state:06+county:037")
 ```
-We will convert the matrix to a data frame, leaving out the first row of the matrix that has the column names and telling R not to convert the character strings to factors.
+We will convert the matrix to a data frame, leaving out the first row of the matrix that has the column names.
 ```{r comment="", results='hold'}
-a <- data.frame(dataRace[-1,], stringsAsFactors=FALSE)
+a <- data.frame(dataRace[-1,])
 names(a) <- dataRace[1,]
 names(a)[1:4] <- c("total","white","black","hisp")
 dataRace <- a
@@ -325,6 +327,7 @@ for(i in c("total","white","black","hisp"))
    dataRace[[i]] <- as.numeric(dataRace[[i]])
 # compute number of residents of other race groups
 dataRace$other <- with(dataRace,total-white-black-hisp)
+dataRace[1:3,]
 ```
 
 Now we have a data frame that links the census tract numbers to populations and race data. Let's add race information to the MS13 injunction data.
@@ -357,30 +360,48 @@ text(st_coordinates(st_centroid(subset(mapCens,inMS13))),
 
 # Working with point data using Los Angeles crime data
 
-The Los Angeles Police Department (LAPD) posts all of its crime data at [Los Angeles' open data portal](https://data.lacity.org/A-Safe-City/Crime-Data-from-2010-to-Present/y8tr-7khq).
+The Los Angeles Police Department (LAPD) posts all of its crime data at Los Angeles' open data portal. We're interested in just the 2010-2019 crime data held in the [2010-2019 crime data file](https://data.lacity.org/Public-Safety/Crime-Data-from-2010-to-2019/63jg-8b9z).
 
-```{r comment="", results='hold'}
-dataCrime <- read.csv("11_shapefiles_and_data/Crime_Data_from_2010_to_Present.csv.gz",
+There are several ways we could go about retrieving the data. One method is to ask R to download the data to our computer and then use `read.csv()` to import it. Conveniently, the Los Angeles open data portal allows "SoQL" queries, meaning that we can use SQL-like where clauses. By default, SoQL will limit the result to 1,000 rows, so I've modified the limit to 5 million, more than enough to get all the 2019 crime data.
+
+```{r comment="", results='hold', warning=FALSE}
+# Method #1
+download.file("https://data.lacity.org/resource/63jg-8b9z.csv?$where=date_extract_y(date_occ)=2019&$limit=5000000",
+              destfile = "11_shapefiles_and_data/LAPD crime data 2019.csv")
+dataCrime <- read.csv("11_shapefiles_and_data/LAPD crime data 2019.csv",
                       as.is=TRUE)
 ```
-The data have a `Location` variable, but we need to communicate to R that this variable has geographic information. Right now, R just thinks this variable is plain text. Using regular expressions we can extract latitude and longitude.
 
-```{r comment="", results='hold'}
-a <- gsub("[()]", "", dataCrime$Location)
-dataCrime$lat <- as.numeric(gsub(",.*", "", a))
-dataCrime$lon <- as.numeric(gsub("[^,]*,", "", a))
-dataCrime$Location <- NULL
-dataCrime <- subset(dataCrime, !is.na(lat))
+Alternatively, we can just skip the download and ask R to directly read in the data from the Los Angeles data portal. The only downside to this is if you mess up your data, then you will need to download it all over again, which can be slow.
+```{r comment="", results='hold', warning=FALSE}
+# Method #2
+dataCrime <- read.csv("https://data.lacity.org/resource/63jg-8b9z.csv?$where=date_extract_y(date_occ)=2019&$limit=5000000",
+                      as.is=TRUE)
 ```
 
-Now that we have separate latitude and longitude, we can convert our dataframe into a simple features spatial object.
-```{r comment="", results='hold'}
+Let's download all 10 years so that we can explore changes in crime over time.
+```{r comment="", results='hold', warning=FALSE}
+download.file("https://data.lacity.org/resource/63jg-8b9z.csv?$limit=5000000",
+              destfile = "11_shapefiles_and_data/LAPD crime data 2010-2019.csv")
+dataCrime <- read.csv("11_shapefiles_and_data/LAPD crime data 2010-2019.csv",
+                      as.is=TRUE)
+```
+
+Like always, let's peek at the first three rows to see what we have.
+```{r comment="", results='hold', warning=FALSE}
+nrow(dataCrime)
+dataCrime[1:3,]
+```
+
+Now let's just keep the data that is not missing the latitude or longitude and convert our dataframe into a simple features spatial object.
+```{r comment="", results='hold', warning=FALSE}
+dataCrime <- subset(dataCrime, !is.na(lat) & !is.na(lon))
+
 dataCrime <- st_as_sf(dataCrime, 
                       coords=c("lon","lat"),
                       crs=4326)
 ```
-Setting `crs=4326` tells R that this spatial object has coordinates in latitude and longitude. We can either give the coordinate system using the longer form `"+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"` or try to remember that [EPSG 4326](http://www.spatialreference.org/ref/epsg/4326/) refers to latitude and longitude.
-
+Setting `crs=4326` tells R that this spatial object has coordinates in latitude and longitude. Try to remember that [EPSG 4326](http://www.spatialreference.org/ref/epsg/4326/) refers to latitude and longitude.
 
 Now we need to reproject the data into the coordinate system to match the injunction safety zone map.
 ```{r comment="", results='hold'}
@@ -391,9 +412,10 @@ Let's now identify which crimes occurred within one mile of the MS13 injunction.
 ```{r comment="", results='hold'}
 plot(st_geometry(st_buffer(mapSZms13, dist=5280)))
 plot(st_geometry(mapSZms13), border="red", lwd=3, add=TRUE)
-for(area in c(1,2,3,6,7,11,20))
-   plot(st_geometry(subset(dataCrime, Area.ID==area)),
-        col=area, 
+for(iArea in c(1,2,3,6,7,11,20))
+   # unique() saves R from plotting duplicate points on top of each other
+   plot(st_geometry(unique(subset(dataCrime, area==iArea, select=geometry))),
+        col=iArea, 
         pch=16, 
         cex=0.5, 
         add=TRUE)
@@ -402,7 +424,7 @@ for(area in c(1,2,3,6,7,11,20))
 A very useful operation is to find out which crimes occurred inside, near, or farther outside an area. We'll figure out which crimes occurred inside the safety zone, in a one-mile buffer around the safety zone, or more than a mile away from the safety zone. We'll subset to just those crimes that occurred in areas near the MS13 safety zone. This step is not essential, but it can save some computer time. There's no need for R to try to figure out if crimes in LAPD Area 4 fell inside the MS13 safety zone. All of those crimes are much more than a mile from the safety zone.
 ```{r comment="", results='hold'}
 # just get those crimes in areas near the MS13 safety zone
-dataCrimeMS13 <- subset(dataCrime, Area.ID %in% c(1,2,3,6,7,11,20))
+dataCrimeMS13 <- subset(dataCrime, area %in% c(1,2,3,6,7,11,20))
 ```
 
 We're going to use two different methods so you learn about different ways of solving these problems. The first method will use the now familiar `st_intersects()` function. In our `datacrimeMS13` data frame we are going to make a new column that labels whether a crime is inside the injunction safety zone (SZ), within a one-mile buffer around the safety zone (buffer), or beyond the buffer (outside). 
@@ -456,14 +478,15 @@ with(dataCrimeMS13, table(place1, place2))
 
 Does crime behave differently inside the safety zone compared with the areas beyond the safety zone? let's break down the crime counts by year and plot them. We're going to divide the crime count by their average so that they are on the same scale. The area beyond the buffer is very large and it doesn't make sense to compare their counts directly.
 ```{r comment="", results='hold'}
-dataCrimeMS13$Date.Occurred <- mdy(dataCrimeMS13$Date.Occurred)
-# count the number of crimes by year and area, only crimes in completed years
-a <- aggregate(DR.Number~place1+year(Date.Occurred),
-               data=subset(dataCrimeMS13,
-                           year(Date.Occurred)<2018),
+# In date_occ, the first 10 characters hold the dates
+dataCrimeMS13$date_occ <- ymd(substring(dataCrimeMS13$date_occ,1,10))
+
+# count the number of crimes by year and area
+a <- aggregate(dr_no~place1+year(date_occ),
+               data=dataCrimeMS13,
                length,
                drop=FALSE)
-a <- reshape(a, timevar="place1", idvar="year(Date.Occurred)", direction="wide")
+a <- reshape(a, timevar="place1", idvar="year(date_occ)", direction="wide")
 names(a) <- c("year","buffer","outside","SZ")
 # normalize to the average crime count over the period
 a$SZ      <- a$SZ     /mean(a$SZ)
@@ -480,7 +503,7 @@ lines(outside~year, data=a, col="green", lwd=3)
 ```
 
 # Exercises
-`r .exNum('How many 2017 crimes occurred inside safety zones?')`
+`r .exNum('How many 2019 crimes occurred inside safety zones?')`
 
 `r .exNum('How many crimes per square mile inside safety zones? (Hint 1: use @@st_area()@@ for area), Hint 2: use @@st_intersects()@@ to see which fall inside @@mapSZ@@)')`
 
@@ -500,9 +523,9 @@ A `MULTIPOLYGON` object is useful for managing a spatial object that involves se
 a <- st_cast(mapSZms13, "POLYGON")
 a
 ```
-Now we can see that `a` has two distinct polygons. The first row corresponds to the southern polygon. Let's store that one separately.
+Now we can see that `a` has two distinct polygons. The second row corresponds to the southern polygon. Let's store that one separately.
 ```{r comment="", results='hold'}
-mapSZms13s <- a[1,]
+mapSZms13s <- a[2,]
 plot(st_geometry(mapSZms13s))
 ```
 
@@ -583,9 +606,9 @@ With the southern MS13 safety zone extracted, let's explore the streets in this 
 
 # Overlaying a street map
 
-Let's load the street map for Los Angeles County, the county that contains the city of Los Angeles. The file we'll use here is `tl_2014_06037_roads.shp`. The naming convention says that this is a TIGER line file, from 2014, for state 06 (California), for county 037 (Los Angeles County), containing roads. Los Angeles County is large and this file has over 140,000 street segments. It can take a little while to load and project.
+Let's load the street map for Los Angeles County, the county that contains the city of Los Angeles. The file we'll use here is `tl_2019_06037_roads.shp`. The naming convention says that this is a TIGER line file, from 2019, for state 06 (California), for county 037 (Los Angeles County), containing roads. Los Angeles County is large and this file has over 135,000 street segments. It can take a little while to load and project.
 ```{r comment="", results='hold'}
-mapLAstreet <- st_read("11_shapefiles_and_data/tl_2014_06037_roads.shp")
+mapLAstreet <- st_read("11_shapefiles_and_data/tl_2019_06037_roads.shp")
 # make sure we use the same projection as the injunction map
 mapLAstreet <- st_transform(mapLAstreet, st_crs(mapSZms13s))
 mapLAstreet[1:3,]
@@ -718,7 +741,7 @@ plot(st_geometry(subset(dataCrimeMS13, inWilbuf)),
 
 And what are the most common crime types in this area?
 ```{r comment="", results='hold'}
-with(dataCrimeMS13, rev(sort(table(Crime.Code.Description[inWilbuf])))[1:5])
+with(dataCrimeMS13, rev(sort(table(crm_cd_desc[inWilbuf])))[1:5])
 ```
 
 In the previous method we created a 100-foot buffer and then asked which crimes landed inside the buffer. Alternatively, we can compute the distance between each crime point location and Wilshire Blvd. This second method takes a lot more computational effort and will be much slower, but we want you to be familiar with the functions that compute distances.
@@ -787,7 +810,7 @@ Which streets have the most incidents?
 a <- table(mapMS13street$FULLNAME[iClose])
 rev(sort(a))[1:10]
 # or,  just using the addresses
-a <- gsub("^[0-9]+ ", "", dataCrimeMS13s$Address)
+a <- gsub("^[0-9]+ ", "", dataCrimeMS13s$location)
 a <- gsub(" * ", " ", a)
 rev(sort(table(a)))[1:10]
 ```
@@ -918,7 +941,7 @@ iCens <- st_intersects(st_buffer(mapSZ[51,], dist=5280),
 plot(st_geometry(mapCens[iCens,]))
 
 # get total population for each census tract
-dataRes <- fromJSON("https://api.census.gov/data/2017/acs/acs5?get=B01001_001E&for=tract:*&in=state:06+county:037")
+dataRes <- fromJSON("https://api.census.gov/data/2019/acs/acs5?get=B01001_001E&for=tract:*&in=state:06+county:037")
 dataRes <- data.frame(dataRes[-1,])
 names(dataRes) <- c("pop","state","county","tract")
 dataRes$pop <- as.numeric(dataRes$pop)
@@ -942,14 +965,17 @@ plot(st_geometry(mapSZ[i,]), add=TRUE, border="purple", lwd=2)
 
 ```{r comment="", results='hold'}
 i <- st_intersects(st_union(mapSZ),
-                   subset(dataCrime, year(mdy(Date.Occurred))==2017))[[1]]
+                   subset(dataCrime, year(date_occ)==2019))[[1]]
 nSZcrimes <- length(i)
 ```
 
 `r .exQ(11)`
 
 ```{r comment="", results='hold'}
-nSZcrimes / st_area(st_union(mapSZ)) * 5280^2
+library(units)
+# use set_units() to convert to square miles
+#   equivalent to multiplying by 5820^2
+set_units(nSZcrimes / st_area(st_union(mapSZ)), value="1/mile^2")
 ```
 
 `r .exQ(12)`
@@ -960,8 +986,8 @@ mapBuf <- st_difference(st_buffer(st_union(mapSZ), dist=5280),
 mapBuf <- st_intersection(mapBuf, mapLA)
 
 i <- st_intersects(mapBuf,
-                   subset(dataCrime, year(mdy(Date.Occurred))==2017))[[1]]
-length(i) / st_area(mapBuf) * 5280^2
+                   subset(dataCrime, year(date_occ)==2019))[[1]]
+set_units(length(i) / st_area(mapBuf), value="1/mile^2")
 ```
 
 `r .exQ(13)`
