@@ -1,32 +1,34 @@
 ---
 title: "Working with Geographic Data"
 author:
-- Greg Ridgeway (gridge@upenn.edu)
+- affiliation: University of Pennsylvania
+  email: gridge@upenn.edu
+  name: Greg Ridgeway
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
-  pdf_document:
-    latex_engine: pdflatex
-  html_document: default
-fontsize: 11pt
+  html_document:
+    css: htmlstyle.css
+editor_options:
+  chunk_output_type: console
 ---
 
-<!-- PDF YAML header Ctrl-Shift-C to comment/uncomment -->
+<!-- HTML YAML header Ctrl-Shift-C to comment/uncomment -->
+
 
 <!-- --- -->
 <!-- title: "Working with Geographic Data" -->
 <!-- author: -->
-<!-- - affiliation: University of Pennsylvania -->
-<!--   email: gridge@upenn.edu -->
-<!--   name: Greg Ridgeway -->
+<!-- - Greg Ridgeway (gridge@upenn.edu) -->
 <!-- date: "`r format(Sys.time(), '%B %d, %Y')`" -->
 <!-- output: -->
-<!--   html_document: -->
-<!--     css: htmlstyle.css -->
-<!-- editor_options:  -->
-<!--   chunk_output_type: console -->
+<!--   pdf_document: -->
+<!--     latex_engine: pdflatex -->
+<!--   html_document: default -->
+<!-- fontsize: 11pt -->
 <!-- --- -->
 
-<!-- HTML YAML header Ctrl-Shift-C to comment/uncomment -->
+<!-- PDF YAML header Ctrl-Shift-C to comment/uncomment -->
+
 
 
 
