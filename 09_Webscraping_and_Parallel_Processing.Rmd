@@ -11,6 +11,8 @@ date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
   html_document:
     css: htmlstyle.css
+editor_options: 
+  chunk_output_type: console
 ---
 
 <!-- HTML YAML header Ctrl-Shift-C to comment/uncomment -->
@@ -92,10 +94,10 @@ a[1:5]
 ```
 `what=""` tells `scan()` to expect plain text and `sep="\n"` tells `scan()` to separate each element when it reaches a line feed character, signaling the end of a line.
 
-Some websites are more complex or use different text encoding. For example, using `scan()` on [https://stores.org/stores-top-retailers-2017/](https://stores.org/stores-top-retailers-2017/) produces unintelligible text. The `GET()` function from the `httr` package can sometimes resolve this.
+Some websites are more complex or use different text encoding. On those websites `scan()` produces unintelligible text. The `GET()` function from the `httr` package can sometimes resolve this.
 ```{r comment="", results='hold'}
 library(httr)
-resp <- GET("https://stores.org/stores-top-retailers-2017/")
+resp <- GET("http://www.the-numbers.com/box-office-chart/daily/2018/07/04")
 a1 <- content(resp, as="text")
 a1 <- strsplit(a1,"\n")[[1]]
 cat(a1[1:10], sep="\n")
@@ -104,7 +106,7 @@ cat(a1[1:10], sep="\n")
 Also, some Mac users will encounter snags with both of these methods and receive "403 Forbidden" errors while their Mac colleague right next to them on the same network will not. I have not figured out why this happens, but have found that making R masquerade as different browser sometimes works.
 
 ```{r comment="",results='hold'}
-resp <- GET("https://stores.org/stores-top-retailers-2017/", 
+resp <- GET("http://www.the-numbers.com/box-office-chart/daily/2018/07/04", 
             user_agent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/537.13+ (KHTML, like Gecko) Version/5.1.7 Safari/534.57.2"))
 a1 <- content(resp, as="text")
 a1 <- strsplit(a1,"\n")[[1]]
