@@ -116,7 +116,7 @@ a1 <- strsplit(a1,"\n")[[1]]
 
 Now that we have stored in the variable `a` the HTML code for one day's movie data in R, let's apply some regular expressions to extract the data. The HTML code includes a lot of lines that do not involve data that interests us. There is code for making the page look nice and code for presenting advertisements. Let's start by finding the lines that have the movie names in them.
 
-Going back to the HTML code, I noticed that both the line with _Jurassic Park_ and _Incredible 2_ have the sequence of characters "#tab=box-office". By finding a pattern of characters that always precedes the text that interests us, we can use it to grep the lines we want. Let's find every line that has "#tab=box-office" in it.
+Going back to the HTML code, I noticed that both the line with _Jurassic Park_ and _Incredibles 2_ have the sequence of characters "#tab=box-office". By finding a pattern of characters that always precedes the text that interests us, we can use it to grep the lines we want. Let's find every line that has "#tab=box-office" in it.
 
 ```{r comment="", results='hold'}
 i <- grep("#tab=box-office", a)
@@ -165,7 +165,7 @@ tail(data0)
 
 # Scraping Multiple Pages
 
-We've now successfully scraped data for one day. This is usually the hardest part. But if we have R code that can correctly scrape one day's worth of data _and_ the website is consistent across days, then it is simple to adapt our code to work for _all_ days. So let's get all movie data from January 1, 2010 through December 31, 2018. That means we're going to be web scraping over 3,200 pages of data.
+We've now successfully scraped data for one day. This is usually the hardest part. But if we have R code that can correctly scrape one day's worth of data _and_ the website is consistent across days, then it is simple to adapt our code to work for _all_ days. So let's get all movie data from January 1, 2010 through December 31, 2020. That means we're going to be web scraping over 3,200 pages of data.
 
 First note that the URL for July 4, 2018 was 
 
@@ -177,7 +177,7 @@ To start, let's make a list of all the dates that we intend to scrape.
 ```{r comment="", results='hold'}
 library(lubridate)
 # create a sequence of all days to scrape
-dates2scrape <- seq(ymd("2010-01-01"), ymd("2018-12-31"), by="days")
+dates2scrape <- seq(ymd("2010-01-01"), ymd("2020-12-31"), by="days")
 ```
 
 Now `dates2scrape` contains a collection of all the dates with movie data that we wish to scrape. 
