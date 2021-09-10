@@ -362,7 +362,7 @@ text(st_coordinates(st_centroid(subset(mapCens,inMS13))),
 
 # Working with point data using Los Angeles crime data
 
-The Los Angeles Police Department (LAPD) posts all of its crime data at Los Angeles' open data portal. We're interested in just the 2010-2019 crime data held in the [2010-2019 crime data file](https://data.lacity.org/Public-Safety/Crime-Data-from-2010-to-2019/63jg-8b9z).
+The Los Angeles Police Department (LAPD) posts all of its crime data at Los Angeles' open data portal. We're interested in the 2010-2019 crime data held in the [2010-2019 crime data file](https://data.lacity.org/Public-Safety/Crime-Data-from-2010-to-2019/63jg-8b9z). We're also interested in the crime data for [2020 to the present](https://data.lacity.org/Public-Safety/Crime-Data-from-2020-to-Present/2nrs-mtv8), which LAPD posts separately.
 
 There are several ways we could go about retrieving the data. One method is to ask R to download the data to our computer and then use `read.csv()` to import it. Conveniently, the Los Angeles open data portal allows "SoQL" queries, meaning that we can use SQL-like where clauses. By default, SoQL will limit the result to 1,000 rows, so I've modified the limit to 5 million, more than enough to get all the 2019 crime data.
 
@@ -381,12 +381,21 @@ dataCrime <- read.csv("https://data.lacity.org/resource/63jg-8b9z.csv?$where=dat
                       as.is=TRUE)
 ```
 
-Let's download all 10 years so that we can explore changes in crime over time.
+Let's download all 2010-2019 data as well as the 2020-present data so that we can explore changes in crime over time.
 ```{r comment="", results='hold', warning=FALSE}
+# get the 2010-2019 data
 download.file("https://data.lacity.org/resource/63jg-8b9z.csv?$limit=5000000",
               destfile = "11_shapefiles_and_data/LAPD crime data 2010-2019.csv")
 dataCrime <- read.csv("11_shapefiles_and_data/LAPD crime data 2010-2019.csv",
                       as.is=TRUE)
+# get the 2020-present data
+download.file("https://data.lacity.org/resource/2nrs-mtv8.csv?$limit=5000000",
+              destfile = "11_shapefiles_and_data/LAPD crime data 2020-present.csv")
+a <- read.csv("11_shapefiles_and_data/LAPD crime data 2020-present.csv",
+                      as.is=TRUE)
+
+# combine 2010-2019 data and 2020-present data
+dataCrime <- rbind(dataCrime, a)
 ```
 
 Like always, let's peek at the first three rows to see what we have.
