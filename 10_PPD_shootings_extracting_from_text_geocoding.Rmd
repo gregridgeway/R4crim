@@ -30,8 +30,9 @@ editor_options:
 <!-- PDF YAML header Ctrl-Shift-C to comment/uncomment -->
 
 <!-- Make RMarkdown cache the results -->
-```{r echo=FALSE}
+```{r echo=FALSE, cache=FALSE}
 knitr::opts_chunk$set(echo=TRUE, cache=TRUE, cache.lazy=FALSE, out.width='100%')
+library(leaflet)
 ```
 
 <!-- A function for automating the numbering and wording of the exercise questions -->
