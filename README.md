@@ -8,7 +8,7 @@ Table of contents
 2. [Dates and times](https://htmlpreview.github.io/?https://github.com/gregridgeway/R4crim/blob/master/02_Dates_and_times.html)
 3. [Working with NIBRS data](https://htmlpreview.github.io/?https://github.com/gregridgeway/R4crim/blob/master/03-Working-with-NIBRS-data.html) (replacing the older notes on [Working with UCR data](https://htmlpreview.github.io/?https://github.com/gregridgeway/R4crim/blob/master/03_Working_with_UCR_data.html))
 4. [Working with NCVS data](https://htmlpreview.github.io/?https://github.com/gregridgeway/R4crim/blob/master/04_Working_with_NCVS_data.html)
-5. [Regular expressions](https://htmlpreview.github.io/?https://github.com/gregridgeway/R4crim/blob/master/05_Regular_expressions.html)
+5. [Regular expressions](https://htmlpreview.github.io/?https://github.com/gregridgeway/R4crim/blob/master/05-Regular-expressions.html)
 6. [Introduction to SQL, Part 1](https://htmlpreview.github.io/?https://github.com/gregridgeway/R4crim/blob/master/06_Introduction_to_SQL1.html)
 7. [Crime hotspot maps](https://htmlpreview.github.io/?https://github.com/gregridgeway/R4crim/blob/master/07_Crime_Hotspot_Map.html)
 8. [Introduction to SQL, Part 2](https://htmlpreview.github.io/?https://github.com/gregridgeway/R4crim/blob/master/06_Introduction_to_SQL2.html)
