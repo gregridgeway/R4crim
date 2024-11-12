@@ -37,13 +37,16 @@ editor_options:
 <!-- PDF YAML header Ctrl-Shift-C to comment/uncomment -->
 
 <!-- Make RMarkdown cache the results -->
-```{r echo=FALSE, cache=FALSE}
+```{r}
+#| echo: false
+#| cache: false
 knitr::opts_chunk$set(echo=TRUE, cache=TRUE, cache.lazy=FALSE, out.width='100%')
 library(leaflet)
 ```
 
 <!-- A function for automating the numbering and wording of the exercise questions -->
-```{r echo=FALSE}
+```{r}
+#| echo: false
 .counterExercise <- 0
 .exerciseQuestions <- NULL
 .exNum <- function(.questionText="") 
@@ -322,7 +325,9 @@ scan("https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAd
 It is messy, but readable. You can see embedded in this text the `lat` and `lon` for this address. You can also see that it should not be too hard for a machine to extract these coordinates, and the rest of the information here, from this block of text. This is the point of JSON, producing data in a format that a human could understand in a small batch, but a machine could process fast and easily.
 
 The `jsonlite` R package facilitates the conversion of JSON text like this into convenient R objects.
-```{r comment="", results='hold'}
+```{r}
+#| comment: ""
+#| results: hold
 library(jsonlite)
 fromJSON("https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&singleLine=38th%20and%20Walnut,%20Philadelphia,%20PA&outFields=Match_addr,Addr_type")
 ```
@@ -330,7 +335,9 @@ fromJSON("https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/fi
 
 To make geocoding a little more convenient, here is an R function that automates the process of taking an address, filling in `%20` for spaces in the appropriate URL, and retrieving the JSON results from the ArcGIS geocoding service.
 
-```{r comment="", results='hold'}
+```{r}
+#| comment: ""
+#| results: hold
 geocodeARCGIS <- function(address)
 {
    a <- gsub(" +", "\\%20", address)
@@ -342,7 +349,11 @@ geocodeARCGIS <- function(address)
 ```
 
 Let's test out `geocodeARCGIS()` by pulling up a up a map of the geocoded coordinates. Once we have the latitude and longitude for the McNeil Building, where we typically hold our crime data science courses at Penn, we can use `leaflet()` to show us a map of the area.
-```{r comment="", message=FALSE, fig.cap="ArcGIS geocoding result for 3718 Locust Walk"}
+```{r}
+#| comment: ""
+#| message: false
+#| fig.cap: "ArcGIS geocoding result for 3718 Locust Walk"
+
 library(leaflet)
 
 gcPenn <- geocodeARCGIS("3718 Locust Walk, Philadelphia, PA")
@@ -388,7 +399,9 @@ ois <- ois |>
 
 
 Several OISs are missing locations.
-```{r comment="", results='hold'}
+```{r}
+#| comment: ""
+#| results: hold
 ois |>
    filter(location %in% c("","withheld","Withheld")) |>
    select(id, location, text)
@@ -455,7 +468,9 @@ for(i in 1:nrow(ois))
 ```
 
 Now it we should have longitude and latitude for every incident. Let's check that they all look sensible.
-```{r comment="", results='hold'}
+```{r}
+#| comment: ""
+#| results: hold
 stem(ois$lat)
 stem(ois$lon)
 ```
@@ -505,7 +520,10 @@ ois |>
 # Working with shapefiles and coordinate systems
 
 The Philadelphia Police Department divides the city into Police Service Areas (PSAs). The city provides a *shapefile*, a file containing geographic data, that describes the boundaries of the PSAs at Philadelphia's [open data site](https://www.opendataphilly.org/dataset/police-service-areas). R can read these files using the `st_read()` function provided in the `sf` (simple features) package. Even though `st_read()` appears to only be accessing `Boundaries_PSA.shp`, you should have all of the `Boundaries_PSA` files in your `10_shapefiles_and_data` folder. The other files have information that `st_read()` needs, like the coordinate system stored in `Boundaries_PSA.prj`. If you do not have all `Boundaries_PSA` files in your folder, then in a few lines you will get errors like "the sfc object should have crs set," meaning that the Coordinate Reference System (CRS) is missing.
-```{r comment="", results='hold', message=FALSE}
+```{r}
+#| comment: ""
+#| results: hold
+#| message: false
 library(sf)
 PPDmap <- st_read("10_shapefiles_and_data/Boundaries_PSA.shp")
 ```
@@ -517,7 +535,10 @@ PPDmap <- geojson_sf("https://opendata.arcgis.com/datasets/8dc58605f9dd484295c7d
 ```
 
 `PPDmap` is an `sf` (simple features) object. It is not unlike a data frame, but it contains a special column containing geographic information associated with a row of data. Here are the two columns in `PPDmap` that are of primary interest.
-```{r comment="", results='hold', message=FALSE}
+```{r}
+#| comment: ""
+#| results: hold
+#| message: false
 PPDmap |> select(PSA_NUM, geometry)
 ```
 The first column shows the PSA number and the second column shows a truncated description of the geometry associated with this row. In this case, `geometry` contains the coordinates of the boundary of the PSA for each row. Use `st_geometry()` to extract the polygons to make a plot.
@@ -668,7 +689,9 @@ PSAlookup |>
 ```
 
 Let's identify which OISs occurred in the same PSA as the University of Pennsylvania. We've already geocoded Penn and have its coordinates. Let's join it with `PPDmap` to find out which PSA it is in.
-```{r comment="", message=FALSE}
+```{r}
+#| comment: ""
+#| message: false
 gcPenn
 
 st_as_sf(gcPenn,
@@ -678,7 +701,9 @@ st_as_sf(gcPenn,
    select(PSA_NUM)
 ```
 Now we see that Penn is in PSA 183 and we can highlight those points on the map.
-```{r comment="", message=FALSE}
+```{r}
+#| comment: ""
+#| message: false
 plot(st_geometry(PPDmap), axes=TRUE)
 PSAlookup |>
   filter(PSA_NUM=="183") |>
@@ -720,7 +745,9 @@ hist(a$n, xlab="Number of OISs", ylab="Number of PSAs", main="")
 ```
 
 Let's discretize the OIS counts into a few categories.
-```{r comment="", message=FALSE}
+```{r}
+#| comment: ""
+#| message: false
 PPDmap <- PPDmap |>
   mutate(catShoot =
            cut(nShoot,
@@ -728,7 +755,10 @@ PPDmap <- PPDmap |>
                right=FALSE))
 ```
 `cut()` converts all of the individual counts into categories, like [1,5) or [25,30). For each of these categories we will associate a color for the map. `heat.colors()` will generate a sequence of colors in the yellow, orange, red range.
-```{r comment="", message=FALSE}
+```{r}
+#| comment: ""
+#| message: false
+#| results: hold
 a <- data.frame(catShoot=levels(PPDmap$catShoot),
                 col=rev(heat.colors(6,1)))
 a
