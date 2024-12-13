@@ -1,0 +1,759 @@
+---
+title: "Introduction to R"
+author:
+- affiliation: University of Pennsylvania
+  email: gridge@upenn.edu
+  name: Greg Ridgeway
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+format:
+  html:
+    theme: 
+      dark: darkly
+      light: default
+    toc: true
+    html-math-method: mathjax
+  pdf:
+    toc: true
+prefer-html: true
+number-sections: true
+editor_options: 
+  chunk_output_type: console
+---
+
+<!-- A function for automating the numbering and wording of the exercise questions -->
+```{r echo=FALSE}
+.counterExercise <- 0
+.exerciseQuestions <- NULL
+.exNum <- function(.questionText="") 
+{
+   .counterExercise <<- .counterExercise+1
+   .exerciseQuestions <<- c(.exerciseQuestions, .questionText)
+   .questionText <- gsub("@@", "`", .questionText)
+   return(paste0(.counterExercise,". ",.questionText))
+}
+```
+
+# Introduction
+
+This is the first set of notes for an introduction to R programming from criminology and criminal justice. These notes assume that you have the latest version of R and R Studio installed. We are also assuming that you know how to start a new script file and submit code to the R console. From that basic knowledge about using R, we are going to start with `2+2` and by the end of this set of notes you will load in a dataset on protests in the United States (mostly), create a few plots, count some incidents, and be able to do some basic data manipulations. Our aim is to build a firm foundation on which we will build throughout this set of notes.
+
+R sometimes provides useful help as to how to do something, such as choosing the right function or figuring what the syntax of a line of code should be. Let's say we're stumped as to what the `sqrt()` function does. Just type `?sqrt` at the R prompt to read documentation on `sqrt()`. Most help pages have examples at the bottom that can give you a better idea about how the function works. R has over 7,000 functions and an often seemingly inconsistent syntax. As you do more complex work with R (such as using new packages), the Help tab can be useful. 
+
+# Basic Math and Functions in R
+
+R, on a very unsophisticated level, is like a calculator. 
+
+```{r}
+#| comment: ""
+#| results: "hold"
+2+2
+1*2*3*4
+(1+2+3-4)/(5*7)
+sqrt(2)
+(1+sqrt(5))/2 # golden ratio
+2^3
+log(2.718281828)
+round(2.718281828,3)
+12^2 
+factorial(4)
+abs(-4)
+```
+
+# Combining values together into a collection (or vector)
+
+We will use the `c()` function a lot. `c()` *c*ombines elements, like numbers and text to form a vector or a collection of values. If we wanted to combine the numbers 1 to 5 we could do
+```{r}
+#| comment: ""
+c(1,2,3,4,5)
+```
+With the `c()` function, it's important to separate all of the items with commas. 
+
+Conveniently, if you want to add 1 to each item in this collection, there's no need to add 1 like `c(1+1,2+1,3+1,4+1,5+1)`... that's a lot of typing. Instead R offers the shortcut
+```{r}
+#| comment: ""
+c(1,2,3,4,5)+1
+```
+In fact, you can apply any mathematical operation to each value in the same way.
+```{r}
+#| comment: ""
+#| results: "hold"
+c(1,2,3,4,5)*2
+sqrt(c(1,2,3,4,5))
+(c(1,2,3,4,5)-3)^2
+abs(c(-1,1,-2,2,-3,3))
+```
+
+Note in the examples below that you can also have a collection of non-numerical items. When combining text items, remember to use quotes around each item.
+```{r}
+#| comment: ""
+#| results: "hold"
+c("CRIM6000","CRIM6001","CRIM6002","CRIM6003")
+c("yes","no","no",NA,NA,"yes")
+```
+In R, `NA` means a missing value. We'll do more exercises later using data containing some `NA` values. In any dataset in the wild, you are virtually guaranteed to find some `NA`s. The function `is.na()` helps determine whether there are any missing values (any NAs). In some of the problems below, we will use `is.na()`.
+
+You can use double quotes or single quotes in R as long as you are consistent. When you have quotes inside the text you need to be particularly careful.
+```{r}
+#| comment: ""
+#| results: "hold"
+"Lou Gehrig's disease"
+'The officer shouted "halt!"'
+```
+The backslashes in the above text "protect" the double quote, communicating to you and to R that the next double quote is not the end of the text, but a character that is actually part of the text you want to keep.
+
+The `c()` function is not the only way to make a collection of values in R. For example, placing a `:` between two numbers can return a collection of numbers in sequence. The functions `rep()` and `seq()` produce repeated values or sequences.
+```{r}
+#| comment: ""
+#| results: "hold"
+1:10
+5:-5
+c(1,1,1,1,1,1,1,1,1,1)
+rep(1,10)
+rep(c(1,2),each=5)
+seq(1, 5)
+seq(1, 5, 2)
+```
+
+R will also do arithmetic with two vectors, doing the calculation pairwise. The following will compute 1+11 and 2+12 up to 10+20.
+```{r}
+#| comment: ""
+1:10 + 11:20
+```
+Yet, other functions operate on the whole collection of values in a vector. See the following examples:
+```{r}
+#| comment: ""
+#| results: "hold"
+sum(c(1,10,3,6,2,5,8,4,7,9)) # sum
+length(c(1,10,3,6,2,5,8,4,7,9)) # how many?
+cumsum(c(1,10,3,6,2,5,8,4,7,9)) # cumulative sum
+mean(c(1,10,3,6,2,5,8,4,7,9)) # mean of collection of 10 numbers
+median(c(1,10,3,6,2,5,8,4,7,9)) # median of same population
+```
+There are also some functions in R that help us find the biggest and smallest values. For example:
+```{r}
+#| comment: ""
+#| results: "hold"
+max(c(1,10,3,6,2,5,8,4,7,9)) # what is the biggest value in vector?
+which.max(c(1,10,3,6,2,5,8,4,7,9)) # in which "spot" would we find it?
+min(c(1,10,3,6,2,5,8,4,7,9)) # what is the smallest value in vector?
+which.min(c(1,10,3,6,2,5,8,4,7,9)) # in which "spot" would we find it?
+```
+
+
+# Setting the working directory
+Now that we have covered a lot of fundamental R features, it is time to load in a real dataset. However, before we do that, R needs to know where to find the data file. So we first need to talk about "the working directory". When you start R, it has a default folder or directory on your computer where it will retrieve or save any files. You can run `getwd()` to get the current working directory. Here's our current working directory, which will not be the same as yours.
+```{r comment=""}
+getwd()    
+```
+Almost certainly this default directory is *not* where you plan to have all of your datasets and files stored. Instead, you probably have an "analysis" or "project" or "R4crim" folder somewhere on you computer where you would like to store your data and work.
+
+Use `setwd()` to tell R what folder you want it to use as the working directory. If you do not set the working directory, R will not know where to find the data you wish to import and will save your results in a location in which you would probably never look. Make it a habit to have `setwd()` as the first line of every script you write. If you know the working directory you want to use, then you can just put it inside the `setwd()` function.
+```
+setwd("C:/Users/greg_/CRIM6002/notes/R4crim")    
+```
+Note that for all platforms, Windows, Macs, and Linux, the working directory only uses forward slashes. So Windows users be careful... most Windows applications use backslashes, but in an effort to make R scripts work across all platforms, R requires forward slashes. Backslashes have a different use in R that you will meet later.
+
+If you do not know how to write your working directory, here comes R Studio to the rescue. In R Studio click Session -> Set Working Directory -> Choose Directory. Then click through to navigate to the working directory that you want to use. When you find it click "Select Folder". Then look over at the console. R Studio will construct the right `setwd()` syntax for you. Copy and paste that into your script for use later. No need to have to click through the Session menu again now that you have your `setwd()` set up.
+
+Now you can use R functions to load in any datasets that are in your working folder. If you have done your `setwd()` correctly, you shouldn't get any errors because R will know exactly where to look for the data files. If the working directory that you've given in the `setwd()` isn't right, R will think the file doesn't even exist. For example, if you give the path for, say, your R4econ folder, R won't be able to load data because the file isn't stored in what R thinks is your working directory. With that out of the way, let's load a dataset.
+
+# Loading a first dataset, protests in the United States
+
+We are going to use a dataset of protests in the United States. The data comes from [CountLove](https://countlove.org/faq.html). The data is a collection of protests that occurred in the United States from 2017 through January 2021. The data includes the date of the protest, the location, the number of attendees, and the reason for the protest. We will load the data and explore it. They stopped collection in February 2021, but you can find more recent crowd data at the [Crowd Counting Consortium](https://ash.harvard.edu/programs/crowd-counting-consortium/).
+
+We start by loading in the dataset. I have created a .RData file containing the protest data. This is stored in a special format that R can read quickly. The file is called `protests.RData`. We will load this file into R using the `load()` function. Once we have loaded the data, we can see what is in the dataset using the `ls()` function. This will list all the objects in the current environment. If you have just started using R, most likely the only object you see in your environment is `dataProtest`.
+```{r}
+load("protests.RData")
+ls()
+```
+
+To start exploring the protest data, have a look at how many rows (protests) and how many columns (protest features) are in the dataset. Then use the `head()` function to show the first few rows of the dataset.
+
+```{r}
+# how many rows?
+nrow(dataProtest)
+# how many columns?
+ncol(dataProtest)
+
+head(dataProtest)
+```
+We learn that the dataset has `r nrow(dataProtest)` rows and `r ncol(dataProtest)` columns. The `head()` function shows the first few rows of the dataset. The first column is the date of the protest (`Date`), the second is the location (`Location`), and the third is the number of attendees (`Attendees`). The fifth column contains tags describing the purpose of the protest (`Tags`). The other columns contain other details, like links to news articles about the protest. We will not be using these other features.
+
+Some R functionality relies on packages written by others. For certain basic data tasks, such as selecting certain columns, filtering rows, modifying values, and summarizing data, we will use the `dplyr` package (usually pronounced dee-ply-er... intended to evoke pliers for data). If you do not have `dplyr` installed, you can install it by running `install.packages("dplyr")`. This is a one-time installation. Once per R session, you need to load the package using `library()`.
+
+```{r}
+#| message: false
+library(dplyr)
+```
+Now with `dplyr` loaded we can slice the protest data to just pick our certain rows, like the first row.
+```{r}
+slice(dataProtest, 1)
+```
+There is a more modern "grammar" in R called the pipe operator. This is a way to chain together functions in a more readable way. The pipe operator is `|>`. It takes the output of the function on the left and passes it as the first argument to the function on the right. This is a more modern way to write R code. Here is the same code as above using the pipe operator.
+```{r}
+dataProtest |> slice(1)
+```
+This code takes `dataProtest` and passes it in to the first argument of the `slice()` function. The `slice()` function then returns the first row of the dataset. This is a more readable way to write the code. 
+
+You will also see many users using `%>%` in their code. The `%>%` pipe operator has been around longer, but the newer `|>` pipe operator, created in 2021 for R 4.1.0, is [faster](https://michaelbarrowman.co.uk/post/the-new-base-pipe/). You can use either one.
+
+If you want the first 3 rows you can also use `slice()`
+```{r}
+dataProtest |> slice(1:3)
+```
+or you can use `head()` that we used earlier.
+```{r}
+dataProtest |> head(3)
+```
+I have the general habit of running `head()` and `tail()` on any datasets I am working with just to make sure it looks like what I expect. I encourage you to do the same. Many errors can be avoided by just looking at the data.
+
+We may also be interested in only a few columns of the dataset. We can use the `select()` function to pick out the columns we want. For example, if we only want the date and location of the protest, we can use the following code.
+```{r}
+dataProtest |> 
+   select(Date, Location) |>
+   head(3)
+```
+This code takes `dataProtest` and passes it to the `select()` function. The `select()` function then returns only the `Date` and `Location` columns of the dataset. `head(3)` then returns the first 3 rows of the dataset. Here you can see how the pipe operator can be used to chain together functions in a readable way. Technically, this code is identical to 
+```{r}
+head(select(dataProtest, Date, Location), 3)
+```
+The computer does not care which approach you take. However, the potential problem with this code is that there is so much distance between  `head` and the `3` at the end. This distance makes it harder to read, understand, and find errors. It will become even more important when we chain many more functions together.
+
+You can also get a column by name using the `$` operator. For example, to get the `Date` column you can use `dataProtest$Date`. To get the first 10 dates you can use `dataProtest$Date[1:10]`. To get the first 10 locations you can use `dataProtest$Location[1:10]`.
+```{r}
+dataProtest$Date
+dataProtest$Date[1:10]
+dataProtest$Location[1:10]
+```
+
+So far everytime we run some R code the results are dumped to the console. This is R's default behavior. If you do not indicate otherwise, it will dump the results to the console and promptly forget those results. When we want to store the results, we can use the assignment operator `<-`. For example, to save the first 10 dates to a variable `a` you can use 
+```{r}
+a <- dataProtest$Date[1:10]
+```
+To save the first 10 locations to a variable `b` you can use 
+```{r}
+b <- dataProtest$Location[1:10]
+```
+Now if we run `ls()` we will see that we have two new variables `a` and `b` in our environment. We can use these variables later in our code.
+```{r}
+ls()
+```
+If you want to see the contents of a variable you can just type the variable name and run the code. For example, to see the contents of `a` you can run
+```{r}
+a
+```
+If a line of R code does not have a `<-`, then the results will not be stored. I would like to simplify our protest dataset by removing some columns that we will not use. I will use the `select()` function to pick out the columns to keep *and* use the `<-` operator to replace the original `dataProtest` with a new version of `dataProtest` that only has the columns I want.
+```{r}
+dataProtest <- dataProtest |>
+   select(Date, Location, Attendees, Tags)
+```
+Now if you run `head(dataProtest)` you will see that the dataset only has the `Date`, `Location`, `Attendees`, and `Tags` columns. The other columns have been removed. `select()` also allows you to indicate which features to drop by prefixing their names with a minus sign. Instead of listing the features we wanted to keep, we could have listed the features we wanted to drop, using `select(-Event..legacy..see.tags., -Source, -Curated, -Total.Articles)`. 
+
+## Exercises
+`r .exNum("What is the date of the protest in line 10000 of the dataset?")`
+`r .exNum("Which protest type is in line 4289 of the dataset?")`
+
+
+# Filtering rows
+
+We can ask every location if they equal "Philadelphia, PA".
+```{r}
+# let's just ask the first 10, otherwise will print out the first 1,000 
+dataProtest$Location[1:10]=="Philadelphia, PA"
+```
+Note the use of the double equal sign `==`. This is the "logical" equal. It is not making `Location` equal to Philadelphia, PA. It is asking if `Location` is equal to Philadelphia, PA. The result is a vector of `TRUE` and `FALSE` values. If the location is Philadelphia, PA, then the result is `TRUE`. If the location is not Philadelphia, PA, then the result is `FALSE`.
+
+How many protests occurred in Philadelphia, PA?
+```{r}
+dataProtest |>
+   filter(Location=="Philadelphia, PA") |>
+   nrow()
+```
+The `filter()` function is used to select rows that meet a certain condition. In this case, we are selecting rows where the `Location` is equal to "Philadelphia, PA". The expression `Location=="Philadelphia, PA"` will evaluate to `TRUE` for any row where `Location` is identical to "Philadelphia, PA" and `FALSE` otherwise. `filter()` will keep only those rows where the logical expression evaluates to `TRUE` eliminating all others (`NA`s also get eliminated). The `nrow()` function, which we met earlier, is used to count the number of rows in the dataset. The result is the number of protests that occurred in Philadelphia, PA.
+
+However, this count does not include those with locations like "University of Pennsylvania, Philadelphia, PA". For example, these ones:
+```{r}
+dataProtest |>
+   filter(Location=="University of Pennsylvania, Philadelphia, PA")
+```
+The `Location` feature has the phrase "Philadelphia, PA", but the `Location` is not *exactly* identical to "Philadelphia, PA". It is time to introduce you to `grepl()`, which is a very powerful function for searching for patterns in text. For now, we will use it simply to search for any `Location` containing the phrase "Philadelphia, PA".  `grepl()` returns `TRUE` if the phrase is found and `FALSE` if it is not found. For example, to find all protests that occurred in Philadelphia, PA, we can use the following code.
+```{r}
+dataProtest |>
+  filter(grepl("Philadelphia, PA", Location)) |>
+  head(n=5)
+```
+Now we have found many more protests in Philadelphia since some of them were at the airport or at City Hall. Let's redo that count.
+```{r}
+dataProtest |>
+   filter(grepl("Philadelphia, PA", Location)) |>
+   nrow()
+```
+We will study `grepl()` and its variants a lot more later, but for now think of it as "Find" in your word processor. If you are looking for a word in a document, you can use "Find" to locate all instances of that word. `grepl()` is the same idea. It is looking for a phrase in a text field.
+
+We can include multiple conditions in the `filter()` function. For example, to find all protests in Philadelphia, PA, before 2018 with more than 1,000 attendees, we can use the following code. Note that `&` is the logical AND operator. It returns `TRUE` if both conditions are `TRUE` and `FALSE` otherwise. The `|` operator is the logical OR operator. It returns `TRUE` if either condition is `TRUE` and `FALSE` otherwise.
+```{r}
+dataProtest |>
+  filter(grepl("Philadelphia, PA", Location) &
+           (Date <= "2017-12-31") &
+           (Attendees >= 1000))
+```
+
+## Exercise
+`r .exNum("How many protests occurred in your home state?")` If not from the US just pick a state like New York "NY" or California "CA" or Pennsylvania "PA"
+
+`r .exNum("Where did the protest in the last row of the full dataset occur?")`
+
+# Summarizing data
+
+What is the average size of a protest? The `summarize()` function is used to calculate summary statistics. For example, to calculate the average number of attendees at a protest, we can use the following code.
+```{r}
+dataProtest |>
+   summarize(mean(Attendees))
+```
+Hmmm... it looks like there are some missing values in the `Attendees` column. Rather than just dropping them and computing the average of the rest, R forces us to be intentional about handling `NA`s. If indeed we want to drop the `NA`s, then we can use the `na.rm=TRUE` argument to remove the missing values before calculating the average.
+
+```{r}
+dataProtest |>
+   summarize(mean(Attendees, na.rm=TRUE))
+```
+Perhaps we are interested any several data summaries at the same time. No problem. Just include them all in `summarize()`.
+```{r}
+dataProtest |>
+   summarize(average = mean(Attendees, na.rm=TRUE),
+             median = median(Attendees, na.rm=TRUE),
+             minimum = min(Attendees, na.rm=TRUE),
+             maximum = max(Attendees, na.rm=TRUE),
+             NAcount = sum(is.na(Attendees)))
+```
+That was a lot of typing to get a complete set of summary statistics. The `summary()` function is always available for that.
+```{r}
+summary(dataProtest$Attendees)
+```
+You can also use it to get a quick summary of the entire dataset.
+```{r}
+summary(dataProtest)
+```
+
+# Mutate to edit and create new columns
+
+The data does not contain a column for the state in which the protest occurred. We can create this column by extracting the state from the `Location` column. The last two characters of the `Location` column contain the state abbreviation. We can use the `str_sub()` function from the `stringr` package to extract the last two characters of the `Location` column. The `str_sub()` function is used to extract a substring from a string. For example, to extract the last two characters of the string "Philadelphia, PA", we can use the following code. Let's load the `stringr` and test out `str_sub()` on an example.
+```{r}
+library(stringr)
+str_sub("Philadelphia, PA", -2)
+```
+The first argument is the string from which to extract the substring. The second argument is the starting position of the substring. A nice feature of `str_sub()` is that you can use negative numbers which it interprets as characters from the end. So the -2 tells `str_sub()` to start at the second to last character. The third argument is the ending position of the substring. Here the -1 means the very last character of the string. If we do not include a third argument, then `str_sub()` will extract the substring starting at the second argument and continuing to the end of the string. 
+```{r}
+str_sub("Philadelphia, PA", -2)
+```
+There are other R functions that can extract substrings including `substring()`, `substr()`, and `gsub()`. I am introducing you to `str_sub()` since because it is the only one that lets you put negative numbers in the second and third arguments to easily grab substrings from the end. This is a very useful feature.
+
+With `str_sub()` now in our toolbox, we can make a new column called `state` that contains the state in which the protest occurred. 
+```{r}
+dataProtest <- dataProtest |>
+   mutate(state=str_sub(Location, -2))
+head(dataProtest)
+```
+Peeking at the first few rows of `dataProtest` we can see that there is a new column with the state abbreviation. Please, always check that your code does what you intended to do. Run, check, run, check, one line at a time.
+
+So you can see that `mutate()` is useful for making new data features computed based on other features. We also will use it to edit or clean up data. Let's check what these state abbreviations look like. 
+```{r}
+dataProtest |>
+   count(state)
+```
+Here I have used the `count()` function to count the number of protests in each state. It groups the data by the `state` column and then counts the number of rows in each group. The result is a new data frame with one column containing the state abbreviation (`state`) and another column containing the number of protests in that state (`count()` will always call this one `n`).
+
+Do you see some problems with our state abbreviations? I an "Fl", an "Hi", and an "Mi" and a few others that do not seem to be correctly capitalized. I also see some abbrevations that are "CE" and "TE", not states that I know of. Let's take a closer look at these strange ones. Note that I am introducing the `%in%` operator. This is a logical operator that asks each value of `state` whether its value is in the collection to the right of `%in%`. It is a more compact way write `state=="Fl" | state=="Hi" | state=="Mi" | state=="ce" | state=="co" | state=="iD" | state=="te" | state=="wA"`. Well, there. I have gone ahead and typed that all out. I hope to never have to type a logical expression with so many ORs again.
+```{r}
+dataProtest |>
+   filter(state %in% c("Fl","Hi","Mi","ce","co","iD","te","wA")) |>
+   select(state, Location)
+```
+Lots of different kinds of errors here. Five of them are just lower case. One is in Mexico (we need to drop this one). One is in Space (space is cool so let's keep that one for fun), and one is in La Porte, which I had to lookup to find that it is in Indiana (IN). Let's clean this up using `mutate()`.
+```{r}
+dataProtest <- dataProtest |>
+   filter(state != "co") |>  # drop Mexico
+   mutate(state = 
+             case_match(state,
+                        "ce" ~ "Space",
+                        "te" ~ "IN",
+                        .default = toupper(state)))
+dataProtest |> 
+   count(state)
+```
+Several things are happening here. First, we are using `case_match()` to change the state abbreviations. Note its structure. The first argument is the variable that we are matching (`state`). Then we list all the changes that we want to make. We are changing "ce" to "Space" and "te" to "IN". The `.default` argument is used to keep all other state abbreviations the same. The `toupper()` function is used to make sure that all state abbreviations are in upper case. Finally we rerun the `count()` function to see if our changes worked. All looks good now.
+
+The last feature that we have yet to explore is the `Tags` column. This column contains a list of reasons for the protest. The format of the tags is to have the reasons separated by a semicolon and a space. For example, a protest might have the tags "Civil Rights; Against pandemic intervention; Police brutality". We can use the `strsplit()` function to split the tags into separate reasons. For example, to split the tags in the first three rows of the dataset, we can use the following code. 
+```{r}
+# what does the tag look like originally?
+dataProtest$Tags[1:3]
+# not split it
+strsplit(dataProtest$Tags[1:3], "; ")
+```
+`strsplit()` returns a `list` structure. This is a structure in R that has no columns and rows. Since each protest has a different number of tags, once we split them up, they do not fit neatly into fixed columns. We can use `unlist()` to remove the list structure and create a long vector of all of the tags. And I will use `table()`, `sort()`, and `tail()` to find the most common reasons for a protest.
+```{r}
+reasons <- strsplit(dataProtest$Tags, "; ")
+reasons <- unlist(reasons)
+table(reasons) |> sort() |> tail()
+```
+Clearly, Civil Rights has topped the list. We can use this information to create a new column that is 1 if the protest has the tag "Civil Rights" and 0 otherwise.
+```{r}
+dataProtest <- dataProtest |>
+   mutate(civilrights = as.numeric(grepl("Civil Rights", Tags)))
+```
+Just like before when we used `grepl()` to find any text matches for "Philadelphia, PA", this time we are using it to search `Tags` for any matches to "Civil Rights". Again, it returns `TRUE` if the pattern is found and `FALSE` otherwise. `as.numeric()` converts `TRUE` to 1 and `FALSE` to 0.
+
+This script is getting long. I have done every step piece by piece with a lot of explanation in between. In practice, you would not do this. You would combine everything into one pipeline that takes in the original dataset and does all the filtering and mutating and selecting to get you the dataset that you want. Here is everything we have done so far compactly written.
+```{r}
+load("protests.RData")
+dataProtest <- dataProtest |>
+   select(Date, Location, Attendees, Tags) |>
+   filter(Location != "Ciudad Juarez, Mexico") |>
+   mutate(state=str_sub(Location, -2),
+          state=case_match(state,
+                           "ce" ~ "Space",
+                           "te" ~ "IN",
+                           .default = toupper(state)),
+          civilrights=as.numeric(grepl("Civil Rights", Tags)))
+head(dataProtest)
+```
+
+## Exercises
+`r .exNum("Which state had the most protests?")` 
+
+`r .exNum("Which state had the least protests?")`
+
+`r .exNum("Which state had the most civil rights protests?")`
+
+`r .exNum("Create a new column that is 1 if the protest has the tag 'Against pandemic intervention'")`
+
+`r .exNum("Which state had the most protests against pandemic interventions?")`
+
+# Creating your own functions
+
+Part of what makes R so powerful and useful is that you can create your own functions. In this way, the R user community can expand R's capabilities to do new tasks. For example, R does not have a built-in function to find the most common value in a collection. We can create our own function to do this. Have a look at this sequence of steps.
+```{r}
+a <- table(unlist(reasons))
+a |> head()
+max(a)
+a[a==max(a)]
+names(a[a==max(a)])
+```
+You have seen `table()` and `unlist()` in action earlier. Then I used `max()` to find the largest number of protests for a single reason. Then I used the expression `a[a==max(a)]`. Inside the square brackets, I ask each value of `a` (the table counts) if they equal the largest value. This returns a logical vector of `TRUE` and `FALSE` values. The square brackets will then pick out from a only those values where the logical expression `a==max(a)` evaluates to `TRUE`. I use this approach rather than `max()` or `head(1)` because it is possible that there are multiple tags that equal the maximum count. Finally, I used `names()` to get the name of the reason. I can pack all of this into a new function called `mostCommon()`.
+
+```{r}
+mostCommon <- function(x)
+{
+   a <- table(x)  
+   return( names(a[a==max(a)]) )
+}
+```
+This function is now a part of our R session and we can use it as we have other functions like `max()` or `mean()`. For example, to find the state with the most protests:
+```{r}
+mostCommon(dataProtest$state)
+```
+Or the most common date for a protest.
+```{r}
+mostCommon(dataProtest$Date)
+```
+
+What the most common date for civil rights protests in Texas?
+```{r}
+dataProtest |>
+  filter(state=="TX" & civilrights==1) |>
+  summarize(mostCommon(Date))
+```
+
+What happened in Texas on 2020-06-06?
+```{r}
+dataProtest |>
+   filter(Date=="2020-06-06" & state=="TX") |>
+   count(Tags)
+```
+This is the height of the George Floyd protests. There were 28 protests recorded in Texas on that day tagged with "Civil Rights; For racial justice; For greater accountability; Police".
+
+Let's make a special collection of states that includes PA and all of its bordering states. We can use this collection to filter the dataset to only include protests in these states.
+```{r}
+PAplusBorderingstates <- c("PA","DE","MD","NJ","NY","OH","WV")
+dataProtest |>
+  filter(state %in% PAplusBorderingstates) |>
+  summarize(mostCommon(Date))
+```
+As I did earlier, I used the `%in%` operator to ask each state in `dataProtest` whether it is a member of the `PAplusBorderingstates` collection. This returns a logical vector of `TRUE` and `FALSE` values. The `filter()` function then keeps only those rows where the logical expression evaluates to `TRUE`.
+
+Here we find that 2018-03-14 is the most common date for protests in Pennsylvania and its bordering states. This particular pi-Day was the day of the National School Walkout to protest gun violence.
+```{r}
+dataProtest |>
+   filter(Date=="2018-03-14" & state %in% PAplusBorderingstates) |>
+   count(Tags)
+```
+
+# Summarizing with groups of protests
+
+We can use the `group_by()` function to group the data by a certain feature. All subsequent operations will be performed separately within each group. For example, let's total the number of protest attendees by state.
+```{r}
+# will double count protesters at multiple protests
+dataProtest |>
+  group_by(state) |>
+  summarize(sum(Attendees, na.rm=TRUE)) |>
+  print(n=Inf)
+```
+`summarize()` calculated the total number of attendees within each state. By default, R will print only the first 10 rows of the dataset. I used `print(n=Inf)` to force R to print all the rows. 
+
+We can also calculate the average number of attendees at a protest in each state.
+```{r}
+options(pillar.sigfig=5) # less rounding
+dataProtest |>
+  group_by(state) |>
+  summarize(Total=sum(Attendees, na.rm=TRUE),
+            Average=mean(Attendees, na.rm=TRUE)) |>
+  print(n=Inf)
+```
+I used `options(pillar.sigfig=5)` to show more digits of precision in the output. 
+
+Interested in which "state" has the largest average protest size? Use `slice_max()`.
+```{r}
+dataProtest |>
+  group_by(state) |>
+  summarize(Average=mean(Attendees, na.rm=TRUE)) |>
+  slice_max(n=1,Average)
+```
+
+We can also simply arrange the rows in descending order of average protest size.
+```{r}
+dataProtest |>
+  group_by(state) |>
+  summarize(Average=mean(Attendees, na.rm=TRUE)) |>
+  arrange(desc(Average))
+```
+  
+
+## Exercises
+
+`r .exNum("Are civil rights protests larger on average than non-civil rights protests?")` (Hint: use group_by/summarize)
+
+# Graphics and plots
+
+We will finish our introduction to R by exploring `Tags` a little more through some barplots and a word cloud.
+
+I will start by a special version of `mostCommon()` that will take a collection of tags and return the most common tag. This will allow us to find the most common protest type in the dataset. This function splits up the tags as we did before, and then applies `mostCommon()` to the resulting collection of tags.
+
+```{r}
+mostCommonType <- function(x)
+{
+  reasons <- strsplit(x, "; ")
+  reasons <- unlist(reasons)
+  return( mostCommon(reasons) )
+}
+
+# test it out
+dataProtest$Tags[1:10]
+mostCommonType(dataProtest$Tags[1:10])
+```
+
+Now we can use `mostCommonType()` to find the most common protest type in the dataset. Note that `mostCommonType()` can return more than one value. `summarize()` will complain if it gets more than one value. 
+```{r}
+dataProtest |>
+  group_by(state) |>
+  summarize(mostCommonType(Tags)) |> 
+  print(n=Inf)
+```
+So let's redo that with `reframe()` instead. `reframe()` is like `summarize()` but allows for multiple values.
+```{r}
+dataProtest |>
+  group_by(state) |>
+  reframe(mostCommonType(Tags)) |> 
+  print(n=Inf)
+```
+So why does Puerto Rico show up three times in these results? 
+```{r}
+dataProtest |>
+  filter(state=="PR") |>
+  pull(Tags) |>
+  strsplit("; ") |>
+  unlist() |>
+  table() |>
+  sort()
+```
+There are three tags all with 11 protests each, a three-way tie for the largest number of protests. So `mostCommonType()` returns all three tags.
+
+R has a lot of built-in functions for creating plots and graphics. We will use the `barplot()` function to create a bar plot of the average number of attendees at protests in each state.
+```{r}
+a <- dataProtest |>
+  group_by(state) |>
+  summarize(Attendees=mean(Attendees, na.rm=TRUE))
+barplot(a$Attendees, names.arg = a$state)
+```
+
+The state name labels are two big so we can shrink the "character expansion" (`cex`) by half.
+```{r}
+barplot(a$Attendees, names.arg = a$state, cex.names=0.5)
+```
+We can also make the plot horizontal.
+```{r}
+barplot(a$Attendees, names.arg = a$state, 
+        cex.names=0.3,
+        horiz=TRUE, 
+        col="seagreen",
+        xlim=c(0,5000))
+```
+
+We can also create a bar plot of the number of protests for the top 5 reasons.
+```{r}
+reasons <- dataProtest$Tags |> 
+  strsplit(";") |> 
+  unlist() |> 
+  table() |>
+  sort(decreasing = TRUE) |>
+  head(5)
+barplot(reasons,
+        ylab="Number of Protests",
+        xlab="Protest Reason")
+```
+
+For figures and plots, always use a vector graphics format. That means export your graphics using SVG or EMF. These formats are scalable and will look good at any size. You can insert these graphics into Word, PowerPoint, or Google Docs. PNG graphics tend to look blurry in reports and presentations. Show some pride in your data work by making sure that your final product looks great. Stick with SVG or EMF or another vector graphics format.
+
+We will end with a beautiful word cloud of the protest tags.
+```{r}
+library(wordcloud2)
+dataProtest$Tags |>
+  strsplit(split="; ") |> 
+  unlist() |>
+  table() |>
+  wordcloud2()
+```
+
+
+# Review
+# 1. R has lots of functions
+setwd()
+load()
+ls()
+
+sqrt()
+log()
+round()
+sum(), mean(), median(), min(), max()
+
+c()
+nrow()
+ncol()
+head()
+is()
+
+which()
+which.max()
+grepl()
+grep()
+gsub()
+summary()
+strsplit()
+sort()
+order()
+unlist()
+names()
+as.numeric()
+
+table()
+barplot()
+wordcloud()
+
+# dplyr/tidyverse come with their own collection of functions
+filter()
+group_by()
+select()
+summarize()/reframe()
+case_when()
+mutate()
+arrange()
+top_n()
+
+
+
+
+
+
+# Solutions to the exercises 
+1. `r .exerciseQuestions[1]`
+```{r}
+#| comment: ""
+dataProtest |>
+   slice(10000) |>
+   select(Date)
+```
+
+2. `r .exerciseQuestions[2]`
+```{r}
+#| comment: ""
+dataProtest |>
+   slice(4289) |>
+   select(Tags)
+```
+
+3. `r .exerciseQuestions[3]`
+```{r}
+#| comment: ""
+dataProtest |>
+   filter(state == "CA") |>
+   count()
+```
+
+4. `r .exerciseQuestions[4]`
+```{r}
+#| comment: ""
+dataProtest |>
+   select(state, Location) |>
+   tail(1)
+```
+
+5. `r .exerciseQuestions[5]`
+```{r}
+#| comment: ""
+dataProtest |>
+   count(state) |>
+   slice_max(n, 
+             with_ties = TRUE) # in case of ties
+```
+
+
+6. `r .exerciseQuestions[6]`
+```{r}
+#| comment: ""
+dataProtest |>
+   count(state) |>
+   slice_min(n, with_ties = TRUE)
+```
+
+7. `r .exerciseQuestions[7]`
+```{r}
+#| comment: ""
+dataProtest |>
+   filter(civilrights==1) |>
+   count(state) |>
+   slice_max(n, with_ties = TRUE)
+```
+
+8. `r .exerciseQuestions[8]`
+```{r}
+#| comment: ""
+dataProtest <- dataProtest |>
+   mutate(pandemic = as.numeric(grepl("Against pandemic intervention", Tags)))
+```
+
+9. `r .exerciseQuestions[9]`
+```{r}
+#| comment: ""
+dataProtest |>
+   filter(pandemic == 1) |>
+   count(state) |>
+   slice_max(n, with_ties = TRUE)
+```
+
+10. `r .exerciseQuestions[10]`
+```{r}
+#| comment: ""
+dataProtest |>
+   group_by(civilrights) |>
+   summarize(mean(Attendees, na.rm=TRUE))
+
+# Yes, civil rights protests are larger on average than non-civil rights protests.
+```
