@@ -624,52 +624,56 @@ dataProtest$Tags |>
 
 
 # Review
-# 1. R has lots of functions
-setwd()
-load()
-ls()
 
-sqrt()
-log()
-round()
-sum(), mean(), median(), min(), max()
+As you saw in this script, R has a lot of functions. We started of figuring how to set our file path so R knows where to look for files. We loaded the data from a .RData file and we listed all the objects in R's environment.
 
-c()
-nrow()
-ncol()
-head()
-is()
+- `setwd()` set working directory
+- `load()` load R objects saved in a .RData file
+- `ls()` list objects in the R environment
 
-which()
-which.max()
-grepl()
-grep()
-gsub()
-summary()
-strsplit()
-sort()
-order()
-unlist()
-names()
-as.numeric()
+R, of course, has all the basic math operations that you might need to do with a set of numbers. Like
+- `sqrt()`
+- `log()`, note that `log()` is the natural log as it is in most mathematical programming languages
+- `round()` round to the nearest integer
+- `abs()` absolute value
+- `length()` number of elements in a collection
+- `cumsum()` cumulative sum
+- `sum()`, `mean()`, `median()`, `min()`, `max()`
 
-table()
-barplot()
-wordcloud()
+Then we worked through some basic functions to work with R objects.
+- `c()` combine numbers and other R objects together in a collection
+- `nrow()`, `ncol()`
+- `head()`, `tail()`
 
-# dplyr/tidyverse come with their own collection of functions
-filter()
-group_by()
-select()
-summarize()/reframe()
-case_when()
-mutate()
-arrange()
-top_n()
+When working with datasets, we covered all the standard functions needed to manipulate data.
+- `slice()`, `slice_max()`, `slice_min()` pick out rows by there position in the dataset or by the max/min values
+- `filter()` pick out rows based on a logical expression about what is in that row
+- `select()` pick out columns by name
+- `count()` count the number of rows in a dataset or the number of rows in a dataset by groups
+- `mutate()` create new columns or edit existing columns
+- `str_sub()` extract substrings from a string
+- `case_match()` used inside `mutate()` to create new columns based on the values in another column 
+- `group_by()`, `summarize()`, `reframe()` used to summarize data by groups
+- `arrange()` sort rows in a dataset
 
+We also covered some more advanced functions.
+- `grepl()` search for patterns in text
+- `summary()` get a summary of a dataset or any set of numbers
+- `sort()` sort a collection of numbers
+- `unlist()` remove the list structure from a list
+- `names()` get the names of the elements in a collection
+- `as.numeric()` convert objects to numbers, we specifically converted logical values to 1s and 0s
+- `strsplit()` split a string into a list of substrings
 
+And we made some graphics too.
+- `barplot()` create a bar plot
+- `wordcloud2()` create a word cloud
 
+In addition we even created our own new functions!
+- `mostCommon()` find the most common value in a collection
+- `mostCommonType()` find the most common tag in a string containing semi-colon separated tags
 
+Before looking at the solutions, try out the exercises for yourself. All the skills you will be learning build on the fundamentals presented in this script. It would be a good idea to go through this a second time to make sure you understand everything.
 
 
 # Solutions to the exercises 
