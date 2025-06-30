@@ -151,7 +151,7 @@ Looks like by noon on November 6, 2016, Chicago was back to Central Standard Tim
 
 # Exercises
 1. At what hour does Daylight Saving Time end? (Hint: Try using `dminutes()` to add time to the date DST ends)
-2. Thanksgiving occurs on the fourth month in November. On what date will Thanksgiving fall in 2020? Hints:
+2. Thanksgiving occurs on the fourth Thursday in November. On what date will Thanksgiving fall in 2020? Hints:
      + Try listing all dates in November
      + Use `wday()` to get the weekday
      + find the fourth Thursday
