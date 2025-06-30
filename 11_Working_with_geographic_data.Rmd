@@ -438,7 +438,7 @@ A very useful operation is to find out which crimes occurred inside, near, or fa
 dataCrimeMS13 <- subset(dataCrime, area %in% c(1,2,3,6,7,11,20))
 ```
 
-We're going to use two different methods so you learn about different ways of solving these problems. The first method will use the now familiar `st_intersects()` function. In our `datacrimeMS13` data frame we are going to make a new column that labels whether a crime is inside the injunction safety zone (SZ), within a one-mile buffer around the safety zone (buffer), or beyond the buffer (outside). 
+We're going to use two different methods so you learn about different ways of solving these problems. The first method will use the now familiar `st_intersects()` function. In our `dataCrimeMS13` data frame we are going to make a new column that labels whether a crime is inside the injunction safety zone (SZ), within a one-mile buffer around the safety zone (buffer), or beyond the buffer (outside).
 ```{r comment="", results='hold', warning=FALSE}
 # create a variable to label the crime's location
 dataCrimeMS13$place1 <- "outside"
