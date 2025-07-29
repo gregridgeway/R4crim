@@ -198,7 +198,11 @@ Looks like by 11am on November 2, 2025, Chicago is back to Central Standard Time
 
 # Exercises
 1. At what hour does Daylight Saving Time end? (Hint: Try using `dminutes()` to add time to the date DST ends)
+<<<<<<< HEAD:02_Dates_and_times.qmd
 2. Thanksgiving occurs on the fourth month in November. On what date will Thanksgiving fall in 2025? Hints:
+=======
+2. Thanksgiving occurs on the fourth Thursday in November. On what date will Thanksgiving fall in 2020? Hints:
+>>>>>>> 97a76dc510f9a952e1d66e1aeb5b473293928770:02 Dates and times.Rmd
      + Try listing all dates in November
      + Use `wday()` to get the weekday
      + find the fourth Thursday
