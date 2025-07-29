@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Greg Ridgeway">
+<meta name="author" content="Ruth Moyer">
+<meta name="dcterms.date" content="2025-07-29">
+
+<title>Dates and Times</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="02_Dates_and_times_files/libs/clipboard/clipboard.min.js"></script>
+<script src="02_Dates_and_times_files/libs/quarto-html/quarto.js"></script>
+<script src="02_Dates_and_times_files/libs/quarto-html/popper.min.js"></script>
+<script src="02_Dates_and_times_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="02_Dates_and_times_files/libs/quarto-html/anchor.min.js"></script>
+<link href="02_Dates_and_times_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="02_Dates_and_times_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="02_Dates_and_times_files/libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="02_Dates_and_times_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="02_Dates_and_times_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="02_Dates_and_times_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="02_Dates_and_times_files/libs/bootstrap/bootstrap-dark.min.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#working-with-dates" id="toc-working-with-dates" class="nav-link" data-scroll-target="#working-with-dates"><span class="header-section-number">2</span> Working with dates</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">3</span> Exercises</a></li>
+  <li><a href="#solutions-to-the-exercises" id="toc-solutions-to-the-exercises" class="nav-link" data-scroll-target="#solutions-to-the-exercises"><span class="header-section-number">4</span> Solutions to the exercises</a></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="02_Dates_and_times.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Dates and Times</h1>
+</div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Authors</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author">Greg Ridgeway <a href="mailto:gridge@upenn.edu" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> </p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            University of Pennsylvania
+          </p>
+      </div>
+    <div class="quarto-title-meta-contents">
+    <p class="author">Ruth Moyer <a href="mailto:moyruth@sas.upenn.edu" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> </p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            University of Pennsylvania
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">July 29, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- In terminal -->
+<!-- quarto render 02_Dates_and_times.qmd -->
+<!-- git commit 02-* -m "commit message" -->
+<!-- git status -->
+<!-- git push -->
+<!-- A function for automating the numbering and wording of the exercise questions -->
+<section id="introduction" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
+<p>Working with dates and times is a lot different than working with the more familiar numbers. Months have different number of days. Sometimes we count hours of the day up to 12 and then start over. Sometimes we count hours up to 24 and then start over. Some years have 366 days. We have 24 times zones around the world. Twice a year we switch clocks for Daylight Saving Time, except in some places like Arizona. Arithmetic, such as adding one month to a date, is poorly defined. Which date is one month after January 31st? Is it February 28th? Or is it March 3rd?</p>
+<p>Fortunately, software for working with dates exist to make these tasks easier. Unfortunately, every system seems to make their own design decisions. Excel stores dates as the number of days since January 0, 1900… that’s not a typo… they count from January 0, 1900. Linux systems count days since January 1, 1970. SPSS stores times as the number of seconds since midnight October 14, 1582, the adoption date of the Gregorian calendar. Much of the world did not adopt the calendar in 1582. The American colonies did not adopt the Gregorian calendar until 1752 along with Great Britain. So beware if you are a historian digging through centuries old data. Aligning dates can become very messy.</p>
+<p>R has had a variety of attempts at providing a means for managing dates. We are going to use the <a href="https://www.jstatsoft.org/article/view/v040i03"><code>lubridate</code></a> package that address just about everything you might need to do with dates and times.</p>
+<p>Do not use <code>as.Date()</code>. <code>lubridate</code> has an easier to read date formatting, more intelligently handles dates of different formats, and has better date arithmetic.</p>
+<p><code>lubridate</code> is not part of R by default. You will need to install it. Simply run</p>
+<pre><code>install.packages("lubridate")</code></pre>
+<p>and R will hit the web, download the <code>lubridate</code> package and any supporting packages it needs (and it does need a few), and installs them. This is a one time event. Once you have <code>lubridate</code> on your machine you will not need to reinstall it every time you need it.</p>
+<p>Some of our students, particularly on Macs, have encountered trouble installing some packages for R. R will sometimes try to download the source code for the packages and compile them from scratch on your machine. Sometimes that goes well and other times it requires that you have other tools installed on your machine. An easy solution is to run</p>
+<pre><code>install.packages("lubridate", type="mac.binary")</code></pre>
+<p>instead to insist that R finds and installs a ready-to-use version of the packages.</p>
+</section>
+<section id="working-with-dates" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Working with dates</h1>
+<p>While <code>lubridate</code> is now installed, once per R session you will need to load <code>lubridate</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>If you close R and restart it, then you’ll need to run this line again.</p>
+<p>Let’s reload the <a href="https://github.com/gregridgeway/R4criminology/blob/master/chicago%20crime%2020141124-20141209.RData">sample of Chicago crime data</a> discussed in the introductory notes, available on the <a href="https://github.com/gregridgeway/R4crim">R4Crim github site</a>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"chicago crime 20141124-20141209.RData"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s extract five dates from the <code>chicagoCrime</code> dataset.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>chicagoCrime <span class="sc">|&gt;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>   <span class="fu">select</span>(Date) <span class="sc">|&gt;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>   <span class="fu">slice</span>(<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2500</span>,<span class="dv">5000</span>,<span class="dv">7500</span>,<span class="dv">10000</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                    Date
+1 12/09/2014 11:54:00 PM
+2 12/05/2014 11:00:00 PM
+3 12/02/2014 10:58:00 AM
+4 11/28/2014 02:35:00 PM
+5 11/24/2014 12:30:00 AM</code></pre>
+</div>
+</div>
+<p>As you can see the dates include the date in month/day/year format and the time on a 12 hour AM/PM clock. R has no idea that these values represent dates. You are familiar with this date formatting, but R just thinks they are strings of characters. Use <code>substring()</code> to just extract the date part, the first 10 characters of <code>Date</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>textDate <span class="ot">&lt;-</span> chicagoCrime <span class="sc">|&gt;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>   <span class="fu">select</span>(Date) <span class="sc">|&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>   <span class="fu">mutate</span>(<span class="at">Date =</span> <span class="fu">substring</span>(Date, <span class="dv">1</span>, <span class="dv">10</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>   <span class="fu">slice</span>(<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2500</span>,<span class="dv">5000</span>,<span class="dv">7500</span>,<span class="dv">10000</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>   <span class="fu">pull</span>(Date)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>textDate</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "12/09/2014" "12/05/2014" "12/02/2014" "11/28/2014" "11/24/2014"</code></pre>
+</div>
+</div>
+<p>Now let’s use the <code>mdy()</code> function from the <code>lubridate</code> package to tell R that these are not just strings of characters, but they actually represent months, days, and years.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">mdy</span>(textDate)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">is</span>(b)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Date"     "oldClass"
+[1] "2014-12-09" "2014-12-05" "2014-12-02" "2014-11-28" "2014-11-24"</code></pre>
+</div>
+</div>
+<p><code>b</code> now stores those five dates in a format that recognizes the month, day, and year. <code>is(b)</code> tells us that R is storing <code>b</code> as a date. There are different functions for other date formats depending on the ordering of the day, month and year, like <code>dmy()</code> and <code>ymd()</code> and even <code>mdy_hms()</code> for month, day, year, hours, minutes, seconds format.</p>
+<p>Now that R knows these are dates, the <code>lubridate</code> package provides a lot of functions to help you work with dates.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">year</span>(b)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">month</span>(b)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">month</span>(b, <span class="at">label=</span><span class="cn">TRUE</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="fu">month</span>(b, <span class="at">label=</span><span class="cn">TRUE</span>, <span class="at">abbr=</span><span class="cn">FALSE</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="fu">wday</span>(b, <span class="at">label=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2014 2014 2014 2014 2014
+[1] 12 12 12 11 11
+[1] Dec Dec Dec Nov Nov
+12 Levels: Jan &lt; Feb &lt; Mar &lt; Apr &lt; May &lt; Jun &lt; Jul &lt; Aug &lt; Sep &lt; ... &lt; Dec
+[1] December December December November November
+12 Levels: January &lt; February &lt; March &lt; April &lt; May &lt; June &lt; ... &lt; December
+[1] Tue Fri Tue Fri Mon
+Levels: Sun &lt; Mon &lt; Tue &lt; Wed &lt; Thu &lt; Fri &lt; Sat</code></pre>
+</div>
+</div>
+<p>Subtraction will tell you the time between two dates. How many days since December 1, 2014? How many days have passed from the values in <code>b</code> to today? The <code>now()</code> function give you the date and time, well… right now.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>b <span class="sc">-</span> <span class="fu">mdy</span>(<span class="st">"12/01/2014"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Time differences in days
+[1]  8  4  1 -3 -7</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">date</span>(<span class="fu">now</span>()) <span class="sc">-</span> b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Time differences in days
+[1] 3885 3889 3892 3896 3900</code></pre>
+</div>
+</div>
+<p>When subtracting dates, R will make a good guess for the unit of time to use in the result. Use <code>difftime()</code> if you want to be specific about the unit of time and not leave it up to R to decide.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">difftime</span>(b, <span class="fu">mdy</span>(<span class="st">"12/01/2014"</span>), <span class="at">units =</span> <span class="st">"days"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Time differences in days
+[1]  8  4  1 -3 -7</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">difftime</span>(b, <span class="fu">mdy</span>(<span class="st">"12/01/2014"</span>), <span class="at">units =</span> <span class="st">"hours"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Time differences in hours
+[1]  192   96   24  -72 -168</code></pre>
+</div>
+</div>
+<p>We can add time to the dates as well</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>b <span class="sc">+</span> <span class="fu">dyears</span>(<span class="dv">1</span>) <span class="co"># adds 365 days, does not increase year by 1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "2015-12-09 06:00:00 UTC" "2015-12-05 06:00:00 UTC"
+[3] "2015-12-02 06:00:00 UTC" "2015-11-28 06:00:00 UTC"
+[5] "2015-11-24 06:00:00 UTC"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>b <span class="sc">+</span> <span class="fu">ddays</span>(<span class="dv">31</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "2015-01-09" "2015-01-05" "2015-01-02" "2014-12-29" "2014-12-25"</code></pre>
+</div>
+</div>
+<p>Now let’s go ahead and create a new column in our Chicago dataset containing properly stored dates.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>chicagoCrime <span class="ot">&lt;-</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>   chicagoCrime <span class="sc">|&gt;</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>   <span class="fu">mutate</span>(<span class="at">realdate =</span> <span class="fu">mdy_hms</span>(Date))</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>chicagoCrime <span class="sc">|&gt;</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>   <span class="fu">select</span>(Date, realdate) <span class="sc">|&gt;</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>   <span class="fu">head</span>() <span class="co"># show the dates in the first few rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                    Date            realdate
+1 12/09/2014 11:54:00 PM 2014-12-09 23:54:00
+2 12/09/2014 11:45:00 PM 2014-12-09 23:45:00
+3 12/09/2014 11:42:00 PM 2014-12-09 23:42:00
+4 12/09/2014 11:42:00 PM 2014-12-09 23:42:00
+5 12/09/2014 11:40:00 PM 2014-12-09 23:40:00
+6 12/09/2014 11:37:00 PM 2014-12-09 23:37:00</code></pre>
+</div>
+</div>
+<p><code>lubridate</code> has converted the date and time formats to a more standardized form, one that is easier to use on a computer.</p>
+<p>The default timezone is Coordinated Universal Time abbreviated UTC, which is the same as Greenwich Mean Time. Interestingly, the abbreviation CUT would make more sense in English, but TCU would make more sense in French, so the compromise was to universally abbreviate as UTC. Since all of these crimes occurred in Chicago, let’s explicitly set the timezone to Central Time. The function <code>OlsonNames()</code> will give you a list of all possible time zones you can use.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>chicagoCrime <span class="ot">&lt;-</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>   chicagoCrime <span class="sc">|&gt;</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>   <span class="fu">mutate</span>(<span class="at">realdate =</span> <span class="fu">force_tz</span>(realdate, <span class="st">"America/Chicago"</span>))</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>chicagoCrime<span class="sc">$</span>realdate[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]   <span class="co"># show just the first five dates</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "2014-12-09 23:54:00 CST" "2014-12-09 23:45:00 CST"
+[3] "2014-12-09 23:42:00 CST" "2014-12-09 23:42:00 CST"
+[5] "2014-12-09 23:40:00 CST"</code></pre>
+</div>
+</div>
+<p>Now when printed you can see that the timezone is set to Central Standard Time. R will automatically handle Daylight Saving Time. Note that an August date reports Central Daylight Time.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mdy_hms</span>(<span class="st">"8/1/2014 12:00:00"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>   <span class="fu">force_tz</span>(<span class="st">"America/Chicago"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "2014-08-01 12:00:00 CDT"</code></pre>
+</div>
+</div>
+<p>Note that <code>force_tz()</code> keeps the dates and times the same, but overwrites the timezone. If you want to lookup what the date and time would be in a different timezone, then use <code>with_tz()</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mdy_hms</span>(<span class="st">"8/1/2014 12:00:00"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>   <span class="fu">force_tz</span>(<span class="st">"America/Chicago"</span>) <span class="sc">|&gt;</span> <span class="co"># force to CDT</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>   <span class="fu">with_tz</span>(<span class="st">"America/New_York"</span>)    <span class="co"># get time in EDT</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "2014-08-01 13:00:00 EDT"</code></pre>
+</div>
+</div>
+<p>We can actually find out when Daylight Saving Time ends. Generate all November dates and convert them to Chicago time.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mdy_hms</span>(<span class="st">"11/1/2025 12:00:00"</span>, <span class="at">tz=</span><span class="st">"America/Chicago"</span>) <span class="sc">+</span> <span class="fu">ddays</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">29</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "2025-11-01 12:00:00 CDT" "2025-11-02 11:00:00 CST"
+ [3] "2025-11-03 11:00:00 CST" "2025-11-04 11:00:00 CST"
+ [5] "2025-11-05 11:00:00 CST" "2025-11-06 11:00:00 CST"
+ [7] "2025-11-07 11:00:00 CST" "2025-11-08 11:00:00 CST"
+ [9] "2025-11-09 11:00:00 CST" "2025-11-10 11:00:00 CST"
+[11] "2025-11-11 11:00:00 CST" "2025-11-12 11:00:00 CST"
+[13] "2025-11-13 11:00:00 CST" "2025-11-14 11:00:00 CST"
+[15] "2025-11-15 11:00:00 CST" "2025-11-16 11:00:00 CST"
+[17] "2025-11-17 11:00:00 CST" "2025-11-18 11:00:00 CST"
+[19] "2025-11-19 11:00:00 CST" "2025-11-20 11:00:00 CST"
+[21] "2025-11-21 11:00:00 CST" "2025-11-22 11:00:00 CST"
+[23] "2025-11-23 11:00:00 CST" "2025-11-24 11:00:00 CST"
+[25] "2025-11-25 11:00:00 CST" "2025-11-26 11:00:00 CST"
+[27] "2025-11-27 11:00:00 CST" "2025-11-28 11:00:00 CST"
+[29] "2025-11-29 11:00:00 CST" "2025-11-30 11:00:00 CST"</code></pre>
+</div>
+</div>
+<p>Looks like by 11am on November 2, 2025, Chicago is back to Central Standard Time.</p>
+</section>
+<section id="exercises" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Exercises</h1>
+<ol type="1">
+<li>At what hour does Daylight Saving Time end? (Hint: Try using <code>dminutes()</code> to add time to the date DST ends)</li>
+<li>Thanksgiving occurs on the fourth month in November. On what date will Thanksgiving fall in 2025? Hints:
+<ul>
+<li>Try listing all dates in November</li>
+<li>Use <code>wday()</code> to get the weekday</li>
+<li>find the fourth Thursday</li>
+</ul></li>
+<li>Make a function that takes as input a year and returns the date of Thanksgiving in that year. Here’s a template to start</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>tday <span class="ot">&lt;-</span> <span class="cf">function</span>(year)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>   <span class="fu">return</span>( )</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="solutions-to-the-exercises" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Solutions to the exercises</h1>
+<ol type="1">
+<li>At what hour does Daylight Saving Time end?</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mdy</span>(<span class="st">"11/2/2025"</span>, <span class="at">tz=</span><span class="st">"America/Chicago"</span>) <span class="sc">+</span> <span class="fu">dminutes</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">180</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1] "2025-11-02 00:01:00 CDT" "2025-11-02 00:02:00 CDT"
+  [3] "2025-11-02 00:03:00 CDT" "2025-11-02 00:04:00 CDT"
+  [5] "2025-11-02 00:05:00 CDT" "2025-11-02 00:06:00 CDT"
+  [7] "2025-11-02 00:07:00 CDT" "2025-11-02 00:08:00 CDT"
+  [9] "2025-11-02 00:09:00 CDT" "2025-11-02 00:10:00 CDT"
+ [11] "2025-11-02 00:11:00 CDT" "2025-11-02 00:12:00 CDT"
+ [13] "2025-11-02 00:13:00 CDT" "2025-11-02 00:14:00 CDT"
+ [15] "2025-11-02 00:15:00 CDT" "2025-11-02 00:16:00 CDT"
+ [17] "2025-11-02 00:17:00 CDT" "2025-11-02 00:18:00 CDT"
+ [19] "2025-11-02 00:19:00 CDT" "2025-11-02 00:20:00 CDT"
+ [21] "2025-11-02 00:21:00 CDT" "2025-11-02 00:22:00 CDT"
+ [23] "2025-11-02 00:23:00 CDT" "2025-11-02 00:24:00 CDT"
+ [25] "2025-11-02 00:25:00 CDT" "2025-11-02 00:26:00 CDT"
+ [27] "2025-11-02 00:27:00 CDT" "2025-11-02 00:28:00 CDT"
+ [29] "2025-11-02 00:29:00 CDT" "2025-11-02 00:30:00 CDT"
+ [31] "2025-11-02 00:31:00 CDT" "2025-11-02 00:32:00 CDT"
+ [33] "2025-11-02 00:33:00 CDT" "2025-11-02 00:34:00 CDT"
+ [35] "2025-11-02 00:35:00 CDT" "2025-11-02 00:36:00 CDT"
+ [37] "2025-11-02 00:37:00 CDT" "2025-11-02 00:38:00 CDT"
+ [39] "2025-11-02 00:39:00 CDT" "2025-11-02 00:40:00 CDT"
+ [41] "2025-11-02 00:41:00 CDT" "2025-11-02 00:42:00 CDT"
+ [43] "2025-11-02 00:43:00 CDT" "2025-11-02 00:44:00 CDT"
+ [45] "2025-11-02 00:45:00 CDT" "2025-11-02 00:46:00 CDT"
+ [47] "2025-11-02 00:47:00 CDT" "2025-11-02 00:48:00 CDT"
+ [49] "2025-11-02 00:49:00 CDT" "2025-11-02 00:50:00 CDT"
+ [51] "2025-11-02 00:51:00 CDT" "2025-11-02 00:52:00 CDT"
+ [53] "2025-11-02 00:53:00 CDT" "2025-11-02 00:54:00 CDT"
+ [55] "2025-11-02 00:55:00 CDT" "2025-11-02 00:56:00 CDT"
+ [57] "2025-11-02 00:57:00 CDT" "2025-11-02 00:58:00 CDT"
+ [59] "2025-11-02 00:59:00 CDT" "2025-11-02 01:00:00 CDT"
+ [61] "2025-11-02 01:01:00 CDT" "2025-11-02 01:02:00 CDT"
+ [63] "2025-11-02 01:03:00 CDT" "2025-11-02 01:04:00 CDT"
+ [65] "2025-11-02 01:05:00 CDT" "2025-11-02 01:06:00 CDT"
+ [67] "2025-11-02 01:07:00 CDT" "2025-11-02 01:08:00 CDT"
+ [69] "2025-11-02 01:09:00 CDT" "2025-11-02 01:10:00 CDT"
+ [71] "2025-11-02 01:11:00 CDT" "2025-11-02 01:12:00 CDT"
+ [73] "2025-11-02 01:13:00 CDT" "2025-11-02 01:14:00 CDT"
+ [75] "2025-11-02 01:15:00 CDT" "2025-11-02 01:16:00 CDT"
+ [77] "2025-11-02 01:17:00 CDT" "2025-11-02 01:18:00 CDT"
+ [79] "2025-11-02 01:19:00 CDT" "2025-11-02 01:20:00 CDT"
+ [81] "2025-11-02 01:21:00 CDT" "2025-11-02 01:22:00 CDT"
+ [83] "2025-11-02 01:23:00 CDT" "2025-11-02 01:24:00 CDT"
+ [85] "2025-11-02 01:25:00 CDT" "2025-11-02 01:26:00 CDT"
+ [87] "2025-11-02 01:27:00 CDT" "2025-11-02 01:28:00 CDT"
+ [89] "2025-11-02 01:29:00 CDT" "2025-11-02 01:30:00 CDT"
+ [91] "2025-11-02 01:31:00 CDT" "2025-11-02 01:32:00 CDT"
+ [93] "2025-11-02 01:33:00 CDT" "2025-11-02 01:34:00 CDT"
+ [95] "2025-11-02 01:35:00 CDT" "2025-11-02 01:36:00 CDT"
+ [97] "2025-11-02 01:37:00 CDT" "2025-11-02 01:38:00 CDT"
+ [99] "2025-11-02 01:39:00 CDT" "2025-11-02 01:40:00 CDT"
+[101] "2025-11-02 01:41:00 CDT" "2025-11-02 01:42:00 CDT"
+[103] "2025-11-02 01:43:00 CDT" "2025-11-02 01:44:00 CDT"
+[105] "2025-11-02 01:45:00 CDT" "2025-11-02 01:46:00 CDT"
+[107] "2025-11-02 01:47:00 CDT" "2025-11-02 01:48:00 CDT"
+[109] "2025-11-02 01:49:00 CDT" "2025-11-02 01:50:00 CDT"
+[111] "2025-11-02 01:51:00 CDT" "2025-11-02 01:52:00 CDT"
+[113] "2025-11-02 01:53:00 CDT" "2025-11-02 01:54:00 CDT"
+[115] "2025-11-02 01:55:00 CDT" "2025-11-02 01:56:00 CDT"
+[117] "2025-11-02 01:57:00 CDT" "2025-11-02 01:58:00 CDT"
+[119] "2025-11-02 01:59:00 CDT" "2025-11-02 01:00:00 CST"
+[121] "2025-11-02 01:01:00 CST" "2025-11-02 01:02:00 CST"
+[123] "2025-11-02 01:03:00 CST" "2025-11-02 01:04:00 CST"
+[125] "2025-11-02 01:05:00 CST" "2025-11-02 01:06:00 CST"
+[127] "2025-11-02 01:07:00 CST" "2025-11-02 01:08:00 CST"
+[129] "2025-11-02 01:09:00 CST" "2025-11-02 01:10:00 CST"
+[131] "2025-11-02 01:11:00 CST" "2025-11-02 01:12:00 CST"
+[133] "2025-11-02 01:13:00 CST" "2025-11-02 01:14:00 CST"
+[135] "2025-11-02 01:15:00 CST" "2025-11-02 01:16:00 CST"
+[137] "2025-11-02 01:17:00 CST" "2025-11-02 01:18:00 CST"
+[139] "2025-11-02 01:19:00 CST" "2025-11-02 01:20:00 CST"
+[141] "2025-11-02 01:21:00 CST" "2025-11-02 01:22:00 CST"
+[143] "2025-11-02 01:23:00 CST" "2025-11-02 01:24:00 CST"
+[145] "2025-11-02 01:25:00 CST" "2025-11-02 01:26:00 CST"
+[147] "2025-11-02 01:27:00 CST" "2025-11-02 01:28:00 CST"
+[149] "2025-11-02 01:29:00 CST" "2025-11-02 01:30:00 CST"
+[151] "2025-11-02 01:31:00 CST" "2025-11-02 01:32:00 CST"
+[153] "2025-11-02 01:33:00 CST" "2025-11-02 01:34:00 CST"
+[155] "2025-11-02 01:35:00 CST" "2025-11-02 01:36:00 CST"
+[157] "2025-11-02 01:37:00 CST" "2025-11-02 01:38:00 CST"
+[159] "2025-11-02 01:39:00 CST" "2025-11-02 01:40:00 CST"
+[161] "2025-11-02 01:41:00 CST" "2025-11-02 01:42:00 CST"
+[163] "2025-11-02 01:43:00 CST" "2025-11-02 01:44:00 CST"
+[165] "2025-11-02 01:45:00 CST" "2025-11-02 01:46:00 CST"
+[167] "2025-11-02 01:47:00 CST" "2025-11-02 01:48:00 CST"
+[169] "2025-11-02 01:49:00 CST" "2025-11-02 01:50:00 CST"
+[171] "2025-11-02 01:51:00 CST" "2025-11-02 01:52:00 CST"
+[173] "2025-11-02 01:53:00 CST" "2025-11-02 01:54:00 CST"
+[175] "2025-11-02 01:55:00 CST" "2025-11-02 01:56:00 CST"
+[177] "2025-11-02 01:57:00 CST" "2025-11-02 01:58:00 CST"
+[179] "2025-11-02 01:59:00 CST" "2025-11-02 02:00:00 CST"</code></pre>
+</div>
+</div>
+<p>What happens after “2025-11-02 01:59:00 CDT”? You can see that it ends when the clock strikes two in the morning. If you want R to really do all the work, use <code>lubridate</code>’s <code>dst()</code> function and find the minimum and maximum times before and after the switch to daylight saving time.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">date =</span> <span class="fu">mdy</span>(<span class="st">"11/2/2025"</span>, <span class="at">tz=</span><span class="st">"America/Chicago"</span>) <span class="sc">+</span> <span class="fu">dminutes</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">180</span>))</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="co"># the latest time that is still in Daylight Saving Time</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>a <span class="sc">|&gt;</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>   <span class="fu">filter</span>(<span class="fu">dst</span>(date)) <span class="sc">|&gt;</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>   <span class="fu">slice_max</span>(date)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                 date
+1 2025-11-02 01:59:00</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># the earliest time that is no longer in Daylight Saving Time</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>a <span class="sc">|&gt;</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>   <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">dst</span>(date)) <span class="sc">|&gt;</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>   <span class="fu">slice_min</span>(date)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                 date
+1 2025-11-02 01:00:00</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># more succinctly</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>a <span class="sc">|&gt;</span> </span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>   <span class="fu">group_by</span>(<span class="fu">dst</span>(date)) <span class="sc">|&gt;</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>   <span class="fu">summarize</span>(<span class="fu">min</span>(date), <span class="fu">max</span>(date))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 3
+  `dst(date)` `min(date)`         `max(date)`        
+  &lt;lgl&gt;       &lt;dttm&gt;              &lt;dttm&gt;             
+1 FALSE       2025-11-02 01:00:00 2025-11-02 02:00:00
+2 TRUE        2025-11-02 00:01:00 2025-11-02 01:59:00</code></pre>
+</div>
+</div>
+<ol start="2" type="1">
+<li>On what date will Thanksgiving fall in 2020?</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">date=</span><span class="fu">mdy</span>(<span class="st">"11/1/2025"</span>) <span class="sc">+</span> <span class="fu">ddays</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">29</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>   <span class="fu">filter</span>(<span class="fu">wday</span>(date, <span class="at">label=</span><span class="cn">TRUE</span>) <span class="sc">==</span> <span class="st">"Thu"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>   <span class="fu">slice</span>(<span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        date
+1 2025-11-27</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># or using some base R code</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">mdy</span>(<span class="fu">paste0</span>(<span class="st">"11/"</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">30</span>,<span class="st">"/2025"</span>))</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>a[<span class="fu">wday</span>(a,<span class="at">label=</span><span class="cn">TRUE</span>)<span class="sc">==</span><span class="st">"Thu"</span>][<span class="dv">4</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "2025-11-27"</code></pre>
+</div>
+</div>
+<ol start="3" type="1">
+<li>Make a function that takes as input a year and returns the date of Thanksgiving in that year.</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>tday <span class="ot">&lt;-</span> <span class="cf">function</span>(year)</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>   <span class="fu">data.frame</span>(<span class="at">date=</span><span class="fu">mdy</span>(<span class="fu">paste0</span>(<span class="st">"11/1/"</span>,year)) <span class="sc">+</span> <span class="fu">ddays</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">29</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">filter</span>(<span class="fu">wday</span>(date, <span class="at">label=</span><span class="cn">TRUE</span>) <span class="sc">==</span> <span class="st">"Thu"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">slice</span>(<span class="dv">4</span>) <span class="sc">|&gt;</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">pull</span>(date)</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a><span class="fu">tday</span>(<span class="dv">2025</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "2025-11-27"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">lapply</span>(<span class="dv">2025</span><span class="sc">:</span><span class="dv">2100</span>, tday)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[[1]]
+[1] "2025-11-27"
+
+[[2]]
+[1] "2026-11-26"
+
+[[3]]
+[1] "2027-11-25"
+
+[[4]]
+[1] "2028-11-23"
+
+[[5]]
+[1] "2029-11-22"
+
+[[6]]
+[1] "2030-11-28"
+
+[[7]]
+[1] "2031-11-27"
+
+[[8]]
+[1] "2032-11-25"
+
+[[9]]
+[1] "2033-11-24"
+
+[[10]]
+[1] "2034-11-23"
+
+[[11]]
+[1] "2035-11-22"
+
+[[12]]
+[1] "2036-11-27"
+
+[[13]]
+[1] "2037-11-26"
+
+[[14]]
+[1] "2038-11-25"
+
+[[15]]
+[1] "2039-11-24"
+
+[[16]]
+[1] "2040-11-22"
+
+[[17]]
+[1] "2041-11-28"
+
+[[18]]
+[1] "2042-11-27"
+
+[[19]]
+[1] "2043-11-26"
+
+[[20]]
+[1] "2044-11-24"
+
+[[21]]
+[1] "2045-11-23"
+
+[[22]]
+[1] "2046-11-22"
+
+[[23]]
+[1] "2047-11-28"
+
+[[24]]
+[1] "2048-11-26"
+
+[[25]]
+[1] "2049-11-25"
+
+[[26]]
+[1] "2050-11-24"
+
+[[27]]
+[1] "2051-11-23"
+
+[[28]]
+[1] "2052-11-28"
+
+[[29]]
+[1] "2053-11-27"
+
+[[30]]
+[1] "2054-11-26"
+
+[[31]]
+[1] "2055-11-25"
+
+[[32]]
+[1] "2056-11-23"
+
+[[33]]
+[1] "2057-11-22"
+
+[[34]]
+[1] "2058-11-28"
+
+[[35]]
+[1] "2059-11-27"
+
+[[36]]
+[1] "2060-11-25"
+
+[[37]]
+[1] "2061-11-24"
+
+[[38]]
+[1] "2062-11-23"
+
+[[39]]
+[1] "2063-11-22"
+
+[[40]]
+[1] "2064-11-27"
+
+[[41]]
+[1] "2065-11-26"
+
+[[42]]
+[1] "2066-11-25"
+
+[[43]]
+[1] "2067-11-24"
+
+[[44]]
+[1] "2068-11-22"
+
+[[45]]
+[1] "2069-11-28"
+
+[[46]]
+[1] "2070-11-27"
+
+[[47]]
+[1] "2071-11-26"
+
+[[48]]
+[1] "2072-11-24"
+
+[[49]]
+[1] "2073-11-23"
+
+[[50]]
+[1] "2074-11-22"
+
+[[51]]
+[1] "2075-11-28"
+
+[[52]]
+[1] "2076-11-26"
+
+[[53]]
+[1] "2077-11-25"
+
+[[54]]
+[1] "2078-11-24"
+
+[[55]]
+[1] "2079-11-23"
+
+[[56]]
+[1] "2080-11-28"
+
+[[57]]
+[1] "2081-11-27"
+
+[[58]]
+[1] "2082-11-26"
+
+[[59]]
+[1] "2083-11-25"
+
+[[60]]
+[1] "2084-11-23"
+
+[[61]]
+[1] "2085-11-22"
+
+[[62]]
+[1] "2086-11-28"
+
+[[63]]
+[1] "2087-11-27"
+
+[[64]]
+[1] "2088-11-25"
+
+[[65]]
+[1] "2089-11-24"
+
+[[66]]
+[1] "2090-11-23"
+
+[[67]]
+[1] "2091-11-22"
+
+[[68]]
+[1] "2092-11-27"
+
+[[69]]
+[1] "2093-11-26"
+
+[[70]]
+[1] "2094-11-25"
+
+[[71]]
+[1] "2095-11-24"
+
+[[72]]
+[1] "2096-11-22"
+
+[[73]]
+[1] "2097-11-28"
+
+[[74]]
+[1] "2098-11-27"
+
+[[75]]
+[1] "2099-11-26"
+
+[[76]]
+[1] "2100-11-25"</code></pre>
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+    const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+    const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+    let newTheme = '';
+    if(darkModeDefault) {
+      newTheme = isAlternate ? baseTheme : alternateTheme;
+    } else {
+      newTheme = isAlternate ? alternateTheme : baseTheme;
+    }
+    const changeGiscusTheme = () => {
+      // From: https://github.com/giscus/giscus/issues/336
+      const sendMessage = (message) => {
+        const iframe = document.querySelector('iframe.giscus-frame');
+        if (!iframe) return;
+        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+      }
+      sendMessage({
+        setConfig: {
+          theme: newTheme
+        }
+      });
+    }
+    const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+    if (isGiscussLoaded) {
+      changeGiscusTheme();
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  const darkModeDefault = true;
+  let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+    toggleGiscusIfUsed(toAlternate, darkModeDefault);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
