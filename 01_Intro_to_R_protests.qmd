@@ -20,6 +20,15 @@ editor_options:
   chunk_output_type: console
 ---
 
+<!-- In terminal -->
+<!-- quarto render 01_Intro_to_R_protests.qmd -->
+
+<!-- git commit 01-* -m "commit message" -->
+<!-- git status -->
+<!-- git push -->
+
+
+
 <!-- A function for automating the numbering and wording of the exercise questions -->
 ```{r echo=FALSE}
 .counterExercise <- 0
