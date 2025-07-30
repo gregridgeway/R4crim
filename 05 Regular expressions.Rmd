@@ -217,7 +217,7 @@ Let's try to find phone numbers in `dataText`. The problem is that phone numbers
 ```{r comment="", results='hold'}
 grep("[0-9]{10}",dataText,value=TRUE)
 ```
-It is also not too hard to find the hypenated phone number pattern.
+It is also not too hard to find the hyphenated phone number pattern.
 ```{r comment="", results='hold'}
 grep("[0-9]{3}-[0-9]{3}-[0-9]{4}",dataText,value=TRUE)
 ```

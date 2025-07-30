@@ -72,7 +72,7 @@ The University of Michigan consolidates the NCVS data into a format that is easi
 
 First, we will download the NCVS 2012 data, [ICPSR 34650](http://www.icpsr.umich.edu/icpsrweb/NACJD/studies/34650). We will need to download the following files, DS1, DS2, DS3, DS4, and DS5 in R format. Also, download DS0, the Codebook (which is in PDF format). We will refer to the codebook frequently. As for the DS1, DS2, DS3, DS4, and DS5 files, we are interested in the .rda files. 
 
-Next, downoad the NCVS 2013 data, [ICPSR 35164](http://www.icpsr.umich.edu/icpsrweb/NACJD/studies/35164). Same drill as above - retrieve DS1, DS2, DS3, DS4, and DS5 in R format.
+Next, download the NCVS 2013 data, [ICPSR 35164](http://www.icpsr.umich.edu/icpsrweb/NACJD/studies/35164). Same drill as above - retrieve DS1, DS2, DS3, DS4, and DS5 in R format.
 
 All told you should have ten .rda files, and one PDF codebook. The codebook is extremely important for understanding what the variable names stand for, and you should become familiar with it as soon as you can. For now, we won't be using the DS5 files that much. Also, the file names are admittedly a bit unwieldy with all the numbers so it might be a good idea to change the names to something that will help you quickly distinguish among all the files. We've created subfolders called NCVS2012 and NCVS2013 that contains the files extracted from the data download. Here are the files we have in our NCVS2012 and NCVS2013 subfolders.
 
@@ -88,7 +88,7 @@ ls()
 head(da34650.0001)
 ```
 
-As you can see, the DS1 for 2012 contains a unique identifer for each interviewed household. Let's load the address record-type file for 2013.
+As you can see, the DS1 for 2012 contains a unique identifier for each interviewed household. Let's load the address record-type file for 2013.
 
 ```{r comment="", results='hold'}
 load("NCVS2013/DS0001/35164-0001-Data.rda")

@@ -226,7 +226,7 @@ dataProtest$Date[1:10]
 dataProtest$Location[1:10]
 ```
 
-So far everytime we run some R code the results are dumped to the console. This is R's default behavior. If you do not indicate otherwise, it will dump the results to the console and promptly forget those results. When we want to store the results, we can use the assignment operator `<-`. For example, to save the first 10 dates to a variable `a` you can use 
+So far every time we run some R code the results are dumped to the console. This is R's default behavior. If you do not indicate otherwise, it will dump the results to the console and promptly forget those results. When we want to store the results, we can use the assignment operator `<-`. For example, to save the first 10 dates to a variable `a` you can use 
 ```{r}
 a <- dataProtest$Date[1:10]
 ```
@@ -362,13 +362,13 @@ dataProtest |>
 ```
 Here I have used the `count()` function to count the number of protests in each state. It groups the data by the `state` column and then counts the number of rows in each group. The result is a new data frame with one column containing the state abbreviation (`state`) and another column containing the number of protests in that state (`count()` will always call this one `n`).
 
-Do you see some problems with our state abbreviations? I an "Fl", an "Hi", and an "Mi" and a few others that do not seem to be correctly capitalized. I also see some abbrevations that are "CE" and "TE", not states that I know of. Let's take a closer look at these strange ones. Note that I am introducing the `%in%` operator. This is a logical operator that asks each value of `state` whether its value is in the collection to the right of `%in%`. It is a more compact way write `state=="Fl" | state=="Hi" | state=="Mi" | state=="ce" | state=="co" | state=="iD" | state=="te" | state=="wA"`. Well, there. I have gone ahead and typed that all out. I hope to never have to type a logical expression with so many ORs again.
+Do you see some problems with our state abbreviations? I see an "Fl", an "Hi", and an "Mi" and a few others that do not seem to be correctly capitalized. I also see some abbreviations that are "CE" and "TE", not states that I know of. Let's take a closer look at these strange ones. Note that I am introducing the `%in%` operator. This is a logical operator that asks each value of `state` whether its value is in the collection to the right of `%in%`. It is a more compact way to write `state=="Fl" | state=="Hi" | state=="Mi" | state=="ce" | state=="co" | state=="iD" | state=="te" | state=="wA"`. Well, there. I have gone ahead and typed that all out. I hope to never have to type a logical expression with so many ORs again.
 ```{r}
 dataProtest |>
    filter(state %in% c("Fl","Hi","Mi","ce","co","iD","te","wA")) |>
    select(state, Location)
 ```
-Lots of different kinds of errors here. Five of them are just lower case. One is in Mexico (we need to drop this one). One is in Space (space is cool so let's keep that one for fun), and one is in La Porte, which I had to lookup to find that it is in Indiana (IN). Let's clean this up using `mutate()`.
+Lots of different kinds of errors here. Five of them are just lower case. One is in Mexico (we need to drop this one). One is in Space (space is cool so let's keep that one for fun), and one is in La Porte, which I had to look up La Porte to find that it is in Indiana (IN). Let's clean this up using `mutate()`.
 ```{r}
 dataProtest <- dataProtest |>
    filter(state != "co") |>  # drop Mexico

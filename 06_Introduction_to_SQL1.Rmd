@@ -63,7 +63,7 @@ knitr::opts_chunk$set(echo=TRUE, cache=TRUE, cache.lazy=FALSE, out.width='100%')
 
 # Introduction
 
-Some datasets are far too large for R to handle by itself. Structured Query Language ("SQL") is a widely used international standard language for managing data stored in a relational databases management system. A relational database management system itself is an approach to managing data using a structure that can be contrasted against the 'flat file' approach we have been using thus far with R. Why use SQL? R doesn't work very well with really huge datasets. A relational database management system offers a way of storing large amounts of information more efficiently and reducing the size of the dataset that we are working with. There are numerous relational database management systems such as Oracle, Microsoft Access, and MySQL. We are going to use [SQLite](https://www.sqlite.org/index.html), which is probably the most widely deployed database system. SQLite is in your phone, car, airplanes, thermostats, and numerous applicances. We are going to hook up SQLite to R so that R can handle large datasets.
+Some datasets are far too large for R to handle by itself. Structured Query Language ("SQL") is a widely used international standard language for managing data stored in a relational databases management system. A relational database management system itself is an approach to managing data using a structure that can be contrasted against the 'flat file' approach we have been using thus far with R. Why use SQL? R doesn't work very well with really huge datasets. A relational database management system offers a way of storing large amounts of information more efficiently and reducing the size of the dataset that we are working with. There are numerous relational database management systems such as Oracle, Microsoft Access, and MySQL. We are going to use [SQLite](https://www.sqlite.org/index.html), which is probably the most widely deployed database system. SQLite is in your phone, car, airplanes, thermostats, and numerous appliances. We are going to hook up SQLite to R so that R can handle large datasets.
 
 These are some basic clauses in a SQL query that we will explore:
 
@@ -224,7 +224,7 @@ Just as `SELECT` filters the columns, the `WHERE` clause filters the rows. Note 
 * the value in the `Arrest` column is "true"
 * the value in the `ICUR` column is either "0486" or "0498"
 
-Importantly, note the use of single (not double) quotation marks in the `WHERE` line. The reason is that if we used double quotes, then R will think that the double quote signals the end of the query. Also note that `Location.Description` has a period in its name. The period has a special meaning in SQL that we will discuss later. We use the square brakets around the name to "protect" the column name, telling SQL to treat it as a column name.
+Importantly, note the use of single (not double) quotation marks in the `WHERE` line. The reason is that if we used double quotes, then R will think that the double quote signals the end of the query. Also note that `Location.Description` has a period in its name. The period has a special meaning in SQL that we will discuss later. We use the square brackets around the name to "protect" the column name, telling SQL to treat it as a column name.
 
 Also, note how we set the `fetch()` line to the variable `a`. 
 
