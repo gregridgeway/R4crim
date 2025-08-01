@@ -25,7 +25,7 @@ editor_options:
 <!-- In terminal -->
 <!-- quarto render 03_Working_with_NIBRS_data.qmd -->
 
-<!-- git commit 03-* -m "commit message" -->
+<!-- git commit 03_* -m "commit message" -->
 <!-- git status -->
 <!-- git push -->
 
