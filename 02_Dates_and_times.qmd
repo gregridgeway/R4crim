@@ -17,7 +17,7 @@ format:
     html-math-method: mathjax
   pdf:
     toc: true
-prefer-html: true
+    prefer-html: true
 number-sections: true
 editor_options: 
   chunk_output_type: console
