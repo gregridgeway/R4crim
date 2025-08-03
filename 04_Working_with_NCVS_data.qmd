@@ -92,10 +92,38 @@ library(tidyr)
 
 dataHH22 |>
   head() |>
-  select(V2001, YEARQ, IDHH, V2003, V2014, V2016, V2017, V2018, V2020,
+  select(V2001, YEARQ, IDHH, V2003, V2014, V2016, V2018, V2020,
          V2030, V2031, V2032, V2034, V2036, V2038, V2040A, V2127B, V2129) 
 ```
-The 2022 house
+The 2022 household dataset has `r ncol(dataHH22)` columns. Instead of printing out all of them, here I just picked out 17 columns here. First off you can see that the column names are generally not helpful. That is where the codebook comes in handy. The codebook tells you what each variable means.
+
+Somewhat hidden is a table linking column names to English explanations of what is in those columns. You can get to it by extracting the data frame's "attributes" with `attr()`.
+```{r}
+varsHH <- dataHH22 |>
+   attr("variable.labels") |>
+   data.frame() |>
+   tibble::rownames_to_column() |>
+   setNames(c("varname","details")) |>
+   filter(!grepl("^HHREP", varname)) # exclude rows that start with HHREP
+```
+Now `varsHH` has two columns, the first with the column names and the second with the details. Let's pull up the 17 columns listed before.
+```{r}
+varsHH |>
+   filter(varname %in% c("V2001","YEARQ","IDHH","V2003","V2014","V2016",
+                         "V2018","V2020","V2030","V2031","V2032","V2034","V2036",
+                         "V2038","V2040A","V2127B","V2129")) 
+```
+These are much more intelligible descriptions. "(S)MSA" stands for the Standard Metropolitan Statistical Areas, an outdated term. Today we call them simply MSAs. Minimum population has to be 50,000, but there is movement toward redefining as 100,000.
+
+Note the first household record has `IDHH` equal to 1809000258543680568236125. We can load the respondent "person file" to see who in this household responded.
+
+```{r}
+# loading person-level data
+load("NCVS2022/DS0003/38603-0003-Data.rda")
+load("NCVS2023/DS0003/38962-0003-Data.rda")
+dataPers22 <- da38603.0003
+dataPers23 <- da38962.0003
+```
 
 As you can see, the DS1 for 2012 contains a unique identifier for each interviewed household. Let's load the address record-type file for 2013.
 
