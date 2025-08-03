@@ -1,0 +1,339 @@
+---
+title: "Working with National Crime Victimization Survey Data"
+author:
+- affiliation: University of Pennsylvania
+  email: gridge@upenn.edu
+  name: Greg Ridgeway
+- affiliation: University of Pennsylvania
+  email: moyruth@upenn.edu
+  name: Ruth Moyer
+- affiliation: University of Pennsylvania
+  email: gohl@upenn.edu
+  name: Li Sian Goh
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+format:
+  html:
+    theme: 
+      dark: darkly
+      light: default
+    toc: true
+    html-math-method: mathjax
+  pdf:
+    toc: true
+    prefer-html: true
+number-sections: true
+editor_options: 
+  chunk_output_type: console
+---
+
+
+<!-- In terminal -->
+<!-- quarto render 04_Working_with_NCVS_data.qmd -->
+
+<!-- git commit 04-* -m "commit message" -->
+<!-- git status -->
+<!-- git push -->
+
+
+
+<!-- A function for automating the numbering and wording of the exercise questions -->
+```{r echo=FALSE}
+.counterExercise <- 0
+.exerciseQuestions <- NULL
+.exNum <- function(.questionText="") 
+{
+   .counterExercise <<- .counterExercise+1
+   .exerciseQuestions <<- c(.exerciseQuestions, .questionText)
+   .questionText <- gsub("@@", "`", .questionText)
+   return(paste0(.counterExercise,". ",.questionText))
+}
+```
+
+
+
+
+# Introduction
+
+Through our work with NIBRS, we have already discussed reported crime. Nonetheless, not all crimes are reported to the police. Each year, under the guidance of the Bureau of Justice Statistics, the U.S. Census Bureau conducts the National Crime Victimization Survey (NCVS), a source of self-reported victimization data. The Census Bureau interviews a sample of people 12 years old or older about the number and characteristics of crime victimizations they experienced during the prior 6 months. 
+
+In 2023 226,480 people in 142,028 households participated. The survey had a 63\% response rate for households and and 82\% response rate for individuals. Households remain in the sample for $3\frac{1}{2}$ years completing interviews every 6 months, in person or by phone, for a total of seven interviews. The survey cost \$62M annually and required roughly 125,000 hours of uncompensated respondent time.
+
+The NCVS contains information about nonfatal personal crimes, such as rape and robbery, as well as property crimes, such as burglary. Additional information about the NCVS can be found at the [BJS website](https://bjs.ojp.gov/data-collection/ncvs). To give a sense of the type of data that the NCVS contains, refer to the [Official 2023 BJS Crime Victimization report](https://bjs.ojp.gov/library/publications/criminal-victimization-2023).
+
+# Acquiring the NCVS data
+
+The University of Michigan consolidates the NCVS data into a format that is easily accessible in R. We will be using data collected in 2022 and 2023 to assemble a dataset that covers victimizations occurring in 2022. Since respondents are asked about crime in the previous six months, respondents completing surveys in May 2023 will still be reporting about crimes in December 2022.
+
+First, we will download the NCVS 2022 data, [ICPSR 38603](https://www.icpsr.umich.edu/web/NACJD/studies/38603). Click on Download, select R, save the resulting file (called something like ICPSR_38603-V1.zip), extract the contents of the zipped file to a convenient folder, and give it a more understandable folder name, like NCVS2022. Repeat the process for downloading the NCVS 2023 data, [ICPSR 38962](https://www.icpsr.umich.edu/web/NACJD/studies/38962). New NCVS data tends to appear in mid-September. Typically we need to wait about nine months to get the results from the previous year.
+
+After unzipping the NCVS files, you will find subfolders called DS0001, DS0002, DS0003, DS0004, and DS0005. 
+```{r}
+#| comment: ""
+list.files("NCVS2022/",recursive = TRUE)
+list.files("NCVS2023/",recursive = TRUE)
+```
+Inside each of these subfolders you see an R data file with the extension .rda. We will spend most of our attention on the contents of the DS0005 folder, which contains the "incident-level extract file." In each folder you will also find codebooks in pdf (and epub) format. The codebook is as important as it is tedious for understanding what is stored in the NCVS data. You should become familiar with the codebooks as soon as you can.
+
+Let's start loading these datasets. We will skip the DS0001 subfolder, which contains basic survey information on the targeted addressed. The DS0002 folder contains data on the households included in the survey.
+```{r}
+#| comment: ""
+load("NCVS2022/DS0002/38603-0002-Data.rda")
+load("NCVS2023/DS0002/38962-0002-Data.rda")
+
+# and let's give them nicer names
+dataHH22 <- da38603.0002
+dataHH23 <- da38962.0002
+```
+Take a peek at the first couple of rows
+```{r}
+#| comment: ""
+library(dplyr)
+library(tidyr)
+
+dataHH22 |>
+  head() |>
+  select(V2001, YEARQ, IDHH, V2003, V2014, V2016, V2017, V2018, V2020,
+         V2030, V2031, V2032, V2034, V2036, V2038, V2040A, V2127B, V2129) 
+```
+The 2022 house
+
+As you can see, the DS1 for 2012 contains a unique identifier for each interviewed household. Let's load the address record-type file for 2013.
+
+```{r comment="", results='hold'}
+load("NCVS2013/DS0001/35164-0001-Data.rda")
+```
+
+Let's give these address record-type files for 2012 and 2013 more useful names.
+```{r comment="", results='hold'}
+dataAddr12 <- da34650.0001 
+dataAddr13 <- da35164.0001 
+```
+
+By contrast, DS2 contains household information. Let's load the household data and give them more useful names.
+```{r comment="", results='hold'}
+load("NCVS2012/DS0002/34650-0002-Data.rda")
+load("NCVS2013/DS0002/35164-0002-Data.rda")
+
+dataHH12 <- da34650.0002 
+dataHH13 <- da35164.0002 
+```
+
+The DS3 files contain person specific information whereas the DS4 files provide incident information. Let's load them and give them useful names.
+```{r comment="", results='hold'}
+
+load("NCVS2012/DS0003/34650-0003-Data.rda")
+load("NCVS2013/DS0003/35164-0003-Data.rda")
+dataPers12 <- da34650.0003
+dataPers13 <- da35164.0003
+
+load("NCVS2012/DS0004/34650-0004-Data.rda")
+load("NCVS2013/DS0004/35164-0004-Data.rda")
+dataInc12 <- da34650.0004
+dataInc13 <- da35164.0004
+```
+
+Now that we've loaded and renamed all the files we'll need, we can remove objects from our working environment that we no longer need. We can use `rm()` to accomplish this:
+```{r comment="", results='hold'}
+rm(da34650.0001,da34650.0002,da34650.0003,da34650.0004,
+   da35164.0001,da35164.0002,da35164.0003,da35164.0004)
+```
+
+Let's examine in a bit more detail the first three rows of the person file. The dataset contains `r ncol(dataPers12)` columns so we will just show the first 40 columns here. Note IDHH (household ID), IDPER (person ID), and the relationship between the first two rows. Also, note that V3077 (Variable #3077) refers to who responded to the survey.
+```{r comment="", results='hold'}
+dataPers12[1:3, 1:40]
+```
+Let's examine the corresponding household information. This dataset also has a lot of features so we will just show here the first 53  of `r ncol(dataHH12)` columns. 
+
+```{r comment="", results='hold'}
+subset(dataHH12, IDHH=="2501017260961929294229224")[,1:53]
+```
+
+And the corresponding incident file (just the first 43 of `r ncol(dataInc12)` columns):
+```{r comment="", results='hold'}
+dataInc12[1:3, 1:43]
+```
+
+Let's look at the month and year of crime incident variables
+```{r comment="", results='hold'}
+with(dataInc12, table(V4014,V4015)) 
+with(dataInc13, table(V4014,V4015))
+```
+
+# Creating a dataframe and weights with NCVS incident data
+Next, we can create a 2012 incident dataframe. Importantly, the 2012 data contain incidents that occurred in 2012 as well as 2011 but were all self-reported to the Census Bureau in 2012. Likewise, the 2013 data contain incidents that occurred in 2012 as well as 2013.  If we wanted to analyze crime that occurred in only 2012, we'd subset the data to include only 2012. We will combine the 2012 and 2013 incident dataframes and then subset this new dataframe so that we exclude 2011 and 2013. As we can see in the Codebook PDF, the variable V4015 refers to the year of occurrence. (Helpful hint: the numbering of the variables correlate to the numbering of the dataframe. The incident-level file is DS4. Many of the variables in DS4 are V4XXX.)
+
+`rbind` binds rows. This is good for when the columns in two datasets are exactly the same.
+
+```{r comment="", results='hold'}
+dataInc <- rbind(dataInc12,dataInc13)
+table(dataInc$V4015) # year crime occured
+dataInc <- subset(dataInc, V4015==2012)
+```
+
+We will also want to exclude crime that happens outside the United States or crimes for which we do not know the location (NA). According to the Codebook, V4022 refers to location.
+
+```{r comment="", results='hold'}
+dataInc <- subset(dataInc, (V4022!="(1) Outside U.S.") | is.na(V4022))
+```
+
+A lot of crimes happen in a series. The BJS convention is to include up to 10 occurrences in a series crime.
+```{r comment="", results='hold'}
+i <- with(dataInc, which((V4019=="(2) No (is series)") & (V4016>=11) & (V4016<=996)))
+dataInc$V4016[i] <- 10
+dataInc$V4016[dataInc$V4016>=997] <- NA
+```
+
+Also, BJS analyses of NCVS data generally use weights because NCVS is survey data. We want to weight the survey data so that they are representative of the wider U.S. population! There are three NCVS weight categories: household, personal, and incident. 
+
+For more information about NCVS weights, consult the section on Weighting Information found at this ICPSR resource guide to the NCVS: (https://www.icpsr.umich.edu/icpsrweb/NACJD/NCVS/accuracy.jsp).
+
+To that extent, let's update the weight for series crimes and create a "date year" weight.
+```{r comment="", results='hold'}
+i <- which(dataInc$V4019=="(2) No (is series)")
+dataInc$WGTVICDY <- dataInc$WGTVICCY
+dataInc$WGTVICDY[i] <- with(dataInc, WGTVICDY[i] * V4016[i])
+```
+We can also tabulate total weight by crime type to estimate the count of a crime. As the Codebook instructs, `V4529` is the variable for crime type.  
+```{r comment="", results='hold'}
+aggregate(WGTVICDY~V4529, data=dataInc, sum)
+```
+As you can see, there are some irregularities with the coding of crime types.  Sometimes a type is coded as "(01)", but other times it is coded as "(1)". Let's standardize this coding using regular expressions.
+```{r comment="", results='hold'}
+dataInc$V4529 <- gsub("\\(([1-9])\\)", "(0\\1)", dataInc$V4529)
+aggregate(WGTVICDY~V4529, data=dataInc, sum)
+```
+
+Now, we can use the NCVS incident data to find out how many car thefts occurred in 2012. 
+```{r comment="", results='hold'}
+with(subset(dataInc, V4529=="(40) Motor veh theft"), 
+     sum(WGTVICDY))
+```
+
+Also, note that the [definition of rape changed](http://www.fbi.gov/about-us/cjis/cjis-link/march-2012/ucr-program-changes-definition-of-rape) in 2013. 
+```{r comment="", results='hold'}
+with(subset(dataInc,V4529=="(01) Completed rape"), 
+     sum(WGTVICDY))
+```     
+
+# Merging in data from the household and person data
+So far, we've created a dataframe and worked with weights for the Incident data.  However, the Household and Person Data have data that we might need. Let's first create a 2012 data year household data frame, much like we did with the incident data. Note that `YEARQ` refers to the year and quarter of the interview. The variable `V2130` is the month allocated from panel/rotation number. The panel/rotation number refer to [the process](https://www.bjs.gov/content/pub/pdf/ncvs_methodology.pdf) through which interviews are conducted.
+
+```{r comment="", results='hold'}
+dataHH <- rbind(dataHH12,dataHH13)
+dataHH <- subset(dataHH, YEARQ>=2012.1 & YEARQ<=2013.2)
+```
+Let's make the "month allocated" uniform, and using regular expressions, delete "0s" following parentheses.
+```{r comment="", results='hold'}
+table(dataHH$V2130)
+dataHH$V2130 <- gsub("\\(0", "\\(", dataHH$V2130)
+table(dataHH$V2130)
+```
+When you view the table again, you can see that the original 21 months listed were condensed into 12.
+
+Next, create a 2012 data year person data frame. We need to first fix incompatible factor/numeric in 2012/2013.  The factor levels in 2012 look like "(1) Yes", but in 2013 are just "1."
+
+```{r comment="", results='hold'}
+i <- sapply(dataPers12,levels)                        #gives factor levels for each variable 
+i <- i[!sapply(i,is.null)]                             #gives factor levels for each factor variable
+                                                       #for non-factor variables, i returns a null result
+i <- sapply(i, function(x) all(substring(x,1,1)=="(")) #store in i those variables where the first                                                               #character of factor levels is "(""
+var.fix <- names(i)[i]                                 #this gives us the name of variables 
+                                                       #where factor levels begin with "(". 
+
+for(xj in var.fix) #create a for-loop to fix these variable names. for each value "xj" in var.fix
+{
+   dataPers12[,xj] <- gsub("\\(([0-9]+)\\).*","\\1",dataPers12[,xj]) #remove the words that follow the                                                                         #numbers in parentheses
+   dataPers12[,xj] <- as.numeric(dataPers12[,xj]) #convert the numbers in parentheses to just numeric                                                       #variables, which present as numbers w/o parentheses
+}
+```
+
+Then, stack the 2012 and 2013 data frames using `rbind()`.
+```{r comment="", results='hold'}
+dataPers <- rbind(dataPers12, dataPers13)
+dataPers <- subset(dataPers, YEARQ>=2012.1 & YEARQ<=2013.2)
+```
+
+Now that we've created a person dataframe and an incident dataframe, we can merge them together. We will use `merge()` to pull age, marital status, and sex into the incident data. The `merge()` function has several parameters that communicate to R which features should be used to match and which ones should be merged. Here we tell `merge()` to use use a pair of features from the incident data (`IDPER` and `YEARQ`) and look up a row in `dataPers` with the same values of `IDPER` and `YEARQ`. We've selected only the five columns `IDPER`, `YEARQ`, `V3014`, `V3015`, and `V3018` from `dataPers`. The first two `merge()` uses to identify matching rows and the last three will be attached as new columns to `dataInc`.
+
+```{r comment=""}
+a <- merge(dataInc,                     # incident data
+           dataPers[,c("IDPER","YEARQ", # IDPER & YEARQ unique IDs of person
+                       "V3014",         # age
+                       "V3015",         # marital status
+                       "V3018")],       # sex
+           by=c("IDPER","YEARQ"),       # variables used to merge
+           all.x=TRUE)                  # keep all incidents, even if not matched
+
+# a should have the same number of rows as dataInc, but 3 additional new columns
+dim(dataInc)
+dim(a)
+# replace dataInc with a, now containing age, marital, and sex
+dataInc <- a
+
+# check merge for first incident
+dataInc[1,c("IDPER","YEARQ","V3014","V3015","V3018")]
+# check dataPers for this person's age, marital, and sex
+subset(dataPers, IDPER=="250105121075958229372843501" & YEARQ==2012.3,
+       select = c("IDPER","YEARQ","V3014","V3015","V3018"))
+```
+
+We can see that the first row of `dataInc` now has three additional columns, and that they have the correct values merged from the `dataPers` data.
+
+Let's give these new columns better names.
+```{r comment="", results='hold'}
+names(dataInc)[names(dataInc)=="V3014"] <- "age"
+names(dataInc)[names(dataInc)=="V3015"] <- "marital"
+names(dataInc)[names(dataInc)=="V3018"] <- "sex"
+```
+Let's also create a new variable that breaks age into age categories.
+```{r comment="", results='hold'}
+dataInc$ageGroup <- cut(dataInc$age, breaks=c(0,16,21,35,45,60,110))
+```
+
+Note that "8" is a missing value indicator for marital status. Always refer to the Codebook if you are not sure what a variable or a categorical variable value means.
+```{r comment="", results='hold'}
+dataInc$marital[dataInc$marital==8] <- NA
+```
+Factor variables in R put meaningful labels on categorical variables. Instead of working with the numbers 1-5 for marital status, let's assign the number values their actual corresponding names.
+```{r comment="", results='hold'}
+dataInc$marital <- factor(dataInc$marital, levels=1:5,
+                        labels=c("married","widowed","divorced",
+                                 "separated","never married"))
+dataInc$sex <- factor(dataInc$sex, levels=1:2, 
+                      labels=c("male","female"))
+```
+Let's get estimated counts by age group and sex.
+```{r comment="", results='hold'}
+aggregate(WGTVICDY~ageGroup+sex, data=dataInc, FUN=sum)
+```
+We can also find out common crime type by sex. As before, `aggregate()` will total up the weights, but as you see in the ageGroup/sex example above, `aggregate()` produces the results in a long form. Sometimes this is useful, but sometimes we want to have our results side-by-side. We will use `reshape()` to convert the "long format" results from `aggregate()` to a "wide format".
+```{r comment="", results='hold'}
+a <- aggregate(WGTVICDY~V4529+sex, data=dataInc, FUN=sum)
+a <- reshape(a, timevar="sex", idvar="V4529", direction="wide")
+a[is.na(a)] <- 0
+names(a) <- c("crimeType","male","female")
+a
+```
+
+We can then convert this result to column percentages. To obtain a column percentage, we divide counts for an individual cell by the total number of counts for the column. So, the sum of all the values in the male column should equal 100:
+```{r comment=""}
+temp <- a
+temp$male   <- with(temp, 100*male/  sum(male))
+temp$female <- with(temp, 100*female/sum(female))
+colSums(temp[,-1]) # check that the columns sum to 100
+temp$ratio <- temp$female/temp$male
+temp[order(-temp$ratio),]
+```
+
+Or we can compute row percentages to determine what percentage of each crime is male and female.
+```{r comment="", results='hold'}
+temp <- a
+row.total <- with(temp, male+female)
+temp$male   <- with(temp, 100*male/  row.total)
+temp$female <- with(temp, 100*female/row.total)
+rowSums(temp[,-1]) # check that the rows sum to 100
+temp$ratio <- temp$female/temp$male
+temp[order(-temp$ratio),]
+```
+
+
