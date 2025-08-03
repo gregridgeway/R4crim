@@ -123,74 +123,220 @@ load("NCVS2022/DS0003/38603-0003-Data.rda")
 load("NCVS2023/DS0003/38962-0003-Data.rda")
 dataPers22 <- da38603.0003
 dataPers23 <- da38962.0003
+
+# lookup respondents from this household
+dataPers22 |>
+  filter(IDHH=="1809000258543680568236125") |>
+  select(!starts_with("PERREP"))  # drop all the PERREP weight columns
+```
+These two rows represent two surveys, six months apart of the same divorced, 62-63 year-old, white male. Let's look up another household.
+```{r}
+dataPers22 |>
+  filter(IDHH=="1809000284384631568236124") |>
+  select(!starts_with("PERREP"))
+```
+These rows represent two surveys occurring at the same time, one of the reference person, a married white female, and a second survey of her husband.
+
+Let's grab the variable details as we did with the household data.
+```{r}
+#| results: "hold"
+# Person file also has list of variable details
+varsPers <- dataPers22 |>
+   attr("variable.labels") |>
+   data.frame() |>
+   tibble::rownames_to_column() |>
+   setNames(c("varname","details")) |>
+   filter(!grepl("^(PERREP|PINTTYPE)", varname))
+varsPers
 ```
 
-As you can see, the DS1 for 2012 contains a unique identifier for each interviewed household. Let's load the address record-type file for 2013.
+There is an incident-level file that we will read in here. We are not going to look at it further, since much of the information in this file is also in the incident extract file.
+```{r}
+#| results: "hold"
+load("NCVS2022/DS0004/38603-0004-Data.rda")
+load("NCVS2023/DS0004/38962-0004-Data.rda")
+dataInc22 <- da38603.0004
+dataInc23 <- da38962.0004
 
-```{r comment="", results='hold'}
-load("NCVS2013/DS0001/35164-0001-Data.rda")
+dataInc22 |>
+   select(IDHH, IDPER, V4014, V4529) |> 
+   head()
 ```
 
-Let's give these address record-type files for 2012 and 2013 more useful names.
-```{r comment="", results='hold'}
-dataAddr12 <- da34650.0001 
-dataAddr13 <- da35164.0001 
+Finally, we will load in the incident extract file and its associated variable details. This extract file merges in household-level and person-level information to the incident-level file, allowing you to connect person-level features with features of the victimizations they report.
+```{r}
+#| results: "hold"
+# incident-level extract file
+load("NCVS2022/DS0005/38603-0005-Data.rda")
+load("NCVS2023/DS0005/38962-0005-Data.rda")
+dataExt22 <- da38603.0005
+dataExt23 <- da38962.0005
+
+varsExt <- dataExt22 |>
+   attr("variable.labels") |>
+   data.frame() |>
+   tibble::rownames_to_column() |>
+   setNames(c("varname","details")) |>
+   filter(!grepl("INCREPWGT|VICREPWGT", varname))
 ```
 
-By contrast, DS2 contains household information. Let's load the household data and give them more useful names.
-```{r comment="", results='hold'}
-load("NCVS2012/DS0002/34650-0002-Data.rda")
-load("NCVS2013/DS0002/35164-0002-Data.rda")
+Let's take a look at a few of the reported crime victimizations. Here I will just pull the respondent's age, marital status, sex, general location, and crime type.
+```{r}
+dataExt22 |>
+  select(V3014, V3015, V3018, V4022, V4529) |>
+  slice(1:3)
+```
+Not all information from the household and person files are in the extract file, but many of the features that are likely to be of interest are there.
 
-dataHH12 <- da34650.0002 
-dataHH13 <- da35164.0002 
+Now that the datasets are loaded and renamed, we can remove objects from our working environment that we no longer need. We can use `rm()` to accomplish this.
+```{r}
+#| results: 'hold'
+rm(da38603.0001,da38603.0002,da38603.0003,da38603.0004,da38603.0005,
+   da38962.0001,da38962.0002,da38962.0003,da38962.0004,da38962.0005)
 ```
 
-The DS3 files contain person specific information whereas the DS4 files provide incident information. Let's load them and give them useful names.
-```{r comment="", results='hold'}
+# Combining 2022 and 2023 data
 
-load("NCVS2012/DS0003/34650-0003-Data.rda")
-load("NCVS2013/DS0003/35164-0003-Data.rda")
-dataPers12 <- da34650.0003
-dataPers13 <- da35164.0003
+Here we are going to create a data frame containing all the reported incidents that *occurred* in 2022.
+Take a look at the month and year of the reported crime incidents.
+```{r}
+with(dataExt22, table(V4014,V4015)) 
+with(dataExt22, table(V4014,V4015))
+```
+Note that the 2022 NCVS reports on crimes that occurred in 2022 and 2021. Similarly, the NCVS 2023 reports on crimes that occurred in 2023 and 2022. Remember that the NCVS surveys as respondents about any victimizations from the prior 12 months. We will going to stack the 2022 and 2023 incident extract data frames and then filter it to exclude 2021 and 2023.
 
-load("NCVS2012/DS0004/34650-0004-Data.rda")
-load("NCVS2013/DS0004/35164-0004-Data.rda")
-dataInc12 <- da34650.0004
-dataInc13 <- da35164.0004
+`bind_rows()` stacks data frames on top of each other, useful when combining two datasets that have the same structure. First we will check that they have the same columns in them.
+```{r}
+identical(names(dataExt22), names(dataExt23))
+```
+Good so far! Now let's try to stack them.
+```{r}
+#| error: true
+dataExt <- dataExt22 |>
+  bind_rows(dataExt23)
+```
+Hmmm... R is complaining about `V2061`. Note that it specifically complains that one data frame has `V2061` stored as a factor (a categorical variable) and the other one has it stored as a double, a decimal number.
+```{r}
+table(dataExt22$V2061, exclude=NULL)
+table(dataExt23$V2061, exclude=NULL)
+```
+What is `V2061` anyway?
+```{r}
+varsExt |> filter(varname=="V2061")
+```
+This reports on who reported on behalf of an unavailable respondent. NOt really important for us so let's drop this one by using `select(-V2061)` on both data frames.
+
+```{r}
+#| error: true
+dataExt <- dataExt22 |>
+  select(-V2061) |>
+  bind_rows(dataExt23 |>
+              select(-V2061))
+```
+Ughh. Now it is complaining about `V4126`.
+```{r}
+varsExt |> filter(varname=="V4126")
+table(dataExt22$V4126, exclude=NULL)
+table(dataExt23$V4126, exclude=NULL)
+```
+In the codebook we can find the full question: "Q.33.3 Which injuries were caused by a weapon OTHER than a gun or knife?". This seems like a potentially interesting question that I probably do not want to discard. The issue is that no 2023 respondent said there was a third weapon that injured them. In 2022 `V4126` was stored as a factor, but in 2023, since they are all missing, R defaulted to numeric (double). We can fix this by just telling R to convert the 2023 data into a factor.
+```{r}
+#| error: true
+dataExt <- dataExt22 |>
+  select(-V2061) |>
+  bind_rows(dataExt23 |>
+              select(-V2061) |>
+              mutate(V4126=as.factor(V4126)))
+```
+Dammit! Now it is complaining about `V4313`. What is the problem with this one? Again we have a problem with 2022 storing as a factor and 2023 storing as a double.
+```{r}
+varsExt |> filter(varname=="V4313")
+table(dataExt22$V4313, exclude=NULL)
+table(dataExt23$V4313, exclude=NULL)
+```
+This column answers "Besides the respondent, which household member(s) owned the (property/money) the offender tried to take?" In 2022, the only responses were missing or #6. In 2023, the responses were missing, 4, or 5. These should be numbers since they are supposed to link respondents in the same household affected by the theft. The approach I'll take is to use `case_match()` telling R to change the 2022 "(006) 6" response to a regular 6.
+```{r}
+#| error: true
+dataExt <- dataExt22 |>
+  select(-V2061) |>
+  mutate(V4313 = as.character(V4313),
+         V4313 = case_match(V4313,
+                            "(006) 6" ~ "6",
+                            .default = NA),
+         V4313 = as.numeric(V4313)) |>
+
+  bind_rows(dataExt23 |>
+              select(-V2061) |>
+              mutate(V4126=as.factor(V4126)))
+```
+Will this ever stop?!?!? Another double in one year and factor in another year, this time affecting `V4357A` asking about handguns.
+```{r}
+varsExt |> filter(varname=="V4357A")
+
+table(dataExt22$V4357A, exclude=NULL)
+table(dataExt23$V4357A, exclude=NULL)
+```
+You might have seen this word "Residue" show up before. For the NCVS, BJS records "Residue" when there is a data entry error resulting in an out-of-range code, an incorrect or unusable answer by the respondent, or the absence of an entry for a question that should have been asked. Sometimes you might also see "Oout of universe/blank". This happens when a value is outside the range of questions to be answered. For example, "Received Medical Care for Injury", only victims who report being injured are asked whether they received medical care. All other victims skip this question.
+
+I will solve this issue by converting the 2022 values to a factor variable. It would be nice to just make it numeric, but the "(005) 5 handguns or more" response makes that awkward.
+```{r}
+dataExt <- dataExt22 |>
+  select(-V2061) |>
+  mutate(V4313 = as.character(V4313),
+         V4313 = case_match(V4313,
+                            "(06) 6" ~ "6",
+                            .default = NA),
+         V4313 = as.numeric(V4313),
+         V4357A = factor(V4357A,
+                         levels=c(1,2,3,997,998),
+                         labels=c("(001) 1","(002) 2",
+                                  "(003) 3",
+                                  "(997) Don't know",
+                                  "(998) Residue"))) |>
+  bind_rows(dataExt23 |>
+              select(-V2061) |>
+              mutate(V4126=as.factor(V4126)))
+```
+Success! Now let's check that all is okay now
+```{r}
+table(dataExt$V4126,  exclude=NULL)
+table(dataExt$V4313,  exclude=NULL)
+table(dataExt$V4357A, exclude=NULL)
 ```
 
-Now that we've loaded and renamed all the files we'll need, we can remove objects from our working environment that we no longer need. We can use `rm()` to accomplish this:
-```{r comment="", results='hold'}
-rm(da34650.0001,da34650.0002,da34650.0003,da34650.0004,
-   da35164.0001,da35164.0002,da35164.0003,da35164.0004)
+Remember that we still have data in here from 2021 and 2023.
+```{r}
+table(dataExt$V4015)
+```
+We are just going to focus on 2022.
+```{r}
+dataExt <- dataExt |> filter(V4015==2022)
 ```
 
-Let's examine in a bit more detail the first three rows of the person file. The dataset contains `r ncol(dataPers12)` columns so we will just show the first 40 columns here. Note IDHH (household ID), IDPER (person ID), and the relationship between the first two rows. Also, note that V3077 (Variable #3077) refers to who responded to the survey.
-```{r comment="", results='hold'}
-dataPers12[1:3, 1:40]
-```
-Let's examine the corresponding household information. This dataset also has a lot of features so we will just show here the first 53  of `r ncol(dataHH12)` columns. 
 
-```{r comment="", results='hold'}
-subset(dataHH12, IDHH=="2501017260961929294229224")[,1:53]
-```
+# BJS modifications and survey weights
 
-And the corresponding incident file (just the first 43 of `r ncol(dataInc12)` columns):
-```{r comment="", results='hold'}
-dataInc12[1:3, 1:43]
-```
 
-Let's look at the month and year of crime incident variables
-```{r comment="", results='hold'}
-with(dataInc12, table(V4014,V4015)) 
-with(dataInc13, table(V4014,V4015))
-```
 
-# Creating a dataframe and weights with NCVS incident data
-Next, we can create a 2012 incident dataframe. Importantly, the 2012 data contain incidents that occurred in 2012 as well as 2011 but were all self-reported to the Census Bureau in 2012. Likewise, the 2013 data contain incidents that occurred in 2012 as well as 2013.  If we wanted to analyze crime that occurred in only 2012, we'd subset the data to include only 2012. We will combine the 2012 and 2013 incident dataframes and then subset this new dataframe so that we exclude 2011 and 2013. As we can see in the Codebook PDF, the variable V4015 refers to the year of occurrence. (Helpful hint: the numbering of the variables correlate to the numbering of the dataframe. The incident-level file is DS4. Many of the variables in DS4 are V4XXX.)
 
-`rbind` binds rows. This is good for when the columns in two datasets are exactly the same.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ```{r comment="", results='hold'}
 dataInc <- rbind(dataInc12,dataInc13)
