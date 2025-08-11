@@ -24,6 +24,7 @@ format:
 number-sections: true
 editor_options: 
   chunk_output_type: console
+bibliography: G:/My Drive/docs/Greg/articles/mybib.bib
 ---
 
 
@@ -200,8 +201,8 @@ rm(da38603.0001,da38603.0002,da38603.0003,da38603.0004,da38603.0005,
 Here we are going to create a data frame containing all the reported incidents that *occurred* in 2022.
 Take a look at the month and year of the reported crime incidents.
 ```{r}
-with(dataExt22, table(V4014,V4015)) 
-with(dataExt22, table(V4014,V4015))
+dataExt22 |> count(V4015, V4014)
+dataExt23 |> count(V4015, V4014)
 ```
 Note that the 2022 NCVS reports on crimes that occurred in 2022 and 2021. Similarly, the NCVS 2023 reports on crimes that occurred in 2023 and 2022. Remember that the NCVS surveys as respondents about any victimizations from the prior 12 months. We will going to stack the 2022 and 2023 incident extract data frames and then filter it to exclude 2021 and 2023.
 
@@ -217,14 +218,14 @@ dataExt <- dataExt22 |>
 ```
 Hmmm... R is complaining about `V2061`. Note that it specifically complains that one data frame has `V2061` stored as a factor (a categorical variable) and the other one has it stored as a double, a decimal number.
 ```{r}
-table(dataExt22$V2061, exclude=NULL)
-table(dataExt23$V2061, exclude=NULL)
+dataExt22 |> count(V2061)
+dataExt23 |> count(V2061)
 ```
 What is `V2061` anyway?
 ```{r}
 varsExt |> filter(varname=="V2061")
 ```
-This reports on who reported on behalf of an unavailable respondent. NOt really important for us so let's drop this one by using `select(-V2061)` on both data frames.
+This reports on who reported on behalf of an unavailable respondent. Not really important for us so let's drop this one by using `select(-V2061)` on both data frames.
 
 ```{r}
 #| error: true
@@ -236,8 +237,8 @@ dataExt <- dataExt22 |>
 Ughh. Now it is complaining about `V4126`.
 ```{r}
 varsExt |> filter(varname=="V4126")
-table(dataExt22$V4126, exclude=NULL)
-table(dataExt23$V4126, exclude=NULL)
+dataExt22 |> count(V4126)
+dataExt23 |> count(V4126)
 ```
 In the codebook we can find the full question: "Q.33.3 Which injuries were caused by a weapon OTHER than a gun or knife?". This seems like a potentially interesting question that I probably do not want to discard. The issue is that no 2023 respondent said there was a third weapon that injured them. In 2022 `V4126` was stored as a factor, but in 2023, since they are all missing, R defaulted to numeric (double). We can fix this by just telling R to convert the 2023 data into a factor.
 ```{r}
@@ -251,8 +252,8 @@ dataExt <- dataExt22 |>
 Dammit! Now it is complaining about `V4313`. What is the problem with this one? Again we have a problem with 2022 storing as a factor and 2023 storing as a double.
 ```{r}
 varsExt |> filter(varname=="V4313")
-table(dataExt22$V4313, exclude=NULL)
-table(dataExt23$V4313, exclude=NULL)
+dataExt22 |> count(V4313)
+dataExt23 |> count(V4313)
 ```
 This column answers "Besides the respondent, which household member(s) owned the (property/money) the offender tried to take?" In 2022, the only responses were missing or #6. In 2023, the responses were missing, 4, or 5. These should be numbers since they are supposed to link respondents in the same household affected by the theft. The approach I'll take is to use `case_match()` telling R to change the 2022 "(006) 6" response to a regular 6.
 ```{r}
@@ -273,8 +274,8 @@ Will this ever stop?!?!? Another double in one year and factor in another year, 
 ```{r}
 varsExt |> filter(varname=="V4357A")
 
-table(dataExt22$V4357A, exclude=NULL)
-table(dataExt23$V4357A, exclude=NULL)
+dataExt22 |> count(V4357A)
+dataExt23 |> count(V4357A)
 ```
 You might have seen this word "Residue" show up before. For the NCVS, BJS records "Residue" when there is a data entry error resulting in an out-of-range code, an incorrect or unusable answer by the respondent, or the absence of an entry for a question that should have been asked. Sometimes you might also see "Oout of universe/blank". This happens when a value is outside the range of questions to be answered. For example, "Received Medical Care for Injury", only victims who report being injured are asked whether they received medical care. All other victims skip this question.
 
@@ -299,9 +300,9 @@ dataExt <- dataExt22 |>
 ```
 Success! Now let's check that all is okay now
 ```{r}
-table(dataExt$V4126,  exclude=NULL)
-table(dataExt$V4313,  exclude=NULL)
-table(dataExt$V4357A, exclude=NULL)
+dataExt |> count(V4126)
+dataExt |> count(V4313)
+dataExt |> count(V4357A)
 ```
 
 Remember that we still have data in here from 2021 and 2023.
@@ -312,202 +313,219 @@ We are just going to focus on 2022.
 ```{r}
 dataExt <- dataExt |> filter(V4015==2022)
 ```
-
+However, BJS reports generally classify by the year of the survey and not by the year of the crime.
 
 # BJS modifications and survey weights
 
+Some respondents report crime victimizations that occurred outside of the United States.
+```{r}
+# V4022 - IN WHAT CITY, TOWN, VILLAGE.
+dataExt |> count(V4022)
+```
+The BJS convention is to exclude these crimes in official reports (see 2023 User Guide, page 21).
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-```{r comment="", results='hold'}
-dataInc <- rbind(dataInc12,dataInc13)
-table(dataInc$V4015) # year crime occured
-dataInc <- subset(dataInc, V4015==2012)
+```{r}
+dataExt <- dataExt |>
+  filter(is.na(V4022) | V4022!="(1) Outside U.S.")
 ```
 
-We will also want to exclude crime that happens outside the United States or crimes for which we do not know the location (NA). According to the Codebook, V4022 refers to location.
+Some crimes happen in a series. For example, a respondent may report on regular domestic abuse that happened numerous times over the last six months. Each incident of domestic abuse is a victimization, but the BJS convention is to include up to 10 occurrences for crimes reported as a series (2023 User Guide, pages 18-19).
 
-```{r comment="", results='hold'}
-dataInc <- subset(dataInc, (V4022!="(1) Outside U.S.") | is.na(V4022))
+Variable `v4016` records the answer to "Altogether, how many times did this type of incident happen during the last 6 months?" and variable `V4019` documents "Can you (respondent) recall enough details of each incident to distinguish them from each other?"
+
+Note that the coding of `V4016` has 997 representing "Don't know" and 998 representing "Residue". These are not counts of victimizations. The logic in the `case_when()` statement below checks for counts between 11 and 996 and sets the value of `V4016` to 10 in that case.
+```{r}
+dataExt <- dataExt |>
+  mutate(V4016 = case_when(
+    V4019=="(2) No (is series)" & V4016>=11 & V4016<=996 ~ 10,
+    V4016 >= 997 ~ NA,
+    .default=V4016))
 ```
 
-A lot of crimes happen in a series. The BJS convention is to include up to 10 occurrences in a series crime.
-```{r comment="", results='hold'}
-i <- with(dataInc, which((V4019=="(2) No (is series)") & (V4016>=11) & (V4016<=996)))
-dataInc$V4016[i] <- 10
-dataInc$V4016[dataInc$V4016>=997] <- NA
+The NCVS sampling design oversamples respondents in places more likely to have crime victimization. This makes the sampling effort more efficient. Otherwise, a purely random sample would contact a lot of people who had no victimization to report. As a result, the raw data from the NCVS do not reflect crime victimization in the United States. We must use the NCVS sampling weights to undo the oversampling of crime victims. 
+
+Constructing the sampling weights is a complex process (see the User Guide "Weights Details" section starting on Page 22). The NCVS sampling weights adjusts for six factors. From the User Guide:
+
+1.  *Base weight*: The inverse of the national sampling rate for the stratum of that unit (person or household).
+
+2.  *Weighting control*: Adjusts for any sub-sampling due to unexpected events in the field, such as new construction, area segments larger than anticipated, and other deviations from the overall stratum sampling rate.
+
+3.  *Household non-interview adjustment*: Adjusts for nonresponse at the household-level by increasing the weights of interviewed households most similar to households not interviewed in terms of race, MSA status of residence, and urban/suburban/rural status of residence. This inflates the weight value assigned to interviewed households so that they represent themselves and non-interviewed households. The non-interviewed cases are assigned a weight of zero, thereby excluding them from population estimates.
+
+4.  *Within-household non-interveiew adjustment*: Adjusts for non-response at the person-level by increasing the weight of interviewed persons most similar to persons not interviewed in terms of region, age, race, sex, and household composition. The adjustment inflates the weight value assigned to completed interviews, so that they represent themselves and sampled individuals who were not interviewed. The non-interviewed cases are assigned a weight of zero. 
+
+5.  *First stage ratio estimates factor*: Adjusts for differences between characteristics of the sample non-self-representing (NSR) primary sampling units (PSUs) and independent measures of the population NSR PSUs. (For self-representing PSUs this factor is set to 1). This factor adjusts for PSU differences on region, MSA status, urban/suburban/rural status, and racial composition.
+
+6.  *Second stage ratio estimate factor*: A post-stratification factor defined for each person to adjust for the difference between weighted counts of persons (using the above five weight components) and independent estimates of the number of persons, within certain age by race by sex categories. These independent estimates are based on the Census population controls adjusted for the undercount.
+
+Fortunately for us, the variable `SERIES_WEIGHT` captures all these adjustments and contains the weight that BJS uses for its official reports. It includes the adjustment for capping series crimes at 10.
+
+::: callout-tip
+## Always use the sampling weights
+
+Importantly, every calculation you do with the NCVS must involve the weights. This includes weighted means, weighted percentages, and weighted counts. Even plots and figures should use the weights.
+:::
+
+Where you would normally compute a sample mean as $\frac{\sum x_i}{n}$, the weighted mean is
+$$
+\frac{\sum w_ix_i}{\sum w_i}
+$$
+For a weighted percentage, total all the weights for respondents with the particular feature divided by the total weight. For some plots there is not an obvious way to accommodate the sampling weights. In those cases we can sample with replacement with probabilities proportional to the sampling weights and plot the sampled points.
+
+# Tabulating victimizations
+
+First, we need to be clear about what we are counting. BJS will report on *victimizations* and *incidents*. Victimizations count the number of times a US person was victimized. Incidents count the number of times a crime incident occurred and those incidents could involve multiple victims. BJS reports largely focus on criminal victimizations.
+
+We can start but just asking the NCVS data how many criminal victimizations there were in 2022. We compute that as the sum of all the weights.
+```{r}
+sum(dataExt$SERIES_WEIGHT)
 ```
+This means that the NCVS estimates that there were `r prettyNum(sum(dataExt$SERIES_WEIGHT), big.mark = ",")` criminal victimizations in the United States in 2022.
 
-Also, BJS analyses of NCVS data generally use weights because NCVS is survey data. We want to weight the survey data so that they are representative of the wider U.S. population! There are three NCVS weight categories: household, personal, and incident. 
-
-For more information about NCVS weights, consult the section on Weighting Information found at this ICPSR resource guide to the NCVS: (https://www.icpsr.umich.edu/icpsrweb/NACJD/NCVS/accuracy.jsp).
-
-To that extent, let's update the weight for series crimes and create a "date year" weight.
-```{r comment="", results='hold'}
-i <- which(dataInc$V4019=="(2) No (is series)")
-dataInc$WGTVICDY <- dataInc$WGTVICCY
-dataInc$WGTVICDY[i] <- with(dataInc, WGTVICDY[i] * V4016[i])
+Let's take a closer look at what kinds of victimization occurred. Note that this code breaks the dataset into groups based on the reported crime type, `V4529`, and computes the total weight associated with each of those crime categories.
+```{r}
+dataExt |>
+  group_by(V4529) |> # crime type
+  summarize(total = sum(SERIES_WEIGHT)) |>
+  print(n=Inf)
 ```
-We can also tabulate total weight by crime type to estimate the count of a crime. As the Codebook instructs, `V4529` is the variable for crime type.  
-```{r comment="", results='hold'}
-aggregate(WGTVICDY~V4529, data=dataInc, sum)
+The first 20 crime types listed are the violent crimes and the remainder are property crimes. Let's extract the two-digit code between the parentheses so that we can classify crime types as violent or property. First, I will run a little test code to make sure my regular expression and the crime type classification works correctly.
+```{r}
+dataExt |>
+   mutate(crimeCode = gsub(".([0-9][0-9]).*", "\\1", V4529),
+          crimeType = ifelse(crimeCode <= 20, "violent", "property")) |>
+   select(V4529, crimeCode, crimeType) |>
+   head()
 ```
-As you can see, there are some irregularities with the coding of crime types.  Sometimes a type is coded as "(01)", but other times it is coded as "(1)". Let's standardize this coding using regular expressions.
-```{r comment="", results='hold'}
-dataInc$V4529 <- gsub("\\(([1-9])\\)", "(0\\1)", dataInc$V4529)
-aggregate(WGTVICDY~V4529, data=dataInc, sum)
-```
-
-Now, we can use the NCVS incident data to find out how many car thefts occurred in 2012. 
-```{r comment="", results='hold'}
-with(subset(dataInc, V4529=="(40) Motor veh theft"), 
-     sum(WGTVICDY))
-```
-
-Also, note that the [definition of rape changed](http://www.fbi.gov/about-us/cjis/cjis-link/march-2012/ucr-program-changes-definition-of-rape) in 2013. 
-```{r comment="", results='hold'}
-with(subset(dataInc,V4529=="(01) Completed rape"), 
-     sum(WGTVICDY))
-```     
-
-# Merging in data from the household and person data
-So far, we've created a dataframe and worked with weights for the Incident data.  However, the Household and Person Data have data that we might need. Let's first create a 2012 data year household data frame, much like we did with the incident data. Note that `YEARQ` refers to the year and quarter of the interview. The variable `V2130` is the month allocated from panel/rotation number. The panel/rotation number refer to [the process](https://www.bjs.gov/content/pub/pdf/ncvs_methodology.pdf) through which interviews are conducted.
-
-```{r comment="", results='hold'}
-dataHH <- rbind(dataHH12,dataHH13)
-dataHH <- subset(dataHH, YEARQ>=2012.1 & YEARQ<=2013.2)
-```
-Let's make the "month allocated" uniform, and using regular expressions, delete "0s" following parentheses.
-```{r comment="", results='hold'}
-table(dataHH$V2130)
-dataHH$V2130 <- gsub("\\(0", "\\(", dataHH$V2130)
-table(dataHH$V2130)
-```
-When you view the table again, you can see that the original 21 months listed were condensed into 12.
-
-Next, create a 2012 data year person data frame. We need to first fix incompatible factor/numeric in 2012/2013.  The factor levels in 2012 look like "(1) Yes", but in 2013 are just "1."
-
-```{r comment="", results='hold'}
-i <- sapply(dataPers12,levels)                        #gives factor levels for each variable 
-i <- i[!sapply(i,is.null)]                             #gives factor levels for each factor variable
-                                                       #for non-factor variables, i returns a null result
-i <- sapply(i, function(x) all(substring(x,1,1)=="(")) #store in i those variables where the first                                                               #character of factor levels is "(""
-var.fix <- names(i)[i]                                 #this gives us the name of variables 
-                                                       #where factor levels begin with "(". 
-
-for(xj in var.fix) #create a for-loop to fix these variable names. for each value "xj" in var.fix
-{
-   dataPers12[,xj] <- gsub("\\(([0-9]+)\\).*","\\1",dataPers12[,xj]) #remove the words that follow the                                                                         #numbers in parentheses
-   dataPers12[,xj] <- as.numeric(dataPers12[,xj]) #convert the numbers in parentheses to just numeric                                                       #variables, which present as numbers w/o parentheses
-}
-```
-
-Then, stack the 2012 and 2013 data frames using `rbind()`.
-```{r comment="", results='hold'}
-dataPers <- rbind(dataPers12, dataPers13)
-dataPers <- subset(dataPers, YEARQ>=2012.1 & YEARQ<=2013.2)
-```
-
-Now that we've created a person dataframe and an incident dataframe, we can merge them together. We will use `merge()` to pull age, marital status, and sex into the incident data. The `merge()` function has several parameters that communicate to R which features should be used to match and which ones should be merged. Here we tell `merge()` to use use a pair of features from the incident data (`IDPER` and `YEARQ`) and look up a row in `dataPers` with the same values of `IDPER` and `YEARQ`. We've selected only the five columns `IDPER`, `YEARQ`, `V3014`, `V3015`, and `V3018` from `dataPers`. The first two `merge()` uses to identify matching rows and the last three will be attached as new columns to `dataInc`.
-
-```{r comment=""}
-a <- merge(dataInc,                     # incident data
-           dataPers[,c("IDPER","YEARQ", # IDPER & YEARQ unique IDs of person
-                       "V3014",         # age
-                       "V3015",         # marital status
-                       "V3018")],       # sex
-           by=c("IDPER","YEARQ"),       # variables used to merge
-           all.x=TRUE)                  # keep all incidents, even if not matched
-
-# a should have the same number of rows as dataInc, but 3 additional new columns
-dim(dataInc)
-dim(a)
-# replace dataInc with a, now containing age, marital, and sex
-dataInc <- a
-
-# check merge for first incident
-dataInc[1,c("IDPER","YEARQ","V3014","V3015","V3018")]
-# check dataPers for this person's age, marital, and sex
-subset(dataPers, IDPER=="250105121075958229372843501" & YEARQ==2012.3,
-       select = c("IDPER","YEARQ","V3014","V3015","V3018"))
-```
-
-We can see that the first row of `dataInc` now has three additional columns, and that they have the correct values merged from the `dataPers` data.
-
-Let's give these new columns better names.
-```{r comment="", results='hold'}
-names(dataInc)[names(dataInc)=="V3014"] <- "age"
-names(dataInc)[names(dataInc)=="V3015"] <- "marital"
-names(dataInc)[names(dataInc)=="V3018"] <- "sex"
-```
-Let's also create a new variable that breaks age into age categories.
-```{r comment="", results='hold'}
-dataInc$ageGroup <- cut(dataInc$age, breaks=c(0,16,21,35,45,60,110))
-```
-
-Note that "8" is a missing value indicator for marital status. Always refer to the Codebook if you are not sure what a variable or a categorical variable value means.
-```{r comment="", results='hold'}
-dataInc$marital[dataInc$marital==8] <- NA
-```
-Factor variables in R put meaningful labels on categorical variables. Instead of working with the numbers 1-5 for marital status, let's assign the number values their actual corresponding names.
-```{r comment="", results='hold'}
-dataInc$marital <- factor(dataInc$marital, levels=1:5,
-                        labels=c("married","widowed","divorced",
-                                 "separated","never married"))
-dataInc$sex <- factor(dataInc$sex, levels=1:2, 
-                      labels=c("male","female"))
-```
-Let's get estimated counts by age group and sex.
-```{r comment="", results='hold'}
-aggregate(WGTVICDY~ageGroup+sex, data=dataInc, FUN=sum)
-```
-We can also find out common crime type by sex. As before, `aggregate()` will total up the weights, but as you see in the ageGroup/sex example above, `aggregate()` produces the results in a long form. Sometimes this is useful, but sometimes we want to have our results side-by-side. We will use `reshape()` to convert the "long format" results from `aggregate()` to a "wide format".
-```{r comment="", results='hold'}
-a <- aggregate(WGTVICDY~V4529+sex, data=dataInc, FUN=sum)
-a <- reshape(a, timevar="sex", idvar="V4529", direction="wide")
-a[is.na(a)] <- 0
-names(a) <- c("crimeType","male","female")
+That all looks correct, so now I can move on to the tabulation.
+```{r}
+a <- dataExt |>
+   mutate(crimeCode = gsub(".([0-9][0-9]).*", "\\1", V4529),
+          crimeType = ifelse(crimeCode <= 20, "violent", "property")) |>
+   group_by(crimeType) |>
+   summarize(estTotal = sum(SERIES_WEIGHT))
 a
 ```
+In 2022, there was an estimated `r prettyNum(a$estTotal[2], big.mark=",")` violent crimes and `r prettyNum(a$estTotal[1], big.mark=",")` property crimes.
 
-We can then convert this result to column percentages. To obtain a column percentage, we divide counts for an individual cell by the total number of counts for the column. So, the sum of all the values in the male column should equal 100:
-```{r comment=""}
-temp <- a
-temp$male   <- with(temp, 100*male/  sum(male))
-temp$female <- with(temp, 100*female/sum(female))
-colSums(temp[,-1]) # check that the columns sum to 100
-temp$ratio <- temp$female/temp$male
-temp[order(-temp$ratio),]
+We can summarize other categories, like car thefts, attempted and completed.
+```{r}
+dataExt |>
+  filter(V4529 %in% c("(40) Motor veh theft",
+                      "(41) At mtr veh theft")) |>
+  summarize(sum(SERIES_WEIGHT))
 ```
 
-Or we can compute row percentages to determine what percentage of each crime is male and female.
-```{r comment="", results='hold'}
-temp <- a
-row.total <- with(temp, male+female)
-temp$male   <- with(temp, 100*male/  row.total)
-temp$female <- with(temp, 100*female/row.total)
-rowSums(temp[,-1]) # check that the rows sum to 100
-temp$ratio <- temp$female/temp$male
-temp[order(-temp$ratio),]
+Measuring sexual assault has been complicated by numerous, sometimes major, changes (improvements, more precisely) in the definitions and data collection methods (e.g. question wording). The Uniform Crime Report made a major change to the the [definition of rape changed](http://www.fbi.gov/about-us/cjis/cjis-link/march-2012/ucr-program-changes-definition-of-rape) in 2013. The NCVS's most recent change was in 2024. See @fisher2024evolution for an extended discussion and timeline of the changes.
+
+Here is the NCVS estimate of the number of sexual assaults (attempted and completed) for 2022.
+```{r}
+dataExt |>
+  filter(V4529 %in% c("(01) Completed rape",
+                      "(02) Attempted rape")) |>
+  summarize(sum(SERIES_WEIGHT))
 ```
 
+NCVS official reports combine all rape and sexual assaults. There are a lot of crime categories that describe sexual assaults.
+```{r}
+unique(dataExt$V4529)
+```
+Let's count any that have the word "rape" and any that have the word "sex" (sometimes capitalized). Here are the ones that BJS counts in this category.
+```{r}
+dataExt |>
+  filter(grepl("rape|[Ss]ex", V4529)) |>
+  distinct(V4529)
+```
+The estimated number of all sexual assaults in 2022 in the United States is
+```{r}
+dataExt |>
+  filter(grepl("rape|[Ss]ex", V4529)) |>
+  summarize(sum(SERIES_WEIGHT))
+```
+Since 2019 we have had no national crime estimates based on police reports.  
 
+# Calculating victimization by demographics
+
+In the remainder of these notes, we will examine relationships between victimization and the respondents' features, like age (`V3014`), marital status (`V3015`), and sex (`V3018`). To make the code more clear, let's give these variables more intelligible names.
+```{r}
+dataExt <- dataExt |>
+  rename(age=V3014, marital=V3015, sex=V3018)
+```
+Perhaps we are interested in which crimes disproportionately affect men and which disproportionately affect women. Start by tabulating crime type by sex.
+```{r}
+dataExt |>
+  group_by(V4529, sex) |>
+  summarize(count=sum(SERIES_WEIGHT)) |>
+   print(n=Inf)
+```
+R produces a long narrow table. This format is sometimes useful, particularly when merging data frames. However, in this case having a table with counts for men and women side-by-side would be easier to absorb. `pivot_wider()` will swing the sex column into two side-by-side columns. 
+```{r}
+dataExt |>
+  group_by(V4529, sex) |>
+  summarize(count=sum(SERIES_WEIGHT)) |>
+  pivot_wider(names_from=sex,
+              values_from=count,
+              values_fill = 0) |> # fill in NAs with 0
+  print(n=Inf)
+```
+Lastly, let's normalize the columns so that they add up to 100\%, giving us the distribution of crime types within each sex.
+```{r}
+dataExt |>
+  group_by(V4529, sex) |>
+  summarize(count=sum(SERIES_WEIGHT)) |>
+  ungroup() |>  # without this, percentages are computed within crime type
+  pivot_wider(names_from  = sex,
+              values_from = count,
+              values_fill = 0) |>
+  rename(male=`(1) Male`, female=`(2) Female`) |>
+  mutate(male  =100*male/sum(male),
+         female=100*female/sum(female),
+         ratio=female/male) |>
+  arrange(desc(ratio)) |>
+  print(n=Inf)
+```
+Sexual assaults disproportionately affect women, while pocket picking and attempted robbery involving assaults disproportionately affect men.
+
+The sequence `group_by()`, `summarize()`, `ungroup()` is so common that there is an alternative way to do the same calculation more compactly with `.by` in `summarize()`.
+```{r}
+# can reduce the group_by, summarize, ungroup with .by
+dataExt |>
+  summarize(count=sum(SERIES_WEIGHT),
+            .by = c(V4529, sex)) |> # eliminates group/ungroup
+  pivot_wider(names_from  = sex,
+              values_from = count,
+              values_fill = 0) |>
+  rename(male=`(1) Male`, female=`(2) Female`) |>
+  mutate(male  =100*male/sum(male),
+         female=100*female/sum(female),
+         ratio=female/male) |>
+  arrange(desc(ratio)) |>
+  print(n=Inf)
+```
+
+We can do a similar calculation by age. First, let's discretize age into some fixed age bins. Then, we can repeat the same calculation to learn about victimization differences by age. I have sorted the results by the 18-24 age category, but you can change it to your age category if you wish.
+
+```{r}
+# can reduce the group_by, summarize, ungroup with .by
+dataExt |>
+   mutate(ageGroup = 
+             cut(age, 
+                 breaks = c(0, 17, 24, 34, 49, 64, Inf),
+                 labels = c("12-17","18-24","25-34",
+                            "35-49","50-64","65+"))) |>
+   summarize(count=sum(SERIES_WEIGHT),
+             .by = c(V4529, ageGroup)) |>
+   pivot_wider(names_from  = ageGroup,
+               values_from = count,
+               values_fill = 0,
+               names_sort = TRUE) |> # keep age groups ordered
+   # apply the same function to every column, except V4529
+   mutate(across(-V4529, function(x) 100*x/sum(x))) |>
+   arrange(desc(`18-24`)) |> # you can change to your age group
+   print(n=Inf)
+```
+
+Since we have made many changes to the dataset, I find it useful to save the final version. This way I can simply `load()` the data again later and know that it already has all the edits and changes that I have made.
+```{r}
+save(dataExt, file="NCVS2022.RData", compress=TRUE)
+```
