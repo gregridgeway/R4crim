@@ -1,0 +1,2137 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Greg Ridgeway">
+<meta name="author" content="Ruth Moyer">
+<meta name="author" content="Li Sian Goh">
+<meta name="dcterms.date" content="2025-08-11">
+
+<title>Working with National Crime Victimization Survey Data</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="04_Working_with_NCVS_data_files/libs/clipboard/clipboard.min.js"></script>
+<script src="04_Working_with_NCVS_data_files/libs/quarto-html/quarto.js"></script>
+<script src="04_Working_with_NCVS_data_files/libs/quarto-html/popper.min.js"></script>
+<script src="04_Working_with_NCVS_data_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="04_Working_with_NCVS_data_files/libs/quarto-html/anchor.min.js"></script>
+<link href="04_Working_with_NCVS_data_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="04_Working_with_NCVS_data_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="04_Working_with_NCVS_data_files/libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="04_Working_with_NCVS_data_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="04_Working_with_NCVS_data_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="04_Working_with_NCVS_data_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="04_Working_with_NCVS_data_files/libs/bootstrap/bootstrap-dark.min.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#acquiring-the-ncvs-data" id="toc-acquiring-the-ncvs-data" class="nav-link" data-scroll-target="#acquiring-the-ncvs-data"><span class="header-section-number">2</span> Acquiring the NCVS data</a></li>
+  <li><a href="#combining-2022-and-2023-data" id="toc-combining-2022-and-2023-data" class="nav-link" data-scroll-target="#combining-2022-and-2023-data"><span class="header-section-number">3</span> Combining 2022 and 2023 data</a></li>
+  <li><a href="#bjs-modifications-and-survey-weights" id="toc-bjs-modifications-and-survey-weights" class="nav-link" data-scroll-target="#bjs-modifications-and-survey-weights"><span class="header-section-number">4</span> BJS modifications and survey weights</a></li>
+  <li><a href="#tabulating-victimizations" id="toc-tabulating-victimizations" class="nav-link" data-scroll-target="#tabulating-victimizations"><span class="header-section-number">5</span> Tabulating victimizations</a></li>
+  <li><a href="#calculating-victimization-by-demographics" id="toc-calculating-victimization-by-demographics" class="nav-link" data-scroll-target="#calculating-victimization-by-demographics"><span class="header-section-number">6</span> Calculating victimization by demographics</a></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="04_Working_with_NCVS_data.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Working with National Crime Victimization Survey Data</h1>
+</div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Authors</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author">Greg Ridgeway <a href="mailto:gridge@upenn.edu" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> </p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            University of Pennsylvania
+          </p>
+      </div>
+    <div class="quarto-title-meta-contents">
+    <p class="author">Ruth Moyer <a href="mailto:moyruth@upenn.edu" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> </p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            University of Pennsylvania
+          </p>
+      </div>
+    <div class="quarto-title-meta-contents">
+    <p class="author">Li Sian Goh <a href="mailto:gohl@upenn.edu" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> </p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            University of Pennsylvania
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">August 11, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- In terminal -->
+<!-- quarto render 04_Working_with_NCVS_data.qmd -->
+<!-- git commit 04-* -m "commit message" -->
+<!-- git status -->
+<!-- git push -->
+<!-- A function for automating the numbering and wording of the exercise questions -->
+<section id="introduction" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
+<p>Through our work with NIBRS, we have already discussed reported crime. Nonetheless, not all crimes are reported to the police. Each year, under the guidance of the Bureau of Justice Statistics, the U.S. Census Bureau conducts the National Crime Victimization Survey (NCVS), a source of self-reported victimization data. The Census Bureau interviews a sample of people 12 years old or older about the number and characteristics of crime victimizations they experienced during the prior 6 months.</p>
+<p>In 2023 226,480 people in 142,028 households participated. The survey had a 63% response rate for households and and 82% response rate for individuals. Households remain in the sample for <span class="math inline">\(3\frac{1}{2}\)</span> years completing interviews every 6 months, in person or by phone, for a total of seven interviews. The survey cost $62M annually and required roughly 125,000 hours of uncompensated respondent time.</p>
+<p>The NCVS contains information about nonfatal personal crimes, such as rape and robbery, as well as property crimes, such as burglary. Additional information about the NCVS can be found at the <a href="https://bjs.ojp.gov/data-collection/ncvs">BJS website</a>. To give a sense of the type of data that the NCVS contains, refer to the <a href="https://bjs.ojp.gov/library/publications/criminal-victimization-2023">Official 2023 BJS Crime Victimization report</a>.</p>
+</section>
+<section id="acquiring-the-ncvs-data" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Acquiring the NCVS data</h1>
+<p>The University of Michigan consolidates the NCVS data into a format that is easily accessible in R. We will be using data collected in 2022 and 2023 to assemble a dataset that covers victimizations occurring in 2022. Since respondents are asked about crime in the previous six months, respondents completing surveys in May 2023 will still be reporting about crimes in December 2022.</p>
+<p>First, we will download the NCVS 2022 data, <a href="https://www.icpsr.umich.edu/web/NACJD/studies/38603">ICPSR 38603</a>. Click on Download, select R, save the resulting file (called something like ICPSR_38603-V1.zip), extract the contents of the zipped file to a convenient folder, and give it a more understandable folder name, like NCVS2022. Repeat the process for downloading the NCVS 2023 data, <a href="https://www.icpsr.umich.edu/web/NACJD/studies/38962">ICPSR 38962</a>. New NCVS data tends to appear in mid-September. Typically we need to wait about nine months to get the results from the previous year.</p>
+<p>After unzipping the NCVS files, you will find subfolders called DS0001, DS0002, DS0003, DS0004, and DS0005.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">list.files</span>(<span class="st">"NCVS2022/"</span>,<span class="at">recursive =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "38603-descriptioncitation.html"      
+ [2] "38603-manifest.txt"                  
+ [3] "38603-related_literature.txt"        
+ [4] "38603-User_guide.pdf"                
+ [5] "DS0001/38603-0001-Codebook-ICPSR.pdf"
+ [6] "DS0001/38603-0001-Data.rda"          
+ [7] "DS0002/38603-0002-Codebook-ICPSR.pdf"
+ [8] "DS0002/38603-0002-Data.rda"          
+ [9] "DS0003/38603-0003-Codebook-ICPSR.pdf"
+[10] "DS0003/38603-0003-Data.rda"          
+[11] "DS0004/38603-0004-Codebook-ICPSR.pdf"
+[12] "DS0004/38603-0004-Data.rda"          
+[13] "DS0005/38603-0005-Codebook-ICPSR.pdf"
+[14] "DS0005/38603-0005-Data.rda"          
+[15] "factor_to_numeric_icpsr.R"           
+[16] "series-95-related_literature.txt"    
+[17] "TermsOfUse.html"                     </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">list.files</span>(<span class="st">"NCVS2023/"</span>,<span class="at">recursive =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "38962-descriptioncitation.html"       
+ [2] "38962-manifest.txt"                   
+ [3] "38962-related_literature.txt"         
+ [4] "38962-User_guide.pdf"                 
+ [5] "DS0001/38962-0001-Codebook-ICPSR.epub"
+ [6] "DS0001/38962-0001-Codebook-ICPSR.pdf" 
+ [7] "DS0001/38962-0001-Data.rda"           
+ [8] "DS0002/38962-0002-Codebook-ICPSR.epub"
+ [9] "DS0002/38962-0002-Codebook-ICPSR.pdf" 
+[10] "DS0002/38962-0002-Data.rda"           
+[11] "DS0003/38962-0003-Codebook-ICPSR.epub"
+[12] "DS0003/38962-0003-Codebook-ICPSR.pdf" 
+[13] "DS0003/38962-0003-Data.rda"           
+[14] "DS0004/38962-0004-Codebook-ICPSR.epub"
+[15] "DS0004/38962-0004-Codebook-ICPSR.pdf" 
+[16] "DS0004/38962-0004-Data.rda"           
+[17] "DS0005/38962-0005-Codebook-ICPSR.epub"
+[18] "DS0005/38962-0005-Codebook-ICPSR.pdf" 
+[19] "DS0005/38962-0005-Data.rda"           
+[20] "factor_to_numeric_icpsr.R"            
+[21] "series-95-related_literature.txt"     
+[22] "TermsOfUse.html"                      </code></pre>
+</div>
+</div>
+<p>Inside each of these subfolders you see an R data file with the extension .rda. We will spend most of our attention on the contents of the DS0005 folder, which contains the “incident-level extract file.” In each folder you will also find codebooks in pdf (and epub) format. The codebook is as important as it is tedious for understanding what is stored in the NCVS data. You should become familiar with the codebooks as soon as you can.</p>
+<p>Let’s start loading these datasets. We will skip the DS0001 subfolder, which contains basic survey information on the targeted addressed. The DS0002 folder contains data on the households included in the survey.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"NCVS2022/DS0002/38603-0002-Data.rda"</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"NCVS2023/DS0002/38962-0002-Data.rda"</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># and let's give them nicer names</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>dataHH22 <span class="ot">&lt;-</span> da38603<span class="fl">.0002</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>dataHH23 <span class="ot">&lt;-</span> da38962<span class="fl">.0002</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Take a peek at the first couple of rows</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>dataHH22 <span class="sc">|&gt;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>() <span class="sc">|&gt;</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(V2001, YEARQ, IDHH, V2003, V2014, V2016, V2018, V2020,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>         V2030, V2031, V2032, V2034, V2036, V2038, V2040A, V2127B, V2129) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                 V2001  YEARQ                      IDHH                   V2003
+1 (2) Household record 2022.1 1809000258358302568236125 (221) 2022, 1st quarter
+2 (2) Household record 2022.1 1809000258380931568236135 (221) 2022, 1st quarter
+3 (2) Household record 2022.1 1809000258543680568236125 (221) 2022, 1st quarter
+4 (2) Household record 2022.1 1809000284326166568236135 (221) 2022, 1st quarter
+5 (2) Household record 2022.1 1809000284384631568236124 (221) 2022, 1st quarter
+6 (2) Household record 2022.1 1809000284459399568236114 (221) 2022, 1st quarter
+                 V2014     V2016                V2018               V2020
+1                 &lt;NA&gt; (1) Urban                 &lt;NA&gt; (01) House/apt/flat
+2 (1) Owned/being bght (1) Urban                 &lt;NA&gt; (01) House/apt/flat
+3 (1) Owned/being bght (1) Urban                 &lt;NA&gt; (01) House/apt/flat
+4 (1) Owned/being bght (1) Urban                 &lt;NA&gt; (01) House/apt/flat
+5 (1) Owned/being bght (2) Rural (2) Less than $1,000 (01) House/apt/flat
+6 (1) Owned/being bght (2) Rural (2) Less than $1,000 (01) House/apt/flat
+                   V2030           V2031                 V2032        V2034
+1 (218) Type A - Refused (01) White only                  &lt;NA&gt;         &lt;NA&gt;
+2 (300) Interviewed hhld            &lt;NA&gt; (11) Reference person  (2) Widowed
+3 (300) Interviewed hhld            &lt;NA&gt; (11) Reference person (3) Divorced
+4 (300) Interviewed hhld            &lt;NA&gt; (11) Reference person (3) Divorced
+5 (300) Interviewed hhld            &lt;NA&gt; (11) Reference person  (1) Married
+6 (300) Interviewed hhld            &lt;NA&gt; (11) Reference person  (2) Widowed
+       V2036                 V2038          V2040A    V2127B
+1       &lt;NA&gt;                  &lt;NA&gt;            &lt;NA&gt; (3) South
+2   (1) Male  (42) Bachelor degree (01) White only (3) South
+3   (1) Male  (42) Bachelor degree (01) White only (3) South
+4 (2) Female    (43) Master degree (01) White only (3) South
+5 (2) Female (28) High school grad (01) White only (3) South
+6 (2) Female (28) High school grad (01) White only (3) South
+                V2129
+1 (2) (S)MSA not city
+2      (3) Not (S)MSA
+3  (1) City of (S)MSA
+4 (2) (S)MSA not city
+5      (3) Not (S)MSA
+6 (2) (S)MSA not city</code></pre>
+</div>
+</div>
+<p>The 2022 household dataset has 448 columns. Instead of printing out all of them, here I just picked out 17 columns here. First off you can see that the column names are generally not helpful. That is where the codebook comes in handy. The codebook tells you what each variable means.</p>
+<p>Somewhat hidden is a table linking column names to English explanations of what is in those columns. You can get to it by extracting the data frame’s “attributes” with <code>attr()</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>varsHH <span class="ot">&lt;-</span> dataHH22 <span class="sc">|&gt;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>   <span class="fu">attr</span>(<span class="st">"variable.labels"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>   <span class="fu">data.frame</span>() <span class="sc">|&gt;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>   tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>() <span class="sc">|&gt;</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>   <span class="fu">setNames</span>(<span class="fu">c</span>(<span class="st">"varname"</span>,<span class="st">"details"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>   <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"^HHREP"</span>, varname)) <span class="co"># exclude rows that start with HHREP</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now <code>varsHH</code> has two columns, the first with the column names and the second with the details. Let’s pull up the 17 columns listed before.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>varsHH <span class="sc">|&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>   <span class="fu">filter</span>(varname <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"V2001"</span>,<span class="st">"YEARQ"</span>,<span class="st">"IDHH"</span>,<span class="st">"V2003"</span>,<span class="st">"V2014"</span>,<span class="st">"V2016"</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"V2018"</span>,<span class="st">"V2020"</span>,<span class="st">"V2030"</span>,<span class="st">"V2031"</span>,<span class="st">"V2032"</span>,<span class="st">"V2034"</span>,<span class="st">"V2036"</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"V2038"</span>,<span class="st">"V2040A"</span>,<span class="st">"V2127B"</span>,<span class="st">"V2129"</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   varname                                                 details
+1    V2001                                   HOUSEHOLD RECORD TYPE
+2    YEARQ                  YEAR AND QUARTER OF INTERVIEW (YYYY.Q)
+3     IDHH                                  NCVS ID FOR HOUSEHOLDS
+4    V2003                  YEAR AND QUARTER IDENTIFICATION NUMBER
+5    V2014                                       TENURE (ORIGINAL)
+6    V2016                                     LAND USE (ORIGINAL)
+7    V2018                                   FARM SALES (ORIGINAL)
+8    V2020                      TYPE OF LIVING QUARTERS (ORIGINAL)
+9    V2030                                 REASON FOR NONINTERVIEW
+10   V2031                   RACE OF HH HEAD (TYPE A NONINTERVIEW)
+11   V2032                 PRINCIPAL PERSON RELATION TO REF PERSON
+12   V2034                  PRINCIPAL PERSON MARITAL STATUS (CURR)
+13   V2036                        PRINCIPAL PERSON SEX (ALLOCATED)
+14   V2038                 PRINCIPAL PERSON EDUCATIONAL ATTAINMENT
+15  V2040A            PRINCIPAL PERSON RACE RECODE (START 2003 Q1)
+16  V2127B REGION - 1990, 2000, 2010 SAMPLE DESIGN (START 1995 Q3)
+17   V2129                                              MSA STATUS</code></pre>
+</div>
+</div>
+<p>These are much more intelligible descriptions. “(S)MSA” stands for the Standard Metropolitan Statistical Areas, an outdated term. Today we call them simply MSAs. Minimum population has to be 50,000, but there is movement toward redefining as 100,000.</p>
+<p>Note the first household record has <code>IDHH</code> equal to 1809000258543680568236125. We can load the respondent “person file” to see who in this household responded.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># loading person-level data</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"NCVS2022/DS0003/38603-0003-Data.rda"</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"NCVS2023/DS0003/38962-0003-Data.rda"</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>dataPers22 <span class="ot">&lt;-</span> da38603<span class="fl">.0003</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>dataPers23 <span class="ot">&lt;-</span> da38962<span class="fl">.0003</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co"># lookup respondents from this household</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>dataPers22 <span class="sc">|&gt;</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(IDHH<span class="sc">==</span><span class="st">"1809000258543680568236125"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">!</span><span class="fu">starts_with</span>(<span class="st">"PERREP"</span>))  <span class="co"># drop all the PERREP weight columns</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>              V3001  YEARQ                      IDHH
+1 (3) Person record 2022.1 1809000258543680568236125
+2 (3) Person record 2022.3 1809000258543680568236125
+                        IDPER V3002                   V3003 V3004
+1 180900025854368056823612501     3 (221) 2022, 1st quarter    18
+2 180900025854368056823612501     3 (223) 2022, 3rd quarter    18
+                 V3005 V3006 V3008 V3009 V3010              V3011
+1 09000258543680568236     1    25     1     1  (1) Personal/self
+2 09000258543680568236     1    25     1     1 (2) Telephone/self
+                  V3012 V3013 V3014        V3015        V3016    V3017    V3018
+1 (11) Reference person    62    62 (3) Divorced (3) Divorced (1) Male (1) Male
+2 (11) Reference person    63    63 (3) Divorced (3) Divorced (1) Male (1) Male
+   V3019                V3020          V3023A  V3024 V3024A         V3025 V3026
+1 (2) No (42) Bachelor degree (01) White only (2) No (2) No (02) February    12
+2 (2) No (42) Bachelor degree (01) White only (2) No (2) No   (08) August    31
+  V3027 V3031 V3032 V3033  V3034 V3035  V3040 V3041  V3042 V3043  V3044 V3045
+1  2022    NA    23    NA (2) No    NA (2) No    NA (2) No    NA (2) No    NA
+2  2022    NA    24    NA (2) No    NA (2) No    NA (2) No    NA (2) No    NA
+   V3046 V3047  V3048 V3049 V3050 V3051 V3052 V3053  V3054 V3055 V3056 V3057
+1 (2) No    NA (2) No  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;    NA (2) No  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
+2 (2) No    NA (2) No  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;    NA (2) No  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
+  V3058 V3059                V3060   V3061   V3062  V3063  V3064  V3065  V3066
+1  &lt;NA&gt;    NA (1) At least 1 entry  (0) No (1) Yes (0) No (0) No (0) No (0) No
+2  &lt;NA&gt;    NA (1) At least 1 entry (1) Yes  (0) No (0) No (0) No (0) No (0) No
+   V3067  V3068               V3069 V3070 V3_V4526H3A V3_V4526H3B V3_V4526H5
+1 (0) No (0) No (0) No out of range  &lt;NA&gt;      (2) No      (2) No     (2) No
+2 (0) No (0) No (0) No out of range  &lt;NA&gt;      (2) No      (2) No     (2) No
+  V3_V4526H4 V3_V4526H6 V3_V4526H7                              V3083
+1     (2) No     (2) No     (2) No (1) Yes, born in the United States
+2     (2) No     (2) No     (2) No (1) Yes, born in the United States
+                                      V3084    V3085    V3086
+1 (2) Straight, that is, not lesbian or gay (1) Male (1) Male
+2 (2) Straight, that is, not lesbian or gay (1) Male (1) Male
+                             V3087 V3088 V3089 V3090 V3091 V3092 V3093 V3094
+1 (1) Never served in the military  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
+2 (1) Never served in the military  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
+  V3097A V3098   V3071 V3072 V3073               V3074                V3075
+1   &lt;NA&gt;  &lt;NA&gt; (1) Yes  &lt;NA&gt;  &lt;NA&gt; (27) Something else (3) St/cnty/loc govt
+2   &lt;NA&gt;  &lt;NA&gt; (1) Yes  &lt;NA&gt;  &lt;NA&gt; (27) Something else (3) St/cnty/loc govt
+       V3076         V3077  V3078                  V3079    V3080 WGTPERCY
+1 (1) A city (1) Hhld resp (2) No (4) None above schools 1207.963 603.9816
+2 (1) A city (1) Hhld resp (2) No (4) None above schools 1470.257 735.1283
+  V3081 V3082 PER_TIS PERINTVNUM PINTTYPE_TIS1                 PINTTYPE_TIS2
+1     0  2022       5          5          &lt;NA&gt; (1) Personal, Self-respondent
+2     0  2022       6          6          &lt;NA&gt; (1) Personal, Self-respondent
+                   PINTTYPE_TIS3                  PINTTYPE_TIS4
+1 (2) Telephone, Self-respondent (2) Telephone, Self-respondent
+2 (2) Telephone, Self-respondent (2) Telephone, Self-respondent
+                   PINTTYPE_TIS5                 PINTTYPE_TIS6
+1 (2) Telephone, Self-respondent (1) Personal, Self-respondent
+2 (2) Telephone, Self-respondent (1) Personal, Self-respondent
+                   PINTTYPE_TIS7                             PERBOUNDED
+1                           &lt;NA&gt; (1) Bounded by previous time in sample
+2 (2) Telephone, Self-respondent (1) Bounded by previous time in sample</code></pre>
+</div>
+</div>
+<p>These two rows represent two surveys, six months apart of the same divorced, 62-63 year-old, white male. Let’s look up another household.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>dataPers22 <span class="sc">|&gt;</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(IDHH<span class="sc">==</span><span class="st">"1809000284384631568236124"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">!</span><span class="fu">starts_with</span>(<span class="st">"PERREP"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>              V3001  YEARQ                      IDHH
+1 (3) Person record 2022.1 1809000284384631568236124
+2 (3) Person record 2022.1 1809000284384631568236124
+                        IDPER V3002                   V3003 V3004
+1 180900028438463156823612401     5 (221) 2022, 1st quarter    18
+2 180900028438463156823612402     5 (221) 2022, 1st quarter    18
+                 V3005 V3006 V3008 V3009 V3010              V3011
+1 09000284384631568236     1    24     1     1 (2) Telephone/self
+2 09000284384631568236     1    24     2     2   (5) Noninterview
+                  V3012 V3013 V3014       V3015       V3016      V3017
+1 (11) Reference person    69    69 (1) Married (1) Married (2) Female
+2          (01) Husband    60    60 (1) Married (1) Married   (1) Male
+       V3018  V3019                 V3020          V3023A  V3024 V3024A
+1 (2) Female   &lt;NA&gt; (28) High school grad (01) White only (2) No (2) No
+2   (1) Male (2) No (28) High school grad (01) White only (2) No (2) No
+          V3025 V3026 V3027 V3031 V3032 V3033  V3034 V3035  V3040 V3041  V3042
+1 (02) February    18  2022    NA     9    NA (2) No    NA (2) No    NA (2) No
+2          &lt;NA&gt;    NA    NA    NA    NA    NA   &lt;NA&gt;    NA   &lt;NA&gt;    NA   &lt;NA&gt;
+  V3043  V3044 V3045  V3046 V3047  V3048 V3049 V3050 V3051 V3052 V3053  V3054
+1    NA (2) No    NA (2) No    NA (2) No  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;    NA (2) No
+2    NA   &lt;NA&gt;    NA   &lt;NA&gt;    NA   &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;    NA   &lt;NA&gt;
+  V3055 V3056 V3057 V3058 V3059                V3060   V3061  V3062  V3063
+1  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;    NA (1) At least 1 entry (1) Yes (0) No (0) No
+2  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;    NA                 &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;
+   V3064  V3065  V3066  V3067  V3068               V3069 V3070 V3_V4526H3A
+1 (0) No (0) No (0) No (0) No (0) No (0) No out of range  &lt;NA&gt;     (1) Yes
+2   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;                &lt;NA&gt;  &lt;NA&gt;        &lt;NA&gt;
+  V3_V4526H3B V3_V4526H5 V3_V4526H4 V3_V4526H6 V3_V4526H7
+1      (2) No     (2) No     (2) No     (2) No     (2) No
+2        &lt;NA&gt;       &lt;NA&gt;       &lt;NA&gt;       &lt;NA&gt;       &lt;NA&gt;
+                               V3083                                     V3084
+1 (1) Yes, born in the United States (2) Straight, that is, not lesbian or gay
+2                               &lt;NA&gt;                                      &lt;NA&gt;
+       V3085      V3086                            V3087 V3088 V3089 V3090
+1 (2) Female (2) Female (1) Never served in the military  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
+2       &lt;NA&gt;       &lt;NA&gt;                             &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;
+  V3091 V3092 V3093 V3094 V3097A V3098   V3071 V3072 V3073               V3074
+1  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt; (1) Yes  &lt;NA&gt;  &lt;NA&gt; (27) Something else
+2  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;                &lt;NA&gt;
+             V3075          V3076             V3077  V3078
+1 (1) Priv company (3) Rural area     (1) Hhld resp (2) No
+2             &lt;NA&gt;           &lt;NA&gt; (0) Not hhld resp   &lt;NA&gt;
+                   V3079    V3080 WGTPERCY V3081 V3082 PER_TIS PERINTVNUM
+1 (4) None above schools 1070.377 535.1885     0  2022       7          7
+2 (4) None above schools    0.000   0.0000     0  2022       7          6
+                   PINTTYPE_TIS1                  PINTTYPE_TIS2
+1 (2) Telephone, Self-respondent (2) Telephone, Self-respondent
+2           (4) Telephone, Proxy           (4) Telephone, Proxy
+                   PINTTYPE_TIS3                  PINTTYPE_TIS4
+1 (2) Telephone, Self-respondent (2) Telephone, Self-respondent
+2           (4) Telephone, Proxy           (4) Telephone, Proxy
+                   PINTTYPE_TIS5                  PINTTYPE_TIS6
+1 (2) Telephone, Self-respondent (2) Telephone, Self-respondent
+2 (2) Telephone, Self-respondent (2) Telephone, Self-respondent
+                   PINTTYPE_TIS7                             PERBOUNDED
+1 (2) Telephone, Self-respondent (1) Bounded by previous time in sample
+2               (5) Noninterview (1) Bounded by previous time in sample</code></pre>
+</div>
+</div>
+<p>These rows represent two surveys occurring at the same time, one of the reference person, a married white female, and a second survey of her husband.</p>
+<p>Let’s grab the variable details as we did with the household data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Person file also has list of variable details</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>varsPers <span class="ot">&lt;-</span> dataPers22 <span class="sc">|&gt;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>   <span class="fu">attr</span>(<span class="st">"variable.labels"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>   <span class="fu">data.frame</span>() <span class="sc">|&gt;</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>   tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>() <span class="sc">|&gt;</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>   <span class="fu">setNames</span>(<span class="fu">c</span>(<span class="st">"varname"</span>,<span class="st">"details"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>   <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"^(PERREP|PINTTYPE)"</span>, varname))</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>varsPers</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        varname
+1         V3001
+2         YEARQ
+3          IDHH
+4         IDPER
+5         V3002
+6         V3003
+7         V3004
+8         V3005
+9         V3006
+10        V3008
+11        V3009
+12        V3010
+13        V3011
+14        V3012
+15        V3013
+16        V3014
+17        V3015
+18        V3016
+19        V3017
+20        V3018
+21        V3019
+22        V3020
+23       V3023A
+24        V3024
+25       V3024A
+26        V3025
+27        V3026
+28        V3027
+29        V3031
+30        V3032
+31        V3033
+32        V3034
+33        V3035
+34        V3040
+35        V3041
+36        V3042
+37        V3043
+38        V3044
+39        V3045
+40        V3046
+41        V3047
+42        V3048
+43        V3049
+44        V3050
+45        V3051
+46        V3052
+47        V3053
+48        V3054
+49        V3055
+50        V3056
+51        V3057
+52        V3058
+53        V3059
+54        V3060
+55        V3061
+56        V3062
+57        V3063
+58        V3064
+59        V3065
+60        V3066
+61        V3067
+62        V3068
+63        V3069
+64        V3070
+65  V3_V4526H3A
+66  V3_V4526H3B
+67   V3_V4526H5
+68   V3_V4526H4
+69   V3_V4526H6
+70   V3_V4526H7
+71        V3083
+72        V3084
+73        V3085
+74        V3086
+75        V3087
+76        V3088
+77        V3089
+78        V3090
+79        V3091
+80        V3092
+81        V3093
+82        V3094
+83       V3097A
+84        V3098
+85        V3071
+86        V3072
+87        V3073
+88        V3074
+89        V3075
+90        V3076
+91        V3077
+92        V3078
+93        V3079
+94        V3080
+95     WGTPERCY
+96        V3081
+97        V3082
+98      PER_TIS
+99   PERINTVNUM
+100  PERBOUNDED
+                                                                                             details
+1                                                                                 PERSON RECORD TYPE
+2                                                             YEAR AND QUARTER OF INTERVIEW (YYYY.Q)
+3                                                                             NCVS ID FOR HOUSEHOLDS
+4                                                                                NCVS ID FOR PERSONS
+5                                                              ICPSR HOUSEHOLD IDENTIFICATION NUMBER
+6                                                                    YEAR AND QUARTER IDENTIFICATION
+7                                                                                      SAMPLE NUMBER
+8                                                                           SCRAMBLED CONTROL NUMBER
+9                                                                                   HOUSEHOLD NUMBER
+10                                                                          PANEL AND ROTATION GROUP
+11                                                                            PERSON SEQUENCE NUMBER
+12                                                                                PERSON LINE NUMBER
+13                                                                                 TYPE OF INTERVIEW
+14                                                                  RELATIONSHIP TO REFERENCE PERSON
+15                                                                                    AGE (ORIGINAL)
+16                                                                                   AGE (ALLOCATED)
+17                                                                   MARITAL STATUS (CURRENT SURVEY)
+18                                                                  MARITAL STATUS (PREVIOUS SURVEY)
+19                                                                                    SEX (ORIGINAL)
+20                                                                                   SEX (ALLOCATED)
+21                                                                        NOW AN ARMED FORCES MEMBER
+22                                                                            EDUCATIONAL ATTAINMENT
+23                                                                       RACE RECODE (START 2003 Q1)
+24                                                                                   HISPANIC ORIGIN
+25                                                       HISPANIC ORIGIN (ALLOCATED) (START 2014 Q1)
+26                                                                         MONTH INTERVIEW COMPLETED
+27                                                                           DAY INTERVIEW COMPLETED
+28                                                                          YEAR INTERVIEW COMPLETED
+29                                                                 HOW LONG AT THIS ADDRESS (MONTHS)
+30                                                                  HOW LONG AT THIS ADDRESS (YEARS)
+31                                                              HOW MANY TIMES MOVED IN LAST 5 YEARS
+32                                                                       SOMETHING STOLEN OR ATTEMPT
+33                                                             NO. TIMES SOMETHING STOLEN OR ATTEMPT
+34                                                              ATTACK, THREAT, THEFT: LOCATION CUES
+35                                                                   NO. TIMES ATTACK, LOCATION CUES
+36                                                              ATTACK, THREAT: WEAPON &amp; ATTACK CUES
+37                                                                     NO. TIMES ATTACK, WEAPON CUES
+38                                                            STOLEN, ATTACK, THREAT: OFFENDER KNOWN
+39                                                                  NO. TIMES ATTACK, OFFENDER KNOWN
+40                                                                    FORCED OR COERCED UNWANTED SEX
+41                                                                            NO. TIMES UNWANTED SEX
+42                                                              CALL POLICE TO REPORT SOMETHING ELSE
+43                                                                                    FIRST INCIDENT
+44                                                                                   SECOND INCIDENT
+45                                                                                    THIRD INCIDENT
+46                                                                    CHECK B: ATTACK, THREAT, THEFT
+47                                                                   NO. TIMES ATTACK, THREAT, THEFT
+48                                                              THOUGHT CRIME BUT DIDN'T CALL POLICE
+49                                                                                    FIRST INCIDENT
+50                                                                                   SECOND INCIDENT
+51                                                                                    THIRD INCIDENT
+52                                                                    CHECK C: ATTACK, THREAT, THEFT
+53                                                                   NO. TIMES ATTACK, THREAT, THEFT
+54                                                            LI WHO PRESENT DURING SCREEN QUESTIONS
+55                                                                             C TELEPHONE INTERVIEW
+56                                                               C NO ONE BESIDES RESPONDENT PRESENT
+57                                                                             C RESPONDENT'S SPOUSE
+58                                                                    C HH MEMBER(S) 12+, NOT SPOUSE
+59                                                                           C HH MEMBER(S) UNDER 12
+60                                                                          C NONHOUSEHOLD MEMBER(S)
+61                                                                  C SOMEONE PRESENT, CAN'T SAY WHO
+62                                                              C DON'T KNOW IF SOMEONE ELSE PRESENT
+63                                                                RESIDUE: WHO PRESENT DURING SCREEN
+64                                                                DID SELECTED RESPONDENT HELP PROXY
+65                           ARE YOU DEAF OR DO YOU HAVE SERIOUS DIFFICULTY HEARING? (START 2016 Q3)
+66  ARE YOU BLIND OR DO YOU HAVE SERIOUS DIFFICULTY SEEING EVEN WHEN WEARING GLASSES (START 2016 Q3)
+67                                           DIFFICULT: LEARN, REMEMBER, CONCENTRATE (START 2016 Q3)
+68                                                        LIMITS PHYSICAL ACTIVITIES (START 2016 Q3)
+69                                     DIFFICULT: DRESSING, BATHING, GET AROUND HOME (START 2016 Q3)
+70                                   DIFFICULT: GO OUTSIDE HOME TO SHOP OR DR OFFICE (START 2016 Q3)
+71                                                                CITIZENSHIP STATUS (START 2017 Q1)
+72                                                                SEXUAL ORIENTATION (START 2017 Q1)
+73                                                          GENDER IDENTITY AT BIRTH (START 2017 Q1)
+74                                                           CURRENT GENDER IDENTITY (START 2017 Q1)
+75                                                              SERVE ON ACTIVE DUTY (START 2017 Q1)
+76                                                           LI: WHEN ON ACTIVE DUTY (START 2017 Q1)
+77                                                     C ACTIVE DUTY: SEPTEMBER 2001 (START 2017 Q1)
+78                                         C ACTIVE DUTY: AUGUST 1990 TO AUGUST 2001 (START 2017 Q1)
+79                                              C ACTIVE DUTY: MAY 1975 TO JULY 1990 (START 2017 Q1)
+80                            C ACTIVE DUTY: VIETNAM ERA (AUGUST 1964 TO APRIL 1975) (START 2017 Q1)
+81                                         C ACTIVE DUTY: FEBRUARY 1955 TO JULY 1964 (START 2017 Q1)
+82                             C ACTIVE DUTY: KOREAN WAR (JULY 1950 TO JANUARY 1955) (START 2017 Q1)
+83                                                  C ACTIVE DUTY: DISCLOSURE RECODE (START 2022 Q1)
+84                                                              RESIDUE: ACTIVE DUTY (START 2017 Q1)
+85                                                                        HAVE JOB OR WORK LAST WEEK
+86                                                                 HAVE JOB OR WORK IN LAST 6 MONTHS
+87                                                                 DID JOB/WORK LAST 2 WEEKS OR MORE
+88                                                                     WHICH BEST DESCRIBES YOUR JOB
+89                                                               IS EMPLOYMENT PRIVATE, GOVT OR SELF
+90                                                             IS WORK MOSTLY IN CITY, SUBURB, RURAL
+91                                                                              HOUSEHOLD RESPONDENT
+92                                                               EMPLOYED BY A COLLEGE OR UNIVERSITY
+93                                                                                  ATTENDING SCHOOL
+94                                                                                     PERSON WEIGHT
+95                                                          ADJUSTED PERSON WEIGHT - COLLECTION YEAR
+96                                                                  NUMBER OF CRIME INCIDENT REPORTS
+97                                                               YEAR IDENTIFICATION (START 1999 Q3)
+98                                                             PERSON TIME IN SAMPLE (START 2015 Q1)
+99                                                           PERSON INTERVIEW NUMBER (START 2015 Q1)
+100                                        PERSON BOUNDED BY PREVIOUS TIME IN SAMPLE (START 2015 Q1)</code></pre>
+</div>
+</div>
+<p>There is an incident-level file that we will read in here. We are not going to look at it further, since much of the information in this file is also in the incident extract file.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"NCVS2022/DS0004/38603-0004-Data.rda"</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"NCVS2023/DS0004/38962-0004-Data.rda"</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>dataInc22 <span class="ot">&lt;-</span> da38603<span class="fl">.0004</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>dataInc23 <span class="ot">&lt;-</span> da38962<span class="fl">.0004</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>dataInc22 <span class="sc">|&gt;</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>   <span class="fu">select</span>(IDHH, IDPER, V4014, V4529) <span class="sc">|&gt;</span> </span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>   <span class="fu">head</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                       IDHH                       IDPER          V4014
+1 1809010265731899564536114 180901026573189956453611401  (12) December
+2 1809040225522254568236115 180904022552225456823611501  (11) November
+3 1809213903398449563644234 180921390339844956364423401 (09) September
+4 1809240299163750563236135 180924029916375056323613501 (09) September
+5 1809243565469154563238115 180924356546915456323811501  (12) December
+6 1809243958169129563244125 180924395816912956324412501    (08) August
+                 V4529
+1 (31) Burg, force ent
+2  (56) Theft $50-$249
+3  (56) Theft $50-$249
+4  (56) Theft $50-$249
+5  (58) Theft value NA
+6 (20) Verbal thr aslt</code></pre>
+</div>
+</div>
+<p>Finally, we will load in the incident extract file and its associated variable details. This extract file merges in household-level and person-level information to the incident-level file, allowing you to connect person-level features with features of the victimizations they report.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># incident-level extract file</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"NCVS2022/DS0005/38603-0005-Data.rda"</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"NCVS2023/DS0005/38962-0005-Data.rda"</span>)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>dataExt22 <span class="ot">&lt;-</span> da38603<span class="fl">.0005</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>dataExt23 <span class="ot">&lt;-</span> da38962<span class="fl">.0005</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>varsExt <span class="ot">&lt;-</span> dataExt22 <span class="sc">|&gt;</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>   <span class="fu">attr</span>(<span class="st">"variable.labels"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>   <span class="fu">data.frame</span>() <span class="sc">|&gt;</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>   tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>() <span class="sc">|&gt;</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>   <span class="fu">setNames</span>(<span class="fu">c</span>(<span class="st">"varname"</span>,<span class="st">"details"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>   <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"INCREPWGT|VICREPWGT"</span>, varname))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s take a look at a few of the reported crime victimizations. Here I will just pull the respondent’s age, marital status, sex, general location, and crime type.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>dataExt22 <span class="sc">|&gt;</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(V3014, V3015, V3018, V4022, V4529) <span class="sc">|&gt;</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  V3014        V3015      V3018             V4022                V4529
+1    56 (3) Divorced (2) Female (3) Same city etc (31) Burg, force ent
+2    78  (2) Widowed (2) Female (3) Same city etc  (56) Theft $50-$249
+3    43  (1) Married   (1) Male (3) Same city etc  (56) Theft $50-$249</code></pre>
+</div>
+</div>
+<p>Not all information from the household and person files are in the extract file, but many of the features that are likely to be of interest are there.</p>
+<p>Now that the datasets are loaded and renamed, we can remove objects from our working environment that we no longer need. We can use <code>rm()</code> to accomplish this.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(da38603<span class="fl">.0002</span>,da38603<span class="fl">.0003</span>,da38603<span class="fl">.0004</span>,da38603<span class="fl">.0005</span>,</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>   da38962<span class="fl">.0002</span>,da38962<span class="fl">.0003</span>,da38962<span class="fl">.0004</span>,da38962<span class="fl">.0005</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="combining-2022-and-2023-data" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Combining 2022 and 2023 data</h1>
+<p>Here we are going to create a data frame containing all the reported incidents that <em>occurred</em> in 2022. Take a look at the month and year of the reported crime incidents.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>dataExt22 <span class="sc">|&gt;</span> <span class="fu">count</span>(V4015, V4014)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   V4015          V4014   n
+1   2021      (07) July 138
+2   2021    (08) August 280
+3   2021 (09) September 384
+4   2021   (10) October 510
+5   2021  (11) November 650
+6   2021  (12) December 849
+7   2022   (01) January 772
+8   2022  (02) February 727
+9   2022     (03) March 774
+10  2022     (04) April 730
+11  2022       (05) May 770
+12  2022      (06) June 839
+13  2022      (07) July 718
+14  2022    (08) August 593
+15  2022 (09) September 383
+16  2022   (10) October 292
+17  2022  (11) November 136</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>dataExt23 <span class="sc">|&gt;</span> <span class="fu">count</span>(V4015, V4014)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   V4015          V4014   n
+1   2022      (07) July 175
+2   2022    (08) August 253
+3   2022 (09) September 364
+4   2022   (10) October 524
+5   2022  (11) November 674
+6   2022  (12) December 859
+7   2023   (01) January 753
+8   2023  (02) February 681
+9   2023     (03) March 699
+10  2023     (04) April 688
+11  2023       (05) May 738
+12  2023      (06) June 760
+13  2023      (07) July 721
+14  2023    (08) August 573
+15  2023 (09) September 447
+16  2023   (10) October 273
+17  2023  (11) November 142</code></pre>
+</div>
+</div>
+<p>Note that the 2022 NCVS reports on crimes that occurred in 2022 and 2021. Similarly, the NCVS 2023 reports on crimes that occurred in 2023 and 2022. Remember that the NCVS surveys as respondents about any victimizations from the prior 12 months. We will going to stack the 2022 and 2023 incident extract data frames and then filter it to exclude 2021 and 2023.</p>
+<p><code>bind_rows()</code> stacks data frames on top of each other, useful when combining two datasets that have the same structure. First we will check that they have the same columns in them.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(<span class="fu">names</span>(dataExt22), <span class="fu">names</span>(dataExt23))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+</div>
+<p>Good so far! Now let’s try to stack them.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>dataExt <span class="ot">&lt;-</span> dataExt22 <span class="sc">|&gt;</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(dataExt23)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-error">
+<pre><code>Error in `bind_rows()`:
+! Can't combine `..1$V2061` &lt;factor&lt;f6015&gt;&gt; and `..2$V2061` &lt;double&gt;.</code></pre>
+</div>
+</div>
+<p>Hmmm… R is complaining about <code>V2061</code>. Note that it specifically complains that one data frame has <code>V2061</code> stored as a factor (a categorical variable) and the other one has it stored as a double, a decimal number.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>dataExt22 <span class="sc">|&gt;</span> <span class="fu">count</span>(V2061)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   V2061    n
+1 (01) 1    8
+2   &lt;NA&gt; 9537</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>dataExt23 <span class="sc">|&gt;</span> <span class="fu">count</span>(V2061)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  V2061    n
+1     1   14
+2     3    1
+3     4    3
+4    NA 9306</code></pre>
+</div>
+</div>
+<p>What is <code>V2061</code> anyway?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>varsExt <span class="sc">|&gt;</span> <span class="fu">filter</span>(varname<span class="sc">==</span><span class="st">"V2061"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  varname                          details
+1   V2061 LINE NO. OF 4TH PROXY RESPONDENT</code></pre>
+</div>
+</div>
+<p>This reports on who reported on behalf of an unavailable respondent. Not really important for us so let’s drop this one by using <code>select(-V2061)</code> on both data frames.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>dataExt <span class="ot">&lt;-</span> dataExt22 <span class="sc">|&gt;</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>V2061) <span class="sc">|&gt;</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(dataExt23 <span class="sc">|&gt;</span></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>              <span class="fu">select</span>(<span class="sc">-</span>V2061))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-error">
+<pre><code>Error in `bind_rows()`:
+! Can't combine `..1$V4126` &lt;factor&lt;fb04b&gt;&gt; and `..2$V4126` &lt;double&gt;.</code></pre>
+</div>
+</div>
+<p>Ughh. Now it is complaining about <code>V4126</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>varsExt <span class="sc">|&gt;</span> <span class="fu">filter</span>(varname<span class="sc">==</span><span class="st">"V4126"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  varname                              details
+1   V4126 WHICH INJURY FROM OTHER WEAPON (3RD)</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>dataExt22 <span class="sc">|&gt;</span> <span class="fu">count</span>(V4126)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>               V4126    n
+1 (10) Bruises, cuts    3
+2               &lt;NA&gt; 9542</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>dataExt23 <span class="sc">|&gt;</span> <span class="fu">count</span>(V4126)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  V4126    n
+1    NA 9324</code></pre>
+</div>
+</div>
+<p>In the codebook we can find the full question: “Q.33.3 Which injuries were caused by a weapon OTHER than a gun or knife?”. This seems like a potentially interesting question that I probably do not want to discard. The issue is that no 2023 respondent said there was a third weapon that injured them. In 2022 <code>V4126</code> was stored as a factor, but in 2023, since they are all missing, R defaulted to numeric (double). We can fix this by just telling R to convert the 2023 data into a factor.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>dataExt <span class="ot">&lt;-</span> dataExt22 <span class="sc">|&gt;</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>V2061) <span class="sc">|&gt;</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(dataExt23 <span class="sc">|&gt;</span></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>              <span class="fu">select</span>(<span class="sc">-</span>V2061) <span class="sc">|&gt;</span></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>              <span class="fu">mutate</span>(<span class="at">V4126=</span><span class="fu">as.factor</span>(V4126)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-error">
+<pre><code>Error in `bind_rows()`:
+! Can't combine `..1$V4313` &lt;factor&lt;514cc&gt;&gt; and `..2$V4313` &lt;double&gt;.</code></pre>
+</div>
+</div>
+<p>Dammit! Now it is complaining about <code>V4313</code>. What is the problem with this one? Again we have a problem with 2022 storing as a factor and 2023 storing as a double.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>varsExt <span class="sc">|&gt;</span> <span class="fu">filter</span>(varname<span class="sc">==</span><span class="st">"V4313"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  varname                                 details
+1   V4313 3RD LINE NO. OF OTHER OWNER THEFT ITEMS</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>dataExt22 <span class="sc">|&gt;</span> <span class="fu">count</span>(V4313)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   V4313    n
+1 (06) 6    2
+2   &lt;NA&gt; 9543</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>dataExt23 <span class="sc">|&gt;</span> <span class="fu">count</span>(V4313)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  V4313    n
+1     4    1
+2     5    1
+3    NA 9322</code></pre>
+</div>
+</div>
+<p>This column answers “Besides the respondent, which household member(s) owned the (property/money) the offender tried to take?” In 2022, the only responses were missing or #6. In 2023, the responses were missing, 4, or 5. These should be numbers since they are supposed to link respondents in the same household affected by the theft. The approach I’ll take is to use <code>case_match()</code> telling R to change the 2022 “(006) 6” response to a regular 6.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>dataExt <span class="ot">&lt;-</span> dataExt22 <span class="sc">|&gt;</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>V2061) <span class="sc">|&gt;</span></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">V4313 =</span> <span class="fu">case_match</span>(V4313,</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"(06) 6"</span> <span class="sc">~</span> <span class="dv">6</span>,</span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>                            <span class="at">.default =</span> <span class="cn">NA</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(dataExt23 <span class="sc">|&gt;</span></span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>              <span class="fu">select</span>(<span class="sc">-</span>V2061) <span class="sc">|&gt;</span></span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>              <span class="fu">mutate</span>(<span class="at">V4126=</span><span class="fu">as.factor</span>(V4126)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-error">
+<pre><code>Error in `bind_rows()`:
+! Can't combine `..1$V4357A` &lt;double&gt; and `..2$V4357A` &lt;factor&lt;758b7&gt;&gt;.</code></pre>
+</div>
+</div>
+<p>Will this ever stop?!?!? Another double in one year and factor in another year, this time affecting <code>V4357A</code> asking about handguns.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>varsExt <span class="sc">|&gt;</span> <span class="fu">filter</span>(varname<span class="sc">==</span><span class="st">"V4357A"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  varname                                      details
+1  V4357A HOW MANY HANDGUNS WERE TAKEN (START 2004 Q1)</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>dataExt22 <span class="sc">|&gt;</span> <span class="fu">count</span>(V4357A)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  V4357A    n
+1      1   41
+2      2    8
+3      3    3
+4    997    1
+5    998    1
+6     NA 9491</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>dataExt23 <span class="sc">|&gt;</span> <span class="fu">count</span>(V4357A)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         V4357A    n
+1       (001) 1   48
+2 (998) Residue    1
+3          &lt;NA&gt; 9275</code></pre>
+</div>
+</div>
+<p>You might have seen this word “Residue” show up before. For the NCVS, BJS records “Residue” when there is a data entry error resulting in an out-of-range code, an incorrect or unusable answer by the respondent, or the absence of an entry for a question that should have been asked. Sometimes you might also see “Out of universe/blank.” This happens when a value is outside the range of questions to be answered. For example, “Received Medical Care for Injury,” only victims who report being injured are asked whether they received medical care. All other victims skip this question.</p>
+<p>I will solve this issue by recoding the 2023 values to numeric values.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>dataExt <span class="ot">&lt;-</span> dataExt22 <span class="sc">|&gt;</span></span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>V2061) <span class="sc">|&gt;</span></span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">V4313 =</span> <span class="fu">case_match</span>(V4313,</span>
+<span id="cb61-4"><a href="#cb61-4" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"(06) 6"</span> <span class="sc">~</span> <span class="dv">6</span>,</span>
+<span id="cb61-5"><a href="#cb61-5" aria-hidden="true" tabindex="-1"></a>                            <span class="at">.default =</span> <span class="cn">NA</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb61-6"><a href="#cb61-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(dataExt23 <span class="sc">|&gt;</span></span>
+<span id="cb61-7"><a href="#cb61-7" aria-hidden="true" tabindex="-1"></a>              <span class="fu">select</span>(<span class="sc">-</span>V2061) <span class="sc">|&gt;</span></span>
+<span id="cb61-8"><a href="#cb61-8" aria-hidden="true" tabindex="-1"></a>              <span class="fu">mutate</span>(<span class="at">V4126 =</span> <span class="fu">as.factor</span>(V4126),</span>
+<span id="cb61-9"><a href="#cb61-9" aria-hidden="true" tabindex="-1"></a>                     <span class="at">V4357A =</span> <span class="fu">case_match</span>(V4357A,</span>
+<span id="cb61-10"><a href="#cb61-10" aria-hidden="true" tabindex="-1"></a>                                         <span class="st">"(001) 1"</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb61-11"><a href="#cb61-11" aria-hidden="true" tabindex="-1"></a>                                         <span class="st">"(998) Residue"</span> <span class="sc">~</span> <span class="dv">998</span>,</span>
+<span id="cb61-12"><a href="#cb61-12" aria-hidden="true" tabindex="-1"></a>                                         <span class="at">.default=</span><span class="cn">NA</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Success! Now let’s check that all is okay now.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>dataExt <span class="sc">|&gt;</span> <span class="fu">count</span>(V4126)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>               V4126     n
+1 (10) Bruises, cuts     3
+2               &lt;NA&gt; 18866</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>dataExt <span class="sc">|&gt;</span> <span class="fu">count</span>(V4313)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  V4313     n
+1     4     1
+2     5     1
+3     6     2
+4    NA 18865</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>dataExt <span class="sc">|&gt;</span> <span class="fu">count</span>(V4357A)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  V4357A     n
+1      1    89
+2      2     8
+3      3     3
+4    997     1
+5    998     2
+6     NA 18766</code></pre>
+</div>
+</div>
+<p>Remember that we still have data in here from 2021 and 2023.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(dataExt<span class="sc">$</span>V4015)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+2021 2022 2023 
+2811 9583 6475 </code></pre>
+</div>
+</div>
+<p>We are just going to focus on 2022.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a>dataExt <span class="ot">&lt;-</span> dataExt <span class="sc">|&gt;</span> <span class="fu">filter</span>(V4015<span class="sc">==</span><span class="dv">2022</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Note that BJS official reports generally classify by the year of the survey and not by the year of the crime.</p>
+</section>
+<section id="bjs-modifications-and-survey-weights" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> BJS modifications and survey weights</h1>
+<p>Some respondents report crime victimizations that occurred outside of the United States.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="co"># V4022 - IN WHAT CITY, TOWN, VILLAGE.</span></span>
+<span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a>dataExt <span class="sc">|&gt;</span> <span class="fu">count</span>(V4022)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                V4022    n
+1    (1) Outside U.S.   44
+2 (2) Not in city etc   67
+3   (3) Same city etc 8069
+4   (4) Diff city etc 1354
+5      (5) Don't know   37
+6         (8) Residue   12</code></pre>
+</div>
+</div>
+<p>The BJS convention is to exclude these crimes in official reports (see 2023 User Guide, page 21).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a>dataExt <span class="ot">&lt;-</span> dataExt <span class="sc">|&gt;</span></span>
+<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">is.na</span>(V4022) <span class="sc">|</span> V4022<span class="sc">!=</span><span class="st">"(1) Outside U.S."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Some crimes happen in a series. For example, a respondent may report on regular domestic abuse that happened numerous times over the last six months. Each incident of domestic abuse is a victimization, but the BJS convention is to include up to 10 occurrences for crimes reported as a series (2023 User Guide, pages 18-19).</p>
+<p>Variable <code>V4016</code> records the answer to “Altogether, how many times did this type of incident happen during the last 6 months?” and variable <code>V4019</code> documents “Can you (respondent) recall enough details of each incident to distinguish them from each other?”</p>
+<p>Note that the coding of <code>V4016</code> has 997 representing “Don’t know” and 998 representing “Residue”. These are not counts of victimizations. The logic in the <code>case_when()</code> statement below checks for counts between 11 and 996 and sets the value of <code>V4016</code> to 10 in that case.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb74"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>dataExt <span class="ot">&lt;-</span> dataExt <span class="sc">|&gt;</span></span>
+<span id="cb74-2"><a href="#cb74-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">V4016 =</span> <span class="fu">case_when</span>(</span>
+<span id="cb74-3"><a href="#cb74-3" aria-hidden="true" tabindex="-1"></a>    V4019<span class="sc">==</span><span class="st">"(2) No (is series)"</span> <span class="sc">&amp;</span> V4016<span class="sc">&gt;=</span><span class="dv">11</span> <span class="sc">&amp;</span> V4016<span class="sc">&lt;=</span><span class="dv">996</span> <span class="sc">~</span> <span class="dv">10</span>,</span>
+<span id="cb74-4"><a href="#cb74-4" aria-hidden="true" tabindex="-1"></a>    V4016 <span class="sc">&gt;=</span> <span class="dv">997</span> <span class="sc">~</span> <span class="cn">NA</span>,</span>
+<span id="cb74-5"><a href="#cb74-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">.default=</span>V4016))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The NCVS sampling design oversamples respondents in places more likely to have crime victimization. This makes the sampling effort more efficient. Otherwise, a purely random sample would contact a lot of people who had no victimization to report. As a result, the raw data from the NCVS do not reflect crime victimization in the United States. We must use the NCVS sampling weights to undo the oversampling of crime victims.</p>
+<p>Constructing the sampling weights is a complex process (see the User Guide “Weights Details” section starting on Page 22). The NCVS sampling weights adjusts for six factors. From the User Guide:</p>
+<ol type="1">
+<li><p><em>Base weight</em>: The inverse of the national sampling rate for the stratum of that unit (person or household).</p></li>
+<li><p><em>Weighting control</em>: Adjusts for any sub-sampling due to unexpected events in the field, such as new construction, area segments larger than anticipated, and other deviations from the overall stratum sampling rate.</p></li>
+<li><p><em>Household non-interview adjustment</em>: Adjusts for nonresponse at the household-level by increasing the weights of interviewed households most similar to households not interviewed in terms of race, MSA status of residence, and urban/suburban/rural status of residence. This inflates the weight value assigned to interviewed households so that they represent themselves and non-interviewed households. The non-interviewed cases are assigned a weight of zero, thereby excluding them from population estimates.</p></li>
+<li><p><em>Within-household non-interveiew adjustment</em>: Adjusts for non-response at the person-level by increasing the weight of interviewed persons most similar to persons not interviewed in terms of region, age, race, sex, and household composition. The adjustment inflates the weight value assigned to completed interviews, so that they represent themselves and sampled individuals who were not interviewed. The non-interviewed cases are assigned a weight of zero.</p></li>
+<li><p><em>First stage ratio estimates factor</em>: Adjusts for differences between characteristics of the sample non-self-representing (NSR) primary sampling units (PSUs) and independent measures of the population NSR PSUs. (For self-representing PSUs this factor is set to 1). This factor adjusts for PSU differences on region, MSA status, urban/suburban/rural status, and racial composition.</p></li>
+<li><p><em>Second stage ratio estimate factor</em>: A post-stratification factor defined for each person to adjust for the difference between weighted counts of persons (using the above five weight components) and independent estimates of the number of persons, within certain age by race by sex categories. These independent estimates are based on the Census population controls adjusted for the undercount.</p></li>
+</ol>
+<p>Fortunately for us, the variable <code>SERIES_WEIGHT</code> captures all these adjustments and contains the weight that BJS uses for its official reports. It includes the adjustment for capping series crimes at 10.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Always use the sampling weights
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Importantly, every calculation you do with the NCVS must involve the weights. This includes weighted means, weighted percentages, and weighted counts. Even plots and figures should use the weights.</p>
+</div>
+</div>
+<p>Where you would normally compute a sample mean as <span class="math inline">\(\frac{\sum x_i}{n}\)</span>, the weighted mean is <span class="math display">\[
+\frac{\sum w_ix_i}{\sum w_i}
+\]</span> For a weighted percentage, total all the weights for respondents with the particular feature divided by the total weight. For some plots there is not an obvious way to accommodate the sampling weights. In those cases we can sample with replacement with probabilities proportional to the sampling weights and plot the sampled points.</p>
+</section>
+<section id="tabulating-victimizations" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Tabulating victimizations</h1>
+<p>First, we need to be clear about what we are counting. BJS will report on <em>victimizations</em> and <em>incidents</em>. Victimizations count the number of times a US person was victimized. Incidents count the number of times a crime incident occurred and those incidents could involve multiple victims. BJS reports largely focus on criminal victimizations.</p>
+<p>We can start but just asking the NCVS data how many criminal victimizations there were in 2022. We compute that as the sum of all the weights.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(dataExt<span class="sc">$</span>SERIES_WEIGHT)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 20121320</code></pre>
+</div>
+</div>
+<p>This means that the NCVS estimates that there were 20,121,320 criminal victimizations in the United States in 2022.</p>
+<p>Let’s take a closer look at what kinds of victimization occurred. Note that this code breaks the dataset into groups based on the reported crime type, <code>V4529</code>, and computes the total weight associated with each of those crime categories.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a>dataExt <span class="sc">|&gt;</span></span>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(V4529) <span class="sc">|&gt;</span> <span class="co"># crime type</span></span>
+<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">total =</span> <span class="fu">sum</span>(SERIES_WEIGHT)) <span class="sc">|&gt;</span></span>
+<span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="at">n=</span><span class="cn">Inf</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 33 × 2
+   V4529                       total
+   &lt;fct&gt;                       &lt;dbl&gt;
+ 1 (01) Completed rape       127522.
+ 2 (02) Attempted rape        67330.
+ 3 (03) Sex aslt w s aslt     27038.
+ 4 (04) Sex aslt w m aslt      7511.
+ 5 (05) Rob w inj s aslt      87026.
+ 6 (06) Rob w inj m aslt      88620.
+ 7 (07) Rob wo injury        216589.
+ 8 (08) At rob inj s asl      25197.
+ 9 (09) At rob inj m asl      47896.
+10 (10) At rob w aslt        119279.
+11 (11) Ag aslt w injury     449842.
+12 (12) At ag aslt w wea     397249.
+13 (13) Thr aslt w weap      637952.
+14 (14) Simp aslt w inj      578068.
+15 (15) Sex aslt wo inj      118078.
+16 (16) Unw sex wo force      52425.
+17 (17) Asl wo weap, wo inj 1295757.
+18 (18) Verbal thr rape       41862.
+19 (19) Ver thr sex aslt      15501.
+20 (20) Verbal thr aslt     1978623.
+21 (21) Purse snatching       35375.
+22 (23) Pocket picking       124503.
+23 (31) Burg, force ent      549203.
+24 (32) Burg, ent wo for    1074214.
+25 (33) Att force entry      312530.
+26 (40) Motor veh theft      518797.
+27 (41) At mtr veh theft     193058.
+28 (54) Theft &lt; $10          623035.
+29 (55) Theft $10-$49       1735619.
+30 (56) Theft $50-$249      2968819.
+31 (57) Theft $250+         3057945.
+32 (58) Theft value NA      1799273.
+33 (59) Attempted theft      749585.</code></pre>
+</div>
+</div>
+<p>The first 20 crime types listed are the violent crimes and the remainder are property crimes. Let’s extract the two-digit code between the parentheses so that we can classify crime types as violent or property. First, I will run a little test code to make sure my regular expression and the crime type classification works correctly.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a>dataExt <span class="sc">|&gt;</span></span>
+<span id="cb79-2"><a href="#cb79-2" aria-hidden="true" tabindex="-1"></a>   <span class="fu">mutate</span>(<span class="at">crimeCode =</span> <span class="fu">gsub</span>(<span class="st">".([0-9][0-9]).*"</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">1"</span>, V4529),</span>
+<span id="cb79-3"><a href="#cb79-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">crimeType =</span> <span class="fu">ifelse</span>(crimeCode <span class="sc">&lt;=</span> <span class="dv">20</span>, <span class="st">"violent"</span>, <span class="st">"property"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb79-4"><a href="#cb79-4" aria-hidden="true" tabindex="-1"></a>   <span class="fu">select</span>(V4529, crimeCode, crimeType) <span class="sc">|&gt;</span></span>
+<span id="cb79-5"><a href="#cb79-5" aria-hidden="true" tabindex="-1"></a>   <span class="fu">head</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                  V4529 crimeCode crimeType
+1 (41) At mtr veh theft        41  property
+2  (59) Attempted theft        59  property
+3   (58) Theft value NA        58  property
+4      (57) Theft $250+        57  property
+5    (55) Theft $10-$49        55  property
+6    (07) Rob wo injury        07   violent</code></pre>
+</div>
+</div>
+<p>That all looks correct, so now I can move on to the tabulation.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> dataExt <span class="sc">|&gt;</span></span>
+<span id="cb81-2"><a href="#cb81-2" aria-hidden="true" tabindex="-1"></a>   <span class="fu">mutate</span>(<span class="at">crimeCode =</span> <span class="fu">gsub</span>(<span class="st">".([0-9][0-9]).*"</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">1"</span>, V4529),</span>
+<span id="cb81-3"><a href="#cb81-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">crimeType =</span> <span class="fu">ifelse</span>(crimeCode <span class="sc">&lt;=</span> <span class="dv">20</span>, <span class="st">"violent"</span>, <span class="st">"property"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb81-4"><a href="#cb81-4" aria-hidden="true" tabindex="-1"></a>   <span class="fu">group_by</span>(crimeType) <span class="sc">|&gt;</span></span>
+<span id="cb81-5"><a href="#cb81-5" aria-hidden="true" tabindex="-1"></a>   <span class="fu">summarize</span>(<span class="at">estTotal =</span> <span class="fu">sum</span>(SERIES_WEIGHT))</span>
+<span id="cb81-6"><a href="#cb81-6" aria-hidden="true" tabindex="-1"></a>a</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 2
+  crimeType  estTotal
+  &lt;chr&gt;         &lt;dbl&gt;
+1 property  13741956.
+2 violent    6379364.</code></pre>
+</div>
+</div>
+<p>In 2022, there was an estimated 6,379,364 violent crimes and 13,741,956 property crimes.</p>
+<p>We can summarize other categories, like car thefts, attempted and completed.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a>dataExt <span class="sc">|&gt;</span></span>
+<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(V4529 <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"(40) Motor veh theft"</span>,</span>
+<span id="cb83-3"><a href="#cb83-3" aria-hidden="true" tabindex="-1"></a>                      <span class="st">"(41) At mtr veh theft"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb83-4"><a href="#cb83-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="fu">sum</span>(SERIES_WEIGHT))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  sum(SERIES_WEIGHT)
+1           711855.4</code></pre>
+</div>
+</div>
+<p>Measuring sexual assault has been complicated by numerous, sometimes major, changes (improvements, more precisely) in the definitions and data collection methods (e.g.&nbsp;question wording). The Uniform Crime Report made a major change to the the <a href="https://le.fbi.gov/cjis-division/cjis-link/ucr-program-changes-definition-of-rape">definition of rape changed</a> in 2013. The NCVS’s most recent change was in 2024. See <span class="citation" data-cites="FisherGross2025">Fisher and Gross (<a href="#ref-FisherGross2025" role="doc-biblioref">2025</a>)</span> for an extended discussion and timeline of the changes.</p>
+<p>Here is the NCVS estimate of the number of sexual assaults (attempted and completed) for 2022.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb85"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a>dataExt <span class="sc">|&gt;</span></span>
+<span id="cb85-2"><a href="#cb85-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(V4529 <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"(01) Completed rape"</span>,</span>
+<span id="cb85-3"><a href="#cb85-3" aria-hidden="true" tabindex="-1"></a>                      <span class="st">"(02) Attempted rape"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb85-4"><a href="#cb85-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="fu">sum</span>(SERIES_WEIGHT))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  sum(SERIES_WEIGHT)
+1           194852.7</code></pre>
+</div>
+</div>
+<p>NCVS official reports combine all rape and sexual assaults. There are a lot of crime categories that describe sexual assaults.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb87"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(dataExt<span class="sc">$</span>V4529)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] (41) At mtr veh theft    (59) Attempted theft     (58) Theft value NA     
+ [4] (57) Theft $250+         (55) Theft $10-$49       (07) Rob wo injury      
+ [7] (13) Thr aslt w weap     (17) Asl wo weap, wo inj (20) Verbal thr aslt    
+[10] (32) Burg, ent wo for    (56) Theft $50-$249      (14) Simp aslt w inj    
+[13] (54) Theft &lt; $10         (31) Burg, force ent     (19) Ver thr sex aslt   
+[16] (23) Pocket picking      (10) At rob w aslt       (11) Ag aslt w injury   
+[19] (40) Motor veh theft     (33) Att force entry     (12) At ag aslt w wea   
+[22] (04) Sex aslt w m aslt   (21) Purse snatching     (03) Sex aslt w s aslt  
+[25] (16) Unw sex wo force    (09) At rob inj m asl    (02) Attempted rape     
+[28] (06) Rob w inj m aslt    (15) Sex aslt wo inj     (18) Verbal thr rape    
+[31] (01) Completed rape      (08) At rob inj s asl    (05) Rob w inj s aslt   
+34 Levels: (01) Completed rape (02) Attempted rape ... (59) Attempted theft</code></pre>
+</div>
+</div>
+<p>Let’s count any that have the word “rape” and any that have the word “sex” (sometimes capitalized). Here are the ones that BJS counts in this category.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb89"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a>dataExt <span class="sc">|&gt;</span></span>
+<span id="cb89-2"><a href="#cb89-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">grepl</span>(<span class="st">"rape|[Ss]ex"</span>, V4529)) <span class="sc">|&gt;</span></span>
+<span id="cb89-3"><a href="#cb89-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(V4529)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                   V4529
+1  (19) Ver thr sex aslt
+2 (04) Sex aslt w m aslt
+3 (03) Sex aslt w s aslt
+4  (16) Unw sex wo force
+5    (02) Attempted rape
+6   (15) Sex aslt wo inj
+7   (18) Verbal thr rape
+8    (01) Completed rape</code></pre>
+</div>
+</div>
+<p>The estimated number of all sexual assaults in 2022 in the United States is</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb91"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a>dataExt <span class="sc">|&gt;</span></span>
+<span id="cb91-2"><a href="#cb91-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">grepl</span>(<span class="st">"rape|[Ss]ex"</span>, V4529)) <span class="sc">|&gt;</span></span>
+<span id="cb91-3"><a href="#cb91-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="fu">sum</span>(SERIES_WEIGHT))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  sum(SERIES_WEIGHT)
+1             457268</code></pre>
+</div>
+</div>
+<p>Since 2019 we have had no national crime estimates based on police reports.</p>
+</section>
+<section id="calculating-victimization-by-demographics" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Calculating victimization by demographics</h1>
+<p>In the remainder of these notes, we will examine relationships between victimization and the respondents’ features, like age (<code>V3014</code>), marital status (<code>V3015</code>), and sex (<code>V3018</code>). To make the code more clear, let’s give these variables more intelligible names.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb93"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb93-1"><a href="#cb93-1" aria-hidden="true" tabindex="-1"></a>dataExt <span class="ot">&lt;-</span> dataExt <span class="sc">|&gt;</span></span>
+<span id="cb93-2"><a href="#cb93-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">age=</span>V3014, <span class="at">marital=</span>V3015, <span class="at">sex=</span>V3018)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Perhaps we are interested in which crimes disproportionately affect men and which disproportionately affect women. Start by tabulating crime type by sex.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb94"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a>dataExt <span class="sc">|&gt;</span></span>
+<span id="cb94-2"><a href="#cb94-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(V4529, sex) <span class="sc">|&gt;</span></span>
+<span id="cb94-3"><a href="#cb94-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">count=</span><span class="fu">sum</span>(SERIES_WEIGHT)) <span class="sc">|&gt;</span></span>
+<span id="cb94-4"><a href="#cb94-4" aria-hidden="true" tabindex="-1"></a>   <span class="fu">print</span>(<span class="at">n=</span><span class="cn">Inf</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'V4529'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 65 × 3
+# Groups:   V4529 [33]
+   V4529                    sex           count
+   &lt;fct&gt;                    &lt;fct&gt;         &lt;dbl&gt;
+ 1 (01) Completed rape      (1) Male     18080.
+ 2 (01) Completed rape      (2) Female  109442.
+ 3 (02) Attempted rape      (1) Male      2190.
+ 4 (02) Attempted rape      (2) Female   65140.
+ 5 (03) Sex aslt w s aslt   (2) Female   27038.
+ 6 (04) Sex aslt w m aslt   (1) Male       677.
+ 7 (04) Sex aslt w m aslt   (2) Female    6834.
+ 8 (05) Rob w inj s aslt    (1) Male     52000.
+ 9 (05) Rob w inj s aslt    (2) Female   35026.
+10 (06) Rob w inj m aslt    (1) Male     16581.
+11 (06) Rob w inj m aslt    (2) Female   72039.
+12 (07) Rob wo injury       (1) Male    102379.
+13 (07) Rob wo injury       (2) Female  114209.
+14 (08) At rob inj s asl    (1) Male     16131.
+15 (08) At rob inj s asl    (2) Female    9065.
+16 (09) At rob inj m asl    (1) Male     31641.
+17 (09) At rob inj m asl    (2) Female   16255.
+18 (10) At rob w aslt       (1) Male     57154.
+19 (10) At rob w aslt       (2) Female   62125.
+20 (11) Ag aslt w injury    (1) Male    195301.
+21 (11) Ag aslt w injury    (2) Female  254541.
+22 (12) At ag aslt w wea    (1) Male    189557.
+23 (12) At ag aslt w wea    (2) Female  207692.
+24 (13) Thr aslt w weap     (1) Male    402951.
+25 (13) Thr aslt w weap     (2) Female  235001.
+26 (14) Simp aslt w inj     (1) Male    214975.
+27 (14) Simp aslt w inj     (2) Female  363093.
+28 (15) Sex aslt wo inj     (1) Male     22433.
+29 (15) Sex aslt wo inj     (2) Female   95645.
+30 (16) Unw sex wo force    (1) Male      7980.
+31 (16) Unw sex wo force    (2) Female   44446.
+32 (17) Asl wo weap, wo inj (1) Male    648373.
+33 (17) Asl wo weap, wo inj (2) Female  647384.
+34 (18) Verbal thr rape     (1) Male     15134.
+35 (18) Verbal thr rape     (2) Female   26727.
+36 (19) Ver thr sex aslt    (1) Male      5480.
+37 (19) Ver thr sex aslt    (2) Female   10021.
+38 (20) Verbal thr aslt     (1) Male   1021068.
+39 (20) Verbal thr aslt     (2) Female  957555.
+40 (21) Purse snatching     (1) Male      1947.
+41 (21) Purse snatching     (2) Female   33428.
+42 (23) Pocket picking      (1) Male     92254.
+43 (23) Pocket picking      (2) Female   32249.
+44 (31) Burg, force ent     (1) Male    177579.
+45 (31) Burg, force ent     (2) Female  371623.
+46 (32) Burg, ent wo for    (1) Male    467653.
+47 (32) Burg, ent wo for    (2) Female  606561.
+48 (33) Att force entry     (1) Male    140494.
+49 (33) Att force entry     (2) Female  172036.
+50 (40) Motor veh theft     (1) Male    249986.
+51 (40) Motor veh theft     (2) Female  268811.
+52 (41) At mtr veh theft    (1) Male     91918.
+53 (41) At mtr veh theft    (2) Female  101140.
+54 (54) Theft &lt; $10         (1) Male    255762.
+55 (54) Theft &lt; $10         (2) Female  367273.
+56 (55) Theft $10-$49       (1) Male    820707.
+57 (55) Theft $10-$49       (2) Female  914912.
+58 (56) Theft $50-$249      (1) Male   1377060.
+59 (56) Theft $50-$249      (2) Female 1591759.
+60 (57) Theft $250+         (1) Male   1649266.
+61 (57) Theft $250+         (2) Female 1408679.
+62 (58) Theft value NA      (1) Male    809339.
+63 (58) Theft value NA      (2) Female  989933.
+64 (59) Attempted theft     (1) Male    400789.
+65 (59) Attempted theft     (2) Female  348795.</code></pre>
+</div>
+</div>
+<p>R produces a long narrow table. This format is sometimes useful, particularly when merging data frames. However, in this case having a table with counts for men and women side-by-side would be easier to absorb. <code>pivot_wider()</code> will swing the sex column into two side-by-side columns.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb97"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb97-1"><a href="#cb97-1" aria-hidden="true" tabindex="-1"></a>dataExt <span class="sc">|&gt;</span></span>
+<span id="cb97-2"><a href="#cb97-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(V4529, sex) <span class="sc">|&gt;</span></span>
+<span id="cb97-3"><a href="#cb97-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">count=</span><span class="fu">sum</span>(SERIES_WEIGHT)) <span class="sc">|&gt;</span></span>
+<span id="cb97-4"><a href="#cb97-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from=</span>sex,</span>
+<span id="cb97-5"><a href="#cb97-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">values_from=</span>count,</span>
+<span id="cb97-6"><a href="#cb97-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">values_fill =</span> <span class="dv">0</span>) <span class="sc">|&gt;</span> <span class="co"># fill in NAs with 0</span></span>
+<span id="cb97-7"><a href="#cb97-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="at">n=</span><span class="cn">Inf</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'V4529'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 33 × 3
+# Groups:   V4529 [33]
+   V4529                    `(1) Male` `(2) Female`
+   &lt;fct&gt;                         &lt;dbl&gt;        &lt;dbl&gt;
+ 1 (01) Completed rape          18080.      109442.
+ 2 (02) Attempted rape           2190.       65140.
+ 3 (03) Sex aslt w s aslt           0        27038.
+ 4 (04) Sex aslt w m aslt         677.        6834.
+ 5 (05) Rob w inj s aslt        52000.       35026.
+ 6 (06) Rob w inj m aslt        16581.       72039.
+ 7 (07) Rob wo injury          102379.      114209.
+ 8 (08) At rob inj s asl        16131.        9065.
+ 9 (09) At rob inj m asl        31641.       16255.
+10 (10) At rob w aslt           57154.       62125.
+11 (11) Ag aslt w injury       195301.      254541.
+12 (12) At ag aslt w wea       189557.      207692.
+13 (13) Thr aslt w weap        402951.      235001.
+14 (14) Simp aslt w inj        214975.      363093.
+15 (15) Sex aslt wo inj         22433.       95645.
+16 (16) Unw sex wo force         7980.       44446.
+17 (17) Asl wo weap, wo inj    648373.      647384.
+18 (18) Verbal thr rape         15134.       26727.
+19 (19) Ver thr sex aslt         5480.       10021.
+20 (20) Verbal thr aslt       1021068.      957555.
+21 (21) Purse snatching          1947.       33428.
+22 (23) Pocket picking          92254.       32249.
+23 (31) Burg, force ent        177579.      371623.
+24 (32) Burg, ent wo for       467653.      606561.
+25 (33) Att force entry        140494.      172036.
+26 (40) Motor veh theft        249986.      268811.
+27 (41) At mtr veh theft        91918.      101140.
+28 (54) Theft &lt; $10            255762.      367273.
+29 (55) Theft $10-$49          820707.      914912.
+30 (56) Theft $50-$249        1377060.     1591759.
+31 (57) Theft $250+           1649266.     1408679.
+32 (58) Theft value NA         809339.      989933.
+33 (59) Attempted theft        400789.      348795.</code></pre>
+</div>
+</div>
+<p>Lastly, let’s normalize the columns so that they add up to 100%, giving us the distribution of crime types within each sex.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb100"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb100-1"><a href="#cb100-1" aria-hidden="true" tabindex="-1"></a>dataExt <span class="sc">|&gt;</span></span>
+<span id="cb100-2"><a href="#cb100-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(V4529, sex) <span class="sc">|&gt;</span></span>
+<span id="cb100-3"><a href="#cb100-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">count=</span><span class="fu">sum</span>(SERIES_WEIGHT)) <span class="sc">|&gt;</span></span>
+<span id="cb100-4"><a href="#cb100-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span>  <span class="co"># without this, percentages are computed within crime type</span></span>
+<span id="cb100-5"><a href="#cb100-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from  =</span> sex,</span>
+<span id="cb100-6"><a href="#cb100-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">values_from =</span> count,</span>
+<span id="cb100-7"><a href="#cb100-7" aria-hidden="true" tabindex="-1"></a>              <span class="at">values_fill =</span> <span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb100-8"><a href="#cb100-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">male=</span><span class="st">`</span><span class="at">(1) Male</span><span class="st">`</span>, <span class="at">female=</span><span class="st">`</span><span class="at">(2) Female</span><span class="st">`</span>) <span class="sc">|&gt;</span></span>
+<span id="cb100-9"><a href="#cb100-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">male  =</span><span class="dv">100</span><span class="sc">*</span>male<span class="sc">/</span><span class="fu">sum</span>(male),</span>
+<span id="cb100-10"><a href="#cb100-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">female=</span><span class="dv">100</span><span class="sc">*</span>female<span class="sc">/</span><span class="fu">sum</span>(female),</span>
+<span id="cb100-11"><a href="#cb100-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">ratio=</span>female<span class="sc">/</span>male) <span class="sc">|&gt;</span></span>
+<span id="cb100-12"><a href="#cb100-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(ratio)) <span class="sc">|&gt;</span></span>
+<span id="cb100-13"><a href="#cb100-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="at">n=</span><span class="cn">Inf</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'V4529'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 33 × 4
+   V4529                        male  female   ratio
+   &lt;fct&gt;                       &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+ 1 (03) Sex aslt w s aslt    0        0.256  Inf    
+ 2 (02) Attempted rape       0.0229   0.616   26.9  
+ 3 (21) Purse snatching      0.0204   0.316   15.5  
+ 4 (04) Sex aslt w m aslt    0.00709  0.0647   9.12 
+ 5 (01) Completed rape       0.189    1.04     5.47 
+ 6 (16) Unw sex wo force     0.0835   0.421    5.04 
+ 7 (06) Rob w inj m aslt     0.174    0.682    3.93 
+ 8 (15) Sex aslt wo inj      0.235    0.905    3.86 
+ 9 (31) Burg, force ent      1.86     3.52     1.89 
+10 (19) Ver thr sex aslt     0.0574   0.0948   1.65 
+11 (18) Verbal thr rape      0.158    0.253    1.60 
+12 (14) Simp aslt w inj      2.25     3.44     1.53 
+13 (54) Theft &lt; $10          2.68     3.48     1.30 
+14 (11) Ag aslt w injury     2.04     2.41     1.18 
+15 (32) Burg, ent wo for     4.89     5.74     1.17 
+16 (33) Att force entry      1.47     1.63     1.11 
+17 (58) Theft value NA       8.47     9.37     1.11 
+18 (56) Theft $50-$249      14.4     15.1      1.05 
+19 (07) Rob wo injury        1.07     1.08     1.01 
+20 (55) Theft $10-$49        8.59     8.66     1.01 
+21 (41) At mtr veh theft     0.962    0.957    0.995
+22 (12) At ag aslt w wea     1.98     1.97     0.991
+23 (10) At rob w aslt        0.598    0.588    0.983
+24 (40) Motor veh theft      2.62     2.54     0.972
+25 (17) Asl wo weap, wo inj  6.79     6.13     0.903
+26 (20) Verbal thr aslt     10.7      9.06     0.848
+27 (59) Attempted theft      4.19     3.30     0.787
+28 (57) Theft $250+         17.3     13.3      0.772
+29 (05) Rob w inj s aslt     0.544    0.331    0.609
+30 (13) Thr aslt w weap      4.22     2.22     0.527
+31 (08) At rob inj s asl     0.169    0.0858   0.508
+32 (09) At rob inj m asl     0.331    0.154    0.465
+33 (23) Pocket picking       0.966    0.305    0.316</code></pre>
+</div>
+</div>
+<p>Sexual assaults disproportionately affect women, while pocket picking and attempted robbery involving assaults disproportionately affect men.</p>
+<p>The sequence <code>group_by()</code>, <code>summarize()</code>, <code>ungroup()</code> is so common that there is an alternative way to do the same calculation more compactly with <code>.by</code> in <code>summarize()</code>. A frequent R error is to use <code>group_by()</code>, then forget that the data is still grouped, and continue to do calculations unaware that they are occurring only within groups. The <code>.by</code> argument also helps avoid this error.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb103"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" aria-hidden="true" tabindex="-1"></a><span class="co"># can reduce the group_by, summarize, ungroup with .by</span></span>
+<span id="cb103-2"><a href="#cb103-2" aria-hidden="true" tabindex="-1"></a>dataExt <span class="sc">|&gt;</span></span>
+<span id="cb103-3"><a href="#cb103-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">count=</span><span class="fu">sum</span>(SERIES_WEIGHT),</span>
+<span id="cb103-4"><a href="#cb103-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">.by =</span> <span class="fu">c</span>(V4529, sex)) <span class="sc">|&gt;</span> <span class="co"># eliminates group/ungroup</span></span>
+<span id="cb103-5"><a href="#cb103-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from  =</span> sex,</span>
+<span id="cb103-6"><a href="#cb103-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">values_from =</span> count,</span>
+<span id="cb103-7"><a href="#cb103-7" aria-hidden="true" tabindex="-1"></a>              <span class="at">values_fill =</span> <span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb103-8"><a href="#cb103-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">male=</span><span class="st">`</span><span class="at">(1) Male</span><span class="st">`</span>, <span class="at">female=</span><span class="st">`</span><span class="at">(2) Female</span><span class="st">`</span>) <span class="sc">|&gt;</span></span>
+<span id="cb103-9"><a href="#cb103-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">male  =</span><span class="dv">100</span><span class="sc">*</span>male<span class="sc">/</span><span class="fu">sum</span>(male),</span>
+<span id="cb103-10"><a href="#cb103-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">female=</span><span class="dv">100</span><span class="sc">*</span>female<span class="sc">/</span><span class="fu">sum</span>(female),</span>
+<span id="cb103-11"><a href="#cb103-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">ratio=</span>female<span class="sc">/</span>male) <span class="sc">|&gt;</span></span>
+<span id="cb103-12"><a href="#cb103-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(ratio)) <span class="sc">|&gt;</span></span>
+<span id="cb103-13"><a href="#cb103-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="at">n=</span><span class="cn">Inf</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 33 × 4
+   V4529                        male  female   ratio
+   &lt;fct&gt;                       &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+ 1 (03) Sex aslt w s aslt    0        0.256  Inf    
+ 2 (02) Attempted rape       0.0229   0.616   26.9  
+ 3 (21) Purse snatching      0.0204   0.316   15.5  
+ 4 (04) Sex aslt w m aslt    0.00709  0.0647   9.12 
+ 5 (01) Completed rape       0.189    1.04     5.47 
+ 6 (16) Unw sex wo force     0.0835   0.421    5.04 
+ 7 (06) Rob w inj m aslt     0.174    0.682    3.93 
+ 8 (15) Sex aslt wo inj      0.235    0.905    3.86 
+ 9 (31) Burg, force ent      1.86     3.52     1.89 
+10 (19) Ver thr sex aslt     0.0574   0.0948   1.65 
+11 (18) Verbal thr rape      0.158    0.253    1.60 
+12 (14) Simp aslt w inj      2.25     3.44     1.53 
+13 (54) Theft &lt; $10          2.68     3.48     1.30 
+14 (11) Ag aslt w injury     2.04     2.41     1.18 
+15 (32) Burg, ent wo for     4.89     5.74     1.17 
+16 (33) Att force entry      1.47     1.63     1.11 
+17 (58) Theft value NA       8.47     9.37     1.11 
+18 (56) Theft $50-$249      14.4     15.1      1.05 
+19 (07) Rob wo injury        1.07     1.08     1.01 
+20 (55) Theft $10-$49        8.59     8.66     1.01 
+21 (41) At mtr veh theft     0.962    0.957    0.995
+22 (12) At ag aslt w wea     1.98     1.97     0.991
+23 (10) At rob w aslt        0.598    0.588    0.983
+24 (40) Motor veh theft      2.62     2.54     0.972
+25 (17) Asl wo weap, wo inj  6.79     6.13     0.903
+26 (20) Verbal thr aslt     10.7      9.06     0.848
+27 (59) Attempted theft      4.19     3.30     0.787
+28 (57) Theft $250+         17.3     13.3      0.772
+29 (05) Rob w inj s aslt     0.544    0.331    0.609
+30 (13) Thr aslt w weap      4.22     2.22     0.527
+31 (08) At rob inj s asl     0.169    0.0858   0.508
+32 (09) At rob inj m asl     0.331    0.154    0.465
+33 (23) Pocket picking       0.966    0.305    0.316</code></pre>
+</div>
+</div>
+<p>We can do a similar calculation by age. First, let’s discretize age into some fixed age bins. Then, we can repeat the same calculation to learn about victimization differences by age. I have sorted the results by the 18-24 age category, but you can change it to your age category if you wish.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb105"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1" aria-hidden="true" tabindex="-1"></a><span class="co"># can reduce the group_by, summarize, ungroup with .by</span></span>
+<span id="cb105-2"><a href="#cb105-2" aria-hidden="true" tabindex="-1"></a>dataExt <span class="sc">|&gt;</span></span>
+<span id="cb105-3"><a href="#cb105-3" aria-hidden="true" tabindex="-1"></a>   <span class="fu">mutate</span>(<span class="at">ageGroup =</span> </span>
+<span id="cb105-4"><a href="#cb105-4" aria-hidden="true" tabindex="-1"></a>             <span class="fu">cut</span>(age, </span>
+<span id="cb105-5"><a href="#cb105-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">17</span>, <span class="dv">24</span>, <span class="dv">34</span>, <span class="dv">49</span>, <span class="dv">64</span>, <span class="cn">Inf</span>),</span>
+<span id="cb105-6"><a href="#cb105-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"12-17"</span>,<span class="st">"18-24"</span>,<span class="st">"25-34"</span>,</span>
+<span id="cb105-7"><a href="#cb105-7" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"35-49"</span>,<span class="st">"50-64"</span>,<span class="st">"65+"</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb105-8"><a href="#cb105-8" aria-hidden="true" tabindex="-1"></a>   <span class="fu">summarize</span>(<span class="at">count=</span><span class="fu">sum</span>(SERIES_WEIGHT),</span>
+<span id="cb105-9"><a href="#cb105-9" aria-hidden="true" tabindex="-1"></a>             <span class="at">.by =</span> <span class="fu">c</span>(V4529, ageGroup)) <span class="sc">|&gt;</span></span>
+<span id="cb105-10"><a href="#cb105-10" aria-hidden="true" tabindex="-1"></a>   <span class="fu">pivot_wider</span>(<span class="at">names_from  =</span> ageGroup,</span>
+<span id="cb105-11"><a href="#cb105-11" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_from =</span> count,</span>
+<span id="cb105-12"><a href="#cb105-12" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_fill =</span> <span class="dv">0</span>,</span>
+<span id="cb105-13"><a href="#cb105-13" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_sort =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="co"># keep age groups ordered</span></span>
+<span id="cb105-14"><a href="#cb105-14" aria-hidden="true" tabindex="-1"></a>   <span class="co"># apply the same function to every column, except V4529</span></span>
+<span id="cb105-15"><a href="#cb105-15" aria-hidden="true" tabindex="-1"></a>   <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="sc">-</span>V4529, <span class="cf">function</span>(x) <span class="dv">100</span><span class="sc">*</span>x<span class="sc">/</span><span class="fu">sum</span>(x))) <span class="sc">|&gt;</span></span>
+<span id="cb105-16"><a href="#cb105-16" aria-hidden="true" tabindex="-1"></a>   <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="st">`</span><span class="at">18-24</span><span class="st">`</span>)) <span class="sc">|&gt;</span> <span class="co"># you can change to your age group</span></span>
+<span id="cb105-17"><a href="#cb105-17" aria-hidden="true" tabindex="-1"></a>   <span class="fu">print</span>(<span class="at">n=</span><span class="cn">Inf</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 33 × 7
+   V4529                    `12-17` `18-24` `25-34` `35-49` `50-64`   `65+`
+   &lt;fct&gt;                      &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+ 1 (56) Theft $50-$249        9.31   13.0   16.2    16.1    14.9    12.9   
+ 2 (57) Theft $250+           4.04   11.8   16.1    17.7    16.2    14.3   
+ 3 (20) Verbal thr aslt      14.2     9.81  10.1     8.65   11.1     7.99  
+ 4 (55) Theft $10-$49         4.14    8.81   9.11    8.16    7.48   12.1   
+ 5 (58) Theft value NA        4.70    7.41   8.63    8.71   10.6    10.1   
+ 6 (17) Asl wo weap, wo inj  23.5     6.29   6.27    7.01    3.88    4.09  
+ 7 (13) Thr aslt w weap       3.63    4.74   3.33    3.13    3.01    1.50  
+ 8 (32) Burg, ent wo for      0.743   4.25   3.61    5.00    6.36    9.99  
+ 9 (12) At ag aslt w wea      4.90    3.56   1.38    1.91    1.73    0.924 
+10 (11) Ag aslt w injury      3.39    3.52   2.29    2.04    2.33    0.648 
+11 (31) Burg, force ent       0.319   3.44   1.63    3.23    3.00    3.33  
+12 (14) Simp aslt w inj       9.17    3.42   3.22    2.11    2.53    1.59  
+13 (59) Attempted theft       1.12    2.93   3.86    3.71    3.91    4.94  
+14 (40) Motor veh theft       0.657   2.62   2.39    2.78    2.75    2.85  
+15 (54) Theft &lt; $10           4.11    2.45   3.74    2.81    2.69    3.54  
+16 (15) Sex aslt wo inj       2.30    1.76   0.432   0.273   0.409   0     
+17 (01) Completed rape        0.202   1.60   1.04    0.516   0.0606  0.340 
+18 (07) Rob wo injury         1.77    1.36   0.992   0.767   1.07    1.31  
+19 (06) Rob w inj m aslt      0.949   1.26   0.878   0.0208  0.0447  0.197 
+20 (02) Attempted rape        0.239   1.10   0.113   0.377   0.214   0.110 
+21 (21) Purse snatching       0       1.04   0       0       0.119   0.126 
+22 (33) Att force entry       0       0.695  1.80    1.56    1.47    2.67  
+23 (10) At rob w aslt         0.595   0.642  0.511   0.458   0.751   0.681 
+24 (23) Pocket picking        1.66    0.432  0.438   0.489   0.543   1.14  
+25 (41) At mtr veh theft      0       0.426  0.880   1.25    1.26    0.883 
+26 (08) At rob inj s asl      0.979   0.397  0.0819  0.0448  0       0     
+27 (16) Unw sex wo force      2.17    0.387  0.120   0       0.246   0.245 
+28 (18) Verbal thr rape       0.128   0.303  0.157   0.185   0.348   0.0321
+29 (05) Rob w inj s aslt      0       0.187  0.399   0.258   0.846   0.525 
+30 (03) Sex aslt w s aslt     0       0.172  0.0642  0       0       0.771 
+31 (09) At rob inj m asl      0.363   0.133  0.120   0.566   0.0915  0.103 
+32 (19) Ver thr sex aslt      0.293   0      0.115   0.0918  0.0167  0.0857
+33 (04) Sex aslt w m aslt     0.418   0      0       0.0421  0.0345  0     </code></pre>
+</div>
+</div>
+<p>Since we have made many changes to the dataset, I find it useful to save the final version. This way I can simply <code>load()</code> the data again later and know that it already has all the edits and changes that I have made.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb107"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb107-1"><a href="#cb107-1" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(dataExt, <span class="at">file=</span><span class="st">"NCVS2022.RData"</span>, <span class="at">compress=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-FisherGross2025" class="csl-entry" role="listitem">
+Fisher, Bonnie S., and Rachel L. Gross. 2025. <span>“The Evolution of the Measurement of Rape and Sexual Assault over 50 Years: Milestones, Definitions, Operationalizations, and Classifications.”</span> <em>Journal of Contemporary Criminal Justice</em> 41 (1): 166–95. <a href="https://doi.org/10.1177/10439862241290352">https://doi.org/10.1177/10439862241290352</a>.
+</div>
+</div></section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+    const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+    const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+    let newTheme = '';
+    if(darkModeDefault) {
+      newTheme = isAlternate ? baseTheme : alternateTheme;
+    } else {
+      newTheme = isAlternate ? alternateTheme : baseTheme;
+    }
+    const changeGiscusTheme = () => {
+      // From: https://github.com/giscus/giscus/issues/336
+      const sendMessage = (message) => {
+        const iframe = document.querySelector('iframe.giscus-frame');
+        if (!iframe) return;
+        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+      }
+      sendMessage({
+        setConfig: {
+          theme: newTheme
+        }
+      });
+    }
+    const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+    if (isGiscussLoaded) {
+      changeGiscusTheme();
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  const darkModeDefault = true;
+  let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+    toggleGiscusIfUsed(toAlternate, darkModeDefault);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
