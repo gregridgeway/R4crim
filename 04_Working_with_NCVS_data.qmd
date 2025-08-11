@@ -69,7 +69,6 @@ First, we will download the NCVS 2022 data, [ICPSR 38603](https://www.icpsr.umic
 
 After unzipping the NCVS files, you will find subfolders called DS0001, DS0002, DS0003, DS0004, and DS0005. 
 ```{r}
-#| comment: ""
 list.files("NCVS2022/",recursive = TRUE)
 list.files("NCVS2023/",recursive = TRUE)
 ```
@@ -77,7 +76,6 @@ Inside each of these subfolders you see an R data file with the extension .rda. 
 
 Let's start loading these datasets. We will skip the DS0001 subfolder, which contains basic survey information on the targeted addressed. The DS0002 folder contains data on the households included in the survey.
 ```{r}
-#| comment: ""
 load("NCVS2022/DS0002/38603-0002-Data.rda")
 load("NCVS2023/DS0002/38962-0002-Data.rda")
 
@@ -87,7 +85,7 @@ dataHH23 <- da38962.0002
 ```
 Take a peek at the first couple of rows
 ```{r}
-#| comment: ""
+#| message: false
 library(dplyr)
 library(tidyr)
 
@@ -192,8 +190,8 @@ Not all information from the household and person files are in the extract file,
 Now that the datasets are loaded and renamed, we can remove objects from our working environment that we no longer need. We can use `rm()` to accomplish this.
 ```{r}
 #| results: 'hold'
-rm(da38603.0001,da38603.0002,da38603.0003,da38603.0004,da38603.0005,
-   da38962.0001,da38962.0002,da38962.0003,da38962.0004,da38962.0005)
+rm(da38603.0002,da38603.0003,da38603.0004,da38603.0005,
+   da38962.0002,da38962.0003,da38962.0004,da38962.0005)
 ```
 
 # Combining 2022 and 2023 data
@@ -260,11 +258,9 @@ This column answers "Besides the respondent, which household member(s) owned the
 #| error: true
 dataExt <- dataExt22 |>
   select(-V2061) |>
-  mutate(V4313 = as.character(V4313),
-         V4313 = case_match(V4313,
-                            "(006) 6" ~ "6",
-                            .default = NA),
-         V4313 = as.numeric(V4313)) |>
+  mutate(V4313 = case_match(V4313,
+                            "(06) 6" ~ 6,
+                            .default = NA)) |>
 
   bind_rows(dataExt23 |>
               select(-V2061) |>
@@ -277,28 +273,24 @@ varsExt |> filter(varname=="V4357A")
 dataExt22 |> count(V4357A)
 dataExt23 |> count(V4357A)
 ```
-You might have seen this word "Residue" show up before. For the NCVS, BJS records "Residue" when there is a data entry error resulting in an out-of-range code, an incorrect or unusable answer by the respondent, or the absence of an entry for a question that should have been asked. Sometimes you might also see "Oout of universe/blank". This happens when a value is outside the range of questions to be answered. For example, "Received Medical Care for Injury", only victims who report being injured are asked whether they received medical care. All other victims skip this question.
+You might have seen this word "Residue" show up before. For the NCVS, BJS records "Residue" when there is a data entry error resulting in an out-of-range code, an incorrect or unusable answer by the respondent, or the absence of an entry for a question that should have been asked. Sometimes you might also see "Out of universe/blank." This happens when a value is outside the range of questions to be answered. For example, "Received Medical Care for Injury," only victims who report being injured are asked whether they received medical care. All other victims skip this question.
 
-I will solve this issue by converting the 2022 values to a factor variable. It would be nice to just make it numeric, but the "(005) 5 handguns or more" response makes that awkward.
+I will solve this issue by recoding the 2023 values to numeric values.
 ```{r}
 dataExt <- dataExt22 |>
   select(-V2061) |>
-  mutate(V4313 = as.character(V4313),
-         V4313 = case_match(V4313,
-                            "(06) 6" ~ "6",
-                            .default = NA),
-         V4313 = as.numeric(V4313),
-         V4357A = factor(V4357A,
-                         levels=c(1,2,3,997,998),
-                         labels=c("(001) 1","(002) 2",
-                                  "(003) 3",
-                                  "(997) Don't know",
-                                  "(998) Residue"))) |>
+  mutate(V4313 = case_match(V4313,
+                            "(06) 6" ~ 6,
+                            .default = NA)) |>
   bind_rows(dataExt23 |>
               select(-V2061) |>
-              mutate(V4126=as.factor(V4126)))
+              mutate(V4126 = as.factor(V4126),
+                     V4357A = case_match(V4357A,
+                                         "(001) 1" ~ 1,
+                                         "(998) Residue" ~ 998,
+                                         .default=NA)))
 ```
-Success! Now let's check that all is okay now
+Success! Now let's check that all is okay now.
 ```{r}
 dataExt |> count(V4126)
 dataExt |> count(V4313)
@@ -313,7 +305,7 @@ We are just going to focus on 2022.
 ```{r}
 dataExt <- dataExt |> filter(V4015==2022)
 ```
-However, BJS reports generally classify by the year of the survey and not by the year of the crime.
+Note that BJS official reports generally classify by the year of the survey and not by the year of the crime.
 
 # BJS modifications and survey weights
 
@@ -331,7 +323,7 @@ dataExt <- dataExt |>
 
 Some crimes happen in a series. For example, a respondent may report on regular domestic abuse that happened numerous times over the last six months. Each incident of domestic abuse is a victimization, but the BJS convention is to include up to 10 occurrences for crimes reported as a series (2023 User Guide, pages 18-19).
 
-Variable `v4016` records the answer to "Altogether, how many times did this type of incident happen during the last 6 months?" and variable `V4019` documents "Can you (respondent) recall enough details of each incident to distinguish them from each other?"
+Variable `V4016` records the answer to "Altogether, how many times did this type of incident happen during the last 6 months?" and variable `V4019` documents "Can you (respondent) recall enough details of each incident to distinguish them from each other?"
 
 Note that the coding of `V4016` has 997 representing "Don't know" and 998 representing "Residue". These are not counts of victimizations. The logic in the `case_when()` statement below checks for counts between 11 and 996 and sets the value of `V4016` to 10 in that case.
 ```{r}
@@ -416,7 +408,7 @@ dataExt |>
   summarize(sum(SERIES_WEIGHT))
 ```
 
-Measuring sexual assault has been complicated by numerous, sometimes major, changes (improvements, more precisely) in the definitions and data collection methods (e.g. question wording). The Uniform Crime Report made a major change to the the [definition of rape changed](http://www.fbi.gov/about-us/cjis/cjis-link/march-2012/ucr-program-changes-definition-of-rape) in 2013. The NCVS's most recent change was in 2024. See @fisher2024evolution for an extended discussion and timeline of the changes.
+Measuring sexual assault has been complicated by numerous, sometimes major, changes (improvements, more precisely) in the definitions and data collection methods (e.g. question wording). The Uniform Crime Report made a major change to the the [definition of rape changed](https://le.fbi.gov/cjis-division/cjis-link/ucr-program-changes-definition-of-rape) in 2013. The NCVS's most recent change was in 2024. See @FisherGross2025 for an extended discussion and timeline of the changes.
 
 Here is the NCVS estimate of the number of sexual assaults (attempted and completed) for 2022.
 ```{r}
@@ -486,7 +478,7 @@ dataExt |>
 ```
 Sexual assaults disproportionately affect women, while pocket picking and attempted robbery involving assaults disproportionately affect men.
 
-The sequence `group_by()`, `summarize()`, `ungroup()` is so common that there is an alternative way to do the same calculation more compactly with `.by` in `summarize()`.
+The sequence `group_by()`, `summarize()`, `ungroup()` is so common that there is an alternative way to do the same calculation more compactly with `.by` in `summarize()`. A frequent R error is to use `group_by()`, then forget that the data is still grouped, and continue to do calculations unaware that they are occurring only within groups. The `.by` argument also helps avoid this error.
 ```{r}
 # can reduce the group_by, summarize, ungroup with .by
 dataExt |>
