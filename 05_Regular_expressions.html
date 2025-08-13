@@ -1,0 +1,1869 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Greg Ridgeway">
+<meta name="author" content="Ruth Moyer">
+<meta name="dcterms.date" content="2025-08-13">
+
+<title>Regular Expressions</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="05_Regular_expressions_files/libs/clipboard/clipboard.min.js"></script>
+<script src="05_Regular_expressions_files/libs/quarto-html/quarto.js"></script>
+<script src="05_Regular_expressions_files/libs/quarto-html/popper.min.js"></script>
+<script src="05_Regular_expressions_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="05_Regular_expressions_files/libs/quarto-html/anchor.min.js"></script>
+<link href="05_Regular_expressions_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="05_Regular_expressions_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="05_Regular_expressions_files/libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="05_Regular_expressions_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="05_Regular_expressions_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="05_Regular_expressions_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="05_Regular_expressions_files/libs/bootstrap/bootstrap-dark.min.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#finding-patterns-in-text-with-grep" id="toc-finding-patterns-in-text-with-grep" class="nav-link" data-scroll-target="#finding-patterns-in-text-with-grep"><span class="header-section-number">2</span> Finding patterns in text with <code>grep()</code></a>
+  <ul class="collapse">
+  <li><a href="#find-letters-and-numbers" id="toc-find-letters-and-numbers" class="nav-link" data-scroll-target="#find-letters-and-numbers"><span class="header-section-number">2.1</span> Find letters and numbers</a>
+  <ul class="collapse">
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">2.1.1</span> Exercises</a></li>
+  </ul></li>
+  <li><a href="#more-symbols-that-help-with-greping" id="toc-more-symbols-that-help-with-greping" class="nav-link" data-scroll-target="#more-symbols-that-help-with-greping"><span class="header-section-number">2.2</span> More symbols that help with greping</a>
+  <ul class="collapse">
+  <li><a href="#carets" id="toc-carets" class="nav-link" data-scroll-target="#carets"><span class="header-section-number">2.2.1</span> Carets <code>^</code></a></li>
+  <li><a href="#dollar-signs" id="toc-dollar-signs" class="nav-link" data-scroll-target="#dollar-signs"><span class="header-section-number">2.2.2</span> Dollar Signs <code>$</code></a></li>
+  <li><a href="#plus-sign" id="toc-plus-sign" class="nav-link" data-scroll-target="#plus-sign"><span class="header-section-number">2.2.3</span> Plus Sign <code>+</code></a></li>
+  <li><a href="#exercises-1" id="toc-exercises-1" class="nav-link" data-scroll-target="#exercises-1"><span class="header-section-number">2.2.4</span> Exercises</a></li>
+  <li><a href="#parentheses" id="toc-parentheses" class="nav-link" data-scroll-target="#parentheses"><span class="header-section-number">2.2.5</span> Parentheses <code>()</code></a></li>
+  <li><a href="#vertical-bar" id="toc-vertical-bar" class="nav-link" data-scroll-target="#vertical-bar"><span class="header-section-number">2.2.6</span> Vertical Bar <code>|</code></a></li>
+  <li><a href="#question-mark" id="toc-question-mark" class="nav-link" data-scroll-target="#question-mark"><span class="header-section-number">2.2.7</span> Question Mark <code>?</code></a></li>
+  <li><a href="#boundaries-b" id="toc-boundaries-b" class="nav-link" data-scroll-target="#boundaries-b"><span class="header-section-number">2.2.8</span> Boundaries <code>\b</code></a></li>
+  <li><a href="#exercises-2" id="toc-exercises-2" class="nav-link" data-scroll-target="#exercises-2"><span class="header-section-number">2.2.9</span> Exercises</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#finding-and-replacing-patterns-in-text-with-gsub" id="toc-finding-and-replacing-patterns-in-text-with-gsub" class="nav-link" data-scroll-target="#finding-and-replacing-patterns-in-text-with-gsub"><span class="header-section-number">3</span> Finding and replacing patterns in text with <code>gsub()</code></a>
+  <ul class="collapse">
+  <li><a href="#basic-find-and-replace-examples" id="toc-basic-find-and-replace-examples" class="nav-link" data-scroll-target="#basic-find-and-replace-examples"><span class="header-section-number">3.1</span> Basic find and replace examples</a>
+  <ul class="collapse">
+  <li><a href="#exercises-3" id="toc-exercises-3" class="nav-link" data-scroll-target="#exercises-3"><span class="header-section-number">3.1.1</span> Exercises</a></li>
+  </ul></li>
+  <li><a href="#back-referencing" id="toc-back-referencing" class="nav-link" data-scroll-target="#back-referencing"><span class="header-section-number">3.2</span> Back-Referencing</a>
+  <ul class="collapse">
+  <li><a href="#class-exercise" id="toc-class-exercise" class="nav-link" data-scroll-target="#class-exercise"><span class="header-section-number">3.2.1</span> Class exercise</a></li>
+  </ul></li>
+  <li><a href="#lookaheads" id="toc-lookaheads" class="nav-link" data-scroll-target="#lookaheads"><span class="header-section-number">3.3</span> Lookaheads</a>
+  <ul class="collapse">
+  <li><a href="#exercises-4" id="toc-exercises-4" class="nav-link" data-scroll-target="#exercises-4"><span class="header-section-number">3.3.1</span> Exercises</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#introduction-to-webscraping-a-practical-application-of-regular-expressions" id="toc-introduction-to-webscraping-a-practical-application-of-regular-expressions" class="nav-link" data-scroll-target="#introduction-to-webscraping-a-practical-application-of-regular-expressions"><span class="header-section-number">4</span> Introduction to Webscraping: A Practical Application of Regular Expressions</a>
+  <ul class="collapse">
+  <li><a href="#the-10000-most-common-english-words" id="toc-the-10000-most-common-english-words" class="nav-link" data-scroll-target="#the-10000-most-common-english-words"><span class="header-section-number">4.1</span> The 10,000 most common English words</a>
+  <ul class="collapse">
+  <li><a href="#exercises-5" id="toc-exercises-5" class="nav-link" data-scroll-target="#exercises-5"><span class="header-section-number">4.1.1</span> Exercises</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#solutions-to-the-exercises" id="toc-solutions-to-the-exercises" class="nav-link" data-scroll-target="#solutions-to-the-exercises"><span class="header-section-number">5</span> Solutions to the exercises</a></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="05_Regular_expressions.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Regular Expressions</h1>
+</div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Authors</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author">Greg Ridgeway <a href="mailto:gridge@upenn.edu" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> </p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            University of Pennsylvania
+          </p>
+      </div>
+    <div class="quarto-title-meta-contents">
+    <p class="author">Ruth Moyer <a href="mailto:moyruth@upenn.edu" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> </p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            University of Pennsylvania
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">August 13, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- In terminal -->
+<!-- quarto render 05_Regular_expressions.qmd -->
+<!-- git commit 05-* -m "commit message" -->
+<!-- git status -->
+<!-- git push -->
+<!-- A function for automating the numbering and wording of the exercise questions -->
+<section id="introduction" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
+<p>A regular expression is a sequence of characters that defines a search pattern. Sometimes we use regular expressions to help us find a pattern in text that we want, like the Find functionality in Word. Other times, we use a regular expression to help us find and <em>replace</em> a piece of text, like the Find and Replace functionality in Word. The two main R functions that we will learn about are <code>grep()</code> and <code>gsub()</code>. You may use them in verb form (e.g., “I need to grep all the gun cases,” “I was grepping like crazy to find all the opioid cases,” “I first had to gsub the commas with semicolons”). Regular expressions are available in numerous other software packages, so everything you learn here will port over to using regular expressions in Linux, Stata, Python, Java, ArcGIS, and many others.</p>
+<p>We have already used regular expressions in previous work that we have done. We wanted to select protests in Philadelphia and ran</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>dataProtest <span class="sc">|&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">grepl</span>(<span class="st">"Philadelphia, PA"</span>, Location))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>When working with NIBRS we cleaned up the column names that had multiple periods in them.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>fmtNames <span class="ot">&lt;-</span> fmt<span class="sc">$</span>Description <span class="sc">|&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>   <span class="fu">strsplit</span>(<span class="at">split =</span> <span class="st">" - "</span>, <span class="at">fixed =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>   <span class="fu">sapply</span>(head, <span class="at">n=</span><span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>   <span class="fu">make.names</span>() <span class="sc">|&gt;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>   <span class="fu">gsub</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">.+(</span><span class="sc">\\</span><span class="st">.|$)"</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">1"</span>, <span class="at">x=</span>_)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>To estimate the number of sexual assault victimizations from the NCVS we selected all the crime labels that had “rape” or “sex” in them.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>dataExt <span class="sc">|&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">grepl</span>(<span class="st">"rape|[Ss]ex"</span>, V4529)) <span class="sc">|&gt;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(V4529)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>All of this will all become clear in these notes.</p>
+</section>
+<section id="finding-patterns-in-text-with-grep" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Finding patterns in text with <code>grep()</code></h1>
+<p>First we will learn about <code>grep()</code>, which was first developed in the early 1970s. <code>grep()</code> searches data for lines that match a given expression. The name <code>grep</code> stands for “globally search a regular expression and print.” Some tangible examples will help us see how <code>grep()</code> works.</p>
+<p>Run the following line that provides a collection of text elements with a diverse range of capitalization, letters, punctuation, and other features. We will use this for practice and testing.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>dataText <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"3718 Locust Walk"</span>,</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>              <span class="st">"4 Privet Drive"</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>              <span class="st">"10880 Malibu Point"</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>              <span class="st">"221B Baker St."</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>              <span class="st">"19104-6286"</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>              <span class="st">"20015"</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>              <span class="st">"90291"</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>              <span class="st">"90210"</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>              <span class="st">"(215) 573-9097"</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>              <span class="st">"215-573-9097"</span>,</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>              <span class="st">"2155739097"</span>,</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>              <span class="st">"Kendall Roy"</span>,</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>              <span class="st">"Roman Roy"</span>,</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>              <span class="st">"Siobhan Roy"</span>,</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>              <span class="st">"Roy Wood, Jr."</span>,</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>              <span class="st">"Royal Caribbean"</span>,</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>              <span class="st">"Casino Royale"</span>,</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>              <span class="st">"two children"</span>,</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>              <span class="st">"2 children"</span>,</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>              <span class="st">"twins"</span>,</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>              <span class="st">"Philadelphia"</span>,</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>              <span class="st">"Philly"</span>,</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>              <span class="st">"Phila"</span>,</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>              <span class="st">"Dr. Phil"</span>,</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>              <span class="st">"$23456"</span>,</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>              <span class="st">"$10000"</span>,</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>              <span class="st">"$60,000"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="find-letters-and-numbers" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="find-letters-and-numbers"><span class="header-section-number">2.1</span> Find letters and numbers</h2>
+<p>Let’s find all of the items that have the letter “a” in <code>dataText</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"a"</span>, dataText)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1]  1  3  4 12 13 14 16 17 21 23</code></pre>
+</div>
+</div>
+<p>This shows the indices of which elements of <code>dataText</code> have an “a” in them. Sure enough the first element, “3718 Locust Walk”, has an “a” and you can confirm that the other indices <code>grep()</code> returned also indicate elements of <code>dataText</code> that have an “a”.</p>
+<p>For most of these notes we are going to set <code>value=TRUE</code>, which will return the actual elements matched rather than their indices. This will make it easier to check that <code>grep()</code> is finding the elements that we are expecting to match.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"a"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "3718 Locust Walk"   "10880 Malibu Point" "221B Baker St."    
+ [4] "Kendall Roy"        "Roman Roy"          "Siobhan Roy"       
+ [7] "Royal Caribbean"    "Casino Royale"      "Philadelphia"      
+[10] "Phila"             </code></pre>
+</div>
+</div>
+<p>As you can see, <code>grep()</code> uses the following general syntax: grep(“what we’re searching for”, the text, and an optional <code>value=TRUE</code> if we want to return text). If we put <code>value=FALSE</code> (which is the default if we do not set <code>value</code>), we will just receive the index in the text where we can find what we are searching for.</p>
+<p>Let’s try another example. Instead of a letter, let’s try to find a number such as “1”. Specifically, which items in <code>dataText</code> have a “1” in them?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"1"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "3718 Locust Walk"   "10880 Malibu Point" "221B Baker St."    
+ [4] "19104-6286"         "20015"              "90291"             
+ [7] "90210"              "(215) 573-9097"     "215-573-9097"      
+[10] "2155739097"         "$10000"            </code></pre>
+</div>
+</div>
+<p>We can also search for multiple characters, instead of individual characters. We place our list of desired characters within square brackets <code>[  ]</code>. For example, let’s find items that contain numbers.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"[0123456789]"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "3718 Locust Walk"   "4 Privet Drive"     "10880 Malibu Point"
+ [4] "221B Baker St."     "19104-6286"         "20015"             
+ [7] "90291"              "90210"              "(215) 573-9097"    
+[10] "215-573-9097"       "2155739097"         "2 children"        
+[13] "$23456"             "$10000"             "$60,000"           </code></pre>
+</div>
+</div>
+<p>If we wanted items that contain an odd number, we could do this.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"[13579]"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "3718 Locust Walk"   "10880 Malibu Point" "221B Baker St."    
+ [4] "19104-6286"         "20015"              "90291"             
+ [7] "90210"              "(215) 573-9097"     "215-573-9097"      
+[10] "2155739097"         "$23456"             "$10000"            </code></pre>
+</div>
+</div>
+<p>So the <code>[]</code> in a regular expression means “match any of these characters.” We can also place square brackets next to each other. For example, let’s say we wanted to find an item in <code>dataText</code> that has four adjacent numbers.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"[0-9][0-9][0-9][0-9]"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "3718 Locust Walk"   "10880 Malibu Point" "19104-6286"        
+ [4] "20015"              "90291"              "90210"             
+ [7] "(215) 573-9097"     "215-573-9097"       "2155739097"        
+[10] "$23456"             "$10000"            </code></pre>
+</div>
+</div>
+<p>Note that we can use the shorthand <code>0-9</code> to mean any number between 0 and 9, including 0 and 9. This regular expression says “find a number, followed by a number, followed by another number, followed by another number.” Alternatively we can use <code>{4}</code> to mean “match four of the previous character”.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"[0-9]{4}"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "3718 Locust Walk"   "10880 Malibu Point" "19104-6286"        
+ [4] "20015"              "90291"              "90210"             
+ [7] "(215) 573-9097"     "215-573-9097"       "2155739097"        
+[10] "$23456"             "$10000"            </code></pre>
+</div>
+</div>
+<p><code>{n}</code> means the preceding item will be matched exactly n times. Note that this also matches text that has five or more numbers in a row, since if they have five numbers in a row, then they will also have four numbers in a row. Later we will learn about how to find exactly four numbers in a row.</p>
+<p>It is not used often, but we can also use the squiggly brackets to make a range.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"[0-9]{5,10}"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "10880 Malibu Point" "19104-6286"         "20015"             
+[4] "90291"              "90210"              "2155739097"        
+[7] "$23456"             "$10000"            </code></pre>
+</div>
+</div>
+<p>Thus <code>{n,m}</code> will find something matched between n and m times. We have used examples above with numbers, but you can apply this syntax to letters.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"[a-zA-Z]{5}"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "3718 Locust Walk"   "4 Privet Drive"     "10880 Malibu Point"
+ [4] "221B Baker St."     "Kendall Roy"        "Roman Roy"         
+ [7] "Siobhan Roy"        "Royal Caribbean"    "Casino Royale"     
+[10] "two children"       "2 children"         "twins"             
+[13] "Philadelphia"       "Philly"             "Phila"             </code></pre>
+</div>
+</div>
+<p>Note how we used the shorthand <code>a-z</code> to mean any lowercase letter and <code>A-Z</code> to mean any uppercase letter. <code>grep()</code> will match a different set of elements if we just search for lower case letters.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"[a-z]{5}"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "3718 Locust Walk"   "4 Privet Drive"     "10880 Malibu Point"
+ [4] "Kendall Roy"        "Siobhan Roy"        "Royal Caribbean"   
+ [7] "Casino Royale"      "two children"       "2 children"        
+[10] "twins"              "Philadelphia"       "Philly"            </code></pre>
+</div>
+</div>
+<p>Searches using <code>grep()</code> are case-sensitive. For example, let’s find all items that contain capital letters.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"[A-Z]"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "3718 Locust Walk"   "4 Privet Drive"     "10880 Malibu Point"
+ [4] "221B Baker St."     "Kendall Roy"        "Roman Roy"         
+ [7] "Siobhan Roy"        "Roy Wood, Jr."      "Royal Caribbean"   
+[10] "Casino Royale"      "Philadelphia"       "Philly"            
+[13] "Phila"              "Dr. Phil"          </code></pre>
+</div>
+</div>
+<section id="exercises" class="level3" data-number="2.1.1">
+<h3 data-number="2.1.1" class="anchored" data-anchor-id="exercises"><span class="header-section-number">2.1.1</span> Exercises</h3>
+<ol type="1">
+<li><p>Find text with vowels</p></li>
+<li><p>Find text with a number immediately followed by a letter</p></li>
+<li><p>What is the difference between <code>grep("Roy", dataText, value=TRUE)</code> and <code>grep("[Roy]", dataText, value=TRUE)</code>?</p></li>
+</ol>
+</section>
+</section>
+<section id="more-symbols-that-help-with-greping" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="more-symbols-that-help-with-greping"><span class="header-section-number">2.2</span> More symbols that help with greping</h2>
+<p>So far you have seen that we use <code>[]</code> to match any character listed between the <code>[]</code>, the <code>-</code> to specify a range to match like <code>0-9</code>, <code>a-z</code>, and <code>A-Z</code>, and the <code>{}</code> to match the previous character multiple times.</p>
+<p>In additional to these, there are several more symbols or sequences of symbols that are useful. The number of symbols on the keyboard are fairly limited compared to the numerous combinations of patterns of text we might wish to find. As a result you will see that some of these symbols are used in very different ways depending on the context.</p>
+<section id="carets" class="level3" data-number="2.2.1">
+<h3 data-number="2.2.1" class="anchored" data-anchor-id="carets"><span class="header-section-number">2.2.1</span> Carets <code>^</code></h3>
+<p>Let’s look at the caret <code>^</code> symbol. When we put a <code>^</code> within square brackets, it means “not”. Let’s try to find text in <code>dataText</code> that has something that is not a letter or a space immediately followed by a letter.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"[^A-Za-z ][A-Za-z]"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "221B Baker St."</code></pre>
+</div>
+</div>
+<p>“221B Baker St.” has a character that is not a letter (1) immediately followed by a letter (B).</p>
+<p>Outside of square brackets the <code>^</code> means something <em>completely</em> different. When we put the <code>^</code> outside of square bracket, it means “the beginning of the text”. For example, the following regular expression matches text where the first character is either an upper-case or a lower-case letter.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"^[A-Za-z]"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "Kendall Roy"     "Roman Roy"       "Siobhan Roy"     "Roy Wood, Jr."  
+ [5] "Royal Caribbean" "Casino Royale"   "two children"    "twins"          
+ [9] "Philadelphia"    "Philly"          "Phila"           "Dr. Phil"       </code></pre>
+</div>
+</div>
+</section>
+<section id="dollar-signs" class="level3" data-number="2.2.2">
+<h3 data-number="2.2.2" class="anchored" data-anchor-id="dollar-signs"><span class="header-section-number">2.2.2</span> Dollar Signs <code>$</code></h3>
+<p>While we use carets to signal the beginning of the text, the dollar sign signals the end of the text. For example, to search for all items that end with either an upper-case or lower-case letter, we would do the following:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"[A-Za-z]$"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "3718 Locust Walk"   "4 Privet Drive"     "10880 Malibu Point"
+ [4] "Kendall Roy"        "Roman Roy"          "Siobhan Roy"       
+ [7] "Royal Caribbean"    "Casino Royale"      "two children"      
+[10] "2 children"         "twins"              "Philadelphia"      
+[13] "Philly"             "Phila"              "Dr. Phil"          </code></pre>
+</div>
+</div>
+<p>Note how all of these have a letter as the last character. We can be more specific and ask for text that end with the letter “y” or end with a 7.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"y$"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"7$"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Kendall Roy" "Roman Roy"   "Siobhan Roy" "Philly"     
+[1] "(215) 573-9097" "215-573-9097"   "2155739097"    </code></pre>
+</div>
+</div>
+</section>
+<section id="plus-sign" class="level3" data-number="2.2.3">
+<h3 data-number="2.2.3" class="anchored" data-anchor-id="plus-sign"><span class="header-section-number">2.2.3</span> Plus Sign <code>+</code></h3>
+<p>The <code>+</code> means “at least one of the previous.” For example, suppose we wanted to find items in our list that have numbers and those numbers are followed by letters.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"[0-9]+[A-Za-z]+"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "221B Baker St."</code></pre>
+</div>
+</div>
+<p>Or search for text that starts with some numbers, then has a space, followed by some letters, and then ends.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"^[0-9]+ [A-Za-z]+$"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "2 children"</code></pre>
+</div>
+</div>
+</section>
+<section id="exercises-1" class="level3" data-number="2.2.4">
+<h3 data-number="2.2.4" class="anchored" data-anchor-id="exercises-1"><span class="header-section-number">2.2.4</span> Exercises</h3>
+<ol start="4" type="1">
+<li><p>Find the Roy children. That is, pick out Kendall, Roman, and Siobhan Roy.</p></li>
+<li><p>Find text that starts with a number and ends with a letter. (Hint: You will probably need to use <code>^</code>, <code>$</code>, and <code>+</code>).</p></li>
+</ol>
+</section>
+<section id="parentheses" class="level3" data-number="2.2.5">
+<h3 data-number="2.2.5" class="anchored" data-anchor-id="parentheses"><span class="header-section-number">2.2.5</span> Parentheses <code>()</code></h3>
+<p>Parentheses group together characters as words. For example, suppose we wanted to find the word “two”.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"(two)"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "two children"</code></pre>
+</div>
+</div>
+<p>On its own the parentheses are no different than just running the regular expression “two” with no parentheses. However, in combination with <code>|</code> and <code>?</code> it gets more interesting and powerful.</p>
+</section>
+<section id="vertical-bar" class="level3" data-number="2.2.6">
+<h3 data-number="2.2.6" class="anchored" data-anchor-id="vertical-bar"><span class="header-section-number">2.2.6</span> Vertical Bar <code>|</code></h3>
+<p>The vertical bar functions as an “or.” Suppose we wanted to get both the phrases “two children” and “2 children”, allowing the number to be spelled out or not. We would use parentheses as well as a vertical bar.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"(two|2) children"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "two children" "2 children"  </code></pre>
+</div>
+</div>
+<p>Let’s find all Los Angeles and Washington DC ZIP codes.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"(902|200)[0-9][0-9]"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "20015" "90291" "90210"</code></pre>
+</div>
+</div>
+<p>Here’s how we can find words that have exactly four characters. To be exactly four characters, on either side of them there needs to be a space or the beginning or end of the line.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"( |^)[A-Za-z]{4}( |$)"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "3718 Locust Walk" "Dr. Phil"        </code></pre>
+</div>
+</div>
+<p><code>( |^)</code> says that we start with either a space or the beginning of the text. <code>( |$)</code> says that at the end there must be a space or the end of the text. In the middle there has to be exactly four letters. Note that this did not select “Phil.” since it has a period following it. We’ll need a more general regular expression to select that one as well.</p>
+<p>Let’s try to find phone numbers in <code>dataText</code>. The problem is that phone numbers have three different formats in our data. The easiest phone number pattern to find is the one with 10 digits in a row.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"[0-9]{10}"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "2155739097"</code></pre>
+</div>
+</div>
+<p>It is also not too hard to find the hyphenated phone number pattern.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"[0-9]{3}-[0-9]{3}-[0-9]{4}"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "215-573-9097"</code></pre>
+</div>
+</div>
+<p>The phone number format with parentheses needs a little more caution. We pointed out earlier that parentheses have special meaning in regular expressions. In fact, there are several “special characters” in regular expressions, <code>\ ^ $ {} [] () . * + ? | -</code>. If you actually want to search for the symbol itself you need to “protect” it with a backslash <code>\</code>. However, the <code>\</code> is a special character for R too and R will think that something special is coming next after the <code>\</code>. So to tell R “no really, I really want a backslash here” you have to protect the backslash too. So to look for those phone numbers with parentheses we use a regular expression like this.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">([0-9]{3}</span><span class="sc">\\</span><span class="st">) [0-9]{3}-[0-9]{4}"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "(215) 573-9097"</code></pre>
+</div>
+</div>
+<p>Now, let’s put all of these patterns together use <code>|</code> to search for any phone number in any of the three formats.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"[0-9]{10}|[0-9]{3}-[0-9]{3}-[0-9]{4}|</span><span class="sc">\\</span><span class="st">([0-9]{3}</span><span class="sc">\\</span><span class="st">) [0-9]{3}-[0-9]{4}"</span>,</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>     dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "(215) 573-9097" "215-573-9097"   "2155739097"    </code></pre>
+</div>
+</div>
+</section>
+<section id="question-mark" class="level3" data-number="2.2.7">
+<h3 data-number="2.2.7" class="anchored" data-anchor-id="question-mark"><span class="header-section-number">2.2.7</span> Question Mark <code>?</code></h3>
+<p>The question mark indicates optional text. To illustrate,</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"Phil(adelphia)"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Philadelphia"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"Phil(adelphia)?"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Philadelphia" "Philly"       "Phila"        "Dr. Phil"    </code></pre>
+</div>
+</div>
+<p>The first one is no different from searching for the word “Philadelphia,” but the second one says that the “adelphia” part is optional. Note that this regular expression also picked up “Dr.&nbsp;Phil”. Again we will need a more careful regular expression to avoid matching this name and only select abbreviations and nicknames for Philadelphia.</p>
+</section>
+<section id="boundaries-b" class="level3" data-number="2.2.8">
+<h3 data-number="2.2.8" class="anchored" data-anchor-id="boundaries-b"><span class="header-section-number">2.2.8</span> Boundaries <code>\b</code></h3>
+<p><code>\b</code> will try to find boundaries around words. This includes spaces, punctuation, and the beginning and end of the text. So another way to find all text with four letter words, including “Phil.”, is</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">b[A-Za-z]{4}</span><span class="sc">\\</span><span class="st">b"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "3718 Locust Walk" "Roy Wood, Jr."    "Dr. Phil"        </code></pre>
+</div>
+</div>
+<p>Remember, the <code>\</code> is a special character for R. To “protect” the backslash we put another backslash in front of it. If we did not include the <code>\b</code> in this regular expression, then we would have also matched words with five or more letters too.</p>
+</section>
+<section id="exercises-2" class="level3" data-number="2.2.9">
+<h3 data-number="2.2.9" class="anchored" data-anchor-id="exercises-2"><span class="header-section-number">2.2.9</span> Exercises</h3>
+<p>Write regular expressions to find the following items in <code>dataText</code>.</p>
+<ol start="6" type="1">
+<li><p>Find commas</p></li>
+<li><p>Find ZIP codes</p></li>
+<li><p>Find those with six letter word</p></li>
+<li><p>Find mentions of Philadelphia</p></li>
+<li><p>Find capitalized words</p></li>
+<li><p>Find the addresses</p></li>
+<li><p>Find a shorter way to get phone numbers using <code>?</code></p></li>
+</ol>
+</section>
+</section>
+</section>
+<section id="finding-and-replacing-patterns-in-text-with-gsub" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Finding and replacing patterns in text with <code>gsub()</code></h1>
+<p><code>gsub()</code> stands for “global substitution.” It is useful for automating the editing of text, including deleting characters from text or extracting only parts of text.</p>
+<section id="basic-find-and-replace-examples" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="basic-find-and-replace-examples"><span class="header-section-number">3.1</span> Basic find and replace examples</h2>
+<p>Let’s remove all numbers from our <code>dataText</code> list.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gsub</span>(<span class="st">"[0-9]"</span>,<span class="st">""</span>,dataText)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] " Locust Walk"    " Privet Drive"   " Malibu Point"   "B Baker St."    
+ [5] "-"               ""                ""                ""               
+ [9] "() -"            "--"              ""                "Kendall Roy"    
+[13] "Roman Roy"       "Siobhan Roy"     "Roy Wood, Jr."   "Royal Caribbean"
+[17] "Casino Royale"   "two children"    " children"       "twins"          
+[21] "Philadelphia"    "Philly"          "Phila"           "Dr. Phil"       
+[25] "$"               "$"               "$,"             </code></pre>
+</div>
+</div>
+<p>or remove all the Roy last names</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gsub</span>(<span class="st">" Roy$"</span>,<span class="st">""</span>,dataText)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "3718 Locust Walk"   "4 Privet Drive"     "10880 Malibu Point"
+ [4] "221B Baker St."     "19104-6286"         "20015"             
+ [7] "90291"              "90210"              "(215) 573-9097"    
+[10] "215-573-9097"       "2155739097"         "Kendall"           
+[13] "Roman"              "Siobhan"            "Roy Wood, Jr."     
+[16] "Royal Caribbean"    "Casino Royale"      "two children"      
+[19] "2 children"         "twins"              "Philadelphia"      
+[22] "Philly"             "Phila"              "Dr. Phil"          
+[25] "$23456"             "$10000"             "$60,000"           </code></pre>
+</div>
+</div>
+<p>or turn all punctuation to “X”</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gsub</span>(<span class="st">"[.)($-]"</span>,<span class="st">"X"</span>, dataText)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "3718 Locust Walk"   "4 Privet Drive"     "10880 Malibu Point"
+ [4] "221B Baker StX"     "19104X6286"         "20015"             
+ [7] "90291"              "90210"              "X215X 573X9097"    
+[10] "215X573X9097"       "2155739097"         "Kendall Roy"       
+[13] "Roman Roy"          "Siobhan Roy"        "Roy Wood, JrX"     
+[16] "Royal Caribbean"    "Casino Royale"      "two children"      
+[19] "2 children"         "twins"              "Philadelphia"      
+[22] "Philly"             "Phila"              "DrX Phil"          
+[25] "X23456"             "X10000"             "X60,000"           </code></pre>
+</div>
+</div>
+<p>or remove HTML tags from text (very very handy!!!).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gsub</span>(<span class="st">"&lt;[^&gt;]+&gt;"</span>, <span class="st">""</span>, </span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>     <span class="st">"&lt;td&gt;&lt;b&gt;&lt;a href=</span><span class="sc">\"</span><span class="st">/movie/Dont-Breathe-2-(2021)#tab=box-office</span><span class="sc">\"</span><span class="st">&gt;Don't Breathe 2&lt;/a&gt;&lt;/b&gt;&lt;/td&gt;"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Don't Breathe 2"</code></pre>
+</div>
+</div>
+<p>This last one we will use a lot. The regular expression says start with a <code>&lt;</code>, then match several characters that are non <code>&gt;</code>, followed by a <code>&gt;</code>. Anything matching this pattern, like <code>&lt;td&gt;</code>, will get removed.</p>
+<p>The first argument of the <code>gsub()</code> function is the “find pattern,” what we are asking <code>gsub()</code> to find. The second argument is a “replacement pattern” that will replace whatever <code>gsub()</code> matched with the find pattern. Lastly, like <code>grep()</code>, we need to tell <code>gsub()</code> the name of the data object in which it should look for the pattern.</p>
+<p>With <code>gsub()</code> we will be using a lot of the same grammar, such as carats, brackets, and dashes, that we used with <code>grep()</code>. To illustrate, let’s remove anything that is not a number from text.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gsub</span>(<span class="st">"[^0-9]"</span>,<span class="st">""</span>,dataText)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "3718"       "4"          "10880"      "221"        "191046286" 
+ [6] "20015"      "90291"      "90210"      "2155739097" "2155739097"
+[11] "2155739097" ""           ""           ""           ""          
+[16] ""           ""           ""           "2"          ""          
+[21] ""           ""           ""           ""           "23456"     
+[26] "10000"      "60000"     </code></pre>
+</div>
+</div>
+<section id="exercises-3" class="level3" data-number="3.1.1">
+<h3 data-number="3.1.1" class="anchored" data-anchor-id="exercises-3"><span class="header-section-number">3.1.1</span> Exercises</h3>
+<ol start="13" type="1">
+<li>Remove the all the commas. Note that we probably just want to remove them from the numbers, but we do not quite yet have the tools to avoid removing the comma from Roy Wood, Jr.</li>
+</ol>
+</section>
+</section>
+<section id="back-referencing" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="back-referencing"><span class="header-section-number">3.2</span> Back-Referencing</h2>
+<p>A bit more complicated aspect of <code>gsub()</code> is “backreferencing.” Any part of the regular expression in the find pattern that is wrapped in parentheses gets stored in a “register.” You can have multiple pairs of parentheses and, therefore, save different parts of what gets matched in the find pattern. You can then recall what <code>gsub()</code> stored in the registers in the replacement pattern, using <code>\\1</code> for what was stored in the first register, <code>\\2</code> for what was stored in the second register, and so on.</p>
+<p>For example, let’s delete the “plus four” part of the ZIP codes in our data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gsub</span>(<span class="st">"([0-9]{5})-[0-9]{4}"</span>,<span class="st">"</span><span class="sc">\\</span><span class="st">1"</span>,dataText)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "3718 Locust Walk"   "4 Privet Drive"     "10880 Malibu Point"
+ [4] "221B Baker St."     "19104"              "20015"             
+ [7] "90291"              "90210"              "(215) 573-9097"    
+[10] "215-573-9097"       "2155739097"         "Kendall Roy"       
+[13] "Roman Roy"          "Siobhan Roy"        "Roy Wood, Jr."     
+[16] "Royal Caribbean"    "Casino Royale"      "two children"      
+[19] "2 children"         "twins"              "Philadelphia"      
+[22] "Philly"             "Phila"              "Dr. Phil"          
+[25] "$23456"             "$10000"             "$60,000"           </code></pre>
+</div>
+</div>
+<p>We wrapped the parentheses around the first five digits, so only those first five digits get stored in register 1. Then the replacement pattern replaces everything that the find pattern matched (the entirety of the five digits, the hyphen, and the plus four digits) with the contents of register 1, containing just the first five digits.</p>
+<p>Let’s use <code>gsub()</code> to just keep the first two “words” in each element of <code>dataText</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gsub</span>(<span class="st">"^([^ ]+ [^ ]+) .*$"</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">1"</span>, dataText)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "3718 Locust"     "4 Privet"        "10880 Malibu"    "221B Baker"     
+ [5] "19104-6286"      "20015"           "90291"           "90210"          
+ [9] "(215) 573-9097"  "215-573-9097"    "2155739097"      "Kendall Roy"    
+[13] "Roman Roy"       "Siobhan Roy"     "Roy Wood,"       "Royal Caribbean"
+[17] "Casino Royale"   "two children"    "2 children"      "twins"          
+[21] "Philadelphia"    "Philly"          "Phila"           "Dr. Phil"       
+[25] "$23456"          "$10000"          "$60,000"        </code></pre>
+</div>
+</div>
+<p>This regular expression says: start at the beginning of the text, find a bunch of characters that are not spaces (remember that the <code>+</code> means one or more of the previous), then find a space, then find another bunch of characters that are not spaces, followed by another space, followed by anything else until the end of the text. The <code>.</code> is a wild card that matches any one character. The <code>*</code> is like the <code>+</code> but it means <em>zero</em> or more of the previous character (the <code>+</code> matches <em>one</em> or more of the previous character). Note how we have used the parentheses. They are wrapped around those first two words. Those words get stored in register 1 and the replacement pattern just recalls whatever got stored in register 1.</p>
+<p>An alternative strategy is to use <code>\w</code>, which means a “word character” (any numbers of letters) and <code>\s</code>, which means any “whitespace character” (spaces, tabs, line feeds, non-breaking space).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gsub</span>(<span class="st">"^(</span><span class="sc">\\</span><span class="st">w+</span><span class="sc">\\</span><span class="st">s</span><span class="sc">\\</span><span class="st">w+)</span><span class="sc">\\</span><span class="st">s.*$"</span>,<span class="st">"</span><span class="sc">\\</span><span class="st">1"</span>,dataText)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "3718 Locust"     "4 Privet"        "10880 Malibu"    "221B Baker"     
+ [5] "19104-6286"      "20015"           "90291"           "90210"          
+ [9] "(215) 573-9097"  "215-573-9097"    "2155739097"      "Kendall Roy"    
+[13] "Roman Roy"       "Siobhan Roy"     "Roy Wood, Jr."   "Royal Caribbean"
+[17] "Casino Royale"   "two children"    "2 children"      "twins"          
+[21] "Philadelphia"    "Philly"          "Phila"           "Dr. Phil"       
+[25] "$23456"          "$10000"          "$60,000"        </code></pre>
+</div>
+</div>
+<p>When working with <code>grep()</code>, we wrote a regular expression to find all the phone numbers in all the various formats. Now let’s use <code>gsub()</code> to standardize all the phone numbers to have the hyphenated format, like 123-456-7890. We use the same regular expression you figured out in the exercises when using <code>?</code> in <code>grep()</code> to find phone numbers, but we insert pairs of parentheses to capture the phone number digits.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gsub</span>(<span class="st">"^</span><span class="sc">\\</span><span class="st">(?([0-9]{3})(</span><span class="sc">\\</span><span class="st">) |-)?([0-9]{3})-?([0-9]{4})"</span>,<span class="st">"</span><span class="sc">\\</span><span class="st">1-</span><span class="sc">\\</span><span class="st">3-</span><span class="sc">\\</span><span class="st">4"</span>,dataText)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "3718 Locust Walk"   "4 Privet Drive"     "10880 Malibu Point"
+ [4] "221B Baker St."     "19104-6286"         "20015"             
+ [7] "90291"              "90210"              "215-573-9097"      
+[10] "215-573-9097"       "215-573-9097"       "Kendall Roy"       
+[13] "Roman Roy"          "Siobhan Roy"        "Roy Wood, Jr."     
+[16] "Royal Caribbean"    "Casino Royale"      "two children"      
+[19] "2 children"         "twins"              "Philadelphia"      
+[22] "Philly"             "Phila"              "Dr. Phil"          
+[25] "$23456"             "$10000"             "$60,000"           </code></pre>
+</div>
+</div>
+<p>Note that register 2 captures whatever text matches the optional text <code>(\\) |-)</code>. That’s why you don’t see <code>\\2</code> in the replacement pattern.</p>
+<section id="class-exercise" class="level3" data-number="3.2.1">
+<h3 data-number="3.2.1" class="anchored" data-anchor-id="class-exercise"><span class="header-section-number">3.2.1</span> Class exercise</h3>
+<ol start="14" type="1">
+<li>Add commas to these numbers <code>c("9453","2332","4645","1234")</code>. That is, make these numbers look like 9,453 and 2,332 and so on. Fill in the find pattern and replacement pattern in <code>gsub("", "", c("9453","2332","4645","1234"))</code></li>
+</ol>
+</section>
+</section>
+<section id="lookaheads" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="lookaheads"><span class="header-section-number">3.3</span> Lookaheads</h2>
+<p>Although not as commonly used as a backreference, a “lookahead” can be helpful to find what comes next or, more generally, to <code>gsub()</code> items that are a bit more complicated. Let’s say you wanted to check that every q is followed by a u. If it’s not, then insert the u after the q.</p>
+<p>Maybe you would do something like this</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gsub</span>(<span class="st">"q[^u]"</span>,<span class="st">"qu"</span>,<span class="fu">c</span>(<span class="st">"quiet"</span>,<span class="st">"quick"</span>,<span class="st">"quagmire"</span>,<span class="st">"qixotic"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "quiet"    "quick"    "quagmire" "quxotic" </code></pre>
+</div>
+</div>
+<p>As you can see, it doesn’t quite do what we wanted. It problematically drops the “i” from “quixotic.” Remember that the replacement pattern will overwrite whatever matches the find pattern. This find pattern will match the “qi,” the q <em>and</em> the adjacent character that is not a u.</p>
+<p>A “lookahead” just peeks at the next character to see what it is, but does not consider it part of the match. In parentheses we signal a lookahead with <code>?</code> and then to ask for a character that is not a “u” we use <code>!u</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gsub</span>(<span class="st">"q(?!u)"</span>, <span class="st">"qu"</span>, <span class="fu">c</span>(<span class="st">"quiet"</span>,<span class="st">"quick"</span>,<span class="st">"quagmire"</span>,<span class="st">"qixotic"</span>), <span class="at">perl=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "quiet"    "quick"    "quagmire" "quixotic"</code></pre>
+</div>
+</div>
+<p>Now we have “quixotic” spelled properly as <code>gsub()</code> looked ahead to check for a “u” but did not consider it part of the match to be replaced. Note that we have set <code>perl=TRUE</code>. There is not a single regular expression standard. Lookaheads (and there are lookbehinds too) are not part of the POSIX 1003.2 standard that R uses by default. However, you can ask R to use perl-style regular expressions that do support lookaheads (and lookbehinds) by simply setting <code>perl=TRUE</code>.</p>
+<p>Let’s say we want to add commas to large numbers to display like 1,234,567 instead of 1234567. Ready for this one?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gsub</span>(<span class="st">"(?&lt;!</span><span class="sc">\\</span><span class="st">.)([0-9])(?=([0-9]{3})+($|</span><span class="sc">\\</span><span class="st">.))"</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">1,"</span>,</span>
+<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a>     <span class="fu">c</span>(<span class="st">"$1234567890"</span>,<span class="st">"234"</span>,<span class="st">"1234"</span>,<span class="st">"12345"</span>,<span class="st">"12345.6789"</span>),</span>
+<span id="cb83-3"><a href="#cb83-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">perl=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "$1,234,567,890" "234"            "1,234"          "12,345"        
+[5] "12,345.6789"   </code></pre>
+</div>
+</div>
+<p>First note the replacement text, <code>\\1,</code>. This is going to take whatever is in register 1 and produce it again followed by a <code>,</code>. The challenge for the matching part is to write a regular expression that identifies those digits where a comma is needed to its right. There are three parts to the regular expression.</p>
+<ul>
+<li><code>(?&lt;!\\.)</code>: This is a “lookbehind” that first makes sure there are no decimals to the left of the digit</li>
+<li><code>([0-9])</code>: Match a single digit and store it in register 1</li>
+<li><code>(?=([0-9]{3})+($|\\.))</code>: This is a “lookahead” checking that there are blocks of 3 digits to the right until either the end or a decimal</li>
+</ul>
+<p>This gets you a handy regular expression to produce nicer looking numbers. Just so you know, R also provides some handy tools for formatting numbers.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb85"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a><span class="fu">prettyNum</span>(<span class="fu">c</span>(<span class="dv">1234567890</span>,<span class="dv">234</span>,<span class="dv">1234</span>,<span class="dv">12345</span>,<span class="fl">12345.6789</span>), <span class="at">big.mark=</span><span class="st">","</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "1,234,567,890" "234"           "1,234"         "12,345"       
+[5] "12,345.68"    </code></pre>
+</div>
+</div>
+<p>Here’s how lookaheads are going to be very important for us in working with data. We often get datasets in comma-separated value format, typically with a “.csv” extension on the file name. The R function <code>read.csv()</code> can read in data in this format. Problems can occur when values in the dataset have commas inside of them.</p>
+<p>Here’s some example text that could be problematic.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb87"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a>text.w.quotes <span class="ot">&lt;-</span> <span class="st">'white,male,"loitering,narcotics",19,"knife,gun"'</span></span>
+<span id="cb87-2"><a href="#cb87-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(text.w.quotes,<span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>white,male,"loitering,narcotics",19,"knife,gun" </code></pre>
+</div>
+</div>
+<p>Some of the commas in this text are separating values for race, sex, arrest charge, age, and recovered contraband. However, there are other commas inside the quotes listing the arrest charges and the contraband items. Fortunately, <code>read.csv()</code> is smart enough to keep quoted items together as one data element, as long as the parameter <code>quote = "\"'"</code>, which is the default. Other functions are not so kind. Later we will use <code>dbWriteTable()</code> to build an SQL database and it will think that all the commas separate the values. So it will think there is a separate <code>"loitering</code> data element and then a <code>narcotics</code>. And the same for <code>"knife</code> and <code>gun"</code>.</p>
+<p>So here is a very handy regular expression using lookaheads that changes commas that are not inside quotes to semicolons. You can also choose a stranger symbol, like | or @. This regular expression looks for a <code>,</code> and then it uses a lookahead for the reminder of the line. It will match that comma is there are no quotes for the rest of the line, <code>[^\"]</code>, or if there are only pairs of quotes each with non-quote characters inside of them, <code>\"[^\"]*\"</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb89"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gsub</span>(<span class="st">",(?=([^</span><span class="sc">\"</span><span class="st">]|</span><span class="sc">\"</span><span class="st">[^</span><span class="sc">\"</span><span class="st">]*</span><span class="sc">\"</span><span class="st">)*$)"</span>,<span class="st">";"</span>,text.w.quotes,<span class="at">perl=</span><span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb89-2"><a href="#cb89-2" aria-hidden="true" tabindex="-1"></a>   <span class="fu">cat</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>white;male;"loitering,narcotics";19;"knife,gun"</code></pre>
+</div>
+</div>
+<p>As you can see, commas inside the quotes are preserved and those outside have been transformed into <code>;</code>. Now we would be able to tell a function like <code>dbWriteTable()</code> that the data elements are separated by <code>;</code> and it will read in the data properly.</p>
+<section id="exercises-4" class="level3" data-number="3.3.1">
+<h3 data-number="3.3.1" class="anchored" data-anchor-id="exercises-4"><span class="header-section-number">3.3.1</span> Exercises</h3>
+<p>Make the following changes to <code>dataText</code>.</p>
+<ol start="15" type="1">
+<li><p>Change Dr.&nbsp;Phil to Dr.&nbsp;Phillip</p></li>
+<li><p>Spell out Philadelphia</p></li>
+<li><p>Keep just the first word or first number</p></li>
+<li><p>Keep only area codes of phone numbers</p></li>
+</ol>
+</section>
+</section>
+</section>
+<section id="introduction-to-webscraping-a-practical-application-of-regular-expressions" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Introduction to Webscraping: A Practical Application of Regular Expressions</h1>
+<p>As you have already seen, regular expressions are an extremely valuable tool when working with data. In fact, we are going to learn about webscraping next. Webscraping enables us to extract data from a website by searching the underlying HTML code for the website and extracting the desired data. To do webscraping, you are going to rely heavily on regular expressions.</p>
+<section id="the-10000-most-common-english-words" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="the-10000-most-common-english-words"><span class="header-section-number">4.1</span> The 10,000 most common English words</h2>
+<p>Suppose we want a list of the 10,000 most common words in English. <a href="https://en.wiktionary.org/wiki/Wiktionary:Frequency_lists/PG/2006/04/1-10000">wiktionary.org</a> provides this list. Have a look at the webpage.</p>
+<p>The <code>scan()</code> function in R can read data from a text file, but if given a URL, it will download the HTML code for that page.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb91"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a>words <span class="ot">&lt;-</span> <span class="fu">scan</span>(<span class="st">"https://en.wiktionary.org/wiki/Wiktionary:Frequency_lists/PG/2006/04/1-10000"</span>,</span>
+<span id="cb91-2"><a href="#cb91-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">what=</span><span class="st">""</span>,<span class="at">sep=</span><span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>If instead you got a message like “Read 50706 items” then you are in luck. You just used R to scrape a webpage. You might get a number different from 50706 and it might change if you run the script another day. Websites make updates to headers, footers, and banners and these alterations change the number of lines of HTML code required to generate the page.</p>
+<p>The first several lines of HTML code in <code>words</code> all contain HTML code to set up the page.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb92"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a>words[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "&lt;!DOCTYPE html&gt;"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+[2] "&lt;html class=\"client-nojs vector-feature-language-in-header-enabled vector-feature-language-in-main-page-header-disabled vector-feature-page-tools-pinned-disabled vector-feature-toc-pinned-clientpref-1 vector-feature-main-menu-pinned-disabled vector-feature-limited-width-clientpref-1 vector-feature-limited-width-content-enabled vector-feature-custom-font-size-clientpref-1 vector-feature-appearance-pinned-clientpref-1 vector-feature-night-mode-enabled skin-theme-clientpref-day vector-sticky-header-enabled vector-toc-available\" lang=\"en\" dir=\"ltr\"&gt;"
+[3] "&lt;head&gt;"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+[4] "&lt;meta charset=\"UTF-8\"&gt;"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+[5] "&lt;title&gt;Wiktionary:Frequency lists/PG/2006/04/1-10000 - Wiktionary, the free dictionary&lt;/title&gt;"                                                                                                                                                                                                                                                                                                                                                                                                                                                                               </code></pre>
+</div>
+</div>
+<p>There is nothing of interest to us here. We just want the part with the 10,000 most common words. Let’s look further down the page.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb94"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a>words[<span class="dv">490</span><span class="sc">+</span><span class="dv">0</span><span class="sc">:</span><span class="dv">9</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "&lt;/td&gt;&lt;/tr&gt;"                                          
+ [2] "&lt;tr&gt;"                                                
+ [3] "&lt;td&gt;1&lt;/td&gt;"                                          
+ [4] "&lt;td&gt;&lt;a href=\"/wiki/the\" title=\"the\"&gt;the&lt;/a&gt;&lt;/td&gt;"
+ [5] "&lt;td&gt;56271872"                                        
+ [6] "&lt;/td&gt;&lt;/tr&gt;"                                          
+ [7] "&lt;tr&gt;"                                                
+ [8] "&lt;td&gt;2&lt;/td&gt;"                                          
+ [9] "&lt;td&gt;&lt;a href=\"/wiki/of\" title=\"of\"&gt;of&lt;/a&gt;&lt;/td&gt;"   
+[10] "&lt;td&gt;33950064"                                        </code></pre>
+</div>
+</div>
+<p>Here we start finding some words! Note that every line that has one of the words we are looking for has <code>title=\"</code>. We can use that phrase to find lines that have the 10,000 words on them. Use <code>grep()</code> to find those lines and print out the first 10 of them to see if this will work for us.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb96"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a>words <span class="ot">&lt;-</span> <span class="fu">grep</span>(<span class="st">"title=</span><span class="sc">\"</span><span class="st">"</span>, words, <span class="at">value=</span><span class="cn">TRUE</span>)</span>
+<span id="cb96-2"><a href="#cb96-2" aria-hidden="true" tabindex="-1"></a>words[<span class="dv">23</span><span class="sc">:</span><span class="dv">30</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "\t\t\t\t\t&lt;div id=\"contentSub\"&gt;&lt;div id=\"mw-content-subtitle\"&gt;&lt;div class=\"subpages\"&gt;&amp;lt; &lt;bdi dir=\"ltr\"&gt;&lt;a href=\"/wiki/Wiktionary:Frequency_lists\" title=\"Wiktionary:Frequency lists\"&gt;Wiktionary:Frequency lists&lt;/a&gt;&lt;/bdi&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;"                                                                                                                                                                                                                                                                                                                                                                                                                   
+[2] "\t\t\t\t\t&lt;div id=\"mw-content-text\" class=\"mw-body-content\"&gt;&lt;div class=\"mw-content-ltr mw-parser-output\" lang=\"en\" dir=\"ltr\"&gt;&lt;div class=\"mw-heading mw-heading3\"&gt;&lt;h3 id=\"1_-_10000\" data-mw-thread-id=\"h-1_-_10000\"&gt;&lt;span data-mw-comment-start=\"\" id=\"h-1_-_10000\"&gt;&lt;/span&gt;1 - 10000&lt;span data-mw-comment-end=\"h-1_-_10000\"&gt;&lt;/span&gt;&lt;/h3&gt;&lt;span class=\"mw-editsection\"&gt;&lt;span class=\"mw-editsection-bracket\"&gt;[&lt;/span&gt;&lt;a href=\"/w/index.php?title=Wiktionary:Frequency_lists/PG/2006/04/1-10000&amp;amp;action=edit&amp;amp;section=1\" title=\"Edit section: 1 - 10000\"&gt;&lt;span&gt;edit&lt;/span&gt;&lt;/a&gt;&lt;span class=\"mw-editsection-bracket\"&gt;]&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;"
+[3] "&lt;td&gt;&lt;a href=\"/wiki/the\" title=\"the\"&gt;the&lt;/a&gt;&lt;/td&gt;"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+[4] "&lt;td&gt;&lt;a href=\"/wiki/of\" title=\"of\"&gt;of&lt;/a&gt;&lt;/td&gt;"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+[5] "&lt;td&gt;&lt;a href=\"/wiki/and\" title=\"and\"&gt;and&lt;/a&gt;&lt;/td&gt;"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+[6] "&lt;td&gt;&lt;a href=\"/wiki/to\" title=\"to\"&gt;to&lt;/a&gt;&lt;/td&gt;"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+[7] "&lt;td&gt;&lt;a href=\"/wiki/in\" title=\"in\"&gt;in&lt;/a&gt;&lt;/td&gt;"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+[8] "&lt;td&gt;&lt;a href=\"/wiki/i\" title=\"i\"&gt;i&lt;/a&gt;&lt;/td&gt;"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            </code></pre>
+</div>
+</div>
+<p>While the first 24 lines do have the phrase <code>title=\"</code>, they are not the ones with the 10,000 words. But starting at line 25 we start seeing the most common words: the, of, and, to. So let’s cut the first 24 lines from <code>words</code> and keep the next 10,000 lines. <code>title=\"</code> shows up more in the HTML code in the footer after the 10,000th word.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb98"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a>words <span class="ot">&lt;-</span> words[<span class="sc">-</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">24</span>)]</span>
+<span id="cb98-2"><a href="#cb98-2" aria-hidden="true" tabindex="-1"></a>words <span class="ot">&lt;-</span> words[<span class="dv">1</span><span class="sc">:</span><span class="dv">10000</span>]</span>
+<span id="cb98-3"><a href="#cb98-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(words) <span class="co"># look at the first several rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "&lt;td&gt;&lt;a href=\"/wiki/the\" title=\"the\"&gt;the&lt;/a&gt;&lt;/td&gt;"
+[2] "&lt;td&gt;&lt;a href=\"/wiki/of\" title=\"of\"&gt;of&lt;/a&gt;&lt;/td&gt;"   
+[3] "&lt;td&gt;&lt;a href=\"/wiki/and\" title=\"and\"&gt;and&lt;/a&gt;&lt;/td&gt;"
+[4] "&lt;td&gt;&lt;a href=\"/wiki/to\" title=\"to\"&gt;to&lt;/a&gt;&lt;/td&gt;"   
+[5] "&lt;td&gt;&lt;a href=\"/wiki/in\" title=\"in\"&gt;in&lt;/a&gt;&lt;/td&gt;"   
+[6] "&lt;td&gt;&lt;a href=\"/wiki/i\" title=\"i\"&gt;i&lt;/a&gt;&lt;/td&gt;"      </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb100"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb100-1"><a href="#cb100-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tail</span>(words) <span class="co"># look at the last several rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "&lt;td&gt;&lt;a href=\"/wiki/film\" title=\"film\"&gt;film&lt;/a&gt;&lt;/td&gt;"                     
+[2] "&lt;td&gt;&lt;a href=\"/wiki/repressed\" title=\"repressed\"&gt;repressed&lt;/a&gt;&lt;/td&gt;"      
+[3] "&lt;td&gt;&lt;a href=\"/wiki/cooperation\" title=\"cooperation\"&gt;cooperation&lt;/a&gt;&lt;/td&gt;"
+[4] "&lt;td&gt;&lt;a href=\"/wiki/sequel\" title=\"sequel\"&gt;sequel&lt;/a&gt;&lt;/td&gt;"               
+[5] "&lt;td&gt;&lt;a href=\"/wiki/wench\" title=\"wench\"&gt;wench&lt;/a&gt;&lt;/td&gt;"                  
+[6] "&lt;td&gt;&lt;a href=\"/wiki/calves\" title=\"calves\"&gt;calves&lt;/a&gt;&lt;/td&gt;"               </code></pre>
+</div>
+</div>
+<p>These lines have the text we need, but there are still a lot of HTML tags, all that HTML code wrapped in <code>&lt; &gt;</code>. <code>&lt;td&gt;</code> is the HTML tag marking a cell in a table and <code>&lt;a&gt;</code> is the HTML tag for creating hyperlinks to other pages. Each of these also has ending tags <code>&lt;/td&gt;</code> and <code>&lt;/a&gt;</code>. Fortunately for us they are all contained within the <code>&lt;</code> and <code>&gt;</code> characters. So let’s use <code>gsub()</code> to remove all the HTML tags.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb102"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb102-1"><a href="#cb102-1" aria-hidden="true" tabindex="-1"></a>words <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="st">"&lt;[^&gt;]*&gt;"</span>,<span class="st">""</span>,words)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>This regular expression looks for a <code>&lt;</code>, then a bunch of characters that are not a <code>&gt;</code>, followed by a <code>&gt;</code> and replaces them with nothing. Now <code>words</code> contains just our list of 10,000 most common words. Here are the first 50 of them.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb103"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" aria-hidden="true" tabindex="-1"></a>words[<span class="dv">1</span><span class="sc">:</span><span class="dv">50</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "the"   "of"    "and"   "to"    "in"    "i"     "that"  "was"   "his"  
+[10] "he"    "it"    "with"  "is"    "for"   "as"    "had"   "you"   "not"  
+[19] "be"    "her"   "on"    "at"    "by"    "which" "have"  "or"    "from" 
+[28] "this"  "him"   "but"   "all"   "she"   "they"  "were"  "my"    "are"  
+[37] "me"    "one"   "their" "so"    "an"    "said"  "them"  "we"    "who"  
+[46] "would" "been"  "will"  "no"    "when" </code></pre>
+</div>
+</div>
+<section id="exercises-5" class="level3" data-number="4.1.1">
+<h3 data-number="4.1.1" class="anchored" data-anchor-id="exercises-5"><span class="header-section-number">4.1.1</span> Exercises</h3>
+<ol start="19" type="1">
+<li><p>We were told “i before e except after c, or when sounded like a as in neighbor or weigh”. Is that true?</p></li>
+<li><p>Find words with punctuation</p></li>
+<li><p>Find words that do not have aeiou in the first four characters</p></li>
+</ol>
+</section>
+</section>
+</section>
+<section id="solutions-to-the-exercises" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Solutions to the exercises</h1>
+<ol type="1">
+<li>Find text with vowels</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb105"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"[AEIOUaeiou]"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "3718 Locust Walk"   "4 Privet Drive"     "10880 Malibu Point"
+ [4] "221B Baker St."     "Kendall Roy"        "Roman Roy"         
+ [7] "Siobhan Roy"        "Roy Wood, Jr."      "Royal Caribbean"   
+[10] "Casino Royale"      "two children"       "2 children"        
+[13] "twins"              "Philadelphia"       "Philly"            
+[16] "Phila"              "Dr. Phil"          </code></pre>
+</div>
+</div>
+<ol start="2" type="1">
+<li>Find text with a number immediately followed by a letter</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb107"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb107-1"><a href="#cb107-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"[0-9][A-z]"</span>, dataText,<span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "221B Baker St."</code></pre>
+</div>
+</div>
+<ol start="3" type="1">
+<li>What is the difference between <code>grep("Roy", dataText, value=TRUE)</code> and <code>grep("[Roy]", dataText, value=TRUE)</code>? <code>Roy</code> will only match text that is exactly “Roy”, while <code>[Roy]</code> will match text that has any one of the characters “R”, “o”, or “y”.</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb109"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb109-1"><a href="#cb109-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"Roy"</span>, dataText,<span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Kendall Roy"     "Roman Roy"       "Siobhan Roy"     "Roy Wood, Jr."  
+[5] "Royal Caribbean" "Casino Royale"  </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb111"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb111-1"><a href="#cb111-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"[Roy]"</span>, dataText,<span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "3718 Locust Walk"   "10880 Malibu Point" "Kendall Roy"       
+ [4] "Roman Roy"          "Siobhan Roy"        "Roy Wood, Jr."     
+ [7] "Royal Caribbean"    "Casino Royale"      "two children"      
+[10] "Philly"            </code></pre>
+</div>
+</div>
+<ol start="4" type="1">
+<li>Find the Roy children</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb113"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb113-1"><a href="#cb113-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"Roy$"</span>, dataText, <span class="at">value =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Kendall Roy" "Roman Roy"   "Siobhan Roy"</code></pre>
+</div>
+</div>
+<ol start="5" type="1">
+<li>Find text that starts with a number and ends with a letter</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb115"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb115-1"><a href="#cb115-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"^[0-9][0-z ]+[A-z]$"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "3718 Locust Walk"   "4 Privet Drive"     "10880 Malibu Point"
+[4] "2 children"        </code></pre>
+</div>
+</div>
+<ol start="6" type="1">
+<li>Find commas</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb117"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb117-1"><a href="#cb117-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">","</span>, dataText,<span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Roy Wood, Jr." "$60,000"      </code></pre>
+</div>
+</div>
+<p>Remember that not every regular expression is complicated. Sometimes you just need to search for something specific and it requires no fancy regular expression.</p>
+<ol start="7" type="1">
+<li>Find ZIP codes</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb119"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb119-1"><a href="#cb119-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"^[0-9]{5}$|^[0-9]{5}-"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "19104-6286" "20015"      "90291"      "90210"     </code></pre>
+</div>
+</div>
+<ol start="8" type="1">
+<li>Find those with six letter word</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb121"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb121-1"><a href="#cb121-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">b[A-Za-z]{6}</span><span class="sc">\\</span><span class="st">b"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "3718 Locust Walk"   "4 Privet Drive"     "10880 Malibu Point"
+[4] "Casino Royale"      "Philly"            </code></pre>
+</div>
+</div>
+<ol start="9" type="1">
+<li>Find mentions of Philadelphia</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb123"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb123-1"><a href="#cb123-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"Phil(adelphia|ly|a)"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Philadelphia" "Philly"       "Phila"       </code></pre>
+</div>
+</div>
+<p>or</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb125"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb125-1"><a href="#cb125-1" aria-hidden="true" tabindex="-1"></a><span class="co"># "Phil" followed by something that is not whitespace</span></span>
+<span id="cb125-2"><a href="#cb125-2" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"Phil[^</span><span class="sc">\\</span><span class="st">s]"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Philadelphia" "Philly"       "Phila"       </code></pre>
+</div>
+</div>
+<ol start="10" type="1">
+<li>Find capitalized words</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb127"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb127-1"><a href="#cb127-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">b[A-Z]"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "3718 Locust Walk"   "4 Privet Drive"     "10880 Malibu Point"
+ [4] "221B Baker St."     "Kendall Roy"        "Roman Roy"         
+ [7] "Siobhan Roy"        "Roy Wood, Jr."      "Royal Caribbean"   
+[10] "Casino Royale"      "Philadelphia"       "Philly"            
+[13] "Phila"              "Dr. Phil"          </code></pre>
+</div>
+</div>
+<ol start="11" type="1">
+<li>Find the addresses</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb129"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb129-1"><a href="#cb129-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"[0-9]+[A-Z]? [A-Za-z ]+ (Drive|Walk|Point|St)"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "3718 Locust Walk"   "4 Privet Drive"     "10880 Malibu Point"
+[4] "221B Baker St."    </code></pre>
+</div>
+</div>
+<ol start="12" type="1">
+<li>Find a shorter way to get phone numbers using <code>?</code></li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb131"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb131-1"><a href="#cb131-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">(?[0-9]{3}(</span><span class="sc">\\</span><span class="st">) |-| )?[0-9]{3}(-| )?[0-9]{4}"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "(215) 573-9097" "215-573-9097"   "2155739097"    </code></pre>
+</div>
+</div>
+<ol start="13" type="1">
+<li>Remove the all the commas</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb133"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb133-1"><a href="#cb133-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gsub</span>(<span class="st">","</span>, <span class="st">""</span>, dataText)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "3718 Locust Walk"   "4 Privet Drive"     "10880 Malibu Point"
+ [4] "221B Baker St."     "19104-6286"         "20015"             
+ [7] "90291"              "90210"              "(215) 573-9097"    
+[10] "215-573-9097"       "2155739097"         "Kendall Roy"       
+[13] "Roman Roy"          "Siobhan Roy"        "Roy Wood Jr."      
+[16] "Royal Caribbean"    "Casino Royale"      "two children"      
+[19] "2 children"         "twins"              "Philadelphia"      
+[22] "Philly"             "Phila"              "Dr. Phil"          
+[25] "$23456"             "$10000"             "$60000"            </code></pre>
+</div>
+</div>
+<ol start="14" type="1">
+<li>Add commas to these numbers <code>c("9453","2332","4645","1234")</code>.</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb135"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb135-1"><a href="#cb135-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gsub</span>(<span class="st">"([0-9])([0-9]{3})"</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">1,</span><span class="sc">\\</span><span class="st">2"</span>, <span class="fu">c</span>(<span class="st">"9453"</span>,<span class="st">"2332"</span>,<span class="st">"4645"</span>,<span class="st">"1234"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "9,453" "2,332" "4,645" "1,234"</code></pre>
+</div>
+</div>
+<p>or</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb137"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb137-1"><a href="#cb137-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gsub</span>(<span class="st">"^([0-9])"</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">1,"</span>, <span class="fu">c</span>(<span class="st">"9453"</span>,<span class="st">"2332"</span>,<span class="st">"4645"</span>,<span class="st">"1234"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "9,453" "2,332" "4,645" "1,234"</code></pre>
+</div>
+</div>
+<ol start="15" type="1">
+<li>Change Dr.&nbsp;Phil to Dr.&nbsp;Phillip</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb139"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb139-1"><a href="#cb139-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gsub</span>(<span class="st">"Phil$"</span>,<span class="st">"Phillip"</span>,dataText)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "3718 Locust Walk"   "4 Privet Drive"     "10880 Malibu Point"
+ [4] "221B Baker St."     "19104-6286"         "20015"             
+ [7] "90291"              "90210"              "(215) 573-9097"    
+[10] "215-573-9097"       "2155739097"         "Kendall Roy"       
+[13] "Roman Roy"          "Siobhan Roy"        "Roy Wood, Jr."     
+[16] "Royal Caribbean"    "Casino Royale"      "two children"      
+[19] "2 children"         "twins"              "Philadelphia"      
+[22] "Philly"             "Phila"              "Dr. Phillip"       
+[25] "$23456"             "$10000"             "$60,000"           </code></pre>
+</div>
+</div>
+<ol start="16" type="1">
+<li>Spell out Philadelphia</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb141"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb141-1"><a href="#cb141-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gsub</span>((<span class="st">"Phil(adelphia|ly|a)"</span>), <span class="st">"Philadelphia"</span>, dataText)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "3718 Locust Walk"   "4 Privet Drive"     "10880 Malibu Point"
+ [4] "221B Baker St."     "19104-6286"         "20015"             
+ [7] "90291"              "90210"              "(215) 573-9097"    
+[10] "215-573-9097"       "2155739097"         "Kendall Roy"       
+[13] "Roman Roy"          "Siobhan Roy"        "Roy Wood, Jr."     
+[16] "Royal Caribbean"    "Casino Royale"      "two children"      
+[19] "2 children"         "twins"              "Philadelphia"      
+[22] "Philadelphia"       "Philadelphia"       "Dr. Phil"          
+[25] "$23456"             "$10000"             "$60,000"           </code></pre>
+</div>
+</div>
+<p>or</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb143"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb143-1"><a href="#cb143-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gsub</span>(<span class="st">"Phil[^</span><span class="sc">\\</span><span class="st">b]+"</span>, <span class="st">"Philadelphia"</span>, dataText)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "3718 Locust Walk"   "4 Privet Drive"     "10880 Malibu Point"
+ [4] "221B Baker St."     "19104-6286"         "20015"             
+ [7] "90291"              "90210"              "(215) 573-9097"    
+[10] "215-573-9097"       "2155739097"         "Kendall Roy"       
+[13] "Roman Roy"          "Siobhan Roy"        "Roy Wood, Jr."     
+[16] "Royal Caribbean"    "Casino Royale"      "two children"      
+[19] "2 children"         "twins"              "Philadelphia"      
+[22] "Philadelphia"       "Philadelphia"       "Dr. Phil"          
+[25] "$23456"             "$10000"             "$60,000"           </code></pre>
+</div>
+</div>
+<ol start="17" type="1">
+<li>Keep just the first word or first number</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb145"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb145-1"><a href="#cb145-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gsub</span>(<span class="st">"^([^ ]+) .*$"</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">1"</span>, dataText)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "3718"         "4"            "10880"        "221B"         "19104-6286"  
+ [6] "20015"        "90291"        "90210"        "(215)"        "215-573-9097"
+[11] "2155739097"   "Kendall"      "Roman"        "Siobhan"      "Roy"         
+[16] "Royal"        "Casino"       "two"          "2"            "twins"       
+[21] "Philadelphia" "Philly"       "Phila"        "Dr."          "$23456"      
+[26] "$10000"       "$60,000"     </code></pre>
+</div>
+</div>
+<p>or</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb147"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb147-1"><a href="#cb147-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gsub</span>(<span class="st">" .*"</span>, <span class="st">""</span>, dataText)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "3718"         "4"            "10880"        "221B"         "19104-6286"  
+ [6] "20015"        "90291"        "90210"        "(215)"        "215-573-9097"
+[11] "2155739097"   "Kendall"      "Roman"        "Siobhan"      "Roy"         
+[16] "Royal"        "Casino"       "two"          "2"            "twins"       
+[21] "Philadelphia" "Philly"       "Phila"        "Dr."          "$23456"      
+[26] "$10000"       "$60,000"     </code></pre>
+</div>
+</div>
+<ol start="18" type="1">
+<li>Keep only area codes of phone numbers</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb149"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb149-1"><a href="#cb149-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gsub</span>(<span class="st">"^</span><span class="sc">\\</span><span class="st">(?([0-9]{3})(</span><span class="sc">\\</span><span class="st">) |-| )?[0-9]{3}-?[0-9]{4}"</span>,<span class="st">"</span><span class="sc">\\</span><span class="st">1"</span>,dataText)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "3718 Locust Walk"   "4 Privet Drive"     "10880 Malibu Point"
+ [4] "221B Baker St."     "19104-6286"         "20015"             
+ [7] "90291"              "90210"              "215"               
+[10] "215"                "215"                "Kendall Roy"       
+[13] "Roman Roy"          "Siobhan Roy"        "Roy Wood, Jr."     
+[16] "Royal Caribbean"    "Casino Royale"      "two children"      
+[19] "2 children"         "twins"              "Philadelphia"      
+[22] "Philly"             "Phila"              "Dr. Phil"          
+[25] "$23456"             "$10000"             "$60,000"           </code></pre>
+</div>
+</div>
+<ol start="19" type="1">
+<li>We were told “i before e except after c, or when sounded like a as in neighbor or weigh”. Is that true?</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb151"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb151-1"><a href="#cb151-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"[^c]ei"</span>, words, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "their"        "being"        "neither"      "seeing"       "foreign"     
+ [6] "weight"       "seized"       "height"       "reign"        "sovereign"   
+[11] "beings"       "wherein"      "veil"         "therein"      "leisure"     
+[16] "seize"        "neighborhood" "heir"         "theirs"       "neighbors"   
+[21] "veins"        "heights"      "neighbour"    "neighbouring" "weighed"     
+[26] "neighbor"     "reigned"      "sovereignty"  "foreigners"   "neighboring" 
+[31] "reins"        "seizing"      "weigh"        "vein"         "Keith"       
+[36] "sovereigns"   "leisurely"    "foreigner"    "weird"        "deity"       
+[41] "weighing"     "freight"      "deities"      "rein"         "reigns"      
+[46] "weighty"      "Raleigh"      "albeit"       "heightened"   "Seine"       
+[51] "well-being"   "forfeit"      "Marseilles"   "twenty-eight" "herein"      </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb153"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb153-1"><a href="#cb153-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"cie"</span>, words, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "ancient"       "society"       "sufficient"    "species"      
+ [5] "science"       "conscience"    "sufficiently"  "scientific"   
+ [9] "fancied"       "fancies"       "efficient"     "efficiency"   
+[13] "tendencies"    "conscientious" "insufficient"  "deficient"    
+[17] "deficiency"   </code></pre>
+</div>
+</div>
+<p>There are a lot of words with “ei” where the letter before the “ei”” is not a “c”. Also, there are a lot of words that have “ie” immediately following a “c”.</p>
+<ol start="20" type="1">
+<li>Find words with punctuation</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb155"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb155-1"><a href="#cb155-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"[^a-zA-Z0-9]"</span>, words, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1] "I'll"           "can't"          "I've"           "didn't"        
+  [5] "an'"            "won't"          "man's"          "c."            
+  [9] "that's"         "etc."           "o'"             "I'd"           
+ [13] "v."             "father's"       "wouldn't"       "he's"          
+ [17] "couldn't"       "isn't"          "'em"            "king's"        
+ [21] "there's"        "ain't"          "you'll"         "god's"         
+ [25] "mother+'s"      "wasn't"         "doesn't"        "haven't"       
+ [29] "you've"         "woman's"        "we'll"          "she's"         
+ [33] "'tis"           "you'd"          "what's"         "cf."           
+ [37] "hadn't"         "th'"            "pp."            "rest."         
+ [41] "o'er"           "u.s."           "he'd"           "they're"       
+ [45] "we're"          "day's"          "girl's"         "he'll"         
+ [49] "shouldn't"      "husband's"      "twenty-five"    "men's"         
+ [53] "other's"        "i.e."           "brother's"      "wife's"        
+ [57] "we've"          "well-known"     "lady's"         "twenty-four"   
+ [61] "ma'am"          "enemy's"        "imp."           "hasn't"        
+ [65] "majesty's"      "viz."           "mustn't"        "old-fashioned" 
+ [69] "friend's"       "so-called"      "re-use"         "aren't"        
+ [73] "they'll"        "needn't"        "pub."           "middle-aged"   
+ [77] "she'd"          "t'"             "of."            "oe."           
+ [81] "prof."          "she'll"         "shan't"         "ne'er"         
+ [85] "as."            "they'd"         "we'd"           "here's"        
+ [89] "they've"        "adj."           "weren't"        "sq."           
+ [93] "gen."           "cong."          "col."           "brother-in-law"
+ [97] "son-in-law"     "e.g."           "ch."            "e-mail"        
+[101] "twenty-one"     "twenty-two"     "it'll"          "ft."           
+[105] "self-control"   "anglo-saxon"    "ff."            "forty-five"    
+[109] "'ll"            "Icel."          "good-looking"   "p.m."          
+[113] "e'er"           "twenty-three"   "thirty-six"     "a.m."          
+[117] "father-in-law"  "e'en"           "seventy-five"   "'cause"        
+[121] "well-being"     "Mass."          "thirty-two"     "self-"         
+[125] "twenty-eight"   "twenty-six"     "sister-in-law"  "three-quarters"
+[129] "'n'"           </code></pre>
+</div>
+</div>
+<p>or</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb157"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb157-1"><a href="#cb157-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"[[:punct:]]"</span>, words, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1] "I'll"           "can't"          "I've"           "didn't"        
+  [5] "an'"            "won't"          "man's"          "c."            
+  [9] "that's"         "etc."           "o'"             "I'd"           
+ [13] "v."             "father's"       "wouldn't"       "he's"          
+ [17] "couldn't"       "isn't"          "'em"            "king's"        
+ [21] "there's"        "ain't"          "you'll"         "god's"         
+ [25] "mother+'s"      "wasn't"         "doesn't"        "haven't"       
+ [29] "you've"         "woman's"        "we'll"          "she's"         
+ [33] "'tis"           "you'd"          "what's"         "cf."           
+ [37] "hadn't"         "th'"            "pp."            "rest."         
+ [41] "o'er"           "u.s."           "he'd"           "they're"       
+ [45] "we're"          "day's"          "girl's"         "he'll"         
+ [49] "shouldn't"      "husband's"      "twenty-five"    "men's"         
+ [53] "other's"        "i.e."           "brother's"      "wife's"        
+ [57] "we've"          "well-known"     "lady's"         "twenty-four"   
+ [61] "ma'am"          "enemy's"        "imp."           "hasn't"        
+ [65] "majesty's"      "viz."           "mustn't"        "old-fashioned" 
+ [69] "friend's"       "so-called"      "re-use"         "aren't"        
+ [73] "they'll"        "needn't"        "pub."           "middle-aged"   
+ [77] "she'd"          "t'"             "of."            "oe."           
+ [81] "prof."          "she'll"         "shan't"         "ne'er"         
+ [85] "as."            "they'd"         "we'd"           "here's"        
+ [89] "they've"        "adj."           "weren't"        "sq."           
+ [93] "gen."           "cong."          "col."           "brother-in-law"
+ [97] "son-in-law"     "e.g."           "ch."            "e-mail"        
+[101] "twenty-one"     "twenty-two"     "it'll"          "ft."           
+[105] "self-control"   "anglo-saxon"    "ff."            "forty-five"    
+[109] "'ll"            "Icel."          "good-looking"   "p.m."          
+[113] "e'er"           "twenty-three"   "thirty-six"     "a.m."          
+[117] "father-in-law"  "e'en"           "seventy-five"   "'cause"        
+[121] "well-being"     "Mass."          "thirty-two"     "self-"         
+[125] "twenty-eight"   "twenty-six"     "sister-in-law"  "three-quarters"
+[129] "'n'"           </code></pre>
+</div>
+</div>
+<p><code>[:punct:]</code> is a special set containing all punctuation characters. or</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb159"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb159-1"><a href="#cb159-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">W"</span>, words, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1] "I'll"           "can't"          "I've"           "didn't"        
+  [5] "an'"            "won't"          "man's"          "c."            
+  [9] "that's"         "etc."           "o'"             "I'd"           
+ [13] "v."             "father's"       "wouldn't"       "he's"          
+ [17] "couldn't"       "isn't"          "'em"            "king's"        
+ [21] "there's"        "ain't"          "you'll"         "god's"         
+ [25] "mother+'s"      "wasn't"         "doesn't"        "haven't"       
+ [29] "you've"         "woman's"        "we'll"          "she's"         
+ [33] "'tis"           "you'd"          "what's"         "cf."           
+ [37] "hadn't"         "th'"            "pp."            "rest."         
+ [41] "o'er"           "u.s."           "he'd"           "they're"       
+ [45] "we're"          "day's"          "girl's"         "he'll"         
+ [49] "shouldn't"      "husband's"      "twenty-five"    "men's"         
+ [53] "other's"        "i.e."           "brother's"      "wife's"        
+ [57] "we've"          "well-known"     "lady's"         "twenty-four"   
+ [61] "ma'am"          "enemy's"        "imp."           "hasn't"        
+ [65] "majesty's"      "viz."           "mustn't"        "old-fashioned" 
+ [69] "friend's"       "so-called"      "re-use"         "aren't"        
+ [73] "they'll"        "needn't"        "pub."           "middle-aged"   
+ [77] "she'd"          "t'"             "of."            "oe."           
+ [81] "prof."          "she'll"         "shan't"         "ne'er"         
+ [85] "as."            "they'd"         "we'd"           "here's"        
+ [89] "they've"        "adj."           "weren't"        "sq."           
+ [93] "gen."           "cong."          "col."           "brother-in-law"
+ [97] "son-in-law"     "e.g."           "ch."            "e-mail"        
+[101] "twenty-one"     "twenty-two"     "it'll"          "ft."           
+[105] "self-control"   "anglo-saxon"    "ff."            "forty-five"    
+[109] "'ll"            "Icel."          "good-looking"   "p.m."          
+[113] "e'er"           "twenty-three"   "thirty-six"     "a.m."          
+[117] "father-in-law"  "e'en"           "seventy-five"   "'cause"        
+[121] "well-being"     "Mass."          "thirty-two"     "self-"         
+[125] "twenty-eight"   "twenty-six"     "sister-in-law"  "three-quarters"
+[129] "'n'"           </code></pre>
+</div>
+</div>
+<p><code>\W</code> matches any character that is not a number or a letter.</p>
+<ol start="21" type="1">
+<li>Find words that do not have aeiou in the first four characters</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb161"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb161-1"><a href="#cb161-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"^[^aeiouAEIOU]{4}"</span>, words, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "system"        "physical"      "style"         "sympathy"     
+ [5] "mysterious"    "mystery"       "physician"     "thyself"      
+ [9] "sympathetic"   "mysteries"     "systems"       "Dryden"       
+[13] "symptoms"      "symbol"        "crystal"       "10th"         
+[17] "hymn"          "mystic"        "sympathies"    "Sydney"       
+[21] "12th"          "syllable"      "11th"          "rhyme"        
+[25] "symbols"       "physically"    "rhythm"        "systematic"   
+[29] "psychology"    "psychological" "p.m."          "mystical"     
+[33] "mythology"     "myth"          "syllables"     "hysterical"   </code></pre>
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+    const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+    const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+    let newTheme = '';
+    if(darkModeDefault) {
+      newTheme = isAlternate ? baseTheme : alternateTheme;
+    } else {
+      newTheme = isAlternate ? alternateTheme : baseTheme;
+    }
+    const changeGiscusTheme = () => {
+      // From: https://github.com/giscus/giscus/issues/336
+      const sendMessage = (message) => {
+        const iframe = document.querySelector('iframe.giscus-frame');
+        if (!iframe) return;
+        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+      }
+      sendMessage({
+        setConfig: {
+          theme: newTheme
+        }
+      });
+    }
+    const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+    if (isGiscussLoaded) {
+      changeGiscusTheme();
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  const darkModeDefault = true;
+  let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+    toggleGiscusIfUsed(toAlternate, darkModeDefault);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
