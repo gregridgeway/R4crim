@@ -137,9 +137,9 @@ while ((length(a <- readLines(infile, n=1000000)) >  0))
   b <- split(a, substring(a,1,2))
 
   # combine window segments with the associated segments
-  b[["01"]] <- c(b[["01"]],b[["W1"]]) # administrative
-  b[["03"]] <- c(b[["03"]],b[["W3"]]) # property
-  b[["06"]] <- c(b[["06"]],b[["W6"]]) # arrestees
+  b[["01"]] <- c(b[["01"]], b[["W1"]]) # administrative
+  b[["03"]] <- c(b[["03"]], b[["W3"]]) # property
+  b[["06"]] <- c(b[["06"]], b[["W6"]]) # arrestees
   b[c("W1","W3","W6")] <- NULL # drop the W1, W3, W6
 
   # write each segment to its own file
@@ -207,9 +207,9 @@ nibrsAdmin01 <-
             col_positions = fwf_widths(fmtWidth),
             col_type=paste(fmtType, collapse="")) |>
    rename_with(~fmtNames) |>
-   rename(ORI=ORIGINATING.AGENCY.IDENTIFIER.ORI,
-          SEGMENT=SEGMENT.LEVEL,
-          STATE=NUMERIC.STATE.CODE)
+   rename(ORI     = ORIGINATING.AGENCY.IDENTIFIER.ORI,
+          SEGMENT = SEGMENT.LEVEL,
+          STATE   = NUMERIC.STATE.CODE)
 ```
 
 Let's take a look at the first three rows.
@@ -265,9 +265,9 @@ nibrsCrm02 <- read_fwf("2023-02.txt.gz",
                        col_positions = fwf_widths(fmtWidth),
                        col_type=paste(fmtType,collapse="")) |>
    rename_with(~fmtNames) |>
-   rename(ORI=ORIGINATING.AGENCY.IDENTIFIER.ORI,
-          SEGMENT=SEGMENT.LEVEL,
-          STATE=NUMERIC.STATE.CODE)
+   rename(ORI     = ORIGINATING.AGENCY.IDENTIFIER.ORI,
+          SEGMENT = SEGMENT.LEVEL,
+          STATE   = NUMERIC.STATE.CODE)
 ```
 
 
@@ -363,9 +363,9 @@ nibrsProp03 <- read_fwf("2023-03.txt.gz",
                         col_type=paste(fmtType,collapse="")) |>
    rename_with(~fmtNames) |>
    mutate(VALUE.OF.PROPERTY=as.numeric(VALUE.OF.PROPERTY)) |>
-   rename(ORI=ORIGINATING.AGENCY.IDENTIFIER.ORI,
-          SEGMENT=SEGMENT.LEVEL,
-          STATE=NUMERIC.STATE.CODE)
+   rename(ORI     = ORIGINATING.AGENCY.IDENTIFIER.ORI,
+          SEGMENT = SEGMENT.LEVEL,
+          STATE   = NUMERIC.STATE.CODE)
 ```
 
 Let's pull up the property record for the Fairbanks, Alaska incident 2300003 that we previously examined.
@@ -412,9 +412,9 @@ nibrsVic04 <- read_fwf("2023-04.txt.gz",
                         col_positions = fwf_widths(fmtWidth),
                         col_type=paste(fmtType,collapse="")) |>
    rename_with(~fmtNames) |>
-   rename(ORI=ORIGINATING.AGENCY.IDENTIFIER.ORI,
-          SEGMENT=SEGMENT.LEVEL,
-          STATE=NUMERIC.STATE.CODE)
+   rename(ORI     = ORIGINATING.AGENCY.IDENTIFIER.ORI,
+          SEGMENT = SEGMENT.LEVEL,
+          STATE   = NUMERIC.STATE.CODE)
 ```
 
 
@@ -454,9 +454,9 @@ nibrsOff05 <- read_fwf("2023-05.txt.gz",
                        col_positions = fwf_widths(fmtWidth),
                        col_type=paste(fmtType,collapse="")) |>
    rename_with(~fmtNames) |>
-   rename(ORI=ORIGINATING.AGENCY.IDENTIFIER.ORI,
-          SEGMENT=SEGMENT.LEVEL,
-          STATE=NUMERIC.STATE.CODE)
+   rename(ORI     = ORIGINATING.AGENCY.IDENTIFIER.ORI,
+          SEGMENT = SEGMENT.LEVEL,
+          STATE   = NUMERIC.STATE.CODE)
 ```
 
 In some years the offender data has some text in the `OFFENDER.SEQUENCE.NUMBER` for some reason, like setting the `OFFENDER.SEQUENCE.NUMBER` to "##". We told `read_fwf()` to expect a numeric value for this column, marked by the "n" in the `fmtType` column here.
@@ -517,9 +517,9 @@ nibrsArr06 <- read_fwf("2023-06.txt.gz",
                        col_positions = fwf_widths(fmtWidth),
                        col_type=paste(fmtType,collapse="")) |>
    rename_with(~fmtNames) |>
-   rename(ORI=ORIGINATING.AGENCY.IDENTIFIER.ORI,
-          SEGMENT=SEGMENT.LEVEL,
-          STATE=NUMERIC.STATE.CODE)
+   rename(ORI     = ORIGINATING.AGENCY.IDENTIFIER.ORI,
+          SEGMENT = SEGMENT.LEVEL,
+          STATE   = NUMERIC.STATE.CODE)
 ```
 
 No arrests were made in this case. You probably already suspected this since there was no description of an offender in this case either.
@@ -555,9 +555,9 @@ nibrsArB07 <- read_fwf("2023-07.txt.gz",
                        col_positions = fwf_widths(fmtWidth),
                        col_type=paste(fmtType,collapse="")) |>
    rename_with(~fmtNames) |>
-   rename(ORI=ORIGINATING.AGENCY.IDENTIFIER.ORI,
-          SEGMENT=SEGMENT.LEVEL,
-          STATE=NUMERIC.STATE.CODE)
+   rename(ORI     = ORIGINATING.AGENCY.IDENTIFIER.ORI,
+          SEGMENT = SEGMENT.LEVEL,
+          STATE   = NUMERIC.STATE.CODE)
 ```
 
 The Fairbanks case we traced through the other NIBRS tables was not a Group B offense, so it will have no records in this table. Instead, let's examine the first two Fairbanks Group B offenses reported. I have gone ahead and joined the Group B arrestee table with the `OffenseLookup` so the offenses are easier to interpret.
@@ -600,9 +600,9 @@ nibrsBH <- read_fwf("2023-BH.txt.gz",
                     col_positions = fwf_widths(fmtWidth),
                     col_type=paste(fmtType,collapse="")) |>
    rename_with(~fmtNames) |>
-   rename(ORI=ORIGINATING.AGENCY.IDENTIFIER.ORI,
-          SEGMENT=SEGMENT.LEVEL,
-          STATE=NUMERIC.STATE.CODE)
+   rename(ORI     = ORIGINATING.AGENCY.IDENTIFIER.ORI,
+          SEGMENT = SEGMENT.LEVEL,
+          STATE   = NUMERIC.STATE.CODE)
 ```
 
 Some particularly important columns are `DATE.ORI.WENT.NIBRS` containing the date when the agency first reported data to NIBRS, the `AGENCY.INDICATOR` describing what type of law enforcement agency it is (eg. city, county, state, college, tribal) or whether the agency relies on another to file its NIBRS reports (such as a transit police that reports through the municipal police). The batch header contains an estimate of the size of the population that the agency covers, but breaks down the reporting by county. Oklahoma City, for example, intersects with four different counties, so that the Oklahoma City Police Department reports their population separately for each.
@@ -611,7 +611,7 @@ Some particularly important columns are `DATE.ORI.WENT.NIBRS` containing the dat
 #| cache: true
 nibrsBH |> 
    filter(ORI=="OK0550600") |> 
-   select(ORI,CITY.NAME,STATE.ABBREVIATION,
+   select(ORI, CITY.NAME, STATE.ABBREVIATION,
           starts_with("CURRENT.POPULATION")) |>
    print(width=360)
 ```
@@ -820,17 +820,19 @@ kable(df, escape = FALSE, col.names = c("Code", "Description")) |>
 
 Other data sources show that the total number of fatal police shooting victims is about 1,000 per year.
 
-6. This exercise will involve a lot more work, including acquiring NIBRS data from multiple years. First, listen to the story "[Is retail theft really rising?](https://www.marketplace.org/2023/09/11/is-retail-theft-really-rising/)" featuring Kai Ryssdal and Livi Burdette recorded on September 11, 2023. In the discussion, one reporter seems to indicate that there are no national data on retail theft. Now that you have worked through this script and worked with NIBRS, you can see that retail theft is a UCR code reportable to NIBRS. Now some stores might not report retail theft to the police, but such non-reporting plagues all crime types. But you can evaluate whether reports of retail theft are increasing or decreasing over time. When examining trends over the last several years, make sure to consider that some agencies, like NYPD, just started reporting in 2023. Best to exclude them if you wish to compare trends from 2021 to the present. So, do the NIBRS data indicate that retail theft is rising?
+`r .exNum('Does NIBRS indicate that retail theft is rising?')` This exercise will involve a lot more work, including acquiring NIBRS data from multiple years. First, listen to the story "[Is retail theft really rising?](https://www.marketplace.org/2023/09/11/is-retail-theft-really-rising/)" featuring Kai Ryssdal and Livi Burdette recorded on September 11, 2023. In the discussion, one reporter seems to indicate that there are no national data on retail theft. Now that you have worked through this script and worked with NIBRS, you can see that retail theft is a UCR code reportable to NIBRS. Now some stores might not report retail theft to the police, but such non-reporting plagues all crime types. But you can evaluate whether reports of retail theft are increasing or decreasing over time. When examining trends over the last several years, make sure to consider that some agencies, like NYPD, just started reporting in 2023. Best to exclude them if you wish to compare trends from 2021 to the present. So, do the NIBRS data indicate that retail theft is rising?
 
 # Answers to the exercises
 
 1. `r .exerciseQuestions[1]`
-```{r comment=""}
+```{r}
+#| comment: ""
 nibrsCrm02 |> filter(ORI=="PAPEP0000") |> count()
 ```
 
 2. `r .exerciseQuestions[2]`
-```{r comment=""}
+```{r}
+#| comment: ""
 #| cache: true
 nibrsCrm02 |>
    filter(ORI=="PAPEP0000") |>
@@ -842,7 +844,8 @@ nibrsCrm02 |>
 ```
 
 3. `r .exerciseQuestions[3]`
-```{r comment=""}
+```{r}
+#| comment: ""
 #| cache: true
 nibrsCrm02 |>
   filter(UCR.OFFENSE.CODE=="13A" &
@@ -854,7 +857,8 @@ nibrsCrm02 |>
 ```
 
 4. `r .exerciseQuestions[4]`
-```{r comment=""}
+```{r}
+#| comment: ""
 #| cache: true
 nibrsCrm02 |>
   filter(UCR.OFFENSE.CODE=="13A" &
@@ -905,7 +909,8 @@ nibrsCrm02 |>
 
 Here's the first idea. We can count "criminal" incidents involving UCR code 09C, justifiable homicide.
 
-```{r comment=""}
+```{r}
+#| comment: ""
 #| cache: true
 nibrsCrm02 |> 
   filter(UCR.OFFENSE.CODE=="09C") |>
@@ -914,17 +919,19 @@ nibrsCrm02 |>
 
 A second approach is to count victims, those killed by citizens (circumstance 20) and those killed by police (circumstance 21).
 
-```{r comment=""}
+```{r}
+#| comment: ""
 #| cache: true
-table(nibrsVic04$CIRCUMSTANCE.1)
-table(nibrsVic04$CIRCUMSTANCE.2)
+nibrsVic04 |> count(CIRCUMSTANCE.1)
+nibrsVic04 |> count(CIRCUMSTANCE.2)
+
 sum(nibrsVic04$CIRCUMSTANCE.1 %in% 20:21)
-table(nibrsVic04$ADDITIONAL.JUSTIFIABLE.HOMICIDE.CIRCUMSTANCES)
+
+nibrsVic04 |> count(ADDITIONAL.JUSTIFIABLE.HOMICIDE.CIRCUMSTANCES)
 ```
 
 ```{r}
 #| echo: false
-# Prepare the data frame
 df <- data.frame(
   Code = c("20", "21", "A", "B", "C", "D", "E", "F", "G"),
   Description = c(
@@ -939,20 +946,34 @@ df <- data.frame(
     "Unable to determine/not enough information"
   ))
 
-# Create the table
 kable(df, escape = FALSE, col.names = c("Code", "Description")) |>
     kable_styling(full_width = FALSE) |>
     collapse_rows(columns = 1, valign = "top")
 ```
 
 The following code offers a more complete description of who committed the justifiable homicide and the reason for the homicide.
-```{r comment=""}
+```{r}
+#| comment: ""
 #| cache: true
 nibrsVic04 |>
   filter(CIRCUMSTANCE.1 %in% c("20","21")) |>
-  group_by(CIRCUMSTANCE.1, ADDITIONAL.JUSTIFIABLE.HOMICIDE.CIRCUMSTANCES) |>
-  count() |>
+  count(CIRCUMSTANCE.1, ADDITIONAL.JUSTIFIABLE.HOMICIDE.CIRCUMSTANCES) |>
   pivot_wider(names_from = ADDITIONAL.JUSTIFIABLE.HOMICIDE.CIRCUMSTANCES,
               values_from = n,
-              values_fill = 0) # what to fill in for NAs
+              values_fill = 0)
 ```
+
+6. `r .exerciseQuestions[6]` To examine trends we would need to load several years of NIBRS data. For now, let's just calculate the number of retail theft (23C) incidents reported to agencies that reported 12 months of NIBRS data.
+```{r}
+#| comment: ""
+#| cache: true
+nibrsCrm02 |>
+   select(ORI, INCIDENT.NUMBER, UCR.OFFENSE.CODE) |>
+   left_join(nibrsBH |> select(ORI,JANUARY:DECEMBER),
+             by=join_by(ORI)) |>
+   filter(UCR.OFFENSE.CODE=="23C" & # shoplifting
+             if_all(JANUARY:DECEMBER, # all months had some report
+                    function(x) x != "NNN")) |>
+   count()
+```
+
