@@ -9,7 +9,7 @@
 <meta name="author" content="Greg Ridgeway">
 <meta name="author" content="Ruth Moyer">
 <meta name="author" content="Li Sian Goh">
-<meta name="dcterms.date" content="2025-08-13">
+<meta name="dcterms.date" content="2025-08-14">
 
 <title>Working with National Crime Victimization Survey Data</title>
 <style>
@@ -187,7 +187,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">August 13, 2025</p>
+      <p class="date">August 14, 2025</p>
     </div>
   </div>
   
@@ -208,7 +208,7 @@ window.Quarto = {
 <section id="introduction" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
 <p>Through our work with NIBRS, we have already discussed reported crime. Nonetheless, not all crimes are reported to the police. Each year, under the guidance of the Bureau of Justice Statistics, the U.S. Census Bureau conducts the National Crime Victimization Survey (NCVS), a source of self-reported victimization data. The Census Bureau interviews a sample of people 12 years old or older about the number and characteristics of crime victimizations they experienced during the prior 6 months.</p>
-<p>In 2023 226,480 people in 142,028 households participated. The survey had a 63% response rate for households and and 82% response rate for individuals. Households remain in the sample for <span class="math inline">\(3\frac{1}{2}\)</span> years completing interviews every 6 months, in person or by phone, for a total of seven interviews. The survey cost $62M annually and required roughly 125,000 hours of uncompensated respondent time.</p>
+<p>In 2023 226,480 people in 142,028 households participated. The survey had a 63% response rate for households and 82% response rate for individuals. Households remain in the sample for <span class="math inline">\(3\frac{1}{2}\)</span> years completing interviews every 6 months, in person or by phone, for a total of seven interviews. The survey cost $62M annually and required roughly 125,000 hours of uncompensated respondent time.</p>
 <p>The NCVS contains information about nonfatal personal crimes, such as rape and robbery, as well as property crimes, such as burglary. Additional information about the NCVS can be found at the <a href="https://bjs.ojp.gov/data-collection/ncvs">BJS website</a>. To give a sense of the type of data that the NCVS contains, refer to the <a href="https://bjs.ojp.gov/library/publications/criminal-victimization-2023">Official 2023 BJS Crime Victimization report</a>.</p>
 </section>
 <section id="acquiring-the-ncvs-data" class="level1" data-number="2">
@@ -264,7 +264,7 @@ window.Quarto = {
 </div>
 </div>
 <p>Inside each of these subfolders you see an R data file with the extension .rda. We will spend most of our attention on the contents of the DS0005 folder, which contains the “incident-level extract file.” In each folder you will also find codebooks in pdf (and epub) format. The codebook is as important as it is tedious for understanding what is stored in the NCVS data. You should become familiar with the codebooks as soon as you can.</p>
-<p>Let’s start loading these datasets. We will skip the DS0001 subfolder, which contains basic survey information on the targeted addressed. The DS0002 folder contains data on the households included in the survey.</p>
+<p>Let’s start loading these datasets. We will skip the DS0001 subfolder, which contains basic survey information on the targeted addresses. The DS0002 folder contains data on the households included in the survey.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"NCVS2022/DS0002/38603-0002-Data.rda"</span>)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"NCVS2023/DS0002/38962-0002-Data.rda"</span>)</span>

@@ -57,7 +57,7 @@ bibliography: G:/My Drive/docs/Greg/articles/mybib.bib
 
 Through our work with NIBRS, we have already discussed reported crime. Nonetheless, not all crimes are reported to the police. Each year, under the guidance of the Bureau of Justice Statistics, the U.S. Census Bureau conducts the National Crime Victimization Survey (NCVS), a source of self-reported victimization data. The Census Bureau interviews a sample of people 12 years old or older about the number and characteristics of crime victimizations they experienced during the prior 6 months. 
 
-In 2023 226,480 people in 142,028 households participated. The survey had a 63\% response rate for households and and 82\% response rate for individuals. Households remain in the sample for $3\frac{1}{2}$ years completing interviews every 6 months, in person or by phone, for a total of seven interviews. The survey cost \$62M annually and required roughly 125,000 hours of uncompensated respondent time.
+In 2023 226,480 people in 142,028 households participated. The survey had a 63\% response rate for households and 82\% response rate for individuals. Households remain in the sample for $3\frac{1}{2}$ years completing interviews every 6 months, in person or by phone, for a total of seven interviews. The survey cost \$62M annually and required roughly 125,000 hours of uncompensated respondent time.
 
 The NCVS contains information about nonfatal personal crimes, such as rape and robbery, as well as property crimes, such as burglary. Additional information about the NCVS can be found at the [BJS website](https://bjs.ojp.gov/data-collection/ncvs). To give a sense of the type of data that the NCVS contains, refer to the [Official 2023 BJS Crime Victimization report](https://bjs.ojp.gov/library/publications/criminal-victimization-2023).
 
@@ -74,7 +74,7 @@ list.files("NCVS2023/",recursive = TRUE)
 ```
 Inside each of these subfolders you see an R data file with the extension .rda. We will spend most of our attention on the contents of the DS0005 folder, which contains the "incident-level extract file." In each folder you will also find codebooks in pdf (and epub) format. The codebook is as important as it is tedious for understanding what is stored in the NCVS data. You should become familiar with the codebooks as soon as you can.
 
-Let's start loading these datasets. We will skip the DS0001 subfolder, which contains basic survey information on the targeted addressed. The DS0002 folder contains data on the households included in the survey.
+Let's start loading these datasets. We will skip the DS0001 subfolder, which contains basic survey information on the targeted addresses. The DS0002 folder contains data on the households included in the survey.
 ```{r}
 load("NCVS2022/DS0002/38603-0002-Data.rda")
 load("NCVS2023/DS0002/38962-0002-Data.rda")
