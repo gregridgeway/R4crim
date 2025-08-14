@@ -1,0 +1,525 @@
+---
+title: "Introduction to SQL"
+author:
+- affiliation: University of Pennsylvania
+  email: gridge@upenn.edu
+  name: Greg Ridgeway
+- affiliation: University of Pennsylvania
+  email: moyruth@upenn.edu
+  name: Ruth Moyer
+- affiliation: University of Pennsylvania
+  email: gohl@upenn.edu
+  name: Li Sian Goh
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+format:
+  html:
+    theme: 
+      dark: darkly
+      light: default
+    toc: true
+    html-math-method: mathjax
+  pdf:
+    toc: true
+    prefer-html: true
+number-sections: true
+editor_options: 
+  chunk_output_type: console
+bibliography: G:/My Drive/docs/Greg/articles/mybib.bib
+---
+
+<!-- In terminal -->
+<!-- quarto render 06_Introduction_to_SQL1.qmd -->
+
+<!-- git commit 06-* -m "commit message" -->
+<!-- git status -->
+<!-- git push -->
+
+<!-- cache the results -->
+```{r}
+#| echo: false
+#knitr::opts_chunk$set(echo=TRUE, cache=FALSE, cache.lazy=FALSE, out.width='100%')
+```
+
+<!-- A function for automating the numbering and wording of the exercise questions -->
+<!-- Use \x60 inside exercise questions for backticks -->
+```{r}
+#| echo: false
+.counterExercise <- 0
+.exerciseQuestions <- NULL
+.exNum <- function(.questionText="") 
+{
+   .counterExercise <<- .counterExercise+1
+   .exerciseQuestions <<- c(.exerciseQuestions, .questionText)
+   return(paste0(.counterExercise,". ",.questionText))
+}
+.exQ <- function(i)
+{
+   return( paste0(i,". ",.exerciseQuestions[i]) )
+}
+```
+
+<!-- To run this, first download the latest Chicago crime data from -->
+<!-- https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-Present/ijzp-q8t2 -->
+<!-- and put the file in the current folder -->
+
+# Introduction
+
+Some datasets are far too large for R to handle by itself. Structured Query Language ("SQL") is a widely used international standard language for managing data stored in a relational databases management system. A relational database management system itself is an approach to managing data using a structure that can be contrasted against the 'flat file' approach we have been using thus far with R. Why use SQL? R doesn't work very well with really huge datasets. A relational database management system offers a way of storing large amounts of information more efficiently and reducing the size of the dataset that we are working with. There are numerous relational database management systems such as Oracle, Microsoft Access, and MySQL. We are going to use [SQLite](https://www.sqlite.org/index.html), which is probably the most widely deployed database system. SQLite is in your phone, car, airplanes, thermostats, and numerous appliances. We are going to hook up SQLite to R so that R can handle large datasets.
+
+These are some basic clauses in a SQL query that we will explore:
+
+SELECT    	fields or functions of fields
+INTO      	results table
+FROM      	tables queried
+WHERE     	conditions for selecting a record
+GROUP BY  	list of fields to group
+ORDER BY  	list of fields to sort by
+
+However, before being able to use SQL as a tool in R, it will first be necessary to install the `sqldf` package.
+
+```{r}
+#| cache: false
+#| message: false
+library(dplyr)
+library(sqldf)
+```
+
+# Getting the data into proper form
+
+We will be working with Chicago crime data, which is accessible comma separated value (csv) format. Before we can even being learning SQL, we are going to have to do a fair bit of work to acquire the dataset, format it so that it is ready for SQLite, and then load it into the SQLite database.
+
+Navigate to the Chicago open data website to get the [data](https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-present/ijzp-q8t2). Click the "Export" button and select the "CSV" option, or directly download from [here](https://data.cityofchicago.org/api/views/ijzp-q8t2/rows.csv?accessType=DOWNLOAD)
+
+The Chicago crime data is huge, more than `r (file.size("Crimes_-_2001_to_present.csv")/10^9) |> round(1) |> format(nsmall=1)` Gb. It contains over 8.3 million records on all crimes reported to the Chicago police department since 2001. R does not handle really large datasets well. By using SQL, you will learn how to more efficiently work with large datasets and learn a data language that is used absolutely everywhere.
+
+Let's use `scan()` to just peek at the first three rows of the file.
+
+```{r}
+scan(what="",file="Crimes_-_2001_to_present.csv",nlines=5,sep="\n")
+```
+`scan()` is a very basic R function that reads in plain text files. We've told it to read in text (`what==""`), the name of the file, to only read in 5 lines (`nlines=5`), and to start a new row whenever it reaches a line feed character (`sep="\n"`). Using `scan()` without `nlines=5` would cause R to try to read in the whole dataset and that could take a lot of time and you might run out of memory.
+
+You can see that the first row contains the column names. The second row contains the first reported crime in the file. You can see date and time, address, crime descriptions, longitude and latitude of the crime, and other information.
+
+Let's try to load this file into a SQLite database. There are two steps. First, using `dbConnect()` we need to tell R to make a connection to a new SQLite database that we will call `chicagocrime.db`. This will be a file in your working folder that SQLite will use to store the data. 
+```{r}
+# create a connection to the database
+con <- dbConnect(SQLite(), dbname="chicagocrime.db")
+```
+```{r}
+#| echo: false
+# just in case you've already created a "crime" table, delete it
+if(dbExistsTable(con, "crime")) dbRemoveTable(con, "crime")
+```
+Then using `dbWriteTable()` we tell R to read in the csv file and store its contents in a new table in the database. We will call that new table `crime`. Make sure that your path is set to the correct folder where you want the database to be stored.
+```{r}
+#| error: true
+# write a table called "crime" into the SQLite database
+dbWriteTable(con, 
+             "crime", # the new table in the database
+             "Crimes_-_2001_to_present.csv",
+             row.names=FALSE,
+             header=TRUE)     # first row has column names
+```
+Looks like there is a problem with the dataset. SQLite was expecting 22 columns, but row 4 had 23. Notice from when we ran `scan()` earlier, the fourth row has a `"(41.908417822, -87.67740693)"`. SQLite thinks that these two numbers belong in two different columns instead of a single `Location` column.
+
+SQLite is very particular about the formatting of a file. It can easily read in a csv file, but this dataset has some commas in places that confuse SQLite. For example, there is a row in this file that looks like this:
+
+```{r}
+#| echo: false 
+print("10000153,HY189345,03/18/2015 12:20:00 PM,091XX S UNIVERSITY AVE,0483,BATTERY,AGG PRO.EMP: OTHER DANG WEAPON,\"SCHOOL, PUBLIC, BUILDING\",true,false,0413,004,8,47,04B,1185475,1844606,2015,02/10/2018 03:50:01 PM,41.728740563,-87.596150779,\"(41.728740563, -87.596150779)\"")
+```
+
+You see that the location description for this crime is `"SCHOOL, PUBLIC, BUILDING"`. Those commas inside the quotes are going to cause SQLite problems. SQLite is going to think that `SCHOOL`, `PUBLIC`, and `BUILDING` are all separate columns rather than one columns describing the location.
+
+To resolve this, we are going to change all the commas that separate the columns into something else besides commas, leaving the commas in elements like `"SCHOOL, PUBLIC, BUILDING"` alone. It does not matter what we use to separate the fields, but it should be an unusual character that would not appear anywhere else in the dataset. Popular choices in the vertical bar (`|`) and the semicolon (`;`). So let's take a slight detour to find out how to convert a comma-separated file into a semicolon separated file. 
+
+You will know if you need to convert your file if, when you try to set up your SQL database, you receive an error message about an "extra column."
+
+We are going to use a `while` loop to read in 1,000,000 rows of the our data file at a time. R can handle 1,000,000 rows. With the 1,000,000 rows read in, we will use a regular expression to replace all the commas used for separating columns with semicolons. Then we will write out the resulting cleaned up rows into a new file. It is a big file so this code can take a few minutes to run to completion.
+
+```{r commas2semicolons}
+#| R.options: list(scipen=999)
+infile  <- file("Crimes_-_2001_to_present.csv", 'r')       # 'r' for 'read'
+outfile <- file("Crimes_-_2001_to_present-clean.csv", 'w') # 'w' for 'write'
+
+# fix the Row #1 with the columns names
+readLines(infile, n=1) |>
+   gsub(",", ";", x=_) |> # separate with ;
+   gsub(" ", "", x=_)  |> # SQL doesn't like field names with .,-,space
+   writeLines(con=outfile)
+
+cLines <- 0 # just a counter for the number of lines read
+
+# read in 1000000 lines. keep going if more than 0 lines read
+while ((length(a <- readLines(infile, n=1000000)) > 0))
+{
+   cLines <- cLines + length(a) # increase the line counter
+   cLines |> format(big.mark=",", scientific=FALSE) |> message()
+   # remove any semicolons if they are there
+   a <- gsub(";", "", a)
+   # use ?= to "lookahead" for paired quotes
+   a <- gsub(",(?=([^\"]|\"[^\"]*\")*$)", ";", a, perl=TRUE)
+   # write the cleaned up data to storage
+   writeLines(a, con=outfile)
+}
+close(infile)
+close(outfile)
+```
+
+Now, let's take a look at the first five lines of the new file we just created.
+```{r} 
+scan(what="",file="Crimes_-_2001_to_present-clean.csv",nlines=5,sep="\n")
+```
+You now see that semicolons separate the columns rather than commas. That previous record that had the location description "SCHOOL, PUBLIC, BUILDING" now looks like this:
+```{r}
+#| echo: false
+print("10000153;HY189345;03/18/2015 12:20:00 PM;091XX S UNIVERSITY AVE;0483;BATTERY;AGG PRO.EMP: OTHER DANG WEAPON;\"SCHOOL, PUBLIC, BUILDING\";true;false;0413;004;8;47;04B;1185475;1844606;2015;02/10/2018 03:50:01 PM;41.728740563;-87.596150779;\"(41.728740563, -87.596150779)\"")
+```
+Note that the commas are still there inside the quotes. Now we will be able to tell SQLite to look for semicolons to separate the columns.
+
+# Setting up the database
+
+Now that the csv file containing the data is ready, we can load it into SQLite. 
+
+```{r buildSQLdatabase}
+# peek at the first few rows of the dataset
+a <- read.table("Crimes_-_2001_to_present-clean.csv",
+                sep=";",nrows=5,header=TRUE)
+# ask SQLite what data type it plans to use to store each column (eg number, text)
+variabletypes <- dbDataType(con, a)
+# make sure these features are stored as TEXT
+variabletypes[c("IUCR","FBICode","Ward","District","CommunityArea")] <- "TEXT"
+
+# just in case you've already created a "crime" table, delete it
+if(dbExistsTable(con, "crime")) dbRemoveTable(con, "crime")
+# import the data file into the database
+dbWriteTable(con, "crime",                         # create crime table   
+             "Crimes_-_2001_to_present-clean.csv", # from our cleaned up file
+             row.names=FALSE,
+             header=TRUE,                          # first row has column names
+             field.types=variabletypes,            
+             sep=";")                              # columns separated with ;
+# does the table exist?
+dbListTables(con)
+# a quick check to see if all the columns are there
+dbListFields(con,"crime")
+# disconnect from the database to finalize
+dbDisconnect(con)
+```
+You will know if the database has been successfully set up if you find a chicagocrime.db file that has about 2 Gb of data in it. If the file size is 0 or really small, then you may be looking in the wrong folder or the data cleaning and import did not finish.
+```{r}
+# how many gigabytes?
+(file.size("chicagocrime.db")/10^9) |> 
+   round(1) |>
+   format(nsmall=1, scientific=FALSE)
+```
+
+Once you have successfully set up your database, there is no reason to run these lines of code again. You should never again need to turn commas into semicolons or run `dbWriteTable()`. Instead, every time you want to work with your database, you can simply need to reconnect to the database with: 
+```{r}
+#| cache: false
+con <- dbConnect(SQLite(), dbname="chicagocrime.db")
+```
+Note that if you are using a cloud-based backup service like iCloud, OneDrive, or Google Drive, you might need to wait until your "db" file has completely synced before you can access your database. For this reason I typically put my SQLite databases in a folder that does not get backed up. If I accidentally delete it, then I just rerun the code to rebuild the database.
+
+# SQL queries (`SELECT`, `WHERE`, `FROM`)
+You have now created a database chicagocrime.db containing a table called `crime` that contains those 8 million crime records. 
+
+Two important clauses with an SQL query are `SELECT` and `FROM`. Unlike R, SQL queries are not case-sensitive and column names are not case-sensitive. So if we were to type "SELECT" as "select" or "Description" as "dEsCrIpTiOn", the SQL query would do the same thing. However, the tradition is to put SQL keywords in all uppercase to make it easier to distinguish them from table and column names.
+
+The `SELECT` clause tells SQL which columns in particular you would like to see. The `FROM` clause simply tells SQL from which table it should pull the data. In this query, we are interested in only the `ID` and `Description` columns.  
+```{r} 
+dbGetQuery(con,
+   "SELECT ID, Description
+    FROM crime",
+    n = 10) # just the first 10 rows
+```
+`dbGetQuery()` pulls the selected rows (first 10) from the selected columns (`ID` and `Description`). Sometimes it is preferable to get large datasets in smaller chunks using `dbSendQuery()` and `dbFetch()`.
+```{r}
+res <- dbSendQuery(con, "
+  SELECT ID,Description
+  FROM crime")
+# pull the first 10 lines
+dbFetch(res, n = 10)
+# pull the next 10 lines
+dbFetch(res, n = 10)
+# when finished, clear the rest of the results
+dbClearResult(res)
+```
+`dbClearResult(res)` tells SQLite that we are all done with this query. We have displayed the first 20 rows. SQLite is standing by with another 8 million rows to show us, but `dbClearResult(res)` tells SQLite that we are no longer interested in this query and it can clear out whatever it has stored for us.
+
+In the previous SQL query we just asked for `ID` and `Description`. Typing out all of the column names would be tiresome, so SQL lets you use a `*` to select all the columns. If we want to look at the first 10 rows but all of the columns, we would use this query:
+```{r} 
+dbGetQuery(con, "
+  SELECT *
+  FROM crime",
+  n = 3)
+```
+In addition to showing us the first three rows in their entirety, we get some warnings here regarding the coordinates of the crime that we will have to deal with later. The issue involves how SQL stores missing values.
+
+Just as `SELECT` filters the columns, the `WHERE` clause filters the rows. Note the use of `AND` and `OR` in the `WHERE` clause. Here we select three columns: `ID`, `Description`, and `LocationDescription`. Also, we want only rows where 
+
+- the value in the `Beat` column is "611"
+- the value in the `Arrest` column is "true"
+- the value in the `ICUR` column is either "0486" or "0498"
+
+Importantly, note the use of single (not double) quotation marks in the `WHERE` line. The reason is that if we used double quotes, then R will think that the double quote signals the end of the query.
+```{r} 
+a <- dbGetQuery(con, "
+    SELECT ID, Description, LocationDescription
+    FROM crime
+    WHERE ((Beat=611) AND 
+          (Arrest='true')) AND
+          ((IUCR='0486') OR (IUCR='0498'))")
+# show the first few rows of the results
+head(a, 3)
+```
+SQL does not like column names with special characters. Only letters (first character *must* be a letter), numbers, and underscores (`_`). Column names also cannot be a SQl keyword, like SELECT or WHERE. If you happen to have a table with any special characters, like periods, hyphens, or spaces, you can "protect" the column name in square brackets. For example, `SELECT [incident id], [text-description], [location.description], [where]`.
+
+## Exercises
+
+`r .exNum('Select records from Beat 234')`
+
+`r .exNum('Select Beat, District, Ward, and Community Area for all "ASSAULT"s')`
+
+`r .exNum('Select records on assaults from Beat 234')`
+
+`r .exNum('Make a table of the number of assaults (IUCR 0560) by Ward')`
+
+# `GROUP_BY` and aggregation functions
+
+We have already covered SQL clauses `SELECT`, `WHERE`, and `FROM`. The SQL function `COUNT(*)` and `GROUP BY` are also very useful. For example, the following query counts how many assaults (IUCR 0560) occurred by ward. `COUNT()` is a SQL "aggregate" function, a function that performs a calculation on a group of values and returns a single number. Other SQL aggregate functions include `AVG()`, `MIN()`, `MAX()`, and `SUM()`. This query will group all the records by `Ward` and then apply the aggregate function `COUNT()` and report that value in a column called `crimecount`. `AS` allows us to give clear column names in the results. Without the `AS crimecount` column of counts would be called `COUNT(*)`, which has several characters about which SQL will complain.
+
+```{r} 
+a <- dbGetQuery(con, "
+   SELECT COUNT(*) AS crimecount,
+          Ward
+   FROM crime
+   WHERE IUCR='0560'
+   GROUP BY Ward")
+print(a)
+```
+
+The `GROUP BY` clause is critical. If you forget it then the result is not well defined. That is, different implementations of SQL may produce different results. The rule you should remember is that "every non-aggregated column in the `SELECT` clause should appear in the `GROUP BY` clause." Here `Ward` is not part of the aggregate function `COUNT()` so it must appear in the `GROUP BY` clause.
+
+## Exercises
+`r .exNum('Count the number of crimes by \x60PrimaryType\x60')`
+
+`r .exNum('Count the number of crimes resulting in arrest')`
+
+`r .exNum('Count the number of crimes by \x60LocationDescription\x60')`. `LocationDescription` is the variable that tells us where (e.g., a parking lot, a barbershop, a fire station, a CTA train, or a motel) a crime occurred
+
+
+# `ORDER_BY` and `UPDATE`
+
+`MAX`, `MIN`, `SUM`, `AVG` are common (and useful) aggregating functions. The `ORDER BY` clause sorts the results for us. It is the SQL version of the `sort()` or `arrange()` functions. Here is an illustration that gives the range of beat numbers in each policing district.
+
+```{r comment="", results='hold'} 
+dbGetQuery(con, "
+   SELECT MIN(Beat) AS min_beat,
+          MAX(Beat) AS max_beat,
+          District
+   FROM crime
+   GROUP BY District
+   ORDER BY District")
+```
+Remember that the `GROUP BY` clause should include every element of the `SELECT` clause that is not involved with an aggregate function. We have `MIN()` and `MAX()` operating on `Beat`, but `District` is on its own and should be placed in the `GROUP BY` clause.
+
+Let's look at our `Latitude` and `Longitude` columns, which will be extremely useful for mapping data points. The following query will give unexpected results.
+
+```{r comment="", results='hold'} 
+dbGetQuery(con, "
+   SELECT MIN(Latitude)  AS min_lat,
+          MAX(Latitude)  AS max_lat,
+          MIN(Longitude) AS min_lon,
+          MAX(Longitude) AS max_lon,
+          District
+   FROM crime
+   GROUP BY District
+   ORDER BY District")
+```
+We get some strange results here. `max_lat` equal to 0.0 is on the equator! It is doubtful that Chicago reported any equatorial crimes. The problem is that we have some blank values in `Longitude` and `Latitude`. Here are some of them.
+```{r} 
+dbGetQuery(con, "SELECT * FROM crime WHERE Longitude=''", n=3)
+```
+Note the `Latitude` and the `Longitude` columns are blank. And have a look at these
+```{r} 
+dbGetQuery(con, "SELECT * FROM crime where Latitude<36.61946", n=3)
+```
+The point (-91.68657, 36.61945) lands in Brandsville, Missouri, also highly unlikely locations for Chicago crime
+
+We can tell SQLite to make the empty or missing values `NULL`, a more proper way to encode that these rows have missing coordinates. The `UPDATE` clause edits our table. R will read in `NULL` values as `NA`. After we do the update, we can rerun the `MIN()`, `MAX()` query. We can also assign `NULL` to latitudes and longitudes that are very close to 0.
+
+Note that we use `dbSendQuery()` when updating since we are not asking for any rows of data to come back to us.
+```{r} 
+res <- dbSendQuery(con, "
+   UPDATE crime SET Latitude=NULL
+   WHERE (Latitude='') OR (ABS(Latitude-0.0) < 0.01) OR (Latitude < 36.7)")
+dbClearResult(res)
+res <- dbSendQuery(con, "
+   UPDATE crime SET Longitude=NULL
+   WHERE (Longitude='') OR (ABS(Longitude-0.0) < 0.01) OR (Longitude < -91.6)")
+dbClearResult(res)
+```
+
+Let's rerun that query and check that we get more sensible results.
+```{r} 
+dbGetQuery(con, "
+   SELECT MIN(Latitude)  AS min_lat,
+          MAX(Latitude)  AS max_lat,
+          MIN(Longitude) AS min_lon,
+          MAX(Longitude) AS max_lon,
+          District
+   FROM crime
+   GROUP BY District
+   ORDER BY District")
+```
+Now we have results that are more in line with where Chicago actually is. Make it a habit to do some checks of your data before doing too much analysis.
+
+And what city does the following plot have the shape of?
+Let's plot the location of these crimes. Plotting all 8 million would be overkill, so let's take a random sample of 10,000 crimes. Here is a SQL query that will do that. It uses some tricks we will learn more about later including the use of `IN`, the use of subqueries (a query within a query), and `LIMIT`. Does the shape of the plot look right?
+```{r comment="", results='hold'} 
+a <- dbGetQuery(con, "
+   SELECT Longitude, Latitude 
+   FROM crime 
+   WHERE id IN (SELECT id 
+                FROM crime 
+                ORDER BY RANDOM() 
+                LIMIT 10000)")
+
+plot(Latitude~Longitude, data=a, 
+     pch=".", 
+     xlab="Longitude", ylab="Latitude")
+```
+
+## Exercises
+
+`r .exNum('Plot the longitude and latitude of all "ASSAULT"s for Ward 22')`
+
+`r .exNum('What is the most common (Long,Lat) for assaults in Ward 22?')` Add the point to your plot using the `points()` function. `points()` simply draws a point (or sequence of points) at the specified coordinates
+
+
+# Solutions to the exercises
+
+`r .exQ(1)`
+```{r}
+dbGetQuery(con, "
+   SELECT *
+   FROM crime
+   WHERE Beat=234",
+   n=5) 
+```
+
+`r .exQ(2)`
+```{r} 
+dbGetQuery(con, "
+   SELECT Beat, District, Ward, CommunityArea, PrimaryType
+   FROM crime
+   WHERE PrimaryType='ASSAULT'",
+   n=5) 
+```
+
+`r .exQ(3)`
+```{r} 
+dbGetQuery(con, "
+   SELECT *
+   FROM crime
+   WHERE (Beat=234) AND (PrimaryType='ASSAULT')",
+   n=5)
+```
+
+`r .exQ(4)`
+
+We could select all the IUCR codes and ward with SQL and then filter and tabulate the data in R.
+```{r} 
+# system.time() reports how long it takes to run the SQL query
+#   How long if we retrieve data from SQL and tabulate in R?
+system.time(
+{
+   data <- dbGetQuery(con, "
+                    SELECT IUCR,Ward
+                    FROM crime")
+   data |>
+      filter(IUCR=="0560") |>
+      count(Ward)
+})
+```
+Or we could make SQL do all the work selecting and tabulating.
+```{r} 
+#   How long if we make SQL do all the work?
+system.time(
+{
+   a <- dbGetQuery(con, "
+      SELECT COUNT(*) AS crimecount,
+             Ward
+      FROM crime
+      WHERE IUCR='0560'
+      GROUP BY Ward")
+})
+```
+Generally, SQL will be much faster for general selecting, filtering, tabulating, and linking data.
+
+`r .exQ(5)`
+```{r} 
+dbGetQuery(con, "
+   SELECT COUNT(*) AS crimecount, 
+          PrimaryType
+   FROM crime
+   GROUP BY PrimaryType")
+```
+
+`r .exQ(6)`
+```{r}
+dbGetQuery(con, "
+   SELECT COUNT(*) AS crimecount, PrimaryType
+   FROM crime
+   WHERE Arrest='true'
+   GROUP BY PrimaryType")
+```
+
+Or, if we were not interested in differentiating based on the `PrimaryType`, we could simply do the following:
+
+```{r}
+dbGetQuery(con, "
+   SELECT COUNT(*) AS crimecount
+   FROM crime
+   WHERE Arrest='true'")
+```
+
+`r .exQ(7)`
+```{r}
+dbGetQuery(con, "
+   SELECT COUNT(*) AS crimecount, LocationDescription
+   FROM crime
+   GROUP BY LocationDescription
+   ORDER BY crimecount DESC")
+```
+
+`r .exQ(8)`
+```{r}
+a <- dbGetQuery(con, "
+   SELECT Latitude, Longitude
+   FROM crime
+   WHERE PrimaryType='ASSAULT' AND Ward='22'")
+plot(Latitude~Longitude, data=a, pch=".")
+```
+
+`r .exQ(9)`
+```{r} 
+b <- dbGetQuery(con, "
+   SELECT COUNT(*) AS crimecount,
+          Latitude, Longitude
+   FROM   crime
+   WHERE  PrimaryType='ASSAULT' AND Ward=22
+   GROUP BY Latitude, Longitude
+   ORDER BY crimecount DESC
+   LIMIT 1")
+
+plot(Latitude~Longitude, data=a, pch=".")
+points(Latitude~Longitude, 
+       data=b,
+       pch=16, 
+       col="salmon",
+       cex=2)
+b
+```
