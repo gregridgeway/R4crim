@@ -31,17 +31,21 @@ bibliography: G:/My Drive/docs/Greg/articles/mybib.bib
 <!-- git status -->
 <!-- git push -->
 
-
 <!-- A function for automating the numbering and wording of the exercise questions -->
-```{r echo=FALSE}
+<!-- Use \x60 inside exercise questions for backticks -->
+```{r}
+#| echo: false
 .counterExercise <- 0
 .exerciseQuestions <- NULL
 .exNum <- function(.questionText="") 
 {
    .counterExercise <<- .counterExercise+1
    .exerciseQuestions <<- c(.exerciseQuestions, .questionText)
-   .questionText <- gsub("@@", "`", .questionText)
    return(paste0(.counterExercise,". ",.questionText))
+}
+.exQ <- function(i)
+{
+   return( paste0(i,". ",.exerciseQuestions[i]) )
 }
 ```
 
@@ -72,7 +76,7 @@ dataExt |>
   filter(grepl("rape|[Ss]ex", V4529)) |>
   distinct(V4529)
 ```
-All of this will all become clear in these notes.
+All of this will become clear in these notes.
 
 # Finding patterns in text with `grep()`
 
@@ -81,7 +85,6 @@ First we will learn about `grep()`, which was first developed in the early 1970s
 Run the following line that provides a collection of text elements with a diverse range of capitalization, letters, punctuation, and other features. We will use this for practice and testing.
 
 ```{r}
-#| results: 'hold'
 dataText <- c("3718 Locust Walk",
               "4 Privet Drive",
               "10880 Malibu Point",
@@ -115,14 +118,12 @@ dataText <- c("3718 Locust Walk",
 
 Let's find all of the items that have the letter "a" in `dataText`.
 ```{r}
-#| results: 'hold'
 grep("a", dataText)
 ```
 This shows the indices of which elements of `dataText` have an "a" in them. Sure enough the first element, "3718 Locust Walk", has an "a" and you can confirm that the other indices `grep()` returned also indicate elements of `dataText` that have an "a".
 
 For most of these notes we are going to set `value=TRUE`, which will return the actual elements matched rather than their indices. This will make it easier to check that `grep()` is finding the elements that we are expecting to match.
 ```{r}
-#| results: 'hold'
 grep("a", dataText, value=TRUE)
 ```
 As you can see, `grep()` uses the following general syntax: grep("what we're searching for", the text, and an optional `value=TRUE` if we want to return text). If we put `value=FALSE` (which is the default if we do not set `value`), we will just receive the index in the text where we can find what we are searching for.
@@ -130,35 +131,29 @@ As you can see, `grep()` uses the following general syntax: grep("what we're sea
 Let's try another example. Instead of a letter, let's try to find a number such as "1". Specifically, which items in `dataText` have a "1" in them?
 
 ```{r}
-#| results: 'hold'
 grep("1", dataText, value=TRUE)
 ```
 
 We can also search for multiple characters, instead of individual characters. We place our list of desired characters within square brackets `[  ]`. For example, let's find items that contain numbers. 
 ```{r}
-#| results: 'hold'
 grep("[0123456789]", dataText, value=TRUE)
 ```
 If we wanted items that contain an odd number, we could do this.
 ```{r}
-#| results: 'hold'
 grep("[13579]", dataText, value=TRUE)
 ```
 So the `[]` in a regular expression means "match any of these characters." We can also place square brackets next to each other. For example, let's say we wanted to find an item in `dataText` that has four adjacent numbers.
 ```{r}
-#| results: 'hold'
 grep("[0-9][0-9][0-9][0-9]", dataText, value=TRUE)
 ```
 Note that we can use the shorthand `0-9` to mean any number between 0 and 9, including 0 and 9. This regular expression says "find a number, followed by a number, followed by another number, followed by another number." Alternatively we can use `{4}` to mean "match four of the previous character".
 ```{r}
-#| results: 'hold'
 grep("[0-9]{4}", dataText, value=TRUE)
 ```
 `{n}` means the preceding item will be matched exactly n times. Note that this also matches text that has five or more numbers in a row, since if they have five numbers in a row, then they will also have four numbers in a row. Later we will learn about how to find exactly four numbers in a row.
 
 It is not used often, but we can also use the squiggly brackets to make a range.
 ```{r}
-#| results: 'hold'
 grep("[0-9]{5,10}", dataText, value=TRUE)
 ```
 
@@ -169,12 +164,10 @@ grep("[a-zA-Z]{5}", dataText, value=TRUE)
 ```
 Note how we used the shorthand `a-z` to mean any lowercase letter and `A-Z` to mean any uppercase letter. `grep()` will match a different set of elements if we just search for lower case letters.
 ```{r} 
-#| results: 'hold'
 grep("[a-z]{5}", dataText, value=TRUE)
 ```
 Searches using `grep()` are case-sensitive. For example, let's find all items that contain capital letters.
 ```{r} 
-#| results: 'hold'
 grep("[A-Z]", dataText, value=TRUE)
 ```
 
@@ -186,35 +179,31 @@ grep("[A-Z]", dataText, value=TRUE)
 `r .exNum('What is the difference between \x60grep("Roy", dataText, value=TRUE)\x60 and \x60grep("[Roy]", dataText, value=TRUE)\x60?')`
 
 
-## More symbols that help with greping
+## More symbols that help with grepping
 So far you have seen that we use `[]` to match any character listed between the `[]`, the `-` to specify a range to match like `0-9`, `a-z`, and `A-Z`, and the `{}` to match the previous character multiple times.
 
-In additional to these, there are several more symbols or sequences of symbols that are useful. The number of symbols on the keyboard are fairly limited compared to the numerous combinations of patterns of text we might wish to find. As a result you will see that some of these symbols are used in very different ways depending on the context.
+In addition to these, there are several more symbols or sequences of symbols that are useful. The number of symbols on the keyboard are fairly limited compared to the numerous combinations of patterns of text we might wish to find. As a result you will see that some of these symbols are used in very different ways depending on the context.
 
 
 ### Carets `^`
 Let's look at the caret `^` symbol. When we put a `^` within square brackets, it means "not". Let's try to find text in `dataText` that has something that is not a letter or a space immediately followed by a letter. 
 ```{r} 
-#| results: 'hold'
 grep("[^A-Za-z ][A-Za-z]", dataText, value=TRUE)
 ```
 "221B Baker St." has a character that is not a letter (1) immediately followed by a letter (B).
 
 Outside of square brackets the `^` means something *completely* different. When we put the `^` outside of square bracket, it means "the beginning of the text". For example, the following regular expression matches text where the first character is either an upper-case or a lower-case letter.
 ```{r} 
-#| results: 'hold'
 grep("^[A-Za-z]", dataText, value=TRUE)
 ```
 
 ### Dollar Signs `$`
 While we use carets to signal the beginning of the text, the dollar sign signals the end of the text. For example, to search for all items that end with either an upper-case or lower-case letter, we would do the following:
 ```{r} 
-#| results: 'hold'
 grep("[A-Za-z]$", dataText, value=TRUE)
 ```
 Note how all of these have a letter as the last character. We can be more specific and ask for text that end with the letter "y" or end with a 7.
 ```{r} 
-#| results: 'hold'
 grep("y$", dataText, value=TRUE)
 grep("7$", dataText, value=TRUE)
 ```
@@ -222,7 +211,6 @@ grep("7$", dataText, value=TRUE)
 ### Plus Sign `+`
 The `+` means "at least one of the previous." For example, suppose we wanted to find items in our list that have numbers and those numbers are followed by letters.
 ```{r} 
-#| results: 'hold'
 grep("[0-9]+[A-Za-z]+", dataText, value=TRUE)
 ```
 Or search for text that starts with some numbers, then has a space, followed by some letters, and then ends.
@@ -240,7 +228,6 @@ grep("^[0-9]+ [A-Za-z]+$", dataText, value=TRUE)
 ### Parentheses `()`
 Parentheses group together characters as words. For example, suppose we wanted to find the word "two".
 ```{r} 
-#| results: 'hold'
 grep("(two)", dataText, value=TRUE)
 ```
 On its own the parentheses are no different than just running the regular expression "two" with no parentheses. However, in combination with `|` and `?` it gets more interesting and powerful.
@@ -267,19 +254,16 @@ grep("[0-9]{10}", dataText, value=TRUE)
 ```
 It is also not too hard to find the hyphenated phone number pattern.
 ```{r} 
-#| results: 'hold'
 grep("[0-9]{3}-[0-9]{3}-[0-9]{4}", dataText, value=TRUE)
 ```
 
 The phone number format with parentheses needs a little more caution. We pointed out earlier that parentheses have special meaning in regular expressions. In fact, there are several "special characters" in regular expressions, `\ ^ $ {} [] () . * + ? | -`. If you actually want to search for the symbol itself you need to "protect" it with a backslash `\`. However, the `\` is a special character for R too and R will think that something special is coming next after the `\`. So to tell R "no really, I really want a backslash here" you have to protect the backslash too. So to look for those phone numbers with parentheses we use a regular expression like this.
 ```{r} 
-#| results: 'hold'
 grep("\\([0-9]{3}\\) [0-9]{3}-[0-9]{4}", dataText, value=TRUE)
 ```
 
-Now, let's put all of these patterns together use `|` to search for any phone number in any of the three formats.
+Now, let's put all of these patterns together and use `|` to search for any phone number in any of the three formats.
 ```{r} 
-#| results: 'hold'
 grep("[0-9]{10}|[0-9]{3}-[0-9]{3}-[0-9]{4}|\\([0-9]{3}\\) [0-9]{3}-[0-9]{4}",
      dataText, value=TRUE)
 ```
@@ -496,47 +480,52 @@ words[1:50]
 `r .exNum('Find words that do not have aeiou in the first four characters')`
 
 # Solutions to the exercises 
-1. `r .exerciseQuestions[1]`
+`r .exQ(1)`
 ```{r}
 grep("[AEIOUaeiou]", dataText, value=TRUE)
 ```
-2. `r .exerciseQuestions[2]`
+
+`r .exQ(2)`
 ```{r}
 grep("[0-9][A-z]", dataText,value=TRUE)
 ```
-3. `r .exerciseQuestions[3]`
+
+`r .exQ(3)`
 `Roy` will only match text that is exactly "Roy", while `[Roy]` will match text that has any one of the characters "R", "o", or "y".
 ```{r}
 grep("Roy", dataText,value=TRUE)
 grep("[Roy]", dataText,value=TRUE)
 ```
 
-4. `r .exerciseQuestions[4]`
+
+`r .exQ(4)`
 ```{r}
 grep("Roy$", dataText, value = TRUE)
 ```
-5. `r .exerciseQuestions[5]`
+
+`r .exQ(5)`
 ```{r}
 grep("^[0-9][0-z ]+[A-z]$", dataText, value=TRUE)
 ```
 
-6. `r .exerciseQuestions[6]`
+
+`r .exQ(6)`
 ```{r}
 grep(",", dataText,value=TRUE)
 ```
 Remember that not every regular expression is complicated. Sometimes you just need to search for something specific and it requires no fancy regular expression.
 
-7. `r .exerciseQuestions[7]`
+`r .exQ(7)`
 ```{r}
 grep("^[0-9]{5}$|^[0-9]{5}-", dataText, value=TRUE)
 ```
 
-8. `r .exerciseQuestions[8]`
+`r .exQ(8)`
 ```{r}
 grep("\\b[A-Za-z]{6}\\b", dataText, value=TRUE)
 ```
 
-9. `r .exerciseQuestions[9]`
+`r .exQ(9)`
 ```{r}
 grep("Phil(adelphia|ly|a)", dataText, value=TRUE)
 ```
@@ -546,27 +535,27 @@ or
 grep("Phil[^\\s]", dataText, value=TRUE)
 ```
 
-10. `r .exerciseQuestions[10]`
+`r .exQ(10)`
 ```{r}
 grep("\\b[A-Z]", dataText, value=TRUE)
 ```
 
-11. `r .exerciseQuestions[11]`
+`r .exQ(11)`
 ```{r}
 grep("[0-9]+[A-Z]? [A-Za-z ]+ (Drive|Walk|Point|St)", dataText, value=TRUE)
 ```
 
-12. `r .exerciseQuestions[12]`
+`r .exQ(12)`
 ```{r}
 grep("\\(?[0-9]{3}(\\) |-| )?[0-9]{3}(-| )?[0-9]{4}", dataText, value=TRUE)
 ```
 
-13. `r .exerciseQuestions[13]`
+`r .exQ(13)`
 ```{r}
 gsub(",", "", dataText)
 ```
 
-14. `r .exerciseQuestions[14]`
+`r .exQ(14)`
 ```{r}
 gsub("([0-9])([0-9]{3})", "\\1,\\2", c("9453","2332","4645","1234"))
 ```
@@ -575,12 +564,12 @@ or
 gsub("^([0-9])", "\\1,", c("9453","2332","4645","1234"))
 ```
 
-15. `r .exerciseQuestions[15]`
+`r .exQ(15)`
 ```{r}
 gsub("Phil$","Phillip",dataText)
 ```
 
-16. `r .exerciseQuestions[16]`
+`r .exQ(16)`
 ```{r}
 gsub(("Phil(adelphia|ly|a)"), "Philadelphia", dataText)
 ```
@@ -589,7 +578,7 @@ or
 gsub("Phil[^\\b]+", "Philadelphia", dataText)
 ```
 
-17. `r .exerciseQuestions[17]`
+`r .exQ(17)`
 ```{r}
 gsub("^([^ ]+) .*$", "\\1", dataText)
 ```
@@ -598,19 +587,19 @@ or
 gsub(" .*", "", dataText)
 ```
 
-18. `r .exerciseQuestions[18]`
+`r .exQ(18)`
 ```{r}
 gsub("^\\(?([0-9]{3})(\\) |-| )?[0-9]{3}-?[0-9]{4}","\\1",dataText)
 ```
 
-19. `r .exerciseQuestions[19]`
+`r .exQ(19)`
 ```{r}
 grep("[^c]ei", words, value=TRUE)
 grep("cie", words, value=TRUE)
 ```
 There are a lot of words with "ei" where the letter before the "ei"" is not a "c". Also, there are a lot of words that have "ie" immediately following a "c".
 
-20. `r .exerciseQuestions[20]`
+`r .exQ(20)`
 ```{r}
 grep("[^a-zA-Z0-9]", words, value=TRUE)
 ```
@@ -625,7 +614,7 @@ grep("\\W", words, value=TRUE)
 ```
 `\W` matches any character that is not a number or a letter.
 
-21. `r .exerciseQuestions[21]`
+`r .exQ(21)`
 ```{r}
 grep("^[^aeiouAEIOU]{4}", words, value=TRUE)
 ```
