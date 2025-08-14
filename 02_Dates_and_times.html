@@ -8,7 +8,7 @@
 
 <meta name="author" content="Greg Ridgeway">
 <meta name="author" content="Ruth Moyer">
-<meta name="dcterms.date" content="2025-08-01">
+<meta name="dcterms.date" content="2025-08-14">
 
 <title>Dates and Times</title>
 <style>
@@ -127,7 +127,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">August 1, 2025</p>
+      <p class="date">August 14, 2025</p>
     </div>
   </div>
   
@@ -148,7 +148,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="introduction" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
 <p>Working with dates and times is a lot different than working with the more familiar numbers. Months have different number of days. Sometimes we count hours of the day up to 12 and then start over. Sometimes we count hours up to 24 and then start over. Some years have 366 days. We have 24 times zones around the world. Twice a year we switch clocks for Daylight Saving Time, except in some places like Arizona. Arithmetic, such as adding one month to a date, is poorly defined. Which date is one month after January 31st? Is it February 28th? Or is it March 3rd?</p>
-<p>Fortunately, software for working with dates exist to make these tasks easier. Unfortunately, every system seems to make their own design decisions. Excel stores dates as the number of days since January 0, 1900… that’s not a typo… they count from January 0, 1900. Linux systems count days since January 1, 1970. SPSS stores times as the number of seconds since midnight October 14, 1582, the adoption date of the Gregorian calendar. Much of the world did not adopt the calendar in 1582. The American colonies did not adopt the Gregorian calendar until 1752 along with Great Britain. So beware if you are a historian digging through centuries old data. Aligning dates can become very messy.</p>
+<p>Fortunately, software for working with dates exists to make these tasks easier. Unfortunately, every system seems to make their own design decisions. Excel stores dates as the number of days since January 0, 1900… that’s not a typo… they count from January 0, 1900. Linux systems count days since January 1, 1970. SPSS stores times as the number of seconds since midnight October 14, 1582, the adoption date of the Gregorian calendar. Much of the world did not adopt the calendar in 1582. The American colonies did not adopt the Gregorian calendar until 1752 along with Great Britain. So beware if you are a historian digging through centuries old data. Aligning dates can become very messy.</p>
 <p>R has had a variety of attempts at providing a means for managing dates. We are going to use the <a href="https://www.jstatsoft.org/article/view/v040i03"><code>lubridate</code></a> package that address just about everything you might need to do with dates and times.</p>
 <p>Do not use <code>as.Date()</code>. <code>lubridate</code> has an easier to read date formatting, more intelligently handles dates of different formats, and has better date arithmetic.</p>
 <p><code>lubridate</code> is not part of R by default. You will need to install it. Simply run</p>
@@ -225,7 +225,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 Levels: Sun &lt; Mon &lt; Tue &lt; Wed &lt; Thu &lt; Fri &lt; Sat</code></pre>
 </div>
 </div>
-<p>Subtraction will tell you the time between two dates. How many days since December 1, 2014? How many days have passed from the values in <code>b</code> to today? The <code>now()</code> function give you the date and time, well… right now.</p>
+<p>Subtraction will tell you the time between two dates. How many days since December 1, 2014? How many days have passed from the values in <code>b</code> to today? The <code>now()</code> function gives you the date and time, well… right now.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>b <span class="sc">-</span> <span class="fu">mdy</span>(<span class="st">"12/01/2014"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -235,7 +235,7 @@ Levels: Sun &lt; Mon &lt; Tue &lt; Wed &lt; Thu &lt; Fri &lt; Sat</code></pre>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">date</span>(<span class="fu">now</span>()) <span class="sc">-</span> b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Time differences in days
-[1] 3888 3892 3895 3899 3903</code></pre>
+[1] 3901 3905 3908 3912 3916</code></pre>
 </div>
 </div>
 <p>When subtracting dates, R will make a good guess for the unit of time to use in the result. Use <code>difftime()</code> if you want to be specific about the unit of time and not leave it up to R to decide.</p>

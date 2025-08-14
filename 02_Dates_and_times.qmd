@@ -52,7 +52,7 @@ editor_options:
 
 Working with dates and times is a lot different than working with the more familiar numbers. Months have different number of days. Sometimes we count hours of the day up to 12 and then start over. Sometimes we count hours up to 24 and then start over. Some years have 366 days. We have 24 times zones around the world. Twice a year we switch clocks for Daylight Saving Time, except in some places like Arizona. Arithmetic, such as adding one month to a date, is poorly defined. Which date is one month after January 31st? Is it February 28th? Or is it March 3rd?
 
-Fortunately, software for working with dates exist to make these tasks easier. Unfortunately, every system seems to make their own design decisions. Excel stores dates as the number of days since January 0, 1900... that's not a typo... they count from January 0, 1900. Linux systems count days since January 1, 1970. SPSS stores times as the number of seconds since midnight October 14, 1582, the adoption date of the Gregorian calendar. Much of the world did not adopt the calendar in 1582. The American colonies did not adopt the Gregorian calendar until 1752 along with Great Britain. So beware if you are a historian digging through centuries old data. Aligning dates can become very messy.
+Fortunately, software for working with dates exists to make these tasks easier. Unfortunately, every system seems to make their own design decisions. Excel stores dates as the number of days since January 0, 1900... that's not a typo... they count from January 0, 1900. Linux systems count days since January 1, 1970. SPSS stores times as the number of seconds since midnight October 14, 1582, the adoption date of the Gregorian calendar. Much of the world did not adopt the calendar in 1582. The American colonies did not adopt the Gregorian calendar until 1752 along with Great Britain. So beware if you are a historian digging through centuries old data. Aligning dates can become very messy.
 
 R has had a variety of attempts at providing a means for managing dates. We are going to use the [`lubridate`](https://www.jstatsoft.org/article/view/v040i03) package that address just about everything you might need to do with dates and times.
 
@@ -129,7 +129,7 @@ month(b, label=TRUE, abbr=FALSE)
 wday(b, label=TRUE)
 ```
 
-Subtraction will tell you the time between two dates. How many days since December 1, 2014? How many days have passed from the values in `b` to today? The `now()` function give you the date and time, well... right now.
+Subtraction will tell you the time between two dates. How many days since December 1, 2014? How many days have passed from the values in `b` to today? The `now()` function gives you the date and time, well... right now.
 ```{r}
 #| comment: ""
 b - mdy("12/01/2014")

@@ -154,7 +154,7 @@ Now that we have covered a lot of fundamental R features, it is time to load in 
 ```{r comment=""}
 getwd()    
 ```
-Almost certainly this default directory is *not* where you plan to have all of your datasets and files stored. Instead, you probably have an "analysis" or "project" or "R4crim" folder somewhere on you computer where you would like to store your data and work.
+Almost certainly this default directory is *not* where you plan to have all of your datasets and files stored. Instead, you probably have an "analysis" or "project" or "R4crim" folder somewhere on your computer where you would like to store your data and work.
 
 Use `setwd()` to tell R what folder you want it to use as the working directory. If you do not set the working directory, R will not know where to find the data you wish to import and will save your results in a location in which you would probably never look. Make it a habit to have `setwd()` as the first line of every script you write. If you know the working directory you want to use, then you can just put it inside the `setwd()` function.
 ```
@@ -230,7 +230,6 @@ The computer does not care which approach you take. However, the potential probl
 
 You can also get a column by name using the `$` operator. For example, to get the `Date` column you can use `dataProtest$Date`. To get the first 10 dates you can use `dataProtest$Date[1:10]`. To get the first 10 locations you can use `dataProtest$Location[1:10]`.
 ```{r}
-dataProtest$Date
 dataProtest$Date[1:10]
 dataProtest$Location[1:10]
 ```
@@ -377,6 +376,13 @@ dataProtest |>
    filter(state %in% c("Fl","Hi","Mi","ce","co","iD","te","wA")) |>
    select(state, Location)
 ```
+Perhaps even more straightforward, R has a built in list of state abbreviations, `state.abb`. We can just filter those values of `state` that are not in this list (I will add Washington DC, Puerto Rico, and Guam too).
+```{r}
+dataProtest |>
+   filter(!(state %in% c(state.abb, "DC", "PR", "GU"))) |>
+   select(state, Location)
+```
+
 Lots of different kinds of errors here. Five of them are just lower case. One is in Mexico (we need to drop this one). One is in Space (space is cool so let's keep that one for fun), and one is in La Porte, which I had to look up La Porte to find that it is in Indiana (IN). Let's clean this up using `mutate()`.
 ```{r}
 dataProtest <- dataProtest |>
@@ -395,7 +401,7 @@ The last feature that we have yet to explore is the `Tags` column. This column c
 ```{r}
 # what does the tag look like originally?
 dataProtest$Tags[1:3]
-# not split it
+# now split it
 strsplit(dataProtest$Tags[1:3], "; ")
 ```
 `strsplit()` returns a `list` structure. This is a structure in R that has no columns and rows. Since each protest has a different number of tags, once we split them up, they do not fit neatly into fixed columns. We can use `unlist()` to remove the list structure and create a long vector of all of the tags. And I will use `table()`, `sort()`, and `tail()` to find the most common reasons for a protest.
