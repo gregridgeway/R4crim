@@ -268,6 +268,22 @@ a <- dbGetQuery(con, "
 # show the first few rows of the results
 head(a, 3)
 ```
+
+SQLite allows regular expressions in the `WHERE` clause. First you have to initialize the regular expression SQL extension. Then you can insert a regular expression after the keyword `REGEXP`.
+```{r}
+# once per R session initialize regexp
+initExtension(con, "regexp")
+# get crimes from beats that start with "12"
+a <- dbGetQuery(con, "
+  SELECT Beat
+  FROM   crime
+  WHERE  Beat REGEXP '^[12]..$'",
+  n = -1)
+
+unique(a$Beat)
+```
+There is a full list of all available [SQLite extensions](https://sqlite.org/src/file/ext/misc). Frankly, I have only ever used the `REGEXP` extension.
+
 SQL does not like column names with special characters. Only letters (first character *must* be a letter), numbers, and underscores (`_`). Column names also cannot be a SQl keyword, like SELECT or WHERE. If you happen to have a table with any special characters, like periods, hyphens, or spaces, you can "protect" the column name in square brackets. For example, `SELECT [incident id], [text-description], [location.description], [where]`.
 
 ## Exercises
