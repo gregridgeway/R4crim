@@ -718,7 +718,7 @@ function(year0)
             geometry = _) |>
       st_transform(4326) # back to lat/long
    
-   leaflet() |>
+   mapYear <- leaflet() |>
       addTiles() |>
       setView(lng = -87.8, lat = 41.85, zoom = 10) |>
       addPolygons(
@@ -748,7 +748,11 @@ function(year0)
                       contourCarTheft$levels_high)/2,
          title = paste(year0, "Incidents / km² / year"),
          opacity = 0.7)
+   
+   # add a little space after each map
+   htmltools::div(style = "margin-bottom: 12px;", mapYear)
 })
+# generate HTML code for all the maps
 htmltools::tagList(maps)
 ```
 
