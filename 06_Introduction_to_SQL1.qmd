@@ -34,12 +34,6 @@ bibliography: G:/My Drive/docs/Greg/articles/mybib.bib
 <!-- git status -->
 <!-- git push -->
 
-<!-- cache the results -->
-```{r}
-#| echo: false
-#knitr::opts_chunk$set(echo=TRUE, cache=FALSE, cache.lazy=FALSE, out.width='100%')
-```
-
 <!-- A function for automating the numbering and wording of the exercise questions -->
 <!-- Use \x60 inside exercise questions for backticks -->
 ```{r}
@@ -350,16 +344,14 @@ The point (-91.68657, 36.61945) lands in Brandsville, Missouri, also highly unli
 
 We can tell SQLite to make the empty or missing values `NULL`, a more proper way to encode that these rows have missing coordinates. The `UPDATE` clause edits our table. R will read in `NULL` values as `NA`. After we do the update, we can rerun the `MIN()`, `MAX()` query. We can also assign `NULL` to latitudes and longitudes that are very close to 0.
 
-Note that we use `dbSendQuery()` when updating since we are not asking for any rows of data to come back to us.
+Note that we use `dbExecute()` when updating since we are not asking for any rows of data to come back to us.
 ```{r} 
-res <- dbSendQuery(con, "
+dbExecute(con, "
    UPDATE crime SET Latitude=NULL
    WHERE (Latitude='') OR (ABS(Latitude-0.0) < 0.01) OR (Latitude < 36.7)")
-dbClearResult(res)
-res <- dbSendQuery(con, "
+dbExecute(con, "
    UPDATE crime SET Longitude=NULL
    WHERE (Longitude='') OR (ABS(Longitude-0.0) < 0.01) OR (Longitude < -91.6)")
-dbClearResult(res)
 ```
 
 Let's rerun that query and check that we get more sensible results.
