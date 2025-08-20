@@ -633,8 +633,7 @@ leaflet() |>
       opacity = 0.5,
       label = ~paste0("Density: ",
                       format(levels_low,  scientific=FALSE), "-",
-                      format(levels_high, scientific=FALSE)) |>
-         lapply(htmltools::HTML),
+                      format(levels_high, scientific=FALSE)),
       highlightOptions = 
          highlightOptions(weight = 2, bringToFront = TRUE)) |>
    addLegend(
