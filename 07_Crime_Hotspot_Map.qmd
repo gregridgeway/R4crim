@@ -59,7 +59,7 @@ bibliography: G:/My Drive/docs/Greg/articles/mybib.bib
 
 
 
-Note: If you have skipped ahead and run the code in Lession \#8: SQL Part 2, then some of the queries involving `PrimaryType` in this set of notes will not work. You will need to modify those queries to left join with the `iucr` table.
+Note: If you have skipped ahead and run the code in Lesson \#8: SQL Part 2, then some of the queries involving `PrimaryType` in this set of notes will not work. You will need to modify those queries to left join with the `iucr` table.
 
 # Introduction
 
@@ -97,7 +97,7 @@ dataAssaults <- dbGetQuery(con, "
          Longitude IS NOT NULL")
 nrow(dataAssaults)
 ```
-Always do a quick check to make shre the data looks the way you expect it to look.
+Always do a quick check to make sure the data looks the way you expect it to look.
 ```{r}
 dataAssaults |> head()
 ```
@@ -280,8 +280,8 @@ You can zoom in on specific neighborhoods or specific hexagons. You can also hov
 You can try to make your own color palettes, like
 ```{r leafletHexMapGreenPink}
 palGreg <- colorNumeric(
-  palette = colorRampPalette(c("springgreen", "hotpink"))(10),
-  domain = c(0, 450))
+  palette = c("springgreen", "hotpink"),
+  domain  = c(0, 450))
 
 leaflet() |>
   addTiles() |>
@@ -309,7 +309,7 @@ leaflet() |>
             opacity = 0.7, 
             labFormat = labelFormat())
 ```
-Yikes! I have made awful color choices here. I find it best to rely on the built in color palettes that have been more thoughtfully constructed.
+Yikes! I have made awful color choices here. The gradation of the palette is not sufficiently varied for us to see where the hotspots are, except for the few hexagons colored hot pink. I find it best to rely on the built in color palettes that have been more thoughtfully constructed.
 
 ## Contour map
 
@@ -608,7 +608,7 @@ leaflet() |>
     highlightOptions = 
        highlightOptions(weight = 2, bringToFront = TRUE))
 ```
-Also, let's make the hotspot map only highlight the hottest spots, those with a crime rate exceeding 80 incidents per km^2^ per year. Zoom in on some of the brightest areas to see what is in these high car theft areas.
+Also, let's make the hotspot map only highlight the hottest spots, those with a crime rate exceeding 80 incidents per km^2^ per year. Zoom in on some of the brightest areas to see what is in these high assault rate areas.
 ```{r leafletChicagoHotSpotsConcaveHull}
 #| warning: false
 #| fig.cap: "Chicago assault hot spots"
@@ -651,7 +651,7 @@ leaflet() |>
 ```
 
 # Visualizing changes in hotspots over time
-Let's create hotspot maps with just motor vehicle theft, and let's make a map for each year between 2018 and 2024. Take a look at the `Date` column in our initial dataset. 
+Let's create hotspot maps with just motor vehicle theft, making a separate map for each year between 2018 and 2024. Take a look at the `Date` column in our initial dataset. 
 ```{r}
 dbGetQuery(con, "SELECT Date 
                  FROM crime
@@ -662,7 +662,7 @@ We want only the year part of these dates. The year starts with the 7^th^ charac
 dataCarTheft <- dbGetQuery(con, "
    SELECT Latitude, 
           Longitude,
-          SUBSTR(Date,7,4) AS year
+          SUBSTR(Date, 7, 4) AS year
    FROM crime
    WHERE PrimaryType='MOTOR VEHICLE THEFT' AND
          Latitude  IS NOT NULL AND
@@ -670,6 +670,7 @@ dataCarTheft <- dbGetQuery(con, "
          year >= 2018 AND year <= 2024")
 dataCarTheft |> head()
 ```
+In the `WHERE` clause, note the use of the alias `year` that was defined in the `SELECT` clause. Most standard SQL implementations do not allows using aliases in the `WHERE` clause, but SQLite does. If you are working with a SQL database that does not allow aliases to be used like this, then you need to replace `year` with `SUBSTR(Date, 7, 4)` every time it is used outside of the `SELECT` clause. Or you can create all the aliases in a Common Table Expression (CTE), which we will discuss in later lessons.
 
 Now that we have the car theft data pulled out of our SQL database, convert to a spatial data frame with `st_as_sf()` and make a color palette for the range of car theft rates.
 ```{r}
@@ -856,7 +857,7 @@ dataCarTheft |>
         xlab = "Year",
         ylab = "Number of car thefts")
 ```
-That spiked was fueled by thefts of Kia and Hyundai vehicles, which lacked passive immobilizer antitheft devices as standard equipment and lead to a social media trend describing how to steal Kia and Hyundai vehicles. 
+That spike was fueled by thefts of Kia and Hyundai vehicles, which lacked passive immobilizer antitheft devices as standard equipment and lead to a social media trend describing how to steal Kia and Hyundai vehicles. 
 
 Many cities other than Chicago have accessible incident-level data. You can easily modify the code here to make a hotspot map for Philadelphia, Los Angeles, Seattle, San Francisco, Baltimore, or Washington, DC.
 
