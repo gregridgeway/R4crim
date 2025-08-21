@@ -58,19 +58,17 @@ bibliography: G:/My Drive/docs/Greg/articles/mybib.bib
 
 # Introduction
 
-Some datasets are far too large for R to handle by itself. Structured Query Language ("SQL") is a widely used international standard language for managing data stored in a relational databases management system. A relational database management system itself is an approach to managing data using a structure that can be contrasted against the 'flat file' approach we have been using thus far with R. Why use SQL? R doesn't work very well with really huge datasets. A relational database management system offers a way of storing large amounts of information more efficiently and reducing the size of the dataset that we are working with. There are numerous relational database management systems such as Oracle, Microsoft Access, and MySQL. We are going to use [SQLite](https://www.sqlite.org/index.html), which is probably the most widely deployed database system. SQLite is in your phone, car, airplanes, thermostats, and numerous appliances. We are going to hook up SQLite to R so that R can handle large datasets.
+Some datasets are far too large for R to handle by itself. Structured Query Language ("SQL") is a widely used international standard language for managing data stored in a relational database management system (RDMS). A relational database management system itself is an approach to managing data using a structure that can be contrasted against the "flat file" approach we have been using thus far with R. Why use SQL? R does not work very well with really huge datasets. A relational database management system offers a way of storing large amounts of information more efficiently and reducing the size of the dataset that we are working with. There are numerous relational database management systems such as Oracle DBMS, Microsoft Access, Microsoft SQL Server, PostgreSQL, and MySQL. We are going to use [SQLite](https://www.sqlite.org/index.html), which is probably the most widely deployed database system. SQLite is in your phone, car, airplanes, thermostats, and numerous appliances. We are going to hook up SQLite to R so that R can handle large datasets.
 
 These are some basic clauses in a SQL query that we will explore:
 
-SELECT    	fields or functions of fields
-INTO      	results table
-FROM      	tables queried
-WHERE     	conditions for selecting a record
-GROUP BY  	list of fields to group
-ORDER BY  	list of fields to sort by
+-  SELECT    	fields or functions of fields
+-  FROM      	tables queried
+-  WHERE     	conditions for selecting a record
+-  GROUP BY  	list of fields to group
+-  ORDER BY  	list of fields to sort by
 
-However, before being able to use SQL as a tool in R, it will first be necessary to install the `sqldf` package.
-
+However, before being able to use SQL as a tool in R, it will first be necessary to load the `sqldf` package.
 ```{r}
 #| cache: false
 #| message: false
@@ -80,18 +78,18 @@ library(sqldf)
 
 # Getting the data into proper form
 
-We will be working with Chicago crime data, which is accessible comma separated value (csv) format. Before we can even being learning SQL, we are going to have to do a fair bit of work to acquire the dataset, format it so that it is ready for SQLite, and then load it into the SQLite database.
+We will be working with Chicago crime data, which is accessible comma-separated value (csv) format. Before we can even being learning SQL, we are going to have to do a fair bit of work to acquire the dataset, format it so that it is ready for SQLite, and then load it into the SQLite database.
 
 Navigate to the Chicago open data website to get the [data](https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-present/ijzp-q8t2). Click the "Export" button and select the "CSV" option, or directly download from [here](https://data.cityofchicago.org/api/views/ijzp-q8t2/rows.csv?accessType=DOWNLOAD)
 
 The Chicago crime data is huge, more than `r (file.size("Crimes_-_2001_to_present.csv")/10^9) |> round(1) |> format(nsmall=1)` Gb. It contains over 8.3 million records on all crimes reported to the Chicago police department since 2001. R does not handle really large datasets well. By using SQL, you will learn how to more efficiently work with large datasets and learn a data language that is used absolutely everywhere.
 
-Let's use `scan()` to just peek at the first three rows of the file.
+Let's use `scan()` to just peek at the first five rows of the file.
 
 ```{r}
-scan(what="",file="Crimes_-_2001_to_present.csv",nlines=5,sep="\n")
+scan(what="", file="Crimes_-_2001_to_present.csv", nlines=5, sep="\n")
 ```
-`scan()` is a very basic R function that reads in plain text files. We've told it to read in text (`what==""`), the name of the file, to only read in 5 lines (`nlines=5`), and to start a new row whenever it reaches a line feed character (`sep="\n"`). Using `scan()` without `nlines=5` would cause R to try to read in the whole dataset and that could take a lot of time and you might run out of memory.
+`scan()` is a very basic R function that reads in plain text files. We have told it to read in text (`what=""`), the name of the file, to only read in 5 lines (`nlines=5`), and to start a new row whenever it reaches a line feed character (`sep="\n"`). Using `scan()` without `nlines=5` would cause R to try to read in the whole dataset and that could take a lot of time and you might run out of memory.
 
 You can see that the first row contains the column names. The second row contains the first reported crime in the file. You can see date and time, address, crime descriptions, longitude and latitude of the crime, and other information.
 
@@ -102,7 +100,7 @@ con <- dbConnect(SQLite(), dbname="chicagocrime.db")
 ```
 ```{r}
 #| echo: false
-# just in case you've already created a "crime" table, delete it
+# just in case you already created a "crime" table, delete it
 if(dbExistsTable(con, "crime")) dbRemoveTable(con, "crime")
 ```
 Then using `dbWriteTable()` we tell R to read in the csv file and store its contents in a new table in the database. We will call that new table `crime`. Make sure that your path is set to the correct folder where you want the database to be stored.
@@ -124,13 +122,13 @@ SQLite is very particular about the formatting of a file. It can easily read in 
 print("10000153,HY189345,03/18/2015 12:20:00 PM,091XX S UNIVERSITY AVE,0483,BATTERY,AGG PRO.EMP: OTHER DANG WEAPON,\"SCHOOL, PUBLIC, BUILDING\",true,false,0413,004,8,47,04B,1185475,1844606,2015,02/10/2018 03:50:01 PM,41.728740563,-87.596150779,\"(41.728740563, -87.596150779)\"")
 ```
 
-You see that the location description for this crime is `"SCHOOL, PUBLIC, BUILDING"`. Those commas inside the quotes are going to cause SQLite problems. SQLite is going to think that `SCHOOL`, `PUBLIC`, and `BUILDING` are all separate columns rather than one columns describing the location.
+You see that the location description for this crime is `"SCHOOL, PUBLIC, BUILDING"`. Those commas inside the quotes are going to cause SQLite problems. SQLite is going to think that `SCHOOL`, `PUBLIC`, and `BUILDING` are all separate columns rather than in one column describing the location.
 
-To resolve this, we are going to change all the commas that separate the columns into something else besides commas, leaving the commas in elements like `"SCHOOL, PUBLIC, BUILDING"` alone. It does not matter what we use to separate the fields, but it should be an unusual character that would not appear anywhere else in the dataset. Popular choices in the vertical bar (`|`) and the semicolon (`;`). So let's take a slight detour to find out how to convert a comma-separated file into a semicolon separated file. 
+To resolve this, we are going to change all the commas that separate the columns into something else besides commas, leaving the commas in elements like `"SCHOOL, PUBLIC, BUILDING"` alone. It does not matter what we use to separate the fields, but it should be an unusual character that would not appear anywhere else in the dataset. Popular choices include the vertical bar (`|`) and the semicolon (`;`). So let's take a slight detour to find out how to convert a comma-separated file into a semicolon separated file. 
 
 You will know if you need to convert your file if, when you try to set up your SQL database, you receive an error message about an "extra column."
 
-We are going to use a `while` loop to read in 1,000,000 rows of the our data file at a time. R can handle 1,000,000 rows. With the 1,000,000 rows read in, we will use a regular expression to replace all the commas used for separating columns with semicolons. Then we will write out the resulting cleaned up rows into a new file. It is a big file so this code can take a few minutes to run to completion.
+We are going to use a `while` loop to read in 1,000,000 rows of the CSV file at a time. R can handle 1,000,000 rows. With 1,000,000 rows read in, we will use a regular expression to replace all the commas used for separating columns with semicolons. Then we will write out the resulting cleaned up rows into a new file. It is a big file so this code can take a few minutes to run to completion.
 
 ```{r commas2semicolons}
 #| R.options: list(scipen=999)
@@ -185,7 +183,7 @@ variabletypes <- dbDataType(con, a)
 # make sure these features are stored as TEXT
 variabletypes[c("IUCR","FBICode","Ward","District","CommunityArea")] <- "TEXT"
 
-# just in case you've already created a "crime" table, delete it
+# just in case you already created a "crime" table, delete it
 if(dbExistsTable(con, "crime")) dbRemoveTable(con, "crime")
 # import the data file into the database
 dbWriteTable(con, "crime",                         # create crime table   
@@ -255,7 +253,7 @@ Just as `SELECT` filters the columns, the `WHERE` clause filters the rows. Note 
 
 - the value in the `Beat` column is "611"
 - the value in the `Arrest` column is "true"
-- the value in the `ICUR` column is either "0486" or "0498"
+- the value in the `IUCR` column is either "0486" or "0498"
 
 Importantly, note the use of single (not double) quotation marks in the `WHERE` line. The reason is that if we used double quotes, then R will think that the double quote signals the end of the query.
 ```{r} 
@@ -284,7 +282,7 @@ unique(a$Beat)
 ```
 There is a full list of all available [SQLite extensions](https://sqlite.org/src/file/ext/misc). Frankly, I have only ever used the `REGEXP` extension.
 
-SQL does not like column names with special characters. Only letters (first character *must* be a letter), numbers, and underscores (`_`). Column names also cannot be a SQl keyword, like SELECT or WHERE. If you happen to have a table with any special characters, like periods, hyphens, or spaces, you can "protect" the column name in square brackets. For example, `SELECT [incident id], [text-description], [location.description], [where]`.
+SQL does not like column names with special characters. Only letters (first character *must* be a letter), numbers, and underscores (`_`). Column names also cannot be a SQL keyword, like SELECT or WHERE. If you happen to have a table with any special characters, like periods, hyphens, or spaces, you can "protect" the column name in square brackets. For example, `SELECT [incident id], [text-description], [location.description], [where]`.
 
 ## Exercises
 
@@ -324,7 +322,7 @@ The `GROUP BY` clause is critical. If you forget it then the result is not well 
 
 `MAX`, `MIN`, `SUM`, `AVG` are common (and useful) aggregating functions. The `ORDER BY` clause sorts the results for us. It is the SQL version of the `sort()` or `arrange()` functions. Here is an illustration that gives the range of beat numbers in each policing district.
 
-```{r comment="", results='hold'} 
+```{r} 
 dbGetQuery(con, "
    SELECT MIN(Beat) AS min_beat,
           MAX(Beat) AS max_beat,
@@ -337,7 +335,7 @@ Remember that the `GROUP BY` clause should include every element of the `SELECT`
 
 Let's look at our `Latitude` and `Longitude` columns, which will be extremely useful for mapping data points. The following query will give unexpected results.
 
-```{r comment="", results='hold'} 
+```{r} 
 dbGetQuery(con, "
    SELECT MIN(Latitude)  AS min_lat,
           MAX(Latitude)  AS max_lat,
@@ -352,11 +350,11 @@ We get some strange results here. `max_lat` equal to 0.0 is on the equator! It i
 ```{r} 
 dbGetQuery(con, "SELECT * FROM crime WHERE Longitude=''", n=3)
 ```
-Note the `Latitude` and the `Longitude` columns are blank. And have a look at these
+Note that the `Latitude` and the `Longitude` columns are blank. Also, look at these
 ```{r} 
 dbGetQuery(con, "SELECT * FROM crime where Latitude<36.61946", n=3)
 ```
-The point (-91.68657, 36.61945) lands in Brandsville, Missouri, also highly unlikely locations for Chicago crime
+The point (-91.68657, 36.61945) lands in Brandsville, Missouri, also a highly unlikely location for Chicago crime.
 
 We can tell SQLite to make the empty or missing values `NULL`, a more proper way to encode that these rows have missing coordinates. The `UPDATE` clause edits our table. R will read in `NULL` values as `NA`. After we do the update, we can rerun the `MIN()`, `MAX()` query. We can also assign `NULL` to latitudes and longitudes that are very close to 0.
 
@@ -385,15 +383,13 @@ dbGetQuery(con, "
 Now we have results that are more in line with where Chicago actually is. Make it a habit to do some checks of your data before doing too much analysis.
 
 And what city does the following plot have the shape of?
-Let's plot the location of these crimes. Plotting all 8 million would be overkill, so let's take a random sample of 10,000 crimes. Here is a SQL query that will do that. It uses some tricks we will learn more about later including the use of `IN`, the use of subqueries (a query within a query), and `LIMIT`. Does the shape of the plot look right?
-```{r comment="", results='hold'} 
+Let's plot the location of these crimes. Plotting all 8 million would be overkill, so let's take a random sample of 10,000 crimes. Here is a SQL query that will randomly order the rows and select just the first 10,000. Does the shape of the plot look right?
+```{r} 
 a <- dbGetQuery(con, "
    SELECT Longitude, Latitude 
    FROM crime 
-   WHERE id IN (SELECT id 
-                FROM crime 
-                ORDER BY RANDOM() 
-                LIMIT 10000)")
+   ORDER BY RANDOM() -- scramble the order of the rows
+   LIMIT 10000")
 
 plot(Latitude~Longitude, data=a, 
      pch=".", 

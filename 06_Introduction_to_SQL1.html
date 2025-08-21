@@ -9,7 +9,7 @@
 <meta name="author" content="Greg Ridgeway">
 <meta name="author" content="Ruth Moyer">
 <meta name="author" content="Li Sian Goh">
-<meta name="dcterms.date" content="2025-08-20">
+<meta name="dcterms.date" content="2025-08-21">
 
 <title>Introduction to SQL</title>
 <style>
@@ -148,7 +148,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">August 20, 2025</p>
+      <p class="date">August 21, 2025</p>
     </div>
   </div>
   
@@ -172,10 +172,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- and put the file in the current folder -->
 <section id="introduction" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
-<p>Some datasets are far too large for R to handle by itself. Structured Query Language (“SQL”) is a widely used international standard language for managing data stored in a relational databases management system. A relational database management system itself is an approach to managing data using a structure that can be contrasted against the ‘flat file’ approach we have been using thus far with R. Why use SQL? R doesn’t work very well with really huge datasets. A relational database management system offers a way of storing large amounts of information more efficiently and reducing the size of the dataset that we are working with. There are numerous relational database management systems such as Oracle, Microsoft Access, and MySQL. We are going to use <a href="https://www.sqlite.org/index.html">SQLite</a>, which is probably the most widely deployed database system. SQLite is in your phone, car, airplanes, thermostats, and numerous appliances. We are going to hook up SQLite to R so that R can handle large datasets.</p>
+<p>Some datasets are far too large for R to handle by itself. Structured Query Language (“SQL”) is a widely used international standard language for managing data stored in a relational database management system (RDMS). A relational database management system itself is an approach to managing data using a structure that can be contrasted against the “flat file” approach we have been using thus far with R. Why use SQL? R does not work very well with really huge datasets. A relational database management system offers a way of storing large amounts of information more efficiently and reducing the size of the dataset that we are working with. There are numerous relational database management systems such as Oracle DBMS, Microsoft Access, Microsoft SQL Server, PostgreSQL, and MySQL. We are going to use <a href="https://www.sqlite.org/index.html">SQLite</a>, which is probably the most widely deployed database system. SQLite is in your phone, car, airplanes, thermostats, and numerous appliances. We are going to hook up SQLite to R so that R can handle large datasets.</p>
 <p>These are some basic clauses in a SQL query that we will explore:</p>
-<p>SELECT fields or functions of fields INTO results table FROM tables queried WHERE conditions for selecting a record GROUP BY list of fields to group ORDER BY list of fields to sort by</p>
-<p>However, before being able to use SQL as a tool in R, it will first be necessary to install the <code>sqldf</code> package.</p>
+<ul>
+<li>SELECT fields or functions of fields</li>
+<li>FROM tables queried</li>
+<li>WHERE conditions for selecting a record</li>
+<li>GROUP BY list of fields to group</li>
+<li>ORDER BY list of fields to sort by</li>
+</ul>
+<p>However, before being able to use SQL as a tool in R, it will first be necessary to load the <code>sqldf</code> package.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sqldf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -183,12 +189,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="getting-the-data-into-proper-form" class="level1" data-number="2">
 <h1 data-number="2"><span class="header-section-number">2</span> Getting the data into proper form</h1>
-<p>We will be working with Chicago crime data, which is accessible comma separated value (csv) format. Before we can even being learning SQL, we are going to have to do a fair bit of work to acquire the dataset, format it so that it is ready for SQLite, and then load it into the SQLite database.</p>
+<p>We will be working with Chicago crime data, which is accessible comma-separated value (csv) format. Before we can even being learning SQL, we are going to have to do a fair bit of work to acquire the dataset, format it so that it is ready for SQLite, and then load it into the SQLite database.</p>
 <p>Navigate to the Chicago open data website to get the <a href="https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-present/ijzp-q8t2">data</a>. Click the “Export” button and select the “CSV” option, or directly download from <a href="https://data.cityofchicago.org/api/views/ijzp-q8t2/rows.csv?accessType=DOWNLOAD">here</a></p>
 <p>The Chicago crime data is huge, more than 2.0 Gb. It contains over 8.3 million records on all crimes reported to the Chicago police department since 2001. R does not handle really large datasets well. By using SQL, you will learn how to more efficiently work with large datasets and learn a data language that is used absolutely everywhere.</p>
-<p>Let’s use <code>scan()</code> to just peek at the first three rows of the file.</p>
+<p>Let’s use <code>scan()</code> to just peek at the first five rows of the file.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">scan</span>(<span class="at">what=</span><span class="st">""</span>,<span class="at">file=</span><span class="st">"Crimes_-_2001_to_present.csv"</span>,<span class="at">nlines=</span><span class="dv">5</span>,<span class="at">sep=</span><span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">scan</span>(<span class="at">what=</span><span class="st">""</span>, <span class="at">file=</span><span class="st">"Crimes_-_2001_to_present.csv"</span>, <span class="at">nlines=</span><span class="dv">5</span>, <span class="at">sep=</span><span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "ID,Case Number,Date,Block,IUCR,Primary Type,Description,Location Description,Arrest,Domestic,Beat,District,Ward,Community Area,FBI Code,X Coordinate,Y Coordinate,Year,Updated On,Latitude,Longitude,Location"                                   
 [2] "13311263,JG503434,07/29/2022 03:39:00 AM,023XX S TROY ST,1582,OFFENSE INVOLVING CHILDREN,CHILD PORNOGRAPHY,RESIDENCE,true,false,1033,010,25,30,17,,,2022,04/18/2024 03:40:59 PM,,,"                                                              
@@ -197,7 +203,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 [5] "11227634,JB147599,08/26/2017 10:00:00 AM,001XX W RANDOLPH ST,0281,CRIM SEXUAL ASSAULT,NON-AGGRAVATED,HOTEL/MOTEL,false,false,0122,001,42,32,02,,,2017,02/11/2018 03:57:41 PM,,,"                                                                 </code></pre>
 </div>
 </div>
-<p><code>scan()</code> is a very basic R function that reads in plain text files. We’ve told it to read in text (<code>what==""</code>), the name of the file, to only read in 5 lines (<code>nlines=5</code>), and to start a new row whenever it reaches a line feed character (<code>sep="\n"</code>). Using <code>scan()</code> without <code>nlines=5</code> would cause R to try to read in the whole dataset and that could take a lot of time and you might run out of memory.</p>
+<p><code>scan()</code> is a very basic R function that reads in plain text files. We have told it to read in text (<code>what=""</code>), the name of the file, to only read in 5 lines (<code>nlines=5</code>), and to start a new row whenever it reaches a line feed character (<code>sep="\n"</code>). Using <code>scan()</code> without <code>nlines=5</code> would cause R to try to read in the whole dataset and that could take a lot of time and you might run out of memory.</p>
 <p>You can see that the first row contains the column names. The second row contains the first reported crime in the file. You can see date and time, address, crime descriptions, longitude and latitude of the crime, and other information.</p>
 <p>Let’s try to load this file into a SQLite database. There are two steps. First, using <code>dbConnect()</code> we need to tell R to make a connection to a new SQLite database that we will call <code>chicagocrime.db</code>. This will be a file in your working folder that SQLite will use to store the data.</p>
 <div class="cell">
@@ -223,10 +229,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>[1] "10000153,HY189345,03/18/2015 12:20:00 PM,091XX S UNIVERSITY AVE,0483,BATTERY,AGG PRO.EMP: OTHER DANG WEAPON,\"SCHOOL, PUBLIC, BUILDING\",true,false,0413,004,8,47,04B,1185475,1844606,2015,02/10/2018 03:50:01 PM,41.728740563,-87.596150779,\"(41.728740563, -87.596150779)\""</code></pre>
 </div>
 </div>
-<p>You see that the location description for this crime is <code>"SCHOOL, PUBLIC, BUILDING"</code>. Those commas inside the quotes are going to cause SQLite problems. SQLite is going to think that <code>SCHOOL</code>, <code>PUBLIC</code>, and <code>BUILDING</code> are all separate columns rather than one columns describing the location.</p>
-<p>To resolve this, we are going to change all the commas that separate the columns into something else besides commas, leaving the commas in elements like <code>"SCHOOL, PUBLIC, BUILDING"</code> alone. It does not matter what we use to separate the fields, but it should be an unusual character that would not appear anywhere else in the dataset. Popular choices in the vertical bar (<code>|</code>) and the semicolon (<code>;</code>). So let’s take a slight detour to find out how to convert a comma-separated file into a semicolon separated file.</p>
+<p>You see that the location description for this crime is <code>"SCHOOL, PUBLIC, BUILDING"</code>. Those commas inside the quotes are going to cause SQLite problems. SQLite is going to think that <code>SCHOOL</code>, <code>PUBLIC</code>, and <code>BUILDING</code> are all separate columns rather than in one column describing the location.</p>
+<p>To resolve this, we are going to change all the commas that separate the columns into something else besides commas, leaving the commas in elements like <code>"SCHOOL, PUBLIC, BUILDING"</code> alone. It does not matter what we use to separate the fields, but it should be an unusual character that would not appear anywhere else in the dataset. Popular choices include the vertical bar (<code>|</code>) and the semicolon (<code>;</code>). So let’s take a slight detour to find out how to convert a comma-separated file into a semicolon separated file.</p>
 <p>You will know if you need to convert your file if, when you try to set up your SQL database, you receive an error message about an “extra column.”</p>
-<p>We are going to use a <code>while</code> loop to read in 1,000,000 rows of the our data file at a time. R can handle 1,000,000 rows. With the 1,000,000 rows read in, we will use a regular expression to replace all the commas used for separating columns with semicolons. Then we will write out the resulting cleaned up rows into a new file. It is a big file so this code can take a few minutes to run to completion.</p>
+<p>We are going to use a <code>while</code> loop to read in 1,000,000 rows of the CSV file at a time. R can handle 1,000,000 rows. With 1,000,000 rows read in, we will use a regular expression to replace all the commas used for separating columns with semicolons. Then we will write out the resulting cleaned up rows into a new file. It is a big file so this code can take a few minutes to run to completion.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>infile  <span class="ot">&lt;-</span> <span class="fu">file</span>(<span class="st">"Crimes_-_2001_to_present.csv"</span>, <span class="st">'r'</span>)       <span class="co"># 'r' for 'read'</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>outfile <span class="ot">&lt;-</span> <span class="fu">file</span>(<span class="st">"Crimes_-_2001_to_present-clean.csv"</span>, <span class="st">'w'</span>) <span class="co"># 'w' for 'write'</span></span>
@@ -312,7 +318,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="co"># make sure these features are stored as TEXT</span></span>
 <span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>variabletypes[<span class="fu">c</span>(<span class="st">"IUCR"</span>,<span class="st">"FBICode"</span>,<span class="st">"Ward"</span>,<span class="st">"District"</span>,<span class="st">"CommunityArea"</span>)] <span class="ot">&lt;-</span> <span class="st">"TEXT"</span></span>
 <span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="co"># just in case you've already created a "crime" table, delete it</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="co"># just in case you already created a "crime" table, delete it</span></span>
 <span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="fu">dbExistsTable</span>(con, <span class="st">"crime"</span>)) <span class="fu">dbRemoveTable</span>(con, <span class="st">"crime"</span>)</span>
 <span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="co"># import the data file into the database</span></span>
 <span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="fu">dbWriteTable</span>(con, <span class="st">"crime"</span>,                         <span class="co"># create crime table   </span></span>
@@ -470,7 +476,7 @@ coercing other values of type real</code></pre>
 <ul>
 <li>the value in the <code>Beat</code> column is “611”</li>
 <li>the value in the <code>Arrest</code> column is “true”</li>
-<li>the value in the <code>ICUR</code> column is either “0486” or “0498”</li>
+<li>the value in the <code>IUCR</code> column is either “0486” or “0498”</li>
 </ul>
 <p>Importantly, note the use of single (not double) quotation marks in the <code>WHERE</code> line. The reason is that if we used double quotes, then R will think that the double quote signals the end of the query.</p>
 <div class="cell">
@@ -507,7 +513,7 @@ coercing other values of type real</code></pre>
 </div>
 </div>
 <p>There is a full list of all available <a href="https://sqlite.org/src/file/ext/misc">SQLite extensions</a>. Frankly, I have only ever used the <code>REGEXP</code> extension.</p>
-<p>SQL does not like column names with special characters. Only letters (first character <em>must</em> be a letter), numbers, and underscores (<code>_</code>). Column names also cannot be a SQl keyword, like SELECT or WHERE. If you happen to have a table with any special characters, like periods, hyphens, or spaces, you can “protect” the column name in square brackets. For example, <code>SELECT [incident id], [text-description], [location.description], [where]</code>.</p>
+<p>SQL does not like column names with special characters. Only letters (first character <em>must</em> be a letter), numbers, and underscores (<code>_</code>). Column names also cannot be a SQL keyword, like SELECT or WHERE. If you happen to have a table with any special characters, like periods, hyphens, or spaces, you can “protect” the column name in square brackets. For example, <code>SELECT [incident id], [text-description], [location.description], [where]</code>.</p>
 <section id="exercises" class="level2" data-number="4.1">
 <h2 data-number="4.1" class="anchored" data-anchor-id="exercises"><span class="header-section-number">4.1</span> Exercises</h2>
 <ol type="1">
@@ -707,7 +713,7 @@ other values of type string</code></pre>
 3             2017 02/11/2018 03:57:41 PM                          \r</code></pre>
 </div>
 </div>
-<p>Note the <code>Latitude</code> and the <code>Longitude</code> columns are blank. And have a look at these</p>
+<p>Note that the <code>Latitude</code> and the <code>Longitude</code> columns are blank. Also, look at these</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dbGetQuery</span>(con, <span class="st">"SELECT * FROM crime where Latitude&lt;36.61946"</span>, <span class="at">n=</span><span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -729,7 +735,7 @@ other values of type string</code></pre>
 3 36.61945 -91.68657 "(36.619446395, -91.686565684)"\r</code></pre>
 </div>
 </div>
-<p>The point (-91.68657, 36.61945) lands in Brandsville, Missouri, also highly unlikely locations for Chicago crime</p>
+<p>The point (-91.68657, 36.61945) lands in Brandsville, Missouri, also a highly unlikely location for Chicago crime.</p>
 <p>We can tell SQLite to make the empty or missing values <code>NULL</code>, a more proper way to encode that these rows have missing coordinates. The <code>UPDATE</code> clause edits our table. R will read in <code>NULL</code> values as <code>NA</code>. After we do the update, we can rerun the <code>MIN()</code>, <code>MAX()</code> query. We can also assign <code>NULL</code> to latitudes and longitudes that are very close to 0.</p>
 <p>Note that we use <code>dbExecute()</code> when updating since we are not asking for any rows of data to come back to us.</p>
 <div class="cell">
@@ -788,19 +794,17 @@ other values of type string</code></pre>
 </div>
 </div>
 <p>Now we have results that are more in line with where Chicago actually is. Make it a habit to do some checks of your data before doing too much analysis.</p>
-<p>And what city does the following plot have the shape of? Let’s plot the location of these crimes. Plotting all 8 million would be overkill, so let’s take a random sample of 10,000 crimes. Here is a SQL query that will do that. It uses some tricks we will learn more about later including the use of <code>IN</code>, the use of subqueries (a query within a query), and <code>LIMIT</code>. Does the shape of the plot look right?</p>
+<p>And what city does the following plot have the shape of? Let’s plot the location of these crimes. Plotting all 8 million would be overkill, so let’s take a random sample of 10,000 crimes. Here is a SQL query that will randomly order the rows and select just the first 10,000. Does the shape of the plot look right?</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="st">"</span></span>
 <span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a><span class="st">   SELECT Longitude, Latitude </span></span>
 <span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a><span class="st">   FROM crime </span></span>
-<span id="cb65-4"><a href="#cb65-4" aria-hidden="true" tabindex="-1"></a><span class="st">   WHERE id IN (SELECT id </span></span>
-<span id="cb65-5"><a href="#cb65-5" aria-hidden="true" tabindex="-1"></a><span class="st">                FROM crime </span></span>
-<span id="cb65-6"><a href="#cb65-6" aria-hidden="true" tabindex="-1"></a><span class="st">                ORDER BY RANDOM() </span></span>
-<span id="cb65-7"><a href="#cb65-7" aria-hidden="true" tabindex="-1"></a><span class="st">                LIMIT 10000)"</span>)</span>
-<span id="cb65-8"><a href="#cb65-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb65-9"><a href="#cb65-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Latitude<span class="sc">~</span>Longitude, <span class="at">data=</span>a, </span>
-<span id="cb65-10"><a href="#cb65-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch=</span><span class="st">"."</span>, </span>
-<span id="cb65-11"><a href="#cb65-11" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab=</span><span class="st">"Longitude"</span>, <span class="at">ylab=</span><span class="st">"Latitude"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb65-4"><a href="#cb65-4" aria-hidden="true" tabindex="-1"></a><span class="st">   ORDER BY RANDOM() -- scramble the order of the rows</span></span>
+<span id="cb65-5"><a href="#cb65-5" aria-hidden="true" tabindex="-1"></a><span class="st">   LIMIT 10000"</span>)</span>
+<span id="cb65-6"><a href="#cb65-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb65-7"><a href="#cb65-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Latitude<span class="sc">~</span>Longitude, <span class="at">data=</span>a, </span>
+<span id="cb65-8"><a href="#cb65-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch=</span><span class="st">"."</span>, </span>
+<span id="cb65-9"><a href="#cb65-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab=</span><span class="st">"Longitude"</span>, <span class="at">ylab=</span><span class="st">"Latitude"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -941,7 +945,7 @@ coercing other values of type string</code></pre>
 <span id="cb74-11"><a href="#cb74-11" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   user  system elapsed 
-   4.75    3.09    8.32 </code></pre>
+   4.89    3.25    8.95 </code></pre>
 </div>
 </div>
 <p>Or we could make SQL do all the work selecting and tabulating.</p>
@@ -958,7 +962,7 @@ coercing other values of type string</code></pre>
 <span id="cb76-10"><a href="#cb76-10" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   user  system elapsed 
-   0.71    2.43    3.38 </code></pre>
+   0.88    2.00    2.89 </code></pre>
 </div>
 </div>
 <p>Generally, SQL will be much faster for general selecting, filtering, tabulating, and linking data.</p>
