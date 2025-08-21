@@ -1,0 +1,640 @@
+---
+title: "Introduction to SQL, Part 2"
+author:
+- affiliation: University of Pennsylvania
+  email: gridge@upenn.edu
+  name: Greg Ridgeway
+- affiliation: University of Pennsylvania
+  email: moyruth@upenn.edu
+  name: Ruth Moyer
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+format:
+  html:
+    theme: 
+      dark: darkly
+      light: default
+    toc: true
+    html-math-method: mathjax
+  pdf:
+    toc: true
+    prefer-html: true
+    fig-format: png
+number-sections: true
+editor_options: 
+  chunk_output_type: console
+bibliography: G:/My Drive/docs/Greg/articles/mybib.bib
+---
+
+
+<!-- A function for automating the numbering and wording of the exercise questions -->
+```{r echo=FALSE}
+.counterExercise <- 0
+.exerciseQuestions <- NULL
+.exNum <- function(.questionText="") 
+{
+   .counterExercise <<- .counterExercise+1
+   .questionText <- gsub("@@", "`", .questionText)
+   .exerciseQuestions <<- c(.exerciseQuestions, .questionText)
+   return(paste0(.counterExercise,". ",.questionText))
+}
+.exQ <- function(i)
+{
+   return( paste0(i,". ",.exerciseQuestions[i]) )
+}
+```
+
+
+<!-- For this Quarto doc to work, first run 06 Intro to SQL Part 1 -->
+
+# Reduce redundant information
+
+The crime table in our Chicago crime database is not ideal. We're probably already unhappy about those dots in the column names. Also, it was overly complicated to extract the year from a date. There is also a lot of redundant information in the table.
+
+Let's take a look at a few example rows.
+
+| Block                     |IUCR| PrimaryType     | FBICode  | Longitude | Latitude |
+|:--------------------------|:---|:----------------|:---------|:----------|:---------|
+| 040XX W 26TH ST           |0560| ASSAULT         | 08A      | -87.67741 | 41.90842 |
+| 089XX S SOUTH CHICAGO AVE |0498| BATTERY         | 04B      | -87.63394 | 41.88602 | 
+| 052XX S HARPER AVE        |2820| OTHER OFFENSE   | 26       | -87.62615 | 41.87183 |
+| 033XX N TROY ST           |2825| OTHER OFFENSE   | 26       | -87.69560 | 41.85655 |
+| 015XX W 107TH ST          |1310| CRIMINAL DAMAGE | 14       | -87.59488 | 41.65512 |
+| 0000X N LARAMIE AVE       |2018| NARCOTICS       | 18       | -87.76673 | 41.94523 |
+| 0000X N KEELER AVE        |0554| ASSAULT         | 08A      | -87.61501 | 41.76935 |
+| 026XX N ELSTON AVE        |0560| ASSAULT         | 08A      | -87.57389 | 41.76742 |
+| 076XX S ABERDEEN ST       |0486| BATTERY         | 08B      | -87.64308 | 41.76094 |
+| 3XX N SHEFFIELD AVE       |1811| NARCOTICS       | 18       | -87.70109 | 41.79261 |
+
+Note that whenever `IUCR` is 0560, then `PrimaryType` is ASSAULT and `FBICode` is 08A. There is no reason to store the IUCR code, the primary crime type, and the FBI code all in the same file. We should keep a separate table that links the IUCR codes, the primary crime types, and the FBI codes, but that we can keep separately. Note that it is essential to store the IUCR code in the crime table. Both IUCR codes 2018 and 1811 both link to NARCOTICS and FBI code 18. If we deleted IUCR from the crime table and kept only the primary crime type, then we would lose some detailed information.
+
+Aside from reducing database size, eliminating redundant information also provides "update consistency." In the table's current form, we could erroneously add a row that had `IUCR` 0560, `PrimaryType` as BATTERY, and `FBICode` 14. 
+
+| Block                     |IUCR| PrimaryType     | FBICode  | Longitude | Latitude |
+|:--------------------------|:---|:----------------|:---------|:----------|:---------|
+| 040XX W 26TH ST           |0560| ASSAULT         | 08A      | -87.67741 | 41.90842 |
+| 040XX W 26TH ST           |0560| BATTERY         |  18      | -87.67741 | 41.90842 |
+
+The database would not complain even though this is an incorrect combination. IUCR code 0560 *must* link with ASSAULT and 08A. To avoid this possibility, we will make an IUCR lookup table where each IUCR code shows up only once and always links to the correct `PrimaryType` and `FBICode`.
+
+|IUCR| PrimaryType     | FBICode  |
+|:---|:----------------|:---------|
+|0486| BATTERY         | 08B      |
+|0498| BATTERY         | 04B      | 
+|0554| ASSAULT         | 08A      |
+|0560| ASSAULT         | 08A      |
+|1310| CRIMINAL DAMAGE | 14       |
+|1811| NARCOTICS       | 18       |
+|2018| NARCOTICS       | 18       |
+|2820| OTHER OFFENSE   | 26       |
+|2825| OTHER OFFENSE   | 26       |
+
+Then we can remove `PrimaryType` and `FBICode` from the crime table and look up the associated `PrimaryType` and `FBICode` from the IUCR lookup table whenever we need that information.
+
+
+Let's start by reconnecting to the Chicago crime database
+```{r} 
+library(dplyr)
+library(sqldf)
+con <- dbConnect(SQLite(), "chicagocrime.db")
+```
+
+The SQL keyword `DISTINCT` will filter out any duplicated rows in the result set so that every row is a unique combination of values.
+
+```{r} 
+a <- dbGetQuery(con, "
+  SELECT DISTINCT IUCR, PrimaryType, FBIcode
+  FROM crime")
+head(a)
+```
+This creates a lookup table showing how IUCR links to the primary crime types and FBI codes. We should check that  each IUCR code uniquely links to the primary type and FBI codes.
+
+```{r} 
+a |> count(IUCR) |> filter(n > 1)
+```
+Let's start by examining codes 2091, 2092, and 2093.
+
+```{r} 
+dbGetQuery(con, "
+  SELECT COUNT(*) AS crimecount,
+         IUCR,
+         PrimaryType,
+         FBICode,
+         SUBSTR(Date,7,4) AS year
+  FROM crime
+  WHERE IUCR IN ('2091', '2092', '2093')
+  GROUP BY IUCR, PrimaryType, year, FBICode
+  ORDER BY IUCR, PrimaryType, year, FBICode")
+```
+These are all narcotics cases, but we see that in some years, these charges are marked as FBI code 18 (crimes of production, sale, use of drugs) and sometimes 26 (a miscellaneous category). FBI code 26 appears more commonly, but the FBI code 26 appears to phase out after 2015. 2091 is a narcotics code for "forfeit property," 2092 is for "soliciting narcotics on a publicway," and 2093 is for "found suspect narcotics." It appears that CPD now interprets these crimes as being drug crimes. Seems the most practical decision is to use the most modern coding and use code 18 for these crimes.
+
+A similar story goes for IUCR crimes 1710, 1715, 1725, 1755, and 1780. These are all offenses involving children that prior to 2016 had been given the FBI miscellaneous code 26, but more recently have been coded as 20 (offenses against family). Again it seems reasonable to use the most modern coding choice and use FBI code 20.
+```{r}
+dbGetQuery(con, "
+  SELECT COUNT(*) AS crimecount,
+         IUCR,
+         PrimaryType,
+         FBICode,
+         SUBSTR(Date,7,4) AS year
+  FROM crime
+  WHERE IUCR IN ('1710','1715','1725','1755','1780')
+  GROUP BY IUCR, PrimaryType, year, FBICode
+  ORDER BY IUCR, PrimaryType, year, FBICode")
+```
+
+IUCR codes 1030 and 1035, which involve possession of incendiary devices, are now being coded as arson rather than miscellaneous.
+```{r} 
+dbGetQuery(con, "
+  SELECT COUNT(*) AS crimecount,
+         IUCR,
+         PrimaryType,
+         FBICode,
+         SUBSTR(Date,7,4) AS year
+  FROM crime
+  WHERE IUCR IN ('1030','1035')
+  GROUP BY IUCR, PrimaryType, year, FBICode
+  ORDER BY IUCR, PrimaryType, year, FBICode")
+```
+This all points to a modernization of FBI codes where Chicago adopted more specific FBI codes rather than placing them in the miscellaneous category.
+
+Lastly, note that the spelling of the primary type for 5114 has changed to remove the extra spaces. Even though they differ only by a few spaces, SQL will conclude that these are different values.
+```{r}
+dbGetQuery(con, 
+   "SELECT COUNT(*) AS crimecount,
+           IUCR,
+           PrimaryType,
+           FBICode,
+           SUBSTR(Date,7,4) AS year
+    FROM crime
+    WHERE IUCR='5114'
+    GROUP BY IUCR, PrimaryType, FBICode, year")
+```
+
+The conclusion of all of this is that if there is any inconsistency in the connection between `IUCR`, `PrimaryType`, and `FBICode`, then we should choose the most recent combination and delete the rest as options. The following SQL query finds for each IUCR the most recent year that it occurred in the dataset. Not all of them are 2025. Several IUCR codes last occurred before 2015.
+```{r}
+dbGetQuery(con, "
+    SELECT IUCR, MAX(year) AS maxyear
+    FROM crime
+    GROUP BY IUCR")
+```
+
+Now that we have a query that tells us the most recent year for each IUCR code, then we should lookup what the `PrimaryType` and `FBICode` is for each `IUCR` in their most recent year. We are going to temporarily create a table with the results from the previous query using "Common Table Expressions" (CTE). A CTE is a temporary table that only lasts for the one query in which it is created. You can have multiple CTEs in one query. Here we also have our first encounter with a `JOIN`. We will cover more about JOIN later in these notes. For now, study the query and see how it solves our problem. With a CTE (the part following the keyword `WITH`) we create a temporary table called `recentIUCR` that has two columns, `IUCR` and `maxyear`. Then the main query looks for rows in the `crime` table that match the rows in `recentIUCR`. When it finds a match, it merges in that crime's `PrimaryType` and `FBICode.` Since many crimes with the same value of `IUCR` show up, we use `DISTINCT` to keep just the unique combinations.
+
+```{r}
+iucrLookupTable <- dbGetQuery(con, "
+  WITH
+     recentIUCR AS
+        (SELECT IUCR, MAX(year) AS maxyear
+         FROM crime
+         GROUP BY IUCR)
+  SELECT DISTINCT crime.IUCR, 
+                  crime.PrimaryType, 
+                  crime.FBICode
+  FROM crime
+  INNER JOIN recentIUCR
+      ON crime.iucr = recentIUCR.iucr AND
+         crime.year = recentIUCR.maxyear
+  ORDER BY crime.IUCR
+")
+
+# check for a few IUCRs
+iucrLookupTable |> 
+   filter(IUCR %in% c(2091,2092,2093,1030,1035,5114))
+
+# make sure that each IUCR code shows up in only one row
+#   should be empty
+iucrLookupTable |> 
+   count(IUCR) |> 
+   filter(n > 1)
+```
+
+With questions about IUCR to FBI codes resolved, let's create the IUCR, primary type, and FBI code lookup table in our Chicago crime database. We can use `dbWriteTable()` to post our data frame `iucrLookupTable` to the database creating a new table called `iucr`.
+```{r} 
+# remove iucr table if it is there already
+if(dbExistsTable(con,"iucr")) dbRemoveTable(con, "iucr")
+
+# import the data frame into SQLite
+dbWriteTable(con, "iucr", iucrLookupTable,
+             row.names=FALSE)
+
+# check
+dbListFields(con,"iucr")
+
+# check whether the table looks correct
+dbGetQuery(con, "SELECT * FROM iucr LIMIT 5")
+```
+Everything looks correct!
+
+Note that we ran a SQL query to pull this lookup table into `iucrLookupTable`, then we wrote that table back to the database with `dbWriteTable()`. There really was no need to pull the table into R, only to post it right back into the database. We can use a `CREATE TABLE` clause to create this lookup table directly in our database.
+```{r}
+# remove iucr table if it is there already
+if(dbExistsTable(con,"iucr")) dbRemoveTable(con, "iucr")
+
+# use dbExecute() since we are creating a table, not retrieving data
+dbExecute(con, "
+  CREATE TABLE iucr AS
+  WITH
+     recentIUCR AS
+        (SELECT IUCR, MAX(year) AS maxyear
+         FROM crime
+         GROUP BY IUCR)
+  SELECT DISTINCT crime.IUCR, crime.PrimaryType, crime.FBICode
+  FROM crime
+  INNER JOIN recentIUCR
+      ON crime.iucr = recentIUCR.iucr AND
+         crime.year = recentIUCR.maxyear
+  ORDER BY crime.IUCR
+")
+```
+
+We now see that our database has two tables, the original `crime` table and the new `iucr` lookup table.
+```{r}
+dbListTables(con)
+```
+
+# Exercises
+
+With the new table `iucr` in the database complete the following exercises.
+
+`r .exNum('Print out all of the rows in iucr')`
+
+`r .exNum('Print out all the IUCR codes for "KIDNAPPING"')`
+
+`r .exNum('How many IUCR codes are there for "ASSAULT"?')`
+
+`r .exNum('Try doing the prior exercise again using @@COUNT(*)@@ if you did not use it the first time')`
+
+
+# SQL dates
+SQLite has no special data/time data type. The `Date` column is currently stored in the `crime` table as plain text. The `PRAGMA` statement is a way to modify or query the SQLite database itself. Here we can ask SQLite the data types it is using to store each of the columns. All the entries, including `Date` are stored as text, integers, or doubles (numbers with decimal points).
+```{r}
+dbGetQuery(con, "PRAGMA table_info(crime)")
+```
+
+The standard date format in computing is yyyy-mm-dd hh:mm:ss, where the hours are on the 24-hour clock (so no AM/PM). The reason for this format is that you can sort the data in this format to get events in order. For some reason, the producers of the Chicago crime dataset did not use this standard format. If you sort events in the current database then all the January events will come first (regardless in what year they occurred) and any events occurring at 1pm will show up before those occurring at 2am. Putting the dates in a standard format also allows us to use some useful SQLite date functions for extracting the year, day of the week, time of day, and other features of the date and time.
+
+The plan is to create a dataframe in R with each crime's `ID` and `Date`. Then we will use `lubridate` to clean up the dates and put them in the standard format. Then we will push a new table into the database containing each crime's `ID` and its newly formatted date.
+
+```{r}
+library(lubridate)
+data <- dbGetQuery(con, "SELECT ID, Date FROM crime")
+data |> head()
+```
+Since the dates are in mm/dd/yyyy hh:mm:ss format, we will use `mdy_hms()` from the `lubridate` package to clean these up. Fortunately, this function can also handle the AM/PM.
+```{r}
+data <- data |>
+   mutate(datefix = mdy_hms(Date),
+          datefix = as.character(datefix)) |> # convert to plain text
+   # delete the original date from the data frame
+   select(-Date)
+
+# check that the reformatting worked
+data |> head()
+```
+
+With the dates in standard format, let's push the fixed dates table to the database.
+```{r}
+# remove DateFix table if it already exists
+if(dbExistsTable(con,"DateFix")) dbRemoveTable(con, "DateFix")
+
+# save a table with ID and the properly formatted date
+dbWriteTable(con, "DateFix", data, row.names=FALSE)
+dbListTables(con)
+```
+We now see that our database now has three tables with the addition of the new `DateFix` table.
+
+Before we used `SUBSTR()` to extract the year from the date. That was not very elegant and required figuring out which characters held the four characters representing the year. Even though SQLite does not have a date/time type, it does have some functions that help us work with dates. We will use SQLite's `STRFTIME()` function. It stands for "string format time". It is a decades old function that you will find in almost all languages. Even R has its own version of `strftime()`. The `STRFTIME()` function has two arguments. The first is a format parameter in which you tell `STRFTIME()` what you want it to extract from the date. The second argument is the column containing the dates. There are a lot of options for the format parameter. For example, you can extract just the year (%Y), just the month (%m), just the minute (%M), the day of the week (%w) with Sunday represented as 0 and Saturday as 6, or the week of the year (%W). You can also combine to get, for example, the year and month (%Y-%m). You can find a complete listing [here](https://www.sqlite.org/lang_datefunc.html).
+
+Let's write a query to test out `STRFTIME()`. Here we will select some dates from `DateFix` and determine on which day of the week the crime occurred.
+```{r}
+a <- dbGetQuery(con, "
+  SELECT ID,
+         datefix,
+         STRFTIME('%w',datefix) AS weekday
+  FROM DateFix")
+a |> head()
+```
+For the first date, `r date(ymd_hms(a$datefix[1]))`, `STRFTIME()` tells us that this was day `r a$weekday[1]` of the week, which is `r c("Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday")[1+as.numeric(a$weekday[1])]` (Remember that 0 is Sunday).
+
+`STRFTIME()` always returns values that are text. That is, if you ask for the year using `STRFTIME('%Y',datefix)` and you get values like 2017 and 2018, your results will be character strings rather than numeric. You will have to convert them using `as.numeric()` in R or, preferably, using a `CAST()` expression in SQL. `CAST()` is particularly useful if you want to select records that, say, occur after 2010 or after noon.
+
+Let's count cases that occurred between Monday and Friday.
+```{r}
+dbGetQuery(con, "
+  SELECT COUNT(*),
+         CAST(STRFTIME('%w',datefix) AS INTEGER) AS weekday
+  FROM DateFix
+  WHERE (weekday>=1) AND (weekday<=5)
+  GROUP BY weekday
+  LIMIT 10")
+```
+In the `SELECT` clause we went ahead and told SQLite to store the weekday as an integer.
+
+# Creating the final table
+
+Now we can put it all together, drop columns we do not want, remove redundant information, and clean up the dates.
+
+Removing columns in tables in SQLite used to not be that simple. Only after March 2021 could you run `ALTER TABLE crime DROP COLUMN Date` to remove a single column. We are going to go with an old-school approach since we are going to make many changes to our database. We are going to rename the current `crime` table, then copy only the columns we want into a new `crime` table, while at the same time replacing the old format dates with the dates in a more preferable format.
+
+First rename the `crime` table to `crime_old` that we will delete as soon as we are done.
+```{r}
+dbExecute(con, "ALTER TABLE crime RENAME TO crime_old")
+```
+
+There should be a new table.
+```{r}
+dbListTables(con)
+```
+
+We are going to need to list all the variables we want to keep, but let's make R do all the work.
+```{r}
+a <- dbListFields(con,"crime_old")
+paste(a, collapse=",")
+```
+
+Now we will create our new `crime`.
+```{r}
+dbExecute(con, "
+   CREATE TABLE crime AS
+   SELECT crime_old.ID,
+          crime_old.CaseNumber,
+          DateFix.datefix AS date,
+          crime_old.Block,
+          crime_old.IUCR,
+          crime_old.Description,
+          crime_old.LocationDescription,
+          crime_old.Arrest,
+          crime_old.Domestic,
+          crime_old.Beat,
+          crime_old.District,
+          crime_old.Ward,
+          crime_old.CommunityArea,
+          crime_old.Latitude,
+          crime_old.Longitude
+   FROM crime_old
+      INNER JOIN DateFix
+        ON crime_old.ID=DateFix.ID")
+```
+This query requires a bit of discussion. First, note that the `FROM` clause joins two tables, `crime_old` and `DateFix`. The `ON` clause tells SQLite how to link these two tables together. It says that if there is a row in `crime_old` with a particular `ID`, then it can find its associated row in the `DateFix` table by finding the matching value in the `DateFix`'s `ID` column. For every column in the `SELECT` clause, we have included the table from where SQLite should find the column. Technically, we only need to prefix the column with the table name when there might be confusion. For example, both `crime_old` and `DateFix` have a column called `ID`. However, we like to be explicit in complicated queries to remind ourselves from where all the data comes. You can also see in this `SELECT` query why periods in column names cause problems. SQL uses the period to separate the table name from the column name. If we were to include `Case.Number` in a `SELECT` statement, then SQL would think we had a table called `Case` with a column called `Number`. Are you not glad we fixed this way back when we first created our database? Technically, `Beat`, `District`, `Ward`, and `CommunityArea` are all redundant information once we have `Latitude` and `Longitude`. However, "spatial joins," linking coordinates to spatial areas, is computationally expensive so that it is more efficient to simply leave this redundant information here. Lastly, note that the first line is a `CREATE TABLE` statement that will store the results of this query in a new table called `crime`.
+
+Let's look at the newly cleaned up table.
+```{r}
+dbGetQuery(con, "
+  SELECT *
+  FROM crime
+  LIMIT 10")
+```
+
+If everything looks as expected, then we can delete the `crime_old` and the `DateFix` tables.
+```{r}
+dbExecute(con, "DROP TABLE crime_old")
+dbExecute(con, "DROP TABLE DateFix")
+
+dbListTables(con)
+```
+
+After all this work, the size of the `chicagocrime.db` database file can become quite large. Our file is now `r round(file.info("chicagocrime.db")$size/1000^3,1)` Gb, much larger than the size of the file we downloaded from the City of Chicago open data site. Even though we have deleted the `crime_old` and `DateFix` tables, SQLite simply marks them as deleted, but does not necessarily give up the space that it had allocated for their storage. It holds onto that space in case the user needs it. The `VACUUM` statement will clean up unused space, but it can take a minute.
+```{r}
+system.time(
+  dbExecute(con, "VACUUM")
+)
+```
+
+After `VACUUM` our `chicagocrime.db` file is now `r round(file.info("chicagocrime.db")$size/1000^3,1)` Gb... much better.
+
+# Joining data across tables --------------------------------------------------
+
+Now with data split across tables, we need to link tables together in order to get information. Let's extract the first 10 crime incident with their case numbers and FBI codes. Since `FBICode` is no longer in the `crime` table we need to add the table `iucr` to the `FROM` clause and link the two tables with a `JOIN`.
+```{r}
+timeIUCRjoin <- 
+system.time(
+{
+   data <- dbGetQuery(con, "
+       SELECT crime.CaseNumber,
+              iucr.FBICode
+       FROM   crime
+         INNER JOIN iucr
+           ON crime.iucr=iucr.iucr")
+})
+data |> head()
+```
+For each record in `crime`, SQLite looks up the crime's IUCR code in the `iucr` table and links in the FBI code. SQLite is fast. This query took `r timeIUCRjoin["elapsed"]` seconds, but this linking does take time especially for really large datasets and large lookup tables. For the above query, SQLite scans through the `iucr` table until it finds the right IUCR code. This is not very efficient. If you were to look up the word "query" in the dictionary, you would not start on page 1 and scan through every word until you arrived at "query". Instead, you would start about two-thirds of the way through the dictionary, see if the words are before or after "query," and revise your search until you find the word. Rather than search hundreds of pages, you might only need to look at nine pages.
+
+In the same way, we can create an "index" for the `iucr` table to help speed up the search. It does not always make the queries faster and can require storing a large index in some cases. Let's try on this example.
+
+```{r}
+dbExecute(con, "
+   CREATE INDEX iucr_idx on iucr(iucr)")
+```
+
+Let's rerun the query now and see if it made a difference.
+```{r}
+timeIUCRjoinIndex <- 
+system.time(
+{
+   data <- dbGetQuery(con, "
+       SELECT crime.CaseNumber,
+              iucr.FBICode
+       FROM   crime
+         INNER JOIN iucr
+           ON crime.iucr=iucr.iucr")
+})
+```
+That query now takes `r timeIUCRjoinIndex["elapsed"]` seconds. Creating an index is not always worth it. If you have queries that are taking too long, it's worth experimenting with creating an index to see if it helps.
+
+In the previous query we used the `WHERE` clause to join the two tables together. Most SQL programmers prefer using `JOIN` rather than using the `WHERE` clause. The primary reason is readability. The thinking is that the `WHERE` clause should really be about filtering which cases to include, while joining tables is quite a different operation. There are also several different kinds of joins. What should the query return if a crime has an IUCR code that does not appear in the `iucr` table? `JOIN`s more carefully define the desired behavior. Here we provide an example of an inner join.
+```{r comment="", results='hold'}
+res <- dbSendQuery(con, "
+                   SELECT crime.CaseNumber,
+                          iucr.FBICode
+                   FROM crime
+                      INNER JOIN iucr
+                      ON crime.iucr=iucr.iucr")
+data <- fetch(res, n = -1)
+dbClearResult(res)
+```
+Note how we modified the `FROM` clause. Rather than listing the tables, we tell SQL to join the `crime` table with the `iucr` table using the `iucr` columns to link them together. The `INNER JOIN` will drop any record in the `crime` table that has an IUCR code that cannot be found in the `iucr` lookup table. Using `LEFT OUTER JOIN` will force every record in `crime` (the "left" table) to appear in the final result set even if it cannot find an IUCR code in `iucr`. It will simply report `NULL` for its `FBICode`.
+
+For a helpful, visual description of the different kinds of joins, visit [this site](http://blog.codinghorror.com/a-visual-explanation-of-sql-joins/).
+
+Let's determine how many assaults occurred in each ward. Since the crime type is stored in `iucr.PrimaryType`, we need to join the tables.
+```{r comment="", results='hold'}
+res <- dbSendQuery(con, "
+                   SELECT COUNT(*) AS crimecount,
+                          crime.Ward
+                   FROM crime
+                      INNER JOIN iucr
+                      ON crime.iucr=iucr.iucr
+                   WHERE iucr.PrimaryType='ASSAULT'
+                   GROUP BY crime.Ward")
+fetch(res, n = -1)
+dbClearResult(res)
+```
+
+Let's tabulate how many Part 1 crimes occur in each year. We'll use `PrimaryType` to give useful labels, `STRFTIME()` to extract the year in which each crime occurred, `FBICode` to pick out the Part 1 crimes, and an `INNER JOIN` to link the tables.
+
+```{r comment="", results='hold'}
+res <- dbSendQuery(con, "
+                   SELECT iucr.PrimaryType    AS type,
+                          STRFTIME('%Y',date) AS year,
+                          COUNT(*)            AS crimecount
+                   FROM crime
+                      INNER JOIN iucr
+                      ON crime.iucr=iucr.iucr
+                   WHERE FBICode IN ('01A','02','03','04A','04B','05','06','07','09')
+                   GROUP BY type, year")
+fetch(res, n = -1)
+dbClearResult(res)
+```
+
+# Exercises
+
+`r .exNum('Count the number of arrests for "MOTOR VEHICLE THEFT"')`
+
+`r .exNum('Which District has the most thefts?')`
+
+
+# Subqueries
+
+Sometimes we would like to use the results of one query as part of another query. You can put `SELECT` statements inside `FROM` statements to accomplish this. We'll use this method to see if addresses are always geocoded to the same coordinates. Here are the unique combinations of addresses and coordinates. We'll just show here the first 20.
+```{r comment="", results='hold'}
+res <- dbSendQuery(con, "
+                   SELECT DISTINCT Block, XCoordinate, YCoordinate
+                   FROM crime")
+fetch(res, n = 20)
+dbClearResult(res)
+```
+
+We would like to know if `Block` shows up multiple times in these results or just one time. We use the results of this query in the `FROM` clause and count up the frequency of each `Block`.
+```{r comment="", results='hold'}
+res <- dbSendQuery(con, "
+                   SELECT COUNT(*), Block
+                   FROM
+                      (SELECT DISTINCT block,
+                                       XCoordinate,
+                                       YCoordinate
+                       FROM crime)
+                   GROUP BY block")
+fetch(res, n = 20)
+dbClearResult(res)
+```
+Clearly, the coordinates are not unique to each address. This suggests that the coordinates have greater spatial resolution than the addresses imply. The addresses are "rounded" to provide some privacy, but the coordinates appear to point to more specific places.
+
+After completing the final exercise, remember to run `dbDisconnect(con)` to disconnect from the database. 
+
+# Exercise
+As a final exercise, which does not involve a subquery,
+
+`r .exNum('Count the number of assaults, since 2010, that occurred on Fridays and Saturdays, after 6pm, reporting the date, day of week, hour of the day, and year')`
+
+
+# Solutions
+
+
+`r .exQ(1)`
+
+```{r comment="", results='hold'}
+res <- dbSendQuery(con, "SELECT * from iucr")
+fetch(res, n=-1)
+dbClearResult(res)
+```
+
+`r .exQ(2)`
+
+```{r comment="", results='hold'}
+res <- dbSendQuery(con, "
+   SELECT iucr
+   FROM iucr
+   WHERE Primarytype='KIDNAPPING'")
+fetch(res, n=-1)
+dbClearResult(res)
+```
+
+`r .exQ(3)`
+
+```{r comment="", results='hold'}
+res <- dbSendQuery(con, "
+   SELECT *
+   FROM iucr
+   WHERE Primarytype='ASSAULT'")
+fetch(res, n=-1)
+dbClearResult(res)
+```
+
+`r .exQ(4)`
+
+```{r comment="", results='hold'}
+res <- dbSendQuery(con, "
+   SELECT COUNT(*)
+   FROM iucr
+   WHERE PrimaryType='ASSAULT'")
+fetch(res, n=-1)
+dbClearResult(res)
+```
+
+`r .exQ(5)`
+
+```{r comment="", results='hold'}
+res <- dbSendQuery(con, "
+   SELECT COUNT(*)
+   FROM crime
+      INNER JOIN iucr ON
+         crime.iucr=iucr.iucr
+   WHERE crime.Arrest='true' AND
+         iucr.PrimaryType='MOTOR VEHICLE THEFT'")
+fetch(res, n=-1)
+dbClearResult(res)
+```
+
+`r .exQ(6)`
+
+```{r comment="", results='hold'}
+res <- dbSendQuery(con, "
+   SELECT COUNT(*) AS crimecount,
+          District
+   FROM crime
+      INNER JOIN iucr ON
+         crime.iucr=iucr.iucr
+   WHERE iucr.PrimaryType='THEFT'
+   GROUP BY District")
+a <- fetch(res, n=-1)
+dbClearResult(res)
+
+subset(a, crimecount==max(crimecount))
+# or
+a[which.max(a$crimecount),]
+```
+
+`r .exQ(7)`
+
+```{r comment="", results='hold'}
+#  count 1) assaults
+#        2) since 2016 on
+#        3) Fridays and Saturdays
+#        4) after 6pm
+# report 5) count,
+#        6) date,
+#        7) day of week, and
+#        8) hour of the day
+#        9) year
+res <- dbSendQuery(con, "
+   SELECT COUNT(*),
+          DATE(crime.Date) AS crimdate,
+          CAST(STRFTIME('%w',crime.Date) AS INTEGER) AS weekday,
+          CAST(STRFTIME('%H',crime.Date) AS INTEGER) AS hour,
+          CAST(STRFTIME('%Y',crime.Date) AS INTEGER) AS year
+   FROM   crime
+             INNER JOIN iucr ON
+                crime.iucr=iucr.iucr
+   WHERE  iucr.PrimaryType='ASSAULT' AND
+          year>=2016 AND
+          weekday>=5 AND
+          hour>=18
+   GROUP BY crimdate, weekday, hour, year")
+fetch(res, n = 20)
+dbClearResult(res)
+```
+
+
+```{r comment="", results='hold'}
+dbDisconnect(con)
+```
