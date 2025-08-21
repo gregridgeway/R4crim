@@ -9,7 +9,7 @@
 <meta name="author" content="Greg Ridgeway">
 <meta name="author" content="Ruth Moyer">
 <meta name="author" content="Li Sian Goh">
-<meta name="dcterms.date" content="2025-08-18">
+<meta name="dcterms.date" content="2025-08-20">
 
 <title>Introduction to SQL</title>
 <style>
@@ -148,7 +148,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">August 18, 2025</p>
+      <p class="date">August 20, 2025</p>
     </div>
   </div>
   
@@ -324,7 +324,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a><span class="co"># does the table exist?</span></span>
 <span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a><span class="fu">dbListTables</span>(con)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "crime"</code></pre>
+<pre><code>[1] "crime" "iucr" </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># a quick check to see if all the columns are there</span></span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dbListFields</span>(con,<span class="st">"crime"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -941,7 +941,7 @@ coercing other values of type string</code></pre>
 <span id="cb74-11"><a href="#cb74-11" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   user  system elapsed 
-   2.65    2.10    4.74 </code></pre>
+   4.75    3.09    8.32 </code></pre>
 </div>
 </div>
 <p>Or we could make SQL do all the work selecting and tabulating.</p>
@@ -958,7 +958,7 @@ coercing other values of type string</code></pre>
 <span id="cb76-10"><a href="#cb76-10" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   user  system elapsed 
-   0.65    1.51    2.19 </code></pre>
+   0.71    2.43    3.38 </code></pre>
 </div>
 </div>
 <p>Generally, SQL will be much faster for general selecting, filtering, tabulating, and linking data.</p>
