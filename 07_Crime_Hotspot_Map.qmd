@@ -28,6 +28,8 @@ editor_options:
 bibliography: G:/My Drive/docs/Greg/articles/mybib.bib
 ---
 
+<!-- This document can't be created after running Lesson #8 SQL part 2. To recreate this document, first rerun Lesson #6 SQL Part 1. -->
+
 <!-- In terminal -->
 <!-- quarto render 07_Crime_Hotspot_Map.qmd -->
 
@@ -55,7 +57,7 @@ bibliography: G:/My Drive/docs/Greg/articles/mybib.bib
 ```
 
 
-<!-- This document can't be created after running Lesson #8 SQL part 2. To recreate this document, first rerun Lesson #6 SQL Part 1. -->
+
 
 Note: If you have skipped ahead and run the code in Lession \#8: SQL Part 2, then some of the queries involving `PrimaryType` in this set of notes will not work. You will need to modify those queries to left join with the `iucr` table.
 
@@ -465,15 +467,18 @@ legend("topright",
 The process of computing a KDE for a two-dimensional collection of points is similar. We use a two-dimensional version of the normal distribution kernel and create a two-dimensional grid of values at which we will compute the incident rate per square kilometer.
 
 ### Contour map with two-dimensional kernel density estimation
-The `MASS` package provides a two-dimensional KDE function `kde2d()`. We will also use the `isoband` package. Isobands are the filled regions between pairs of contour lines representing areas where the incident rate values fall within a given range.
+The `MASS` package provides a two-dimensional KDE function `kde2d()`. However, the `MASS` package also has a `select()` function that clashes with dplyr's `select()` function. This makes it either easy to cause bugs or confusing why an apparently simple line of code does not work. So we will not run `library(MASS)` and just prefix any calls to `MASS` functions with `MASS::` to avoid problems completely.
+
+We will also use the `isoband` package. Isobands are the filled regions between pairs of contour lines representing areas where the incident rate values fall within a given range.
 ```{r}
 #| message: false
 # for computing 2-dimensional kernel density estimates
-library(MASS)
+#   prefer not to load it, MASS::select() clash with dplyr::select()
+# library(MASS)
 # for creating polygons from contours
 library(isoband)
 ```
-Here we use `bandwidth.nrd()` to select bandwidths, one for the x direction and one for the y direction. `kde2d()` will compute the KDE on a 200 x 200 grid of points.
+Here we use `MASS::bandwidth.nrd()` to select bandwidths, one for the x direction and one for the y direction. `kde2d()` will compute the KDE on a 200 x 200 grid of points.
 
 ```{r kde2dcalculation}
 #| cache: true
@@ -482,13 +487,14 @@ xy <- dataAssaults |>
    st_coordinates() |>
    data.frame()
 # simple bandwidth guess for how much smoothing
-h <- c(bandwidth.nrd(xy$X), bandwidth.nrd(xy$Y))  
-kdeAssaults <- kde2d(
+h <- c(MASS::bandwidth.nrd(xy$X), 
+       MASS::bandwidth.nrd(xy$Y))  
+kdeAssaults <- MASS::kde2d(
    xy$X, xy$Y, # coordinates
    n = 200,    # a 200 x 200 grid
    h = h)      # bandwidth
 ```
-Stored in `kdeAssaults` is a component `z` that contains the crime density estimate. As we requested, `kde2d()` chopped the map of Chicago into a 200 x 200 grid of dimension and `z` contains the estimated crime density at those grid points. Those points are centered in a box with width and height equal to:
+Stored in `kdeAssaults` is a component `z` that contains the crime density estimate. As we requested, `MASS::kde2d()` chopped the map of Chicago into a 200 x 200 grid of dimension and `z` contains the estimated crime density at those grid points. Those points are centered in a box with width and height equal to:
 ```{r}
 # width in meters
 diff(kdeAssaults$x[1:2])
@@ -698,8 +704,9 @@ function(year0)
       filter(year == year0) |> # for just one year
       st_coordinates() |>
       data.frame()
-   h <- c(bandwidth.nrd(xy$X), bandwidth.nrd(xy$Y))  
-   kdeCarTheft <- kde2d(xy$X, xy$Y, n = 200, h = h)
+   h <- c(MASS::bandwidth.nrd(xy$X), 
+          MASS::bandwidth.nrd(xy$Y))  
+   kdeCarTheft <- MASS::kde2d(xy$X, xy$Y, n = 200, h = h)
    
    # no need to divide by year here... only one year of data
    kdeCarTheft$zKM2Year <- kdeCarTheft$z * nrow(xy) * 10^6 
@@ -773,8 +780,9 @@ function(year0)
       filter(year == year0) |> # for just one year
       st_coordinates() |>
       data.frame()
-   h <- c(bandwidth.nrd(xy$X), bandwidth.nrd(xy$Y))  
-   kdeCarTheft <- kde2d(xy$X, xy$Y, n = 200, h = h)
+   h <- c(MASS::bandwidth.nrd(xy$X), 
+          MASS::bandwidth.nrd(xy$Y))  
+   kdeCarTheft <- MASS::kde2d(xy$X, xy$Y, n = 200, h = h)
    
    # no need to divide by year here... only one year of data
    kdeCarTheft$zKM2Year <- kdeCarTheft$z * nrow(xy) * 10^6 
@@ -851,3 +859,10 @@ dataCarTheft |>
 That spiked was fueled by thefts of Kia and Hyundai vehicles, which lacked passive immobilizer antitheft devices as standard equipment and lead to a social media trend describing how to steal Kia and Hyundai vehicles. 
 
 Many cities other than Chicago have accessible incident-level data. You can easily modify the code here to make a hotspot map for Philadelphia, Los Angeles, Seattle, San Francisco, Baltimore, or Washington, DC.
+
+# Disconnect
+
+Remember to disconnect from the database when you are done.
+```{r}
+dbDisconnect(con)
+```
