@@ -403,6 +403,13 @@ plot(Latitude~Longitude, data=a,
 `r .exNum('What is the most common (Long,Lat) for assaults in Ward 22?')` Add the point to your plot using the `points()` function. `points()` simply draws a point (or sequence of points) at the specified coordinates
 
 
+And always disconnect when you are done.
+```{r}
+#| eval: false
+dbDisconnect(con)
+```
+
+
 # Solutions to the exercises
 
 `r .exQ(1)`
@@ -527,3 +534,12 @@ points(Latitude~Longitude,
        cex=2)
 b
 ```
+
+
+```{r}
+#| echo: false
+dbDisconnect(con)
+# make a copy so Lesson 08 can start from here
+file.copy("chicagocrime.db", "chicagocrimePost06.db", overwrite = TRUE)
+```
+
