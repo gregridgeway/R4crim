@@ -112,8 +112,6 @@ The backslashes in the above text "protect" the double quote, communicating to y
 
 The `c()` function is not the only way to make a collection of values in R. For example, placing a `:` between two numbers can return a collection of numbers in sequence. The functions `rep()` and `seq()` produce repeated values or sequences.
 ```{r}
-#| comment: ""
-#| results: "hold"
 1:10
 5:-5
 c(1,1,1,1,1,1,1,1,1,1)
@@ -131,7 +129,6 @@ R will also do arithmetic with two vectors, doing the calculation pairwise. The 
 Yet, other functions operate on the whole collection of values in a vector. See the following examples:
 ```{r}
 #| comment: ""
-#| results: "hold"
 sum(c(1,10,3,6,2,5,8,4,7,9)) # sum
 length(c(1,10,3,6,2,5,8,4,7,9)) # how many?
 cumsum(c(1,10,3,6,2,5,8,4,7,9)) # cumulative sum
@@ -141,7 +138,6 @@ median(c(1,10,3,6,2,5,8,4,7,9)) # median of same population
 There are also some functions in R that help us find the biggest and smallest values. For example:
 ```{r}
 #| comment: ""
-#| results: "hold"
 max(c(1,10,3,6,2,5,8,4,7,9)) # what is the biggest value in vector?
 which.max(c(1,10,3,6,2,5,8,4,7,9)) # in which "spot" would we find it?
 min(c(1,10,3,6,2,5,8,4,7,9)) # what is the smallest value in vector?
@@ -157,7 +153,8 @@ getwd()
 Almost certainly this default directory is *not* where you plan to have all of your datasets and files stored. Instead, you probably have an "analysis" or "project" or "R4crim" folder somewhere on your computer where you would like to store your data and work.
 
 Use `setwd()` to tell R what folder you want it to use as the working directory. If you do not set the working directory, R will not know where to find the data you wish to import and will save your results in a location in which you would probably never look. Make it a habit to have `setwd()` as the first line of every script you write. If you know the working directory you want to use, then you can just put it inside the `setwd()` function.
-```
+```{r}
+#| eval: false
 setwd("C:/Users/greg_/CRIM6002/notes/R4crim")    
 ```
 Note that for all platforms, Windows, Macs, and Linux, the working directory only uses forward slashes. So Windows users be careful... most Windows applications use backslashes, but in an effort to make R scripts work across all platforms, R requires forward slashes. Backslashes have a different use in R that you will meet later.
@@ -198,11 +195,11 @@ Now with `dplyr` loaded we can slice the protest data to just pick our certain r
 ```{r}
 slice(dataProtest, 1)
 ```
-There is a more modern "grammar" in R called the pipe operator. This is a way to chain together functions in a more readable way. The pipe operator is `|>`. It takes the output of the function on the left and passes it as the first argument to the function on the right. This is a more modern way to write R code. Here is the same code as above using the pipe operator.
+There is a more modern "grammar" in R using the pipe operator. This is a way to chain together functions in a more readable way. The pipe operator is `|>`. It takes the output of the function on the left and passes it as the first argument to the function on the right. Here is the same code as above using the pipe operator.
 ```{r}
 dataProtest |> slice(1)
 ```
-This code takes `dataProtest` and passes it in to the first argument of the `slice()` function. The `slice()` function then returns the first row of the dataset. This is a more readable way to write the code. 
+This code takes `dataProtest` and passes it in to the first argument of the `slice()` function. The `slice()` function then returns the first row of the dataset. The code is more readable this way. 
 
 You will also see many users using `%>%` in their code. The `%>%` pipe operator has been around longer, but the newer `|>` pipe operator, created in 2021 for R 4.1.0, is [faster](https://michaelbarrowman.co.uk/post/the-new-base-pipe/). You can use either one.
 
@@ -546,6 +543,117 @@ dataProtest |>
 
 `r .exNum("Are civil rights protests larger on average than non-civil rights protests?")` (Hint: use group_by/summarize)
 
+
+# `pivot_wider()`/`pivot_longer()`
+
+Note: You may encounter code with `melt()`, `cast()`, `reshape()`, `gather()`, and `spread()`. All of these are legacy versions of `pivot_wider()` and `pivot_longer()`.
+
+`pivot_wider()` and `pivot_longer()` reorganize datasets between "wide" and "long" form. 
+`pivot_longer()` takes many side-by-side columns (say, one column per year) and stacks them into two neat columns, one that says "which year" and one that shows the value, so your table becomes taller and easier to plot or compare. `pivot_wider()` does the opposite. It takes a tall list of items (like many rows per state and year) and spreads them back out so each thing gets its own column, making the table wider and easier to read at a glance.
+
+`pivot_wider()` and `pivot_longer()` are in the `tidyr` package.
+```{r}
+library(tidyr)
+```
+Let's say that we are interested in determining which states have fewer civil rights protesters than non-civil rights protesters. With our existing `group_by()` and `sumamrize()` skills we can tabulate the number of protesters by state and by type of protest.
+```{r}
+dataProtest |>
+   group_by(state, civilrights) |>
+   summarize(totAttendees = sum(Attendees, na.rm=TRUE))
+```
+Now we can see the protester counts for civil rights and non-civil rights protest for each state. However, it is not clear how to compare the rows within each state. 
+
+This is where `pivot_wider()` comes in handy. We tell `pivot_wider()` to take the `civilrights` column and spread its values across columns, creating a column for non-civil rights protester counts and another column for civil rights protester counts. The values that will fill the new table come from `totAttendees`. Since `civilrights` takes values 0 and 1, I have asked `pivot_wider()` to paste "CR" in front of the values so that we get valid R column names.
+```{r}
+dataProtest |>
+   group_by(state, civilrights) |>
+   summarize(totAttendees = sum(Attendees, na.rm=TRUE)) |>
+   pivot_wider(names_from = civilrights,
+               values_from = totAttendees,
+               names_prefix = "CR")
+```
+Almost done. We just need to filter those with fewer civil rights protesters.
+```{r}
+dataProtest |>
+   group_by(state, civilrights) |>
+   summarize(totAttendees = sum(Attendees, na.rm=TRUE)) |>
+   pivot_wider(names_from = civilrights,
+               values_from = totAttendees,
+               names_prefix = "CR") |>
+   filter(CR1 < CR0)
+```
+By spreading the columns out wide made it easier to make our calculation within each state. There is usually a way to avoid `pivot_wider()` and still get the right answer. For example,
+```{r}
+dataProtest |>
+  group_by(state) |>
+  summarize(CR0 = sum(if_else(civilrights == 0, 
+                              Attendees, 0, missing = 0), na.rm = TRUE),
+            CR1 = sum(if_else(civilrights == 1, 
+                              Attendees, 0, missing = 0), na.rm = TRUE)) |>
+  filter(CR1 < CR0)
+```
+This approach requires a little trick with the `if_else()`, including the value of `Attendees` in the sum if the associated protest is/is not a civil rights protest. Still, having `pivot_wider()` in your toolbox will come in handy.
+
+Let's try an example that is a little more complicated. We will determine which states had the largest percent increase in protesters in 2020 compared to the average annual number of protesters 2017-2019. For each state we need a total for 2020 and an average annual number across 2017, 2018, and 2019.
+
+First, let's derive a few helpful columns. Extract the year from `Date` and label that year as either 2017-2019 or as 2020. Note that I used `2017_2019` with an underscore as the label since R can confuse a hyphen for a minus sign.
+```{r}
+dataProtest |>
+   filter(Date < "2021-01-01") |>
+   mutate(year = substring(Date, 1, 4) |> as.numeric(),
+          timePeriod = ifelse(year %in% 2017:2019,
+                              "2017_2019",
+                              "2020")) |>
+   select(Attendees, civilrights, Date, year, timePeriod) |>
+   head()
+```
+Second, we can get the total number of protesters by state and time period.
+```{r}
+dataProtest |>
+   filter(Date < "2021-01-01") |>
+   mutate(year = substring(Date, 1, 4) |> as.numeric(),
+          timePeriod = ifelse(year %in% 2017:2019,
+                              "2017_2019",
+                              "2020")) |>
+   group_by(state, timePeriod) |>
+   summarize(totProtesters = sum(Attendees, na.rm=TRUE))
+```
+The results is still "grouped" at this point. Be sure to `ungroup()` so that subsequent calculations do not just occur within each group. The sequence group()/summarize()/ungroup() is so common that there is a shortcut using `.by`. Either `ungroup()` or use `.by`. Then we `pivot_wider()`.
+```{r}
+dataProtest |>
+   filter(Date < "2021-01-01") |>
+   mutate(year = substring(Date, 1, 4) |> as.numeric(),
+          timePeriod = ifelse(year %in% 2017:2019,
+                              "2017_2019",
+                              "2020")) |>
+   summarize(totProtesters = sum(Attendees, na.rm=TRUE),
+             .by = c(state, timePeriod)) |>
+   pivot_wider(names_from = timePeriod,
+               names_prefix = "year",
+               values_from = totProtesters,
+               values_fill = 0) |>
+   arrange(state)
+```
+Finally, we are in a position to compute the percent change, sort, and display those states with the largest percentage change.
+```{r}
+dataProtest |>
+   filter(Date < "2021-01-01") |>
+   mutate(year = substring(Date, 1, 4) |> as.numeric(),
+          timePeriod = ifelse(year %in% 2017:2019,
+                              "2017_2019",
+                              "2020")) |>
+   summarize(totProtesters = sum(Attendees, na.rm=TRUE),
+             .by = c(state, timePeriod)) |>
+   pivot_wider(names_from = timePeriod,
+               names_prefix = "year",
+               values_from = totProtesters,
+               values_fill = 0) |>
+   mutate(ave2017_2019 = year2017_2019/3,
+          pctChange = 100*(year2020-ave2017_2019)/ave2017_2019) |>
+   select(state, pctChange) |>
+   slice_max(pctChange, n = 5)
+```
+
 # Graphics and plots
 
 We will finish our introduction to R by exploring `Tags` a little more through some barplots and a word cloud.
@@ -622,7 +730,8 @@ reasons <- dataProtest$Tags |>
   head(5)
 barplot(reasons,
         ylab="Number of Protests",
-        xlab="Protest Reason")
+        xlab="Protest Reason",
+        cex.names = 0.6) # shrink bar labels 30%
 ```
 
 For figures and plots, always use a vector graphics format. That means export your graphics using SVG or EMF. These formats are scalable and will look good at any size. You can insert these graphics into Word, PowerPoint, or Google Docs. PNG graphics tend to look blurry in reports and presentations. Show some pride in your data work by making sure that your final product looks great. Stick with SVG or EMF or another vector graphics format.
@@ -673,6 +782,7 @@ When working with datasets, we covered all the standard functions needed to mani
 * `case_match()` used inside `mutate()` to create new columns based on the values in another column 
 * `group_by()`, `summarize()`, `reframe()` used to summarize data by groups
 * `arrange()` sort rows in a dataset
+* `pivot_wider()` and `pivot_longer()` to organize data in wide or long form
 
 We also covered some more advanced functions.
 
