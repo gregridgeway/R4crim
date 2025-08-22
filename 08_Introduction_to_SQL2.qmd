@@ -27,7 +27,8 @@ bibliography: G:/My Drive/docs/Greg/articles/mybib.bib
 
 
 <!-- A function for automating the numbering and wording of the exercise questions -->
-```{r echo=FALSE}
+```{r}
+#| echo: false
 .counterExercise <- 0
 .exerciseQuestions <- NULL
 .exNum <- function(.questionText="") 
@@ -41,14 +42,14 @@ bibliography: G:/My Drive/docs/Greg/articles/mybib.bib
 {
    return( paste0(i,". ",.exerciseQuestions[i]) )
 }
+
+# copy chicagocrime database so its state matches after Lesson 6
+file.copy("chicagocrimePost06.db", "chicagocrime.db", overwrite = TRUE)
 ```
-
-
-<!-- For this Quarto doc to work, first run 06 Intro to SQL Part 1 -->
 
 # Creating an IUCR lookup table
 
-The crime table in our Chicago crime database is not ideal. It was overly complicated to extract the year from a date. There is also a lot of redundant information in the table.
+The crime table in our Chicago crime database is not ideal. It is overly complicated to extract the year from a date. There is also a lot of redundant information in the table.
 
 Let's take a look at a few example rows.
 
@@ -90,7 +91,7 @@ The database would not complain even though this is an incorrect combination. IU
 
 Then we can remove `PrimaryType` and `FBICode` from the crime table and look up the associated `PrimaryType` and `FBICode` from the IUCR lookup table whenever we need that information.
 
-Let's start by reconnecting to the Chicago crime database
+Let's start by reconnecting to the Chicago crime database.
 ```{r} 
 #| message: false
 library(dplyr)
@@ -123,9 +124,9 @@ dbGetQuery(con, "
   GROUP BY IUCR, PrimaryType, year, FBICode
   ORDER BY IUCR, PrimaryType, year, FBICode")
 ```
-These are all narcotics cases, but we see that in some years, these charges are marked as FBI code 18 (crimes of production, sale, use of drugs) and sometimes 26 (a miscellaneous category). FBI code 26 appears more commonly, but the FBI code 26 appears to phase out after 2015. 2091 is a narcotics code for "forfeit property," 2092 is for "soliciting narcotics on a publicway," and 2093 is for "found suspect narcotics." It appears that the CPD is now using the more specific FBI codes rather than the generic miscellaneous. The most practical decision is to use the most modern coding and use code 18 for these crimes.
+These are all narcotics cases, but we see that in some years, these charges are marked as FBI code 18 (crimes of production, sale, use of drugs) and sometimes 26 (a miscellaneous category). FBI code 26 appears more commonly, but the FBI code 26 appears to phase out after 2015. 2091 is a narcotics code for "forfeit property," 2092 is for "soliciting narcotics on a public way," and 2093 is for "found suspect narcotics." It appears that the CPD is now using the more specific FBI codes rather than the generic miscellaneous. The most practical decision is to use the most modern coding and use code 18 for these crimes.
 
-A similar story goes for IUCR crimes 1710, 1715, 1725, 1755, and 1780. These are all offenses involving children that prior to 2016 had been given the FBI miscellaneous code 26, but more recently have been coded as 20 (offenses against family). Again it seems reasonable to use the most modern coding choice and use FBI code 20.
+A similar story applies to IUCR crimes 1710, 1715, 1725, 1755, and 1780. These are all offenses involving children that prior to 2016 had been given the FBI miscellaneous code 26, but more recently have been coded as 20 (offenses against family). Again, it seems reasonable to use the most modern coding choice and use FBI code 20.
 ```{r}
 dbGetQuery(con, "
   SELECT COUNT(*) AS crimecount,
@@ -179,7 +180,7 @@ dbGetQuery(con, "
   ORDER BY year")
 ```
 
-The conclusion of all of this is that if there is any inconsistency in the connection between `IUCR`, `PrimaryType`, and `FBICode`, then we should choose the most recent combination and delete the rest as options. The following SQL query finds for each IUCR the most recent year that it occurred in the dataset. Not all of them are 2025. Several IUCR codes last occurred before 2015.
+The conclusion of all of this is that if there is any inconsistency in the connection between `IUCR`, `PrimaryType`, and `FBICode`, then we should choose the most recent combination and delete the rest as options. The following SQL query finds for each IUCR the most recent year that it occurred in the dataset. Not all codes appear in the most recent year. Several IUCR codes last occurred before 2015.
 ```{r}
 dbGetQuery(con, "
     SELECT IUCR, MAX(year) AS maxyear
@@ -187,7 +188,7 @@ dbGetQuery(con, "
     GROUP BY IUCR")
 ```
 
-Now that we have a query that tells us the most recent year for each IUCR code, then we should look up what the `PrimaryType` and `FBICode` is for each `IUCR` in their most recent year. We are going to temporarily create a table with the results from the previous query using "Common Table Expressions" (CTE). A CTE is a temporary table that only lasts for the one query in which it is created. You can have multiple CTEs in one query. Also, here we have our first encounter with a `JOIN`. We will cover more about `JOIN` later in these notes. For now, study the query and see how it solves our problem. With a CTE (the part following the keyword `WITH`) we create a temporary table called `recentIUCR` that has two columns, `IUCR` and `maxyear`. Then the main query looks for rows in the `crime` table that match the rows in `recentIUCR`. When it finds a match, it merges in that crime's `PrimaryType` and `FBICode.` Since many crimes with the same value of `IUCR` show up, we use `DISTINCT` to keep just the unique combinations.
+Now that we have a query that tells us the most recent year for each IUCR code, we should look up what the `PrimaryType` and `FBICode` are for each `IUCR` in its most recent year. We are going to temporarily create a table with the results from the previous query using "Common Table Expressions" (CTE). A CTE is a temporary table that only lasts for the one query in which it is created. You can have multiple CTEs in one query. Also, here we have our first encounter with a `JOIN`. We will cover more about `JOIN` later in these notes. For now, study the query and see how it solves our problem. With a CTE (the part following the keyword `WITH`) we create a temporary table called `recentIUCR` that has two columns, `IUCR` and `maxyear`. Then the main query looks for rows in the `crime` table that match the rows in `recentIUCR`. When it finds a match, it merges in that crime's `PrimaryType` and `FBICode.` Since many crimes with the same value of `IUCR` show up, we use `DISTINCT` to keep just the unique combinations.
 
 ```{r}
 iucrLookupTable <- dbGetQuery(con, "
@@ -217,7 +218,7 @@ iucrLookupTable |>
    filter(n > 1)
 ```
 
-With questions about IUCR to FBI codes resolved, let's create the IUCR, primary type, and FBI code lookup table in our Chicago crime database. We can use `dbWriteTable()` to post our data frame `iucrLookupTable` to the database creating a new table called `iucr`.
+With questions about IUCR to FBI codes resolved, let's create the IUCR, primary type, and FBI code lookup table in our Chicago crime database. We can use `dbWriteTable()` to post our data frame `iucrLookupTable` to the database, creating a new table called `iucr`.
 ```{r} 
 # remove iucr table if it is there already
 if(dbExistsTable(con,"iucr")) dbRemoveTable(con, "iucr")
@@ -263,7 +264,7 @@ dbListTables(con)
 
 ## Exercises
 
-With the new table `iucr` in the database complete the following exercises.
+With the new table `iucr` in the database, complete the following exercises.
 
 `r .exNum('Print out all of the rows in iucr')`
 
@@ -275,14 +276,14 @@ With the new table `iucr` in the database complete the following exercises.
 
 
 # SQL dates
-SQLite has no special data/time data type. The `Date` column is currently stored in the `crime` table as plain text. The `PRAGMA` statement is a way to modify or query the SQLite database itself. Here we can ask SQLite the data types it is using to store each of the columns. All the entries, including `Date` are stored as text, integers, or doubles (numbers with decimal points).
+SQLite has no special date/time data type. The `Date` column is currently stored in the `crime` table as plain text. The `PRAGMA` statement is a way to modify or query the SQLite database itself. Here we can ask SQLite the data types it is using to store each of the columns. All the entries, including `Date`, are stored as text, integers, or doubles (numbers with decimal points).
 ```{r}
 dbGetQuery(con, "PRAGMA table_info(crime)")
 ```
 
-The standard date format in computing is yyyy-mm-dd hh:mm:ss, where the hours are on the 24-hour clock (so no AM/PM). The reason for this format is that you can sort the data in this format to get events in order. For some reason, the producers of the Chicago crime dataset did not use this standard format. If you sort events in the current database then all the January events will come first (regardless in what year they occurred) and any events occurring at 1pm will show up before those occurring at 2am. Putting the dates in a standard format also allows us to use some useful SQLite date functions for extracting the year, day of the week, time of day, and other features of the date and time.
+The standard date format in computing is yyyy-mm-dd hh:mm:ss, where the hours are on the 24-hour clock (so no AM/PM). The reason for this format is that you can sort the data in this format to get events in order. For some reason, the producers of the Chicago crime dataset did not use this standard format. If you sort events in the current database, then all the January events will come first (regardless of the year in which they occurred) and any events occurring at 1pm will show up before those occurring at 2am. Putting the dates in a standard format also allows us to use some useful SQLite date functions for extracting the year, day of the week, time of day, and other features of the date and time.
 
-The plan is to create a dataframe in R with each crime's `ID` and `Date`. Then we will use `lubridate` to clean up the dates and put them in the standard format. Then we will push a new table into the database containing each crime's `ID` and its newly formatted date.
+The plan is to create a data frame in R with each crime's `ID` and `Date`. Then we will use `lubridate` to clean up the dates and put them in the standard format. Then we will push a new table into the database containing each crime's `ID` and its newly formatted date.
 
 ```{r}
 #| message: false
@@ -313,9 +314,9 @@ dbListTables(con)
 ```
 Our database now has three tables with the addition of the new `DateFix` table.
 
-Before we used `SUBSTR()` to extract the year from the date. That was not very elegant and required figuring out which characters held the four characters representing the year. Even though SQLite does not have a date/time type, it does have some functions that help us work with dates. We will use SQLite's `STRFTIME()` function. It stands for "string format time". It is a decades old function that you will find in almost all languages. Even R has its own version of `strftime()`. Early programming language compilers limited functions to at most eight characters, so programmers got rather creative in shrinking complicated function descriptions down to eight characters.
+Before we used `SUBSTR()` to extract the year from the date. That was not very elegant and required figuring out which characters held the four characters representing the year. Even though SQLite does not have a date/time type, it does have some functions that help us work with dates. We will use SQLite's `STRFTIME()` function. It stands for "string format time". It is a decades-old function that you will find in almost all languages. Even R has its own version of `strftime()`. Early programming language compilers limited functions to at most eight characters, so programmers got rather creative in shrinking complicated function descriptions down to eight characters.
 
-The `STRFTIME()` function has two arguments. The first is a format parameter in which you tell `STRFTIME()` what you want it to extract from the date. The second argument is the column containing the dates. There are a lot of options for the format parameter. For example, you can extract just the year (%Y), just the month (%m), just the minute (%M), the day of the week (%w) with Sunday represented as 0 and Saturday as 6, or the week of the year (%W). You can also combine to get, for example, the year and month (%Y-%m). You can find a complete listing [here](https://www.sqlite.org/lang_datefunc.html).
+The `STRFTIME()` function has two primary arguments (and some optional [modifiers](https://sqlite.org/lang_datefunc.html#modifiers)). The first is a format parameter in which you tell `STRFTIME()` what you want it to extract from the date. The second argument is the column containing the dates. There are a lot of options for the format parameter. For example, you can extract just the year (%Y), just the month (%m), just the minute (%M), the day of the week (%w) with Sunday represented as 0 and Saturday as 6, or the week of the year (%W). You can also combine to get, for example, the year and month (%Y-%m). You can find a complete listing [here](https://www.sqlite.org/lang_datefunc.html).
 
 Let's write a query to test out `STRFTIME()`. Here we will select some dates from `DateFix` and determine on which day of the week the crime occurred.
 ```{r}
@@ -333,22 +334,22 @@ For the first date, `r date(ymd_hms(a$datefix[1]))`, `STRFTIME()` tells us that 
 Let's count cases that occurred between Monday and Friday after noon.
 ```{r}
 dbGetQuery(con, "
-  SELECT COUNT(*),
+  SELECT COUNT(*) as crimecount,
          CAST(STRFTIME('%w',datefix) AS INTEGER) AS weekday
   FROM DateFix
   WHERE (weekday>=1) AND (weekday<=5) AND
         (CAST(STRFTIME('%H',datefix) AS INTEGER) >= 12)
   GROUP BY weekday")
 ```
-In the `SELECT` clause we went ahead and told SQLite to store the weekday as an integer and in the `WHERE` clause we extracted the hour (24-hour clock) so that we could make a numerical comparison with the number 12.
+In the `SELECT` clause, we told SQLite to store the weekday as an integer. In the `WHERE` clause we extracted the hour (24-hour clock) so that we could make a numerical comparison with the number 12.
 
 # Creating the final table
 
 Now we can put it all together, drop columns we do not want, remove redundant information, and clean up the dates.
 
-Removing columns in tables in SQLite used to not be that simple. Only after March 2021 could you run `ALTER TABLE crime DROP COLUMN Date` to remove a single column. We are going to go with an old-school approach since we are going to make many changes to our database. We are going to rename the current `crime` table, then copy only the columns we want into a new `crime` table, while at the same time replacing the old format dates with the dates in a more preferable format.
+Removing columns from tables in SQLite used to not be simple. Only after March 2021 could you run `ALTER TABLE crime DROP COLUMN Date` to remove a single column. We are going to use an old-school approach since we are going to make many changes to our database. We are going to rename the current `crime` table, then copy only the columns we want into a new `crime` table, while at the same time replacing the old format dates with dates in a more preferable format.
 
-First rename the `crime` table to `crime_old` that we will delete as soon as we are done.
+First, rename the `crime` table to `crime_old`, which we will delete as soon as we are done.
 ```{r}
 dbExecute(con, "ALTER TABLE crime RENAME TO crime_old")
 ```
@@ -414,11 +415,11 @@ After all this work, the size of the `chicagocrime.db` database file can become 
 dbExecute(con, "VACUUM")
 ```
 
-After `VACUUM` our `chicagocrime.db` file is now `r round(file.info("chicagocrime.db")$size/1000^3,1)` Gb... much better.
+After `VACUUM`, our `chicagocrime.db` file is now `r round(file.info("chicagocrime.db")$size/1000^3,1)` Gb... much better.
 
 # Joining data across tables
 
-Now with data split across tables, we need to link tables together in order to get information. Let's extract the first 10 crime incident with their case numbers and FBI codes. Since `FBICode` is no longer in the `crime` table we need to add the table `iucr` to the `FROM` clause and link the two tables with a `JOIN`.
+Now that data are split across tables, we need to link tables together to get information. Let's extract the first 10 crime incidents with their case numbers and FBI codes. Since `FBICode` is no longer in the `crime` table, we need to add the table `iucr` to the `FROM` clause and link the two tables with a `JOIN`.
 ```{r}
 timeIUCRjoin <- 
 system.time(
@@ -433,9 +434,9 @@ system.time(
 data |> head()
 timeIUCRjoin
 ```
-For each record in `crime`, SQLite looks up the crime's IUCR code in the `iucr` table and links in the FBI code. SQLite is fast. This query took `r timeIUCRjoin["elapsed"]` seconds, but this linking does take time especially for really large datasets and large lookup tables. For the above query, SQLite scans through the `iucr` table until it finds the right IUCR code. This is not very efficient. If you were to look up the word "query" in the dictionary, you would not start on page 1 and scan through every word until you arrived at "query". Instead, you would start about two-thirds of the way through the dictionary, see if the words are before or after "query," and revise your search until you find the word. Rather than search hundreds of pages, you might only need to look at nine pages.
+For each record in `crime`, SQLite looks up the crime's IUCR code in the `iucr` table and links in the FBI code. SQLite is fast. This query took `r timeIUCRjoin["elapsed"]` seconds, but this linking does take time, especially for really large datasets and large lookup tables. For the above query, SQLite scans through the `iucr` table until it finds the right IUCR code. This is not very efficient. If you were to look up the word "query" in the dictionary, you would not start on page 1 and scan through every word until you arrived at "query". Instead, you would start about two-thirds of the way through the dictionary, see if the words are before or after "query," and revise your search until you find the word. Rather than search hundreds of pages, you might only need to look at nine pages.
 
-In the same way, we can create an "index" for the `iucr` table to help speed up the search. It does not always make the queries faster and can require storing a large index in some cases. Let's try on this example.
+In the same way, we can create an index for the `iucr` table to help speed up the search. An index does not always make queries faster and can require storing a large index in some cases. Let's try this example.
 
 ```{r}
 dbExecute(con, "
@@ -470,7 +471,7 @@ Technically this is a legal SQL join query. However, most SQL programmers prefer
 
 There are also several different kinds of joins. What should the query return if a crime has an IUCR code that does not appear in the `iucr` table? `JOIN`s more carefully define the desired behavior. An `INNER JOIN` returns only the rows where the join keys (the columns we use to link tables like `crime.iucr`) exist in both tables. All other rows are dropped. SQL interprets joins using the WHERE clause implicitly as an `INNER JOIN`.
 
-Generally in social science we do not want to drop a row simply because its IUCR code does not appear in the lookup table. We would probably rather code its `PrimaryType` and `FBICode` as missing rather than drop the row. A `LEFT JOIN` forces every record in `crime` (the "left" table) to appear in the final result set even if it cannot find an IUCR code in `iucr`. It will simply report `NA` for its `FBICode`. More precisely, `LEFT JOIN` is synonymous with a `LEFT OUTER JOIN` (the `OUTER` keyword is optional).
+Generally, in social science, we do not want to drop a row simply because its IUCR code does not appear in the lookup table. We would probably rather code its `PrimaryType` and `FBICode` as missing rather than drop the row. A `LEFT JOIN` forces every record in `crime` (the "left" table) to appear in the final result set even if it cannot find an IUCR code in `iucr`. It will simply report `NA` for its `FBICode`. More precisely, `LEFT JOIN` is synonymous with a `LEFT OUTER JOIN` (the `OUTER` keyword is optional).
 
 For a helpful, visual description of the different kinds of joins, visit [this site](http://blog.codinghorror.com/a-visual-explanation-of-sql-joins/).
 
@@ -506,12 +507,12 @@ dbGetQuery(con, "
 
 `r .exNum('Count the number of arrests for "MOTOR VEHICLE THEFT"')`
 
-`r .exNum('Which District has the most thefts?')`. You can first try doing this with a mix of SQL and R. Once, you do that, try finding another solution that only uses SQL (and two CTEs in a `WITH` clause separated by a comma).
+`r .exNum('Which District has the most thefts?')`. You can first try doing this with a mix of SQL and R. Once you do that, try finding another solution that only uses SQL (and two CTEs in a `WITH` clause separated by a comma).
 
 
 # Subqueries
 
-Sometimes we would like to use the results of one query as part of another query. You can put `SELECT` statements inside `FROM` statements to accomplish this. We will use this method to see if addresses are always geocoded to the same coordinates. Here are the unique combinations of addresses and coordinates. We will just show here the first 20.
+Sometimes we would like to use the results of one query as part of another query. You can put `SELECT` statements inside `FROM` statements to accomplish this. We will use this method to see if addresses are always geocoded to the same coordinates. Here are the unique combinations of addresses and coordinates. We will just show the first 20.
 ```{r}
 dbGetQuery(con, "
    SELECT DISTINCT Block, Longitude, Latitude
@@ -520,7 +521,7 @@ dbGetQuery(con, "
 ```
 The crime table has at least one row with each of these combinations of `Block`, `Longitude`, and `Latitude`.
 
-We would like to know if `Block` shows up multiple times in these results or just one time. We use the results of this query in the `FROM` clause and count up the frequency of each `Block`.
+We would like to know if `Block` shows up multiple times in these results or just once. We use the results of this query in the `FROM` clause and count up the frequency of each `Block`.
 ```{r SQLDistinctBlocks}
 dbGetQuery(con, "
    SELECT COUNT(*) AS Blockcount, 
@@ -536,7 +537,7 @@ dbGetQuery(con, "
 ```
 Clearly, the coordinates are not unique to each address. The addresses are "rounded" to provide some privacy, but the coordinates appear to be scattered. Why? The Chicago data portal notes "This location is shifted from the actual location for partial redaction but falls on the same block."
 
-Rather than place subqueries in the `FROM` clause, the more modern preference is to use Common Table Expressions like we did earlier. Rewritten as a CTE
+Rather than place subqueries in the `FROM` clause, the more modern preference is to use Common Table Expressions like we did earlier. Rewritten as a CTE:
 ```{r SQLDistinctBlocksCTE}
 dbGetQuery(con, "
  WITH
@@ -552,12 +553,12 @@ dbGetQuery(con, "
  ORDER BY blockcount DESC
  LIMIT 20")
 ```
-If you are going to use the CTE or subquery in multiple queries then it is better to `CREATE TEMPORARY TABLE`, which we will encounter later.
+If you are going to use the CTE or subquery in multiple queries, then it is better to `CREATE TEMPORARY TABLE`, which we will encounter later.
 
 After completing the final exercise, remember to run `dbDisconnect(con)` to disconnect from the database. 
 
 ## Exercise
-As a final exercise, which does not involve a subquery,
+As a final exercise that does not involve a subquery:
 
 `r .exNum('Count the number of assaults, since 2016, that occurred on Fridays and Saturdays, after 6pm, reporting the date, day of week, hour of the day, and year')`
 
@@ -588,7 +589,7 @@ dbGetQuery(con, "
 dbGetQuery(con, "
    SELECT *
    FROM iucr
-   WHERE Primarytype='ASSAULT'")
+   WHERE PrimaryType='ASSAULT'")
 ```
 
 `r .exQ(4)`
@@ -669,10 +670,10 @@ FROM DistrictCountCTE
 #        9) year
 dbGetQuery(con, "
    SELECT COUNT(*),
-          DATE(crime.Date) AS crimdate,
-          CAST(STRFTIME('%w',crime.Date) AS INTEGER) AS weekday,
-          CAST(STRFTIME('%H',crime.Date) AS INTEGER) AS hour,
-          CAST(STRFTIME('%Y',crime.Date) AS INTEGER) AS year
+          DATE(crime.date) AS crimdate,
+          CAST(STRFTIME('%w',crime.date) AS INTEGER) AS weekday,
+          CAST(STRFTIME('%H',crime.date) AS INTEGER) AS hour,
+          CAST(STRFTIME('%Y',crime.date) AS INTEGER) AS year
    FROM   crime
              INNER JOIN iucr ON
                 crime.iucr=iucr.iucr
