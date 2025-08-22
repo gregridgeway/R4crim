@@ -28,7 +28,7 @@ editor_options:
 bibliography: G:/My Drive/docs/Greg/articles/mybib.bib
 ---
 
-<!-- This document can't be created after running Lesson #8 SQL part 2. To recreate this document, first rerun Lesson #6 SQL Part 1. -->
+<!-- This document can't be created after running Lesson #8 SQL part 2. To recreate this document, first rerun Lesson #6 SQL Part 1 or copy chicagocrimePost06.db to chicagocrime.db -->
 
 <!-- In terminal -->
 <!-- quarto render 07_Crime_Hotspot_Map.qmd -->
