@@ -65,23 +65,20 @@ Have a look at the HTML code by looking at the page source for this page using t
 
 ```{r} 
 #| echo: false
-#| results: 'asis'
 a <- scan("http://www.the-numbers.com/box-office-chart/daily/2025/07/04",
           what="",sep="\n")
-a <- paste("    ",a)
 cat(a[1:10], sep="\n")
 ```
 
 This is all HTML code to set up the page. If you scroll down a few hundred lines, you will find code that looks like this:
 ```{r}
 #| echo: false
-#| results: 'asis'
 i <- min(grep("#tab=box-office",a))-4
 cat(a[i:(i+20)], sep="\n")
 ```
-I see Jurassic World Rebirth and F1: The Movie. In addition to the movie name, there are ticket sales, number of theaters, and more. It is all wrapped in a lot of HTML code to make it look pretty on a web page, but for our purposes we just want to pull those numbers out.
+I see _Jurassic World Rebirth_ and _F1: The Movie_. In addition to the movie name, there are ticket sales, number of theaters, and more. It is all wrapped in a lot of HTML code to make it look pretty on a web page, but for our purposes we just want to pull those numbers out.
 
-`scan()` is a basic R function for reading in text, from the keyboard, from files, from the web, ... however data might arrive. Giving `scan()` a URL causes `scan()` to pull down the HTML code for that page and return it to you. Let's try one page of movie data.
+`scan()` is a basic R function for reading in text, from the keyboard, from files, from the web, ... however data might arrive. Giving `scan()` a URL causes `scan()` to pull down the HTML code for that page and return it to you. Let's try one page of movie data. `what=""` tells `scan()` to expect plain text and `sep="\n"` tells `scan()` to separate each element when it reaches a line feed character, signaling the end of a line.
 ```{r}
 #| message: false
 library(dplyr)
@@ -90,19 +87,20 @@ a <- scan("http://www.the-numbers.com/box-office-chart/daily/2025/07/04",
 # examine the first few lines
 a[1:5]
 ```
-`what=""` tells `scan()` to expect plain text and `sep="\n"` tells `scan()` to separate each element when it reaches a line feed character, signaling the end of a line.
+
 
 Some websites are more complex or use different text encoding. On those websites `scan()` produces unintelligible text. The `GET()` function from the `httr` package can sometimes resolve this.
 ```{r}
+#| eval: false
 library(httr)
 resp <- GET("http://www.the-numbers.com/box-office-chart/daily/2025/07/04")
 a1 <- content(resp, as="text")
 a1 <- strsplit(a1,"\n")[[1]]
-cat(a1[1:10], sep="\n")
 ```
 
 Also, some Mac users will encounter snags with both of these methods and receive "403 Forbidden" errors while their Mac colleague right next to them on the same network will not. I have not figured out why this happens, but have found that making R masquerade as different browser sometimes works.
 ```{r}
+#| eval: false
 resp <- GET("http://www.the-numbers.com/box-office-chart/daily/2025/07/04", 
             user_agent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/537.13+ (KHTML, like Gecko) Version/5.1.7 Safari/534.57.2"))
 a1 <- content(resp, as="text")
@@ -119,7 +117,7 @@ Going back to the HTML code, I noticed that both the line with _Jurassic World R
 i <- grep("#tab=box-office", a)
 i
 ```
-These are the line numbers that, if the pattern holds, contain our movie titles. Note that the source code that you might see in your browser may be a little different from the line numbers you see here. Even if you run this code on a different day, you might get different line numbers because some of the code, code for advertisements in particular, can frequently change.
+These are the line numbers that, if the pattern holds, contain our movie titles. Note that the the numbers you get on your computer might be a little different from the line numbers shown here. Even if you run this code on a different day, you might get different line numbers because some of the code, code for advertisements in particular, can frequently change.
 
 Let's see what these lines of HTML code look like.
 ```{r}
@@ -160,6 +158,32 @@ head(data0)
 tail(data0)
 ```
 
+## Movies with no titles
+
+Some movies have no movie titles. Have a look at the February 21, 2011 movies.
+```{r}
+a <- scan("https://www.the-numbers.com/box-office-chart/daily/2011/02/21",
+          what="", sep="\n")
+i <- grep("Genesis-Code", a)
+a[-10:10 + i]
+```
+Note that the line for _The Genesis Code_ has the movie title in href, but no movie title is between the HTML tags `<a></a>`. In these cases let's pull the movie title from the href argument.
+
+```{r}
+i <- grep("#tab=box-office",a)
+data0 <- data.frame(movie = gsub("<[^>]*>","",a[i]),
+                    gross = as.numeric(gsub("<[^>]*>|[,$]","",a[i+2])))
+# which ones are blank?
+j <- which(data0$movie=="")
+a[i[j]]
+
+# test regex to pull movie title
+gsub(".*/movie/([^#]*)#.*", "\\1", a[i[j]])
+# replace empty movie names
+data0$movie[j] <- gsub(".*/movie/([^#]*)#.*", "\\1", a[i[j]]) |>
+  gsub("-", " ", x=_)
+```
+
 # Scraping Multiple Pages
 
 We have now successfully scraped data for one day. This is usually the hardest part. But if we have R code that can correctly scrape one day's worth of data _and_ the website is consistent across days, then it is simple to adapt our code to work for _all_ days. So let's get all movie data from January 1, 2010 through July 31, 2025. That means we are going to be web scraping `r difftime(lubridate::mdy("7/31/2025"), lubridate::mdy("12/31/2009")) |> as.numeric() |> format(big.mark=",")` pages of data.
@@ -181,11 +205,10 @@ dates2scrape <- seq(ymd("2010-01-01"), ymd("2025-07-31"), by="days")
 Now `dates2scrape` contains a collection of all the dates with movie data that we wish to scrape. 
 ```{r}
 dates2scrape[1:5]
-# gsub() can change the - to / to match the appearance of the numbers.com URL
+# gsub() to change - to / matching appearance of thenumbers.com URL
 gsub("-", "/", dates2scrape[1:5])
 ```
-
-Our plan is to construct a for loop within which we will construct a URL from `dates2scrape`, pull down the HTML code from that URL, scrape the movie data into a data frame, and then combine the each day's data frame into one data frame will all of the movie data. First we create a list that will contain each day's data frame.
+Our plan is to construct a for-loop within which we will construct a URL from `dates2scrape`, pull down the HTML code from that URL, scrape the movie data into a data frame, and then combine the each day's data frame into one data frame will all of the movie data. First we create a list that will contain each day's data frame.
 ```{r}
 results <- vector("list", length(dates2scrape))
 ```
@@ -206,19 +229,22 @@ for(iDate in 1:length(dates2scrape))
    urlText <- paste0("https://www.the-numbers.com/box-office-chart/daily/",
                      gsub("-", "/", dates2scrape[iDate]))
 
-   # read in the HTML code... now using UTF8
+   # read in the HTML code
    a <- scan(urlText, what="", sep="\n", fileEncoding="UTF-8")
 
    # find movies
    i <- grep("#tab=box-office", a)
    
    # get movie names and gross
-   data0 <- data.frame(movie=gsub("<[^>]*>", "", a[i]),
-                       gross=as.numeric(gsub("<[^>]*>|[$,]","",a[i+2])))
+   data0 <- data.frame(movie = gsub("<[^>]*>", "", a[i]),
+                       gross = as.numeric(gsub("<[^>]*>|[$,]","",a[i+2])),
+                       date  = dates2scrape[iDate])
+   
+   # replace empty movie names
+   j <- which(data0$movie=="")
+   data0$movie[j] <- gsub(".*/movie/([^#]*)#.*", "\\1", a[i[j]]) |>
+      gsub("-", " ", x=_)
 
-   # add date into the dataset
-   data0$date  <- dates2scrape[iDate]
-    
    results[[iDate]] <- data0
 }
 # calculate how long it took
@@ -241,6 +267,8 @@ movieData <- bind_rows(results)
 # check that the number of rows and dates seem reasonable
 nrow(movieData)
 range(movieData$date)
+head(movieData)
+tail(movieData)
 ```
 
 If you ran that for-loop to gather 15 years worth of data, most likely you walked away from your computer to do something more interesting than watch its progress. In these situations, I like to send myself a text message when it is complete. The `emayili` package is a convenient way to send yourself an email or text. If you fill it in with your email, username, and gmail app password, the following code will send you an email or text message when the script reaches this point. (as of August 2025 I have not been able to get this to work)
@@ -318,15 +346,36 @@ Note that the `foreach()` differs a little bit in its syntax compared with our p
 
 Parallelization introduces some complications. If anything goes wrong in a parallelized script, then the whole `foreach()` fails. For example, let's say that after scraping movie data from 2000-2016 you briefly lose your internet connection. If this happens, then `scan()` fails and the whole `foreach()` will end with an error, tossing all of your already complete computation. To avoid this you need to either be sure you have a solid internet connection, or wrap the call to `scan()` in a `try()` and a `repeat` loop that is smart enough to wait a few seconds and try the scan again rather than fail completely.
 
-With all this in mind, let's web scrape the movie data using multiple cores with a `try()`/`repeat`. Typically, any attempts to print from inside a parallel `foreach()` do not appear in the console, since that print is running in a separate, parallel R session. The `progressr` package offers a way to print a progress bar to the console that also offers an estimated time to completion.
+This causes an error since this website does not exist (or not yet!).
+```{r}
+#| error: true
+res <- scan("http://www.jaywalkingIsNotACrime.org", what="", sep="\n")
+# res does not exist
+res
+```
+If we wrap `scan()` with `try()`, then we can catch the error and write R code to gracefully handle the problem.
+```{r}
+res <- try(scan("http://www.jaywalkingIsNotACrime.org", what="", sep="\n"),
+           silent = TRUE) |>
+   suppressWarnings()
+is(res)
+if(inherits(res, "try-error"))
+{
+   message("Could not find that website")
+} else
+{
+   message("Found that website")
+}
+```
+With all this in mind, let's web scrape the movie data using multiple cores with a `try()`/`repeat{}`. Typically, any attempts to print from inside a parallel `foreach()` do not appear in the console, since that print is running in a separate, parallel R session. The `progressr` package offers a way to print a progress bar to the console that also offers an estimated time to completion.
 ```{r}
 #| eval: false
+# setup a Command-Line Interface progress bar
 library(progressr)
+handlers("cli")
+
 plan(multisession, workers = 8)
 registerDoFuture()
-
-# setup a Command-Line Interface progress bar
-handlers("cli")
 
 timeStart <- Sys.time() # record the starting time
 # wrap the foreach inside the progress monitor
@@ -336,14 +385,13 @@ movieData <- with_progress(
    p <- progressor(steps = length(dates2scrape))
    
    result <- foreach(iDate=1:length(dates2scrape),
-                     .combine = dplyr::bind_rows) %dopar%
+                     .combine = bind_rows) %dopar%
    {
       # update progress bar
       p(paste("Working on", dates2scrape[iDate]))
       urlText <- paste0("https://www.the-numbers.com/box-office-chart/daily/",
                         gsub("-", "/", dates2scrape[iDate]))
    
-
       # retry up to 5 times with short backoff
       tries <- 0
       repeat 
@@ -363,7 +411,12 @@ movieData <- with_progress(
                           gross = as.numeric(gsub("<[^>]*>|[$,]","",a[i+2])),
                           date  = dates2scrape[iDate])
        
-     return(data0)
+      # replace empty movie names
+      j <- which(data0$movie=="")
+      data0$movie[j] <- gsub(".*/movie/([^#]*)#.*", "\\1", a[i[j]]) |>
+         gsub("-", " ", x=_)
+
+        return(data0)
    }
    
    # the last object in with_progress() will be returned
@@ -382,7 +435,9 @@ nrow(movieData)
 range(movieData$date)
 head(movieData)
 tail(movieData)
-# check for movie names with HTML codes
+```
+Check for movie names with HTML codes.
+```{r}
 movieData$movie |> grep("&[A-z]+;", x=_, value=TRUE) |> unique() |> head()
 ```
 Those HTML characters in movie titles are annoying to look at. Let's fix it now.
@@ -392,7 +447,7 @@ movieData <- movieData |>
    mutate(movie = gsub("&hellip;", "...", movie))
 ```
 
-It is probably wise at this point to save `movieData` so that you will not have to rerun this in the future.
+It is probably wise at this point to save `movieData` so that you will not have to rerun this if you mess up your dataset. With `movieData` saved you should feel free to test out your ideas. You can always `load("movieData.RData")` if you make a mistake.
 ```{r}
 save(movieData, file="movieData.RData", compress=TRUE)
 ```
@@ -418,8 +473,7 @@ movieData |>
 ```
 
 ## Inflation adjust
-
-As you may have noticed, the price of going to see a movie keeps increasing. the-numbers.com keeps track of the average movie ticket price, which we can use to create a movie-specific inflation factor. Let's scrape the average ticket price from [https://www.the-numbers.com/market/](https://www.the-numbers.com/market/) and compute an inflation adjustment factor. That factor will vary by year. It will tell you how much you need to multiply, say, a ticket purchased in 2010 so that it equates to 2025 prices.
+As you may have noticed, the price of a movie ticket keeps increasing. the-numbers.com keeps track of the average movie ticket price, which we can use to create a movie-specific inflation factor. Let's scrape the average ticket price from [https://www.the-numbers.com/market/](https://www.the-numbers.com/market/) and compute an inflation adjustment factor. That factor will vary by year. It will tell you how much you need to multiply, say, a ticket purchased in 2010 so that it equates to 2025 prices.
 ```{r}
 a <- scan("https://www.the-numbers.com/market/",
           what="", sep="\n")
@@ -438,9 +492,9 @@ inflation
 Now we link each movie to our inflation factor table to compute ticket sales adjusted to 2025 prices.
 ```{r}
 movieData <- movieData |>
-  mutate(year=year(date)) |>
-  left_join(inflation, join_by(year==year)) |>
-  mutate(grossAdj=gross*adjustment) |>
+   mutate(year=year(date)) |>
+   left_join(inflation, join_by(year==year)) |>
+   mutate(grossAdj=gross*adjustment) |>
    select(-avgPrice, -adjustment)
 
 movieData |>
@@ -469,29 +523,48 @@ movieData |>
        xlab="Date", ylab="Gross (millions of dollars)")
 abline(v=ymd(c("2011-11-18", "2012-11-16")))
 ```
-In both of these figures we see the enormous ticket sales in the first several days followed by a steady decline over the subsequent months. Then, another large spike in ticket sales indicating a second installment. When we find a large spike in ticket sales, we will mark that as indicating the second part.
+In both of these figures we see the enormous ticket sales in the first several days followed by a steady decline over the subsequent months. Then, another large spike in ticket sales indicating a second installment. When we find a large spike in ticket sales, we will mark that as indicating the second part. For each movie, here are the four days with the largest jumps in ticket sales from the day before.
+```{r}
+movieData |>
+   filter(movie %in% c("Harry Potter and the Deat...",
+                       "The Twilight Saga: Breaki...")) |>
+   summarize(gross = sum(gross), # total sales by date and movie
+             .by=c(movie, date)) |>
+   group_by(movie) |> # now find large change within movie
+   arrange(movie, date) |>
+   mutate(change = gross - lag(gross), # lag is NA for 1st one
+          change = if_else(is.na(change), Inf, change)) |>
+   # find the largest jumps in sales
+   slice_max(change, n=4)
+```
+If there are several days close together, like 2011-07-14 and 2011-07-15, then we should only keep the earlier one... the first big jump.
 ```{r}
 part2date <- movieData |>
    filter(movie %in% c("Harry Potter and the Deat...",
                        "The Twilight Saga: Breaki...")) |>
    summarize(gross = sum(gross), # total sales by date and movie
-             .by=c(movie, date)) |> 
+             .by=c(movie, date)) |>
    group_by(movie) |> # now find large change within movie
    arrange(movie, date) |>
-   mutate(change = gross - lag(gross)) |> # lag is NA for 1st one
-   # find the two largest jumps in sales
-   #    one is likely Part 1 and another Part 2
-   slice_max(change, n=2) |> 
-   #    one with later date is Part 2
+   mutate(change = gross - lag(gross), # lag is NA for 1st one
+          change = if_else(is.na(change), Inf, change)) |>
+   # find the largest jumps in sales
+   slice_max(change, n=4) |>
+   arrange(movie, date) |>
+   # keep the first of any dates close to each other
+   mutate(diffDays = date - lag(date)) |>
+   filter(is.na(diffDays) | diffDays > 60) |>
+   # one with later date is Part 2
    slice_max(date) |>
    ungroup() |>
-   rename(date2 = date)
+   rename(date2 = date) |>
+   select(movie, date2)
 ```
 Before altering `movieData`, let's make sure we get this join right.
 ```{r}
 # test the merge
 movieData |>
-   left_join(part2date |> select(movie, date2), 
+   left_join(part2date, 
              join_by(movie == movie)) |>
    mutate(moviePart = 
              case_when(
@@ -508,7 +581,7 @@ movieData |>
 Great! Looks like the `moviePart` has the right values given the dates. Now we can paste the Part 1 and Part 2 on the end of the movie name.
 ```{r}
 movieData <- movieData |>
-   left_join(part2date |> select(movie, date2), 
+   left_join(part2date, 
              join_by(movie == movie)) |>
    mutate(moviePart = 
              case_when(
@@ -533,85 +606,99 @@ movieData |>
    filter(grepl("Harry Potter and the Deat...|The Twilight Saga: Breaki...",
                 movie))
 ```
-
+Are there other movies that have multiple parts that we have lumped together? Let's search for other large jumps in ticket sales.
 ```{r}
 movieJumps <- movieData |>
-   summarise(gross = sum(gross), .by = c(movie, date)) |>
+   summarize(gross = sum(gross), .by = c(movie, date)) |>
    arrange(movie, date) |>
    group_by(movie) |>
    mutate(prev_gross  = lag(gross),
+          prev_gross = if_else(is.na(prev_gross), 0, prev_gross),
           change      = gross - prev_gross,
+          # NA -> first appearance
+          change = if_else(is.na(change), Inf, change),
           pct_change  = 100*change / pmax(prev_gross, 1)) |>  # guard div-by-zero
-  filter(!is.na(change), change > 0)
-   
+   filter(!is.na(change), change > 0)
+
 movieJumps |>
-  group_by(movie) |>
-  slice_max(change, n=2, with_ties = FALSE) |>
-  summarize(first_date   = min(date),
-            second_date  = max(date),
-            sep_days     = as.integer(diff(range(date))),
-            min_top2_pct = min(pct_change),
-            min_top2_abs = min(change)) |>
-   ungroup() |>
-   filter(sep_days     >= 30,         # spikes 30+ days apart
-          min_top2_pct >= 100,        # jump at least 100%
-          min_top2_abs >= 1000000) |> # jump at least $5m
-   arrange(desc(min_top2_pct))
-```
-Looks like several more movies need parts added to them. _The Hunger Games: Mockingjay_ had two parts. _Guardians of the Galaxy_ had Volume 1, 2, and 3 (first one was simply _Guardians of the Galaxy_). _Teenage Mutant Ninja Turtles_ was released in 2014, _Teenage Mutant Ninja Turtles: Out of the Shadows_ was released in 2016, and _Teenage Mutant Ninja Turtles: Mutant Mayhem_ was released in 2023 (more planned for 2027!). There have been five _Pirates of the Caribbean_ movies, two of which were released after 2010. Robin Hood is two different movies with the same title, one starring Russell Crowe and another starring Taron Egerton. A few on here are anomolies that we can safely ignore like _Coraline_, _The Descendants_, the anime film _The Lord of the Rings: The War of the Rohirrim_, and the _DC League of Super Pets_.
-```{r}
-partDates <- movieData |>
-   filter(movie %in% c("Paranormal Activity: The ...",
-                       "The Hunger Games: Mocking...",
-                       "Guardians of the Galaxy V...",
-                       "Teenage Mutant Ninja Turt...",
-                       "Pirates of the Caribbean:...",
-                       "Alvin and the Chipmunks: ...")) |>
-   summarize(gross = sum(gross),
-             .by=c(movie, date)) |> 
    group_by(movie) |>
+   slice_max(change, n=10, with_ties = FALSE) |>
    arrange(movie, date) |>
-   mutate(change = gross - lag(gross)) |>
-   slice_max(change, n=3) |>
+   mutate(diffDays = date - lag(date)) |>
+   filter(is.na(diffDays) | diffDays > 30) |>
+   summarize(first_date   = min(date),
+             second_date  = max(date),
+             sep_days     = as.integer(diff(range(date))),
+             min_top_pct  = min(pct_change),
+             max_top_abs  = max(change)) |>
+   ungroup() |>
+   filter(sep_days    >= 100,        # spikes 100+ days apart
+          min_top_pct >= 100,        # jump at least 100%
+          max_top_abs >= 1000000) |> # jump at least $1m
+   arrange(desc(min_top_pct)) |>
+   print(n=Inf)
+```
+Looks like several more movies need parts added to them. _The Hunger Games: Mockingjay_ had two parts. _Guardians of the Galaxy_ had Volume 1, 2, and 3 (first one was simply _Guardians of the Galaxy_). _Teenage Mutant Ninja Turtles_ was released in 2014, _Teenage Mutant Ninja Turtles: Out of the Shadows_ was released in 2016, and _Teenage Mutant Ninja Turtles: Mutant Mayhem_ was released in 2023 (more planned for 2027!). There have been five _Pirates of the Caribbean_ movies, two of which were released after 2010. _Robin Hood_ is two different movies with the same title, one starring Russell Crowe and another starring Taron Egerton. Some we can safely ignore, such as the re-releases.
+```{r}
+toFix <- c("Guardians of the Galaxy V...",
+           "Teenage Mutant Ninja Turt...",
+           "The Hunger Games: Mocking...",
+           "Alvin and the Chipmunks: ...",
+           "Paranormal Activity: The ...",
+           "Pirates of the Caribbean:...",
+           "Robin Hood",
+           "How to Train Your Dragon",
+           "The Lion King",
+           "The Way Back",
+           "Together",
+           "Every Day")
+
+partDates <- movieData |>
+   filter(movie %in% toFix) |>
+   summarize(gross = sum(gross), .by=c(movie, date)) |>
+   arrange(movie, date) |>
+   group_by(movie) |>
+   mutate(change = gross - lag(gross),
+          # change NA means first date ever
+          change = if_else(is.na(change), Inf, change)) |>
+   slice_max(change, n=4) |>
    arrange(movie, date) |>
    mutate(daysDiff = as.numeric(date-lag(date))) |>
+   # choose first date and dates separated 30+ days
    filter(is.na(daysDiff) | (daysDiff>30)) |>
    mutate(start = date-ddays(3),
           end = lead(date, default = ymd("2100-01-01"))-ddays(3),
           year = year(date)) |>
    ungroup() |>
    # Alvin opened in December 2009
-   mutate(start = if_else(movie=="Alvin and the Chipmunks: ..." &
-                             date=="2010-01-09",
+   mutate(start = if_else(start <= "2010-01-31",
                           ymd("2010-01-01"),
                           start))
-partDates
+partDates |> print(n=Inf)
 
 movieData <- movieData |>
    select(-year) |>
-   left_join(partDates |> select(-date, -gross, -change, -daysDiff), 
+   left_join(partDates |> select(-date, -gross, -change, -daysDiff),
              join_by(movie,
                      date >=start,
                      date < end)) |>
-   mutate(moviePart = if_else(!is.na(year), 
+   mutate(moviePart = if_else(!is.na(year),
                               paste0("(",year,")"),
                               ""),
           movie = paste0(movie, moviePart)) |>
    select(-start, -end, -year, -moviePart)
 ```
-
+As always, double check that the new movie names seem to be labeled in the correct years.
 ```{r}
-library(stringr)
 movieData |>
-   filter(str_starts(movie, "Alvin and the Chipmunks") |
-          str_starts(movie, "Guardians of the Galaxy") |
-          str_starts(movie, "The Hunger Games: Mocking")) |>
+   filter(gsub("\\([0-9]{4}\\)", "", movie) %in% toFix) |>
    mutate(year = year(date)) |>
    select(movie, year) |>
-   distinct()
+   distinct() |>
+   arrange(movie)
 ```
 Let's save our final movie dataset with inflation-adjusted gross and corrected movie titles.
 ```{r}
-save(movieData, file="movieData2.RData", compress=TRUE)
+save(movieData, file="movieDataFinal.RData", compress=TRUE)
 ```
 Now that you have movie data and in a previous section you assembled Chicago crime data, combine the two datasets so that you can answer the question "what happens to crime when big movies come out?"
