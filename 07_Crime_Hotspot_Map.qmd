@@ -618,7 +618,7 @@ legendMid <- legendMid[legendMid > 80]
 legendCol <- pal(legendMid)
 legendLabs <- paste0(contourAssaults$levels_low, "-",
                      contourAssaults$levels_high)
-legendLabs <- legendLabs[5:9]
+legendLabs <- legendLabs[contourAssaults$levels_low >= 80]
 
 leaflet() |>
    addTiles() |>
