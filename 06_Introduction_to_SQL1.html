@@ -9,7 +9,7 @@
 <meta name="author" content="Greg Ridgeway">
 <meta name="author" content="Ruth Moyer">
 <meta name="author" content="Li Sian Goh">
-<meta name="dcterms.date" content="2025-08-22">
+<meta name="dcterms.date" content="2025-08-31">
 
 <title>Introduction to SQL</title>
 <style>
@@ -148,7 +148,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">August 22, 2025</p>
+      <p class="date">August 31, 2025</p>
     </div>
   </div>
   
@@ -282,7 +282,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>8,000,000</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
-<pre><code>8,377,991</code></pre>
+<pre><code>8,390,646</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">close</span>(infile)</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">close</span>(outfile)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -538,56 +538,56 @@ coercing other values of type real</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>   crimecount Ward
 1       29470     
-2        5294    1
-3        8084   10
-4        5069   11
-5        4269   12
-6        3845   13
-7        4248   14
-8        9540   15
-9       11296   16
-10      13640   17
-11       6116   18
-12       3539   19
-13      10769    2
-14      13080   20
-15      11463   21
-16       4336   22
-17       4078   23
-18      12580   24
-19       5298   25
-20       6472   26
-21      11677   27
-22      15108   28
-23       8886   29
-24      11755    3
-25       4443   30
-26       4497   31
-27       3240   32
-28       2999   33
-29      11092   34
-30       4457   35
-31       3727   36
-32       9332   37
-33       3418   38
-34       2929   39
-35       8537    4
-36       3728   40
-37       3227   41
-38       9674   42
-39       2185   43
-40       3163   44
-41       3609   45
-42       5186   46
-43       2689   47
-44       3954   48
-45       5184   49
-46       9245    5
-47       3320   50
-48      12902    6
-49      11773    7
-50      11697    8
-51      11710    9</code></pre>
+2        5306    1
+3        8100   10
+4        5085   11
+5        4273   12
+6        3859   13
+7        4265   14
+8        9556   15
+9       11339   16
+10      13662   17
+11       6130   18
+12       3546   19
+13      10779    2
+14      13107   20
+15      11488   21
+16       4350   22
+17       4083   23
+18      12604   24
+19       5326   25
+20       6479   26
+21      11721   27
+22      15148   28
+23       8899   29
+24      11767    3
+25       4448   30
+26       4499   31
+27       3244   32
+28       3004   33
+29      11107   34
+30       4468   35
+31       3738   36
+32       9354   37
+33       3424   38
+34       2935   39
+35       8565    4
+36       3734   40
+37       3233   41
+38       9691   42
+39       2191   43
+40       3173   44
+41       3617   45
+42       5200   46
+43       2695   47
+44       3967   48
+45       5195   49
+46       9269    5
+47       3326   50
+48      12936    6
+49      11797    7
+50      11727    8
+51      11744    9</code></pre>
 </div>
 </div>
 <p>The <code>GROUP BY</code> clause is critical. If you forget it then the result is not well defined. That is, different implementations of SQL may produce different results. The rule you should remember is that “every non-aggregated column in the <code>SELECT</code> clause should appear in the <code>GROUP BY</code> clause.” Here <code>Ward</code> is not part of the aggregate function <code>COUNT()</code> so it must appear in the <code>GROUP BY</code> clause.</p>
@@ -743,13 +743,13 @@ other values of type string</code></pre>
 <span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a><span class="st">   UPDATE crime SET Latitude=NULL</span></span>
 <span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a><span class="st">   WHERE (Latitude='') OR (ABS(Latitude-0.0) &lt; 0.01) OR (Latitude &lt; 36.7)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 93577</code></pre>
+<pre><code>[1] 93655</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dbExecute</span>(con, <span class="st">"</span></span>
 <span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a><span class="st">   UPDATE crime SET Longitude=NULL</span></span>
 <span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a><span class="st">   WHERE (Longitude='') OR (ABS(Longitude-0.0) &lt; 0.01) OR (Longitude &lt; -91.6)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 93577</code></pre>
+<pre><code>[1] 93655</code></pre>
 </div>
 </div>
 <p>Let’s rerun that query and check that we get more sensible results.</p>
@@ -949,7 +949,7 @@ coercing other values of type string</code></pre>
 <span id="cb75-11"><a href="#cb75-11" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   user  system elapsed 
-   3.32    2.01    6.05 </code></pre>
+   3.14    2.04    5.37 </code></pre>
 </div>
 </div>
 <p>Or we could make SQL do all the work selecting and tabulating.</p>
@@ -966,7 +966,7 @@ coercing other values of type string</code></pre>
 <span id="cb77-10"><a href="#cb77-10" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   user  system elapsed 
-   0.81    1.61    2.53 </code></pre>
+   0.71    1.83    2.62 </code></pre>
 </div>
 </div>
 <p>Generally, SQL will be much faster for general selecting, filtering, tabulating, and linking data.</p>
@@ -981,42 +981,42 @@ coercing other values of type string</code></pre>
 <span id="cb79-5"><a href="#cb79-5" aria-hidden="true" tabindex="-1"></a><span class="st">   GROUP BY PrimaryType"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   crimecount                       PrimaryType
-1       14354                             ARSON
-2      560071                           ASSAULT
-3     1526524                           BATTERY
-4      443249                          BURGLARY
-5        1609 CONCEALED CARRY LICENSE VIOLATION
-6       27303               CRIM SEXUAL ASSAULT
-7      952792                   CRIMINAL DAMAGE
-8       11111           CRIMINAL SEXUAL ASSAULT
-9      225607                 CRIMINAL TRESPASS
-10     384905                DECEPTIVE PRACTICE
+1       14368                             ARSON
+2      561234                           ASSAULT
+3     1528740                           BATTERY
+4      443840                          BURGLARY
+5        1620 CONCEALED CARRY LICENSE VIOLATION
+6       27296               CRIM SEXUAL ASSAULT
+7      954180                   CRIMINAL DAMAGE
+8       11220           CRIMINAL SEXUAL ASSAULT
+9      225885                 CRIMINAL TRESPASS
+10     385782                DECEPTIVE PRACTICE
 11          1                 DOMESTIC VIOLENCE
-12      14660                          GAMBLING
-13      13883                          HOMICIDE
-14        136                 HUMAN TRAFFICKING
-15      20050  INTERFERENCE WITH PUBLIC OFFICER
-16       5067                      INTIMIDATION
-17       7478                        KIDNAPPING
-18      15348              LIQUOR LAW VIOLATION
-19     427418               MOTOR VEHICLE THEFT
-20     762440                         NARCOTICS
+12      14661                          GAMBLING
+13      13906                          HOMICIDE
+14        139                 HUMAN TRAFFICKING
+15      20090  INTERFERENCE WITH PUBLIC OFFICER
+16       5077                      INTIMIDATION
+17       7483                        KIDNAPPING
+18      15357              LIQUOR LAW VIOLATION
+19     428309               MOTOR VEHICLE THEFT
+20     762793                         NARCOTICS
 21         38                    NON - CRIMINAL
 22        190                      NON-CRIMINAL
 23          9  NON-CRIMINAL (SUBJECT SPECIFIED)
-24        942                         OBSCENITY
-25      60129        OFFENSE INVOLVING CHILDREN
+24        945                         OBSCENITY
+25      60232        OFFENSE INVOLVING CHILDREN
 26        162          OTHER NARCOTIC VIOLATION
-27     522174                     OTHER OFFENSE
-28      70363                      PROSTITUTION
+27     522986                     OTHER OFFENSE
+28      70379                      PROSTITUTION
 29        215                  PUBLIC INDECENCY
-30      54573            PUBLIC PEACE VIOLATION
+30      54633            PUBLIC PEACE VIOLATION
 31         24                         RITUALISM
-32     313479                           ROBBERY
-33      33970                       SEX OFFENSE
-34       6032                          STALKING
-35    1777761                             THEFT
-36     123924                 WEAPONS VIOLATION</code></pre>
+32     313817                           ROBBERY
+33      34026                       SEX OFFENSE
+34       6052                          STALKING
+35    1780782                             THEFT
+36     124175                 WEAPONS VIOLATION</code></pre>
 </div>
 </div>
 <ol start="6" type="1">
@@ -1030,42 +1030,42 @@ coercing other values of type string</code></pre>
 <span id="cb81-5"><a href="#cb81-5" aria-hidden="true" tabindex="-1"></a><span class="st">   GROUP BY PrimaryType"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   crimecount                       PrimaryType
-1        1769                             ARSON
-2      113606                           ASSAULT
-3      330925                           BATTERY
-4       25340                          BURGLARY
-5        1554 CONCEALED CARRY LICENSE VIOLATION
+1        1774                             ARSON
+2      113725                           ASSAULT
+3      331346                           BATTERY
+4       25365                          BURGLARY
+5        1565 CONCEALED CARRY LICENSE VIOLATION
 6        4365               CRIM SEXUAL ASSAULT
-7       62027                   CRIMINAL DAMAGE
-8         811           CRIMINAL SEXUAL ASSAULT
-9      153567                 CRIMINAL TRESPASS
-10      47726                DECEPTIVE PRACTICE
+7       62083                   CRIMINAL DAMAGE
+8         816           CRIMINAL SEXUAL ASSAULT
+9      153649                 CRIMINAL TRESPASS
+10      47750                DECEPTIVE PRACTICE
 11          1                 DOMESTIC VIOLENCE
-12      14554                          GAMBLING
-13       6659                          HOMICIDE
+12      14555                          GAMBLING
+13       6671                          HOMICIDE
 14         13                 HUMAN TRAFFICKING
-15      18365  INTERFERENCE WITH PUBLIC OFFICER
+15      18407  INTERFERENCE WITH PUBLIC OFFICER
 16        731                      INTIMIDATION
 17        798                        KIDNAPPING
-18      15199              LIQUOR LAW VIOLATION
-19      32501               MOTOR VEHICLE THEFT
-20     757507                         NARCOTICS
+18      15207              LIQUOR LAW VIOLATION
+19      32533               MOTOR VEHICLE THEFT
+20     757836                         NARCOTICS
 21          6                    NON - CRIMINAL
 22         18                      NON-CRIMINAL
 23          3  NON-CRIMINAL (SUBJECT SPECIFIED)
-24        699                         OBSCENITY
-25      11627        OFFENSE INVOLVING CHILDREN
+24        700                         OBSCENITY
+25      11643        OFFENSE INVOLVING CHILDREN
 26        108          OTHER NARCOTIC VIOLATION
-27      92239                     OTHER OFFENSE
-28      70052                      PROSTITUTION
+27      92385                     OTHER OFFENSE
+28      70068                      PROSTITUTION
 29        211                  PUBLIC INDECENCY
-30      34078            PUBLIC PEACE VIOLATION
+30      34107            PUBLIC PEACE VIOLATION
 31          3                         RITUALISM
-32      28982                           ROBBERY
-33       8656                       SEX OFFENSE
-34        730                          STALKING
-35     192818                             THEFT
-36      89935                 WEAPONS VIOLATION</code></pre>
+32      29017                           ROBBERY
+33       8666                       SEX OFFENSE
+34        731                          STALKING
+35     193124                             THEFT
+36      90159                 WEAPONS VIOLATION</code></pre>
 </div>
 </div>
 <p>Or, if we were not interested in differentiating based on the <code>PrimaryType</code>, we could simply do the following:</p>
@@ -1076,7 +1076,7 @@ coercing other values of type string</code></pre>
 <span id="cb83-4"><a href="#cb83-4" aria-hidden="true" tabindex="-1"></a><span class="st">   WHERE Arrest='true'"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  crimecount
-1    2118183</code></pre>
+1    2120139</code></pre>
 </div>
 </div>
 <ol start="7" type="1">
@@ -1090,151 +1090,151 @@ coercing other values of type string</code></pre>
 <span id="cb85-5"><a href="#cb85-5" aria-hidden="true" tabindex="-1"></a><span class="st">   ORDER BY crimecount DESC"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>    crimecount                                     LocationDescription
-1      2188634                                                  STREET
-2      1378068                                               RESIDENCE
-3       992559                                               APARTMENT
-4       759893                                                SIDEWALK
+1      2192032                                                  STREET
+2      1379598                                               RESIDENCE
+3       994878                                               APARTMENT
+4       760617                                                SIDEWALK
 5       269956                                                   OTHER
 6       202933                          PARKING LOT/GARAGE(NON.RESID.)
-7       186576                                                   ALLEY
-8       167776                                      SMALL RETAIL STORE
-9       146370                              "SCHOOL, PUBLIC, BUILDING"
-10      140579                                              RESTAURANT
-11      135280                                        RESIDENCE-GARAGE
-12      132667                                  VEHICLE NON-COMMERCIAL
-13      124167                                 RESIDENCE PORCH/HALLWAY
-14      110654                                        DEPARTMENT STORE
-15      104657                                      GROCERY FOOD STORE
-16       93505                                             GAS STATION
+7       186884                                                   ALLEY
+8       168253                                      SMALL RETAIL STORE
+9       146368                              "SCHOOL, PUBLIC, BUILDING"
+10      140867                                              RESTAURANT
+11      135279                                        RESIDENCE-GARAGE
+12      132886                                  VEHICLE NON-COMMERCIAL
+13      124166                                 RESIDENCE PORCH/HALLWAY
+14      110961                                        DEPARTMENT STORE
+15      104800                                      GROCERY FOOD STORE
+16       93644                                             GAS STATION
 17       75140                           RESIDENTIAL YARD (FRONT/BACK)
-18       68975                            COMMERCIAL / BUSINESS OFFICE
-19       63192                                           PARK PROPERTY
+18       69131                            COMMERCIAL / BUSINESS OFFICE
+19       63309                                           PARK PROPERTY
 20       56098                                 CHA PARKING LOT/GROUNDS
-21       46948                                           BAR OR TAVERN
-22       44351                  PARKING LOT / GARAGE (NON RESIDENTIAL)
-23       41231                                            CTA PLATFORM
-24       40395                                           CHA APARTMENT
-25       39543                                              DRUG STORE
-26       34321                                               CTA TRAIN
-27       33028                                                    BANK
+21       47020                                           BAR OR TAVERN
+22       44857                  PARKING LOT / GARAGE (NON RESIDENTIAL)
+23       41261                                            CTA PLATFORM
+24       40430                                           CHA APARTMENT
+25       39609                                              DRUG STORE
+26       34389                                               CTA TRAIN
+27       33058                                                    BANK
 28       30249                               "SCHOOL, PUBLIC, GROUNDS"
 29       29723                                             HOTEL/MOTEL
-30       27614                                       CONVENIENCE STORE
-31       27368                                                 CTA BUS
+30       27692                                       CONVENIENCE STORE
+31       27417                                                 CTA BUS
 32       25021                          CHA HALLWAY/STAIRWELL/ELEVATOR
 33       24679                                         VACANT LOT/LAND
-34       24623                                  DRIVEWAY - RESIDENTIAL
-35       22836                                         OTHER (SPECIFY)
+34       24674                                  DRIVEWAY - RESIDENTIAL
+35       23050                                         OTHER (SPECIFY)
 36       22458                                     TAVERN/LIQUOR STORE
 37       22189                               HOSPITAL BUILDING/GROUNDS
 38       18560                         POLICE FACILITY/VEH PARKING LOT
-39       17570                             RESIDENCE - PORCH / HALLWAY
+39       17707                             RESIDENCE - PORCH / HALLWAY
 40       16296                                        AIRPORT/AIRCRAFT
 41       15488                       CHURCH/SYNAGOGUE/PLACE OF WORSHIP
-42       15153                         RESIDENCE - YARD (FRONT / BACK)
-43       14757                            GOVERNMENT BUILDING/PROPERTY
-44       14671                                                        
+42       15296                         RESIDENCE - YARD (FRONT / BACK)
+43       14770                                                        
+44       14757                            GOVERNMENT BUILDING/PROPERTY
 45       14656                            NURSING HOME/RETIREMENT HOME
-46       14357                                      RESIDENCE - GARAGE
-47       14324                                       CONSTRUCTION SITE
+46       14460                                      RESIDENCE - GARAGE
+47       14329                                       CONSTRUCTION SITE
 48       14182                             "SCHOOL, PRIVATE, BUILDING"
-49       12404                                       CURRENCY EXCHANGE
-50       12174                                      ABANDONED BUILDING
-51       10697                                               WAREHOUSE
+49       12409                                       CURRENCY EXCHANGE
+50       12182                                      ABANDONED BUILDING
+51       10698                                               WAREHOUSE
 52       10276                             CTA GARAGE / OTHER PROPERTY
-53       10238                                           ATHLETIC CLUB
-54        8800                                            CTA BUS STOP
-55        8772                                              BARBERSHOP
-56        8705                          ATM (AUTOMATIC TELLER MACHINE)
-57        7814                                                 TAXICAB
-58        7803                                             CTA STATION
-59        7553                                SCHOOL - PUBLIC BUILDING
-60        7453                                                 LIBRARY
-61        7429                                   MEDICAL/DENTAL OFFICE
-62        7395                             HOSPITAL BUILDING / GROUNDS
+53       10258                                           ATHLETIC CLUB
+54        8824                                            CTA BUS STOP
+55        8779                                              BARBERSHOP
+56        8707                          ATM (AUTOMATIC TELLER MACHINE)
+57        7838                                             CTA STATION
+58        7816                                                 TAXICAB
+59        7582                                SCHOOL - PUBLIC BUILDING
+60        7487                             HOSPITAL BUILDING / GROUNDS
+61        7477                                                 LIBRARY
+62        7429                                   MEDICAL/DENTAL OFFICE
 63        6892                          FACTORY/MANUFACTURING BUILDING
-64        6703                                 SCHOOL - PUBLIC GROUNDS
-65        6656                                           HOTEL / MOTEL
+64        6753                                 SCHOOL - PUBLIC GROUNDS
+65        6727                                           HOTEL / MOTEL
 66        5930                       OTHER RAILROAD PROP / TRAIN DEPOT
 67        5787                              COLLEGE/UNIVERSITY GROUNDS
-68        5627              AIRPORT TERMINAL UPPER LEVEL - SECURE AREA
+68        5644              AIRPORT TERMINAL UPPER LEVEL - SECURE AREA
 69        5615                                      VEHICLE-COMMERCIAL
-70        5333                                          CLEANING STORE
+70        5335                                          CLEANING STORE
 71        5290                                    SPORTS ARENA/STADIUM
 72        4292                              "SCHOOL, PRIVATE, GROUNDS"
-73        4195                   POLICE FACILITY / VEHICLE PARKING LOT
-74        4051                               NURSING / RETIREMENT HOME
-75        3849                                       VACANT LOT / LAND
-76        3760                                         DAY CARE CENTER
-77        3600                                                CAR WASH
-78        3567                         OTHER COMMERCIAL TRANSPORTATION
-79        2800                                   TAVERN / LIQUOR STORE
+73        4243                   POLICE FACILITY / VEHICLE PARKING LOT
+74        4090                               NURSING / RETIREMENT HOME
+75        3877                                       VACANT LOT / LAND
+76        3764                                         DAY CARE CENTER
+77        3603                                                CAR WASH
+78        3576                         OTHER COMMERCIAL TRANSPORTATION
+79        2822                                   TAVERN / LIQUOR STORE
 80        2732                                     MOVIE HOUSE/THEATER
-81        2676                          GOVERNMENT BUILDING / PROPERTY
-82        2668          AIRPORT TERMINAL LOWER LEVEL - NON-SECURE AREA
-83        2594                                         APPLIANCE STORE
-84        2351                               CHA PARKING LOT / GROUNDS
-85        2343                   CHURCH / SYNAGOGUE / PLACE OF WORSHIP
-86        1865                                     AIRPORT PARKING LOT
-87        1652                                 MEDICAL / DENTAL OFFICE
-88        1630                             AUTO / BOAT / RV DEALERSHIP
-89        1528         AIRPORT BUILDING NON-TERMINAL - NON-SECURE AREA
-90        1497                                SCHOOL - PRIVATE GROUNDS
+81        2703                          GOVERNMENT BUILDING / PROPERTY
+82        2676          AIRPORT TERMINAL LOWER LEVEL - NON-SECURE AREA
+83        2603                                         APPLIANCE STORE
+84        2377                               CHA PARKING LOT / GROUNDS
+85        2369                   CHURCH / SYNAGOGUE / PLACE OF WORSHIP
+86        1876                                     AIRPORT PARKING LOT
+87        1668                                 MEDICAL / DENTAL OFFICE
+88        1641                             AUTO / BOAT / RV DEALERSHIP
+89        1532         AIRPORT BUILDING NON-TERMINAL - NON-SECURE AREA
+90        1505                                SCHOOL - PRIVATE GROUNDS
 91        1399                       COLLEGE/UNIVERSITY RESIDENCE HALL
-92        1387                                                    AUTO
-93        1318          AIRPORT TERMINAL UPPER LEVEL - NON-SECURE AREA
-94        1309                                            FIRE STATION
-95        1304                                 JAIL / LOCK-UP FACILITY
-96        1301                      AIRPORT EXTERIOR - NON-SECURE AREA
-97        1272                                    VEHICLE - COMMERCIAL
+92        1389                                                    AUTO
+93        1321          AIRPORT TERMINAL UPPER LEVEL - NON-SECURE AREA
+94        1313                                            FIRE STATION
+95        1306                                 JAIL / LOCK-UP FACILITY
+96        1306                      AIRPORT EXTERIOR - NON-SECURE AREA
+97        1286                                    VEHICLE - COMMERCIAL
 98        1181                          LAKEFRONT/WATERFRONT/RIVERBANK
-99        1168                                   COIN OPERATED MACHINE
-100       1153              AIRPORT TERMINAL LOWER LEVEL - SECURE AREA
-101       1133                               SCHOOL - PRIVATE BUILDING
-102       1085                                      HIGHWAY/EXPRESSWAY
-103       1076                                        FEDERAL BUILDING
+99        1169                                   COIN OPERATED MACHINE
+100       1155              AIRPORT TERMINAL LOWER LEVEL - SECURE AREA
+101       1141                               SCHOOL - PRIVATE BUILDING
+102       1084                                      HIGHWAY/EXPRESSWAY
+103       1080                                        FEDERAL BUILDING
 104       1012                           AIRPORT VENDING ESTABLISHMENT
-105       1003                                               POOL ROOM
-106        977                                                AIRCRAFT
+105       1005                                               POOL ROOM
+106        981                                                AIRCRAFT
 107        962                                          DELIVERY TRUCK
-108        920             AIRPORT BUILDING NON-TERMINAL - SECURE AREA
-109        910                                         ANIMAL HOSPITAL
-110        909               CTA PARKING LOT / GARAGE / OTHER PROPERTY
-111        890                      CHA HALLWAY / STAIRWELL / ELEVATOR
+108        924             AIRPORT BUILDING NON-TERMINAL - SECURE AREA
+109        921               CTA PARKING LOT / GARAGE / OTHER PROPERTY
+110        910                                         ANIMAL HOSPITAL
+111        898                      CHA HALLWAY / STAIRWELL / ELEVATOR
 112        825                                           BOWLING ALLEY
-113        761                                               PAWN SHOP
-114        749                                  SPORTS ARENA / STADIUM
-115        734                   OTHER RAILROAD PROPERTY / TRAIN DEPOT
-116        720                        FACTORY / MANUFACTURING BUILDING
-117        705                                                   HOUSE
+113        763                                               PAWN SHOP
+114        760                                  SPORTS ARENA / STADIUM
+115        745                   OTHER RAILROAD PROPERTY / TRAIN DEPOT
+116        722                        FACTORY / MANUFACTURING BUILDING
+117        706                                                   HOUSE
 118        698                                         BOAT/WATERCRAFT
-119        593                          AIRPORT EXTERIOR - SECURE AREA
-120        592                                            CREDIT UNION
-121        589 "VEHICLE - OTHER RIDE SHARE SERVICE (LYFT, UBER, ETC.)"
-122        518                                                  BRIDGE
-123        514                      LAKEFRONT / WATERFRONT / RIVERBANK
+119        597                          AIRPORT EXTERIOR - SECURE AREA
+120        596 "VEHICLE - OTHER RIDE SHARE SERVICE (LYFT, UBER, ETC.)"
+121        592                                            CREDIT UNION
+122        526                      LAKEFRONT / WATERFRONT / RIVERBANK
+123        520                                                  BRIDGE
 124        472                                         FOREST PRESERVE
 125        467 "VEHICLE - OTHER RIDE SHARE SERVICE (E.G., UBER, LYFT)"
-126        436                                                CEMETARY
-127        426                                VEHICLE - DELIVERY TRUCK
+126        437                                                CEMETARY
+127        430                                VEHICLE - DELIVERY TRUCK
 128        407                                                   PORCH
-129        403                          COLLEGE / UNIVERSITY - GROUNDS
-130        395                                        SAVINGS AND LOAN
-131        382                                   MOVIE HOUSE / THEATER
+129        404                          COLLEGE / UNIVERSITY - GROUNDS
+130        396                                        SAVINGS AND LOAN
+131        383                                   MOVIE HOUSE / THEATER
 132        331                            VEHICLE - OTHER RIDE SERVICE
 133        330                                                    YARD
-134        282                                             PARKING LOT
-135        269                                    HIGHWAY / EXPRESSWAY
+134        286                                             PARKING LOT
+135        272                                    HIGHWAY / EXPRESSWAY
 136        245                                               NEWSSTAND
 137        202                               CTA TRACKS - RIGHT OF WAY
-138        174                     AIRPORT TRANSPORTATION SYSTEM (ATS)
-139        157                                       BOAT / WATERCRAFT
+138        175                     AIRPORT TRANSPORTATION SYSTEM (ATS)
+139        167                                       BOAT / WATERCRAFT
 140        152            AIRPORT TERMINAL MEZZANINE - NON-SECURE AREA
 141        144                                              VACANT LOT
-142        122                   COLLEGE / UNIVERSITY - RESIDENCE HALL
+142        123                   COLLEGE / UNIVERSITY - RESIDENCE HALL
 143        111                                                 HALLWAY
 144        103                                            RETAIL STORE
-145         79                           CASINO/GAMBLING ESTABLISHMENT
+145         84                           CASINO/GAMBLING ESTABLISHMENT
 146         75                                                  GARAGE
 147         75                                                 GANGWAY
 148         71                                 GAS STATION DRIVE/PROP.
@@ -1243,8 +1243,8 @@ coercing other values of type string</code></pre>
 151         40                                                  TAVERN
 152         39                                             CHA HALLWAY
 153         35                                                BASEMENT
-154         28                                               VESTIBULE
-155         28                                                DRIVEWAY
+154         29                                                DRIVEWAY
+155         28                                               VESTIBULE
 156         27                                               STAIRWELL
 157         27                                                   HOTEL
 158         27                                BARBER SHOP/BEAUTY SALON
@@ -1260,10 +1260,10 @@ coercing other values of type string</code></pre>
 168         13                                    "CTA ""L"" PLATFORM"
 169         11                                      GARAGE/AUTO REPAIR
 170         11                                                    FARM
-171         11                                       "CTA ""L"" TRAIN"
-172         10                        VEHICLE-COMMERCIAL - TROLLEY BUS
-173         10            VEHICLE-COMMERCIAL - ENTERTAINMENT/PARTY BUS
-174         10                                            CTA PROPERTY
+171         11                                            CTA PROPERTY
+172         11                                       "CTA ""L"" TRAIN"
+173         10                        VEHICLE-COMMERCIAL - TROLLEY BUS
+174         10            VEHICLE-COMMERCIAL - ENTERTAINMENT/PARTY BUS
 175         10                                           CHA STAIRWELL
 176          9                                                   TRUCK
 177          9                                               CHA LOBBY
