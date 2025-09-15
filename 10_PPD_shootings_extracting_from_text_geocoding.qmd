@@ -13,9 +13,24 @@ format:
     toc: true
     html-math-method: mathjax
     fig-format: svg
+    code-overflow: wrap
+    include-in-header:
+      text: |
+        <style>
+          pre code {
+            white-space: pre-wrap;
+            word-break: break-all;
+            overflow-wrap: anywhere;
+          }
+        </style>    
   pdf:
     toc: true
     prefer-html: true
+    include-in-header: 
+      text: |
+        \usepackage{fvextra}
+        \fvset{breaklines,breakanywhere}
+        \DefineVerbatimEnvironment{verbatim}{Verbatim}{breaklines,breakanywhere}
 number-sections: true
 editor_options: 
   chunk_output_type: console
@@ -39,7 +54,6 @@ bibliography: G:/My Drive/docs/Greg/articles/mybib.bib
 .exNum <- function(.questionText="") 
 {
    .counterExercise <<- .counterExercise+1
-   .questionText <- gsub("@@", "`", .questionText)
    .exerciseQuestions <<- c(.exerciseQuestions, .questionText)
    return(paste0(.counterExercise,". ",.questionText))
 }
@@ -83,15 +97,15 @@ We can run `scan()`, as we did previously, on the PPD OIS webpage and regex our 
 
 ```{r}
 # pull the whole OIS page
-a <- scan("https://www.phillypolice.com/accountability/ois/", what="", sep="\n")
+a <- scan("https://www.phillypolice.com/accountability/ois/", 
+          what="", sep="\n")
 # search for the start of a table
 i <- grep("<tbody>", a)
 a[i] |> substring(1, 500)
+
 # search for start of table <tbody> in a[i]
 iStart <- gregexpr("<tbody>",  a[i]) |> unlist()
-iEnd   <- gregexpr("</tbody>", a[i]) |> unlist()
-a <- a[i] |> substring(iStart, iEnd)
-a |> substring(1, 500)
+a[i] |> substring(iStart, iStart+500)
 ```
 Buried in the HTML code are the entries in the table. Even though all the information does not appear on the main webpage, it is in the HTML. This is not always the case. Some pages dynamically generate information as the user interacts with a page and the page elements. We are going to use this as an opportunity to learn more advanced webscraping methods.
 
@@ -101,55 +115,64 @@ The _page source_ is the static HTML the browser receives from the server (e.g. 
 
 Start by initiating a new hidden Chrome browser.
 ```{r}
-b <- ChromoteSession$new()
+browser <- ChromoteSession$new()
 ```
 Nothing will be visible on your screen at this point. If you want to watch the browser is doing in response to R actions, you can use `view()`, but this is not necessary.
 ```{r}
 #| eval: false
-b$view()
+browser$view()
 ```
-Let's tell our hidden browser to navigate over to the PPD OIS webpage. Sometimes pages take a moment to load. go_to() waits for the navigation to the page finish before completing.
+Let's tell our hidden browser to navigate over to the PPD OIS webpage. Sometimes pages take a moment to load. `go_to()` waits for the navigation to the page finish before completing.
 ```{r}
-b$go_to("https://www.phillypolice.com/accountability/ois/")
+browser$go_to("https://www.phillypolice.com/accountability/ois/")
 ```
 I will grab a screenshot to show that everything is working so far.
 ```{r}
-#| label: fig-screenshot
-#| fig-cap: Screenshot from the hidden Chrome browser view of the PPD OIS webpage
+#| results: hide
 # get page size
-pageSize <- b$Page$getLayoutMetrics()$contentSize
-b$screenshot(cliprect = c(left=0, top=0, 
-                          width=pageSize$width, height=800))
+pageSize <- browser$Page$getLayoutMetrics()$contentSize
+browser$screenshot(cliprect = c(left=0, top=0, 
+                                width=pageSize$width, height=800))
+```
+
+```{r}
+#| label: fig-screenshot
+#| fig-cap: Screenshot from the hidden Chrome browser view of the PPD OIS
+#| echo: false
 knitr::include_graphics("screenshot.png")
 ```
-Let's take a little cybersecurity detour for a moment. If you right-click on a webpage and select "Inspect," then you can see the DOM for the page. After inspection, I noticed that the OIS table's ID is `#data-table-ois`. I can tell the DOM to change elements on the page. To demonstrate, I will change the address in the 25th row to 3718 Locust Walk. `tr:nth-child(25)` selects the 25th row and `td:nth-child(2)` selects the column. Setting `.textContent = '3718 Locust Walk'` changes the cell text in the DOM immediately.
+Let's take a little cybersecurity detour for a moment. If you right-click on a webpage and select "Inspect," then you can see the DOM for the page. Right-click and Inspect the OIS table and you will find that the table's ID is `#data-table-ois`. From R I can tell the DOM to change elements on the page. To demonstrate, I will change the address in the 25th row to 3718 Locust Walk. `tr:nth-child(25)` selects the 25th row and `td:nth-child(2)` selects the column. Setting `.textContent = '3718 Locust Walk'` changes the cell text in the DOM immediately.
 ```{r}
-b$Runtime$evaluate("document.querySelector('#data-table-ois tr:nth-child(25) td:nth-child(2)').textContent = '3718 Locust Walk';")
+browser$Runtime$evaluate("document.querySelector('#data-table-ois tr:nth-child(25) td:nth-child(2)').textContent = '3718 Locust Walk';")
 ```
 Now let's look at the page
 ```{r}
+#| results: hide
+pageSize <- browser$Page$getLayoutMetrics()$contentSize
+browser$screenshot("screenshot2.png",
+             cliprect = c(left=0, top=pageSize$height-800, 
+                          width=pageSize$width, height=800))
+```
+
+```{r}
 #| label: fig-screenshot2
 #| fig-cap: Screenshot of the manipulated PPD OIS webpage
-b$screenshot(cliprect = c(left=0, top=pageSize$height-800, 
-                          width=pageSize$width, height=800))
-knitr::include_graphics("screenshot.png")
+#| echo: false
+knitr::include_graphics("screenshot2.png")
 ```
-This is how the "refund/overpayment scam" works. A fraudster gets the victim to view their account webpage and to give the fraudster some level of remote control. The fraudster then manipulates the DOM to give the impression that they have mistakenly sent the victim \$10,000 instead of \$1,000. The fraudster then convince the victim to send the \$9,000 difference even though no money was ever given to them.
+This is how the "refund/overpayment scam" works. A fraudster gets the victim to view their account webpage and to give the fraudster some level of remote control. The fraudster then manipulates the DOM to give the impression that they have mistakenly sent the victim \$10,000 instead of \$1,000. The fraudster then convinces the victim to send the \$9,000 difference even though no money was ever given to them.
 
 Rather than try to scam someone, let's get back to the business of pulling all the OIS data into R. I will first get the ID of the main HTML from DOM. Then I will read in the HTML associated with that ID.
 ```{r}
 # get the ID of the main HTML
-html <- b$DOM$getDocument()$root$nodeId
+html <- browser$DOM$getDocument()$root$nodeId
 html
 # pull in raw html source code, like view page source or scan()
-page_html <- b$DOM$getOuterHTML(nodeId = html)$outerHTML
+page_html <- browser$DOM$getOuterHTML(nodeId = html)$outerHTML
 # page_html is one long string of HTML code
 #   look at a few lines
 page_html |> 
-   substring(1,1500) |> 
-   # wrap the text
-   gsub("(?s).{1,60}\\K", "\n", x=_, perl = TRUE) |>
-   cat(sep="\n")
+   substring(1,1500)
 ```
 
 Now convert all that HTML code into an HTML document object with which R knows how to work.
@@ -161,7 +184,7 @@ In this page we are looking for any `table` elements.
 ```{r}
 page |> html_elements("table") 
 ```
-There appear to be four tables on the page, but I noticed that the third one of these is called "data-table-ois." That must be the one we want. Let's extract it by name and convert it to R data frame object.
+There appear to be four tables on the page, but I noticed that the third one of these has an `id="data-table-ois"`. That must be the one we want. Let's extract it by name and convert it to an R data frame object.
 ```{r}
 # extract the data-table-ois by name
 page |> 
@@ -176,30 +199,38 @@ page |>
    html_elements("tbody a") |>
    html_attr("href")
 ```
-With that, we have been able to get all of the information for the first 25 OIS incidents. Now we have to "click" the Next button to get to the next set of 25 OIS incidents. First, I will check to see if it is disabled. Since we are still looking at the first page it will not be disabled, but when we are looking at the final page of OIS incidents then it will be disabled. To figure out the name of that Next button, in my browser I right-clicked on the button, selected Inspect, and then reviewed the resulting HTML code.
+With that, we have been able to get all of the information for the first 25 OIS incidents. Now we have to "click" the Next button to get to the next set of 25 OIS incidents. First, I will check to see if it is disabled. Since we are still looking at the first page it will not be disabled, but when we are looking at the final page of OIS incidents then it will be disabled. To figure out the name of that Next button, in my browser I right-clicked on the Next button, selected Inspect, and then reviewed the resulting HTML code.
 ```html
 <a class="paginate_button next" aria-controls="data-table-ois" role="link" data-dt-idx="next" tabindex="0" id="data-table-ois_next">Next</a>
 ```
 I see that the HTML tag is `<a>` and its classes are `paginate` and `next`. So `a.paginate.next` will search the HTML code for an `<a>` element with both a `paginate` and `next` class.
 ```{r}
 # check whether the Next button is disabled
-b$Runtime$evaluate(
-  expression = 'document.querySelector("a.paginate_button.next").classList.contains("disabled");') |>
+browser$Runtime$evaluate(
+  expression = 'document.
+                   querySelector("a.paginate_button.next").
+                   classList.
+                   contains("disabled");') |>
    pluck("result","value")
 ```
 On a single page there might be several such buttons. A more robust method of finding the right button is to query it by name, in this case `data-table-ois_next`.
 ```{r}
 # check whether the Next button is disabled
-b$Runtime$evaluate(
-  expression = 'document.querySelector("#data-table-ois_next").classList.contains("disabled");') |>
+browser$Runtime$evaluate(
+  expression = 'document.
+                   querySelector("#data-table-ois_next").
+                   classList.
+                   contains("disabled");') |>
    pluck("result","value")
 ```
 Either method gives the same response, the button is not disabled. That means we can click it to move on to the next page.
 ```{r}
 #| results: hide
 # Click the "Next" button
-b$Runtime$evaluate(
-  expression = 'document.querySelector("#data-table-ois_next").click();')
+browser$Runtime$evaluate(
+  expression = 'document.
+                   querySelector("#data-table-ois_next").
+                   click();')
 ```
 
 Armed with all the skills to navigate and extract key information from this site, we can wrap these ideas in a `while()` loop that will keep scraping OIS data as long as the Next button is active.
@@ -208,11 +239,11 @@ Armed with all the skills to navigate and extract key information from this site
 #| label: scrapingAll
 #| cache: true
 # reset page to beginning
-b$go_to("https://www.phillypolice.com/accountability/ois/")
+browser$go_to("https://www.phillypolice.com/accountability/ois/")
 # give the browser additional time to fully load page
 Sys.sleep(5)
 # you can force scroll to bottom if you have the view open
-#   b$Runtime$evaluate("window.scrollTo(0, document.body.scrollHeight);")
+#   browser$Runtime$evaluate("window.scrollTo(0, document.body.scrollHeight);")
 
 # store results from each page in ois (a list of data frames)
 ois <- list()
@@ -222,18 +253,17 @@ while(!isFinished)
 {
   message(paste0("Read HTML from page ",iPage))
   # get ID of main HTML
-  html <- b$DOM$getDocument()$root$nodeId
+  html <- browser$DOM$getDocument()$root$nodeId
   # raw html source code
-  page_html <- b$DOM$getOuterHTML(nodeId = html)$outerHTML
+  page_html <- browser$DOM$getOuterHTML(nodeId = html)$outerHTML
   # parse the HTML into a structured document
   page <- read_html(page_html)
 
-  # Pull the table rows
-  #   page actually has 4 tables. 3rd one has the OIS data
+  # Pull the table
   oisTable <- page |>
     html_elements("table#data-table-ois")
 
-  # extract the table text
+  # extract the table text to a data frame
   ois[[iPage]] <- oisTable |>
      html_table() |>
      data.frame()
@@ -241,26 +271,31 @@ while(!isFinished)
 
   # extract the URLs from each row
   oisURLs <- oisTable |>
-    html_elements("tbody a") |> # get all <a> tags in the table body
+    html_elements("tbody a") |>
     html_attr("href")
   ois[[iPage]]$url <- oisURLs
 
   # is "Next" button is disabled?
-  isFinished <- b$Runtime$evaluate(
-    expression = 'document.querySelector("#data-table-ois_next").classList.contains("disabled");') |>
+  isFinished <- browser$Runtime$evaluate(
+    expression = 'document.
+                     querySelector("#data-table-ois_next").
+                     classList.
+                     contains("disabled");') |>
      pluck("result","value")
 
   if(!isFinished)
   {
     # Click the "Next" button
-    b$Runtime$evaluate(
-      expression = 'document.querySelector("#data-table-ois_next").click();')
+    browser$Runtime$evaluate(
+      expression = 'document.
+                       querySelector("#data-table-ois_next").
+                       click();')
     Sys.sleep(2)
     iPage <- iPage + 1
   }
 }
 # close the browser
-b$close()
+browser$close()
 
 # combine pages into single data frame
 #   drop year since we are going to extract the actual date later
@@ -340,6 +375,8 @@ paste0(a[i], ", 20", substring(ois$id[i],1,2))
 The rest of the dates have formats that are in some variation of 01/11/2024 or 01-11-2024 or 01/11/24 or 01-11-24, sometimes with / separators and sometimes with - separators and sometimes with a four digit year and sometimes with a two digit year. We can craft our regular expression to capture all these variations.
 ```{r}
 # get the remaining dates in #/#/# or #-#-# format
+#   .*  is "greedy" and will absorb as much as possible
+#   .*? is "lazy" and will stop at the first pattern match
 gsub(".*?([0-9]{1,2}[/-][0-9]{1,2}[/-](20)?[1-2][0-9]).*",
      "\\1",
      a[nchar(a) > 20])
@@ -347,7 +384,8 @@ gsub(".*?([0-9]{1,2}[/-][0-9]{1,2}[/-](20)?[1-2][0-9]).*",
 We have covered all the cases and can now create a column of incident dates extracted from the incident details.
 ```{r}
 ois <- ois |>
-   mutate(date = gsub(".*?(January|February|March|April|May|June|July|August|September|October|November|December)( [0-9]{1,2})(, 20[0-9]{2})?.*", 
+   mutate(date = gsub(
+".*?(January|February|March|April|May|June|July|August|September|October|November|December)( [0-9]{1,2})(, 20[0-9]{2})?.*", 
                       "\\1\\2\\3", text),
           date = if_else(nchar(date)<20, date, NA),
           date = if_else(!is.na(date) & !grepl("20[0-9]{2}", date),
@@ -373,15 +411,25 @@ Geocoding is the process of converting a text description of a location (typical
 We will use the the ArcGIS geocoder to get the coordinates of every location. Many web data sources use a standardized language for providing data. JSON (JavaScript Object Notation) is quite common and ArcGIS uses JSON. 
 
 The URL for ArcGIS has the form
-`https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&singleLine=38th%20and%20Walnut,%20Philadelphia,%20PA&outFields=Match_addr,Addr_type`
+
+```{r}
+#| results: asis
+#| echo: false
+url <- "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&singleLine=38th%20and%20Walnut,%20Philadelphia,%20PA&outFields=Match_addr,Addr_type"
+if (knitr::is_html_output()) 
+{
+   cat('<pre style="white-space:pre-wrap; word-break:break-all; overflow-wrap:anywhere;">', url, '</pre>\n')
+} else if (knitr::is_latex_output()) 
+{
+   cat("\\begin{Verbatim}[breaklines,breakanywhere]\n", url, "\n\\end{Verbatim}\n")
+}
+```
 
 You can see the address for Penn's McNeil Building embedded in this URL. Spaces need to be replaced with `%20` (the space character has ASCII code 20). Let's see what data we get back from this URL.
 
 ```{r}
 scan("https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&singleLine=38th%20and%20Walnut,%20Philadelphia,%20PA&outFields=Match_addr,Addr_type",
-     what="", sep="\n") |>
-   gsub("(?s).{1,60}\\K", "\n", x=_, perl = TRUE) |>
-   cat(sep="\n")
+     what="", sep="\n")
 ```
 It is messy, but readable. You can see embedded in this text the `lat` and `lon` for this address. You can also see that it should not be too hard for a machine to extract these coordinates, and the rest of the information here, from this block of text. This is the point of JSON, producing data in a format that a human could understand in a small batch, but a machine could process fast and easily.
 
@@ -408,10 +456,11 @@ Let's test out `geocodeARCGIS()` by pulling up a up a map of the geocoded coordi
 #| fig.cap: "ArcGIS geocoding result for 3718 Locust Walk"
 library(leaflet)
 
-gcPenn <- geocodeARCGIS("3718 Locust Walk, Philadelphia, PA")
-gcPenn <- gcPenn$candidates[1,]
-gcPenn$lon <- gcPenn$location$x
-gcPenn$lat <- gcPenn$location$y
+gcPenn <- geocodeARCGIS("3718 Locust Walk, Philadelphia, PA") |>
+   pluck("candidates") |> 
+   head(1) |>
+   mutate(lon = location$x,
+          lat = location$y)
 
 leaflet() |>
    addTiles() |>
@@ -774,7 +823,7 @@ We can see that `PPDmap` now has a new `nShoot` column. A histogram will show wh
 ```{r}
 #| label: fig-OIScountHist
 #| fig-cap: "Histogram of OIS incident counts by PSA"
-hist(a$n, xlab="Number of OISs", ylab="Number of PSAs", main="")
+hist(PPDmap$nShoot, xlab="Number of OISs", ylab="Number of PSAs", main="")
 ```
 
 Let's discretize the OIS counts into a few categories.
@@ -799,7 +848,7 @@ These are eight digit codes describing the color. The first two digits correspon
 
 Now we join `PPDmap` with our color lookup table in `a` and plot it.
 ```{r}
-#| label: fig-OIScountHist
+#| label: fig-OIScountColorcodedMap
 #| fig-cap: "PSAs color-coded by number of OIS incidents"
 # match the color to category
 PPDmap <- PPDmap |>
@@ -836,8 +885,8 @@ Lastly, I will share the classic _viridis_ palette, noted for being color-blind 
 ```{r}
 #| label: fig-OIScountHistsf3
 #| fig-cap: "PSAs color-coded by number of OIS incidents, viridis palette"
-#| library(viridis)
 # classic viridis palette
+library(viridis)
 PPDmap |>
   select(nShoot) |>
   plot(main="",
