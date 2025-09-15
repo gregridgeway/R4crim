@@ -262,6 +262,14 @@ The phone number format with parentheses needs a little more caution. We pointed
 grep("\\([0-9]{3}\\) [0-9]{3}-[0-9]{4}", dataText, value=TRUE)
 ```
 
+There is a workaround to the extra backslashes, which can be overwhelming in some regular expressions. An R raw string literal prevents R from interpreting the backslashes as special characters. Wrap your text inside `r"( ... )"` and you can do away with double backslashes.
+```{r}
+# an R string literal requiring only single backslashes
+r"(\([0-9]{3}\) [0-9]{3}-[0-9]{4})"
+# regular expression, now with 50% fewer backslashes!
+grep(r"(\([0-9]{3}\) [0-9]{3}-[0-9]{4})", dataText, value=TRUE)
+```
+
 Now, let's put all of these patterns together and use `|` to search for any phone number in any of the three formats.
 ```{r} 
 grep("[0-9]{10}|[0-9]{3}-[0-9]{3}-[0-9]{4}|\\([0-9]{3}\\) [0-9]{3}-[0-9]{4}",
