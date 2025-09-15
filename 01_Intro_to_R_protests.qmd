@@ -103,7 +103,6 @@ In R, `NA` means a missing value. We'll do more exercises later using data conta
 
 You can use double quotes or single quotes in R as long as you are consistent. When you have quotes inside the text you need to be particularly careful.
 ```{r}
-#| comment: ""
 #| results: "hold"
 "Lou Gehrig's disease"
 'The officer shouted "halt!"'
@@ -123,12 +122,10 @@ seq(1, 5, 2)
 
 R will also do arithmetic with two vectors, doing the calculation pairwise. The following will compute 1+11 and 2+12 up to 10+20.
 ```{r}
-#| comment: ""
 1:10 + 11:20
 ```
 Yet, other functions operate on the whole collection of values in a vector. See the following examples:
 ```{r}
-#| comment: ""
 sum(c(1,10,3,6,2,5,8,4,7,9)) # sum
 length(c(1,10,3,6,2,5,8,4,7,9)) # how many?
 cumsum(c(1,10,3,6,2,5,8,4,7,9)) # cumulative sum
@@ -137,7 +134,6 @@ median(c(1,10,3,6,2,5,8,4,7,9)) # median of same population
 ```
 There are also some functions in R that help us find the biggest and smallest values. For example:
 ```{r}
-#| comment: ""
 max(c(1,10,3,6,2,5,8,4,7,9)) # what is the biggest value in vector?
 which.max(c(1,10,3,6,2,5,8,4,7,9)) # in which "spot" would we find it?
 min(c(1,10,3,6,2,5,8,4,7,9)) # what is the smallest value in vector?
@@ -147,7 +143,7 @@ which.min(c(1,10,3,6,2,5,8,4,7,9)) # in which "spot" would we find it?
 
 # Setting the working directory
 Now that we have covered a lot of fundamental R features, it is time to load in a real dataset. However, before we do that, R needs to know where to find the data file. So we first need to talk about "the working directory". When you start R, it has a default folder or directory on your computer where it will retrieve or save any files. You can run `getwd()` to get the current working directory. Here's our current working directory, which will not be the same as yours.
-```{r comment=""}
+```{r}
 getwd()    
 ```
 Almost certainly this default directory is *not* where you plan to have all of your datasets and files stored. Instead, you probably have an "analysis" or "project" or "R4crim" folder somewhere on your computer where you would like to store your data and work.
