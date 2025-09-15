@@ -1,5 +1,5 @@
 ---
-title: "Webscraping and Parallel Processing"
+title: "Web scraping and Parallel Processing"
 author:
 - affiliation: University of Pennsylvania
   email: gridge@upenn.edu
@@ -15,10 +15,10 @@ format:
       light: default
     toc: true
     html-math-method: mathjax
+    fig-format: svg
   pdf:
     toc: true
     prefer-html: true
-    fig-format: png
 number-sections: true
 editor_options: 
   chunk_output_type: console
@@ -53,11 +53,11 @@ bibliography: G:/My Drive/docs/Greg/articles/mybib.bib
 
 
 # Introduction 
-At the end of our discussion about regular expressions, we introduced the concept of web scraping. Not all online data is in a tidy, downloadable format such as a .csv or .RData file. Yet, patterns in the underlying HTML code and regular expressions together provide a valuable way to "scrape" data off of a webpage. Here, we are going to work through an example of webscraping. We are going to get data on ticket sales of every movie, for every day going back to 2010. 
+At the end of our discussion about regular expressions, we introduced the concept of web scraping. Not all online data is in a tidy, downloadable format such as a .csv or .RData file. Yet, patterns in the underlying HTML code and regular expressions together provide a valuable way to "scrape" data off of a webpage. Here, we are going to work through an example of web scraping. We are going to get data on ticket sales of every movie, for every day going back to 2010. 
 
 As a preliminary matter, some R packages, such as `rvest` and `chromote`, can help with web scraping. Eventually you may wish to explore those packages. For now, we are going to work with basic fundamentals so that you have the most flexibility to extract data from most websites.
 
-First, you will need to make sure that you can access the underlying HTML code for the webpage that you want to scrape. In most browsers you can simply right click on a webpage and then click "View Page Source."  If you are using Microsoft Edge, you can right click on the webpage, click "View Source" and then look at the "Debugger" tab. In Safari select "Settings," select the "Advanced" tab, check "Show Develop menu," and then whenever viewing a page you can right click and select "show page source".
+First, you will need to make sure that you can access the underlying HTML code for the webpage that you want to scrape. In most browsers you can simply right-click on a webpage and then click "View Page Source."  If you are using Microsoft Edge, you can right-click on the webpage, click "View Source," and then look at the "Debugger" tab. In Safari select "Settings," choose the "Advanced" tab, check "Show Develop menu," and then whenever viewing a page you can right-click and select "Show Page Source."
 
 Have a look at the webpage [http://www.the-numbers.com/box-office-chart/daily/2025/07/04](http://www.the-numbers.com/box-office-chart/daily/2025/07/04). This page contains information about the movies that were shown in theaters on July 4, 2025 and the amount of money (in dollars) that each of those movies grossed that day. 
 
@@ -98,7 +98,7 @@ a1 <- content(resp, as="text")
 a1 <- strsplit(a1,"\n")[[1]]
 ```
 
-Also, some Mac users will encounter snags with both of these methods and receive "403 Forbidden" errors while their Mac colleague right next to them on the same network will not. I have not figured out why this happens, but have found that making R masquerade as different browser sometimes works.
+Also, some Mac users will encounter snags with both of these methods and receive "403 Forbidden" errors while their Mac colleague right next to them on the same network will not. I have not figured out why this happens, but have found that making R masquerade as a different browser sometimes works.
 ```{r}
 #| eval: false
 resp <- GET("http://www.the-numbers.com/box-office-chart/daily/2025/07/04", 
@@ -117,16 +117,16 @@ Going back to the HTML code, I noticed that both the line with _Jurassic World R
 i <- grep("#tab=box-office", a)
 i
 ```
-These are the line numbers that, if the pattern holds, contain our movie titles. Note that the the numbers you get on your computer might be a little different from the line numbers shown here. Even if you run this code on a different day, you might get different line numbers because some of the code, code for advertisements in particular, can frequently change.
+These are the line numbers that, if the pattern holds, contain our movie titles. Note that the numbers you get on your computer might be a little different from the line numbers shown here. Even if you run this code on a different day, you might get different line numbers because some of the code, code for advertisements in particular, can frequently change.
 
 Let's see what these lines of HTML code look like.
 ```{r}
 a[i]
 ```
 
-Double checking and indeed the first line here is _Jurassic World Rebirth_ and the last line is _The King of Kings_. This matches what is on the web page. We now are quite close to having a list of movies that played in theaters on July 4, 2025. However, as you can see, we have a lot of excess symbols and HTML code to eliminate before we can have a neat list of movie names.
+Double-checking and indeed the first line here is _Jurassic World Rebirth_ and the last line is _The King of Kings_. This matches what is on the web page. We now are quite close to having a list of movies that played in theaters on July 4, 2025. However, as you can see, we have a lot of excess symbols and HTML code to eliminate before we can have a neat list of movie names.
 
-HTML tags are always have the form `<some code here>`. Therefore, any text between a less than and greater than symbol we should remove. Here is a regular expression that will look for a `<` followed by a bunch of characters that are not `>` followed by the HTML tag ending `>`... and `gsub()` will delete them.
+HTML tags always have the form `<some code here>`. Therefore, we should remove any text between a less than and greater than symbol. Here is a regular expression that looks for a `<` followed by any number of characters that are not `>`, and then a closing `>`... and `gsub()` will delete them.
 
 ```{r}
 gsub("<[^>]*>", "", a[i])
@@ -160,14 +160,14 @@ tail(data0)
 
 ## Movies with no titles
 
-Some movies have no movie titles. Have a look at the February 21, 2011 movies.
+Some movies have missing titles. Have a look at the February 21, 2011 movies.
 ```{r}
 a <- scan("https://www.the-numbers.com/box-office-chart/daily/2011/02/21",
           what="", sep="\n")
 i <- grep("Genesis-Code", a)
 a[-10:10 + i]
 ```
-Note that the line for _The Genesis Code_ has the movie title in href, but no movie title is between the HTML tags `<a></a>`. In these cases let's pull the movie title from the href argument.
+Note that the line for _The Genesis Code_ has the movie title in the `href` attribute, but no movie title is between the `<a></a>` tags. In these cases let's pull the movie title from the `href` attribute.
 
 ```{r}
 i <- grep("#tab=box-office",a)
@@ -192,7 +192,7 @@ First note that the URL for July 4, 2025 was
 
 `https://www.the-numbers.com/box-office-chart/daily/2025/07/04`
 
-We can extract data from any other date by using the same URL, but changing the ending to match the date that we want. Importantly, note that the 07 and the 04 in the URL must have the leading 0 for the URL to return the correct page.
+We can extract data from any other date by using the same URL, but changing the ending to match the date that we want. Importantly, the 07 and the 04 in the URL must have leading zeros for the URL to return the correct page.
 
 To start, let's make a list of all the dates that we intend to scrape.
 ```{r}
@@ -208,13 +208,13 @@ dates2scrape[1:5]
 # gsub() to change - to / matching appearance of thenumbers.com URL
 gsub("-", "/", dates2scrape[1:5])
 ```
-Our plan is to construct a for-loop within which we will construct a URL from `dates2scrape`, pull down the HTML code from that URL, scrape the movie data into a data frame, and then combine the each day's data frame into one data frame will all of the movie data. First we create a list that will contain each day's data frame.
+Our plan is to construct a for-loop within which we will construct a URL from `dates2scrape`, pull down the HTML code from that URL, scrape the movie data into a data frame, and then combine each day's data frame into one data frame with all of the movie data. First we create a list that will contain each day's data frame.
 ```{r}
 results <- vector("list", length(dates2scrape))
 ```
 On iteration `i` of our for loop we will store that day's movie data frame in `results[[i]]`. The following for loop can take several minutes to run and its speed will depend on your network connection and how responsive the web site is. Before running the entire for loop, it may be a good idea to temporarily set the dates to a short period of time (e.g., a month or two) just to verify that your code is functioning properly. Once you have concluded that the code is doing what you want it to do, you can set the dates so that the for loop runs for the entire analysis period.
 
-This takes about an hour to pull all the data.
+This loop takes about an hour to pull all the data.
 ```{r webscraping}
 #| message: false
 #| results: hide
@@ -311,7 +311,7 @@ parallelly::availableCores()
 
 Having access to multiple cores allows you to write scripts that send different tasks to different processors to work on simultaneously. While one processor is busy scraping the data for January 1st, the second can get to work on January 2nd, and another can work on January 3rd. All the processors will be fighting over the one connection you have to the internet, but they can `grep()` and `gsub()` at the same time other processors are working on other dates.
 
-To write a script to work in parallel, you will need the `foreach` and `future` packages. Let's first test whether parallelization actually speed things up. There are two `foreach` loops below. In both of them, each iteration of the loop does not really do anything except pause for 2 seconds. The first loop, which does not use parallelization, includes 10 iterations and so should take 20 seconds to run. The second `foreach` loop looks the same, except right before the `foreach` loop we have told R to make use of two of the computer's processors rather than the default of one processor. This should cause one processor to sleep for 2 seconds 10 times and the other processor to sleep for 2 seconds 10 times. In total this should take about 10 seconds.
+To write a script to work in parallel, you will need the `foreach` and `future` packages. Let's first test whether parallelization actually speeds things up. There are two `foreach` loops below. In both of them, each iteration of the loop does not really do anything except pause for 2 seconds. The first loop, which does not use parallelization, includes 10 iterations and so should take 20 seconds to run. The second `foreach` loop looks the same, except right before the `foreach` loop we have told R to make use of two of the computer's processors rather than the default of one processor. This should cause one processor to sleep for 2 seconds 10 times and the other processor to sleep for 2 seconds 10 times. In total this should take about 10 seconds.
 
 ```{r}
 library(foreach)
@@ -344,7 +344,7 @@ Sure enough, the parallel implementation was able to complete 20 seconds worth o
 
 Note that the `foreach()` differs a little bit in its syntax compared with our previous use of for-loops. While for-loops have the syntax `for(i in 1:10)` the syntax for `foreach()` looks like `foreach(i=1:10)` and is followed by a `%do%` or a `%dopar%`. Lastly, note that the final step inside the `{ }` following  a `foreach()` is a `return()` statement. `foreach()` will take the returned values of each of the iterations and assemble them into a single list by default. In the following `foreach()` we have added `.combine=bind_rows` to the `foreach()` so that the final results will be stacked into one data frame, avoiding the need for a separate `bind_rows()` like we used previously.
 
-Parallelization introduces some complications. If anything goes wrong in a parallelized script, then the whole `foreach()` fails. For example, let's say that after scraping movie data from 2000-2016 you briefly lose your internet connection. If this happens, then `scan()` fails and the whole `foreach()` will end with an error, tossing all of your already complete computation. To avoid this you need to either be sure you have a solid internet connection, or wrap the call to `scan()` in a `try()` and a `repeat` loop that is smart enough to wait a few seconds and try the scan again rather than fail completely.
+Parallelization introduces some complications. If anything goes wrong in a parallelized script, then the whole `foreach()` fails. For example, let's say that after scraping movie data from 2000-2016 you briefly lose your internet connection. If this happens, then `scan()` fails and the whole `foreach()` will end with an error, tossing all of your completed work. To avoid this you need to either be sure you have a solid internet connection, or wrap the call to `scan()` in a `try()` and a `repeat` loop that is smart enough to wait a few seconds and try the scan again rather than fail completely.
 
 This causes an error since this website does not exist (or not yet!).
 ```{r}
@@ -367,7 +367,7 @@ if(inherits(res, "try-error"))
    message("Found that website")
 }
 ```
-With all this in mind, let's web scrape the movie data using multiple cores with a `try()`/`repeat{}`. Typically, any attempts to print from inside a parallel `foreach()` do not appear in the console, since that print is running in a separate, parallel R session. The `progressr` package offers a way to print a progress bar to the console that also offers an estimated time to completion.
+With all this in mind, let's web scrape the movie data using multiple cores with `try()`/`repeat{}`. Typically, any attempts to print from inside a parallel `foreach()` do not appear in the console, since that print is running in a separate, parallel R session. The `progressr` package offers a way to print a progress bar to the console that also offers an estimated time to completion.
 ```{r}
 #| eval: false
 # setup a Command-Line Interface progress bar
@@ -438,7 +438,7 @@ tail(movieData)
 ```
 Check for movie names with HTML codes.
 ```{r}
-movieData$movie |> grep("&[A-z]+;", x=_, value=TRUE) |> unique() |> head()
+movieData$movie |> grep("&[A-Za-z]+;", x=_, value=TRUE) |> unique() |> head()
 ```
 Those HTML characters in movie titles are annoying to look at. Let's fix it now.
 ```{r}
@@ -472,8 +472,8 @@ movieData |>
    arrange(desc(gross))
 ```
 
-## Inflation adjust
-As you may have noticed, the price of a movie ticket keeps increasing. the-numbers.com keeps track of the average movie ticket price, which we can use to create a movie-specific inflation factor. Let's scrape the average ticket price from [https://www.the-numbers.com/market/](https://www.the-numbers.com/market/) and compute an inflation adjustment factor. That factor will vary by year. It will tell you how much you need to multiply, say, a ticket purchased in 2010 so that it equates to 2025 prices.
+## Adjusting for Inflation
+As you may have noticed, the price of a movie ticket keeps increasing. the-numbers.com tracks the average movie ticket price, which we can use to create a movie-specific inflation factor. Let's scrape the average ticket price from [https://www.the-numbers.com/market/](https://www.the-numbers.com/market/) and compute an inflation adjustment factor. That factor will vary by year. It will tell you how much you need to multiply, say, a ticket purchased in 2010 so that it equates to 2025 prices.
 ```{r}
 a <- scan("https://www.the-numbers.com/market/",
           what="", sep="\n")
@@ -592,7 +592,7 @@ movieData <- movieData |>
           movie = paste0(movie, moviePart)) |>
    select(-date2, -moviePart)
 ```
-Now we can redo our list of top 10 movies by inflation-adjusted gross. No Harry Potter or Twilight anymore.
+Now we can redo our list of top 10 movies by inflation-adjusted gross. No more Harry Potter or Twilight.
 ```{r}
 movieData |>
   summarize(grossAdj=sum(grossAdj), .by=movie) |>
@@ -701,4 +701,4 @@ Let's save our final movie dataset with inflation-adjusted gross and corrected m
 ```{r}
 save(movieData, file="movieDataFinal.RData", compress=TRUE)
 ```
-Now that you have movie data and in a previous section you assembled Chicago crime data, combine the two datasets so that you can answer the question "what happens to crime when big movies come out?"
+Now that you have movie data and, in a previous section you assembled Chicago crime data, combine the two datasets so that you can answer the question "What happens to crime when big movies come out?"
