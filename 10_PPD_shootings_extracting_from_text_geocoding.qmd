@@ -13,6 +13,7 @@ format:
     toc: true
     html-math-method: mathjax
     fig-format: svg
+    embed-resources: false
     code-overflow: wrap
     include-in-header:
       text: |
@@ -26,11 +27,8 @@ format:
   pdf:
     toc: true
     prefer-html: true
-    include-in-header: 
-      text: |
-        \usepackage{fvextra}
-        \fvset{breaklines,breakanywhere}
-        \DefineVerbatimEnvironment{verbatim}{Verbatim}{breaklines,breakanywhere}
+    listings: true
+    include-in-header: preamble.tex
 number-sections: true
 editor_options: 
   chunk_output_type: console
@@ -60,6 +58,14 @@ bibliography: G:/My Drive/docs/Greg/articles/mybib.bib
 .exQ <- function(i)
 {
    return( paste0(i,". ",.exerciseQuestions[i]) )
+}
+
+if (knitr::is_latex_output()) {
+  knitr::knit_hooks$set(output = function(x, options) {
+    paste0("\\begin{Verbatim}[breaklines,breakanywhere]\n",
+           x,
+           "\\end{Verbatim}\n")
+  })
 }
 ```
 
@@ -116,19 +122,23 @@ The _page source_ is the static HTML the browser receives from the server (e.g. 
 Start by initiating a new hidden Chrome browser.
 ```{r}
 browser <- ChromoteSession$new()
+# Good idea to setup the browser to close when we exit R
+#    When creating these notes it runs too soon, so commented out here
+# on.exit(browser$close(), add = TRUE)
 ```
-Nothing will be visible on your screen at this point. If you want to watch the browser is doing in response to R actions, you can use `view()`, but this is not necessary.
+Nothing will be visible on your screen at this point. If you want to watch what the browser is doing in response to R actions, you can use `view()`, but this is not necessary.
 ```{r}
 #| eval: false
 browser$view()
 ```
-Let's tell our hidden browser to navigate over to the PPD OIS webpage. Sometimes pages take a moment to load. `go_to()` waits for the navigation to the page finish before completing.
+Let's tell our hidden browser to navigate over to the PPD OIS webpage. Sometimes pages take a moment to load. `go_to()` waits for the navigation to finish before allowing R to move on to the next line of code.
 ```{r}
 browser$go_to("https://www.phillypolice.com/accountability/ois/")
 ```
 I will grab a screenshot to show that everything is working so far.
 ```{r}
 #| results: hide
+#| message: false
 # get page size
 pageSize <- browser$Page$getLayoutMetrics()$contentSize
 browser$screenshot(cliprect = c(left=0, top=0, 
@@ -139,6 +149,7 @@ browser$screenshot(cliprect = c(left=0, top=0,
 #| label: fig-screenshot
 #| fig-cap: Screenshot from the hidden Chrome browser view of the PPD OIS
 #| echo: false
+#| out.width: "100%"
 knitr::include_graphics("screenshot.png")
 ```
 Let's take a little cybersecurity detour for a moment. If you right-click on a webpage and select "Inspect," then you can see the DOM for the page. Right-click and Inspect the OIS table and you will find that the table's ID is `#data-table-ois`. From R I can tell the DOM to change elements on the page. To demonstrate, I will change the address in the 25th row to 3718 Locust Walk. `tr:nth-child(25)` selects the 25th row and `td:nth-child(2)` selects the column. Setting `.textContent = '3718 Locust Walk'` changes the cell text in the DOM immediately.
@@ -148,6 +159,7 @@ browser$Runtime$evaluate("document.querySelector('#data-table-ois tr:nth-child(2
 Now let's look at the page
 ```{r}
 #| results: hide
+#| message: false
 pageSize <- browser$Page$getLayoutMetrics()$contentSize
 browser$screenshot("screenshot2.png",
              cliprect = c(left=0, top=pageSize$height-800, 
@@ -158,11 +170,12 @@ browser$screenshot("screenshot2.png",
 #| label: fig-screenshot2
 #| fig-cap: Screenshot of the manipulated PPD OIS webpage
 #| echo: false
+#| out.width: "100%"
 knitr::include_graphics("screenshot2.png")
 ```
 This is how the "refund/overpayment scam" works. A fraudster gets the victim to view their account webpage and to give the fraudster some level of remote control. The fraudster then manipulates the DOM to give the impression that they have mistakenly sent the victim \$10,000 instead of \$1,000. The fraudster then convinces the victim to send the \$9,000 difference even though no money was ever given to them.
 
-Rather than try to scam someone, let's get back to the business of pulling all the OIS data into R. I will first get the ID of the main HTML from DOM. Then I will read in the HTML associated with that ID.
+Rather than try to scam someone, let's get back to the business of pulling all the OIS data into R. I will first get the ID of the main HTML from the DOM. Then I will read in the HTML associated with that ID.
 ```{r}
 # get the ID of the main HTML
 html <- browser$DOM$getDocument()$root$nodeId
@@ -184,7 +197,7 @@ In this page we are looking for any `table` elements.
 ```{r}
 page |> html_elements("table") 
 ```
-There appear to be four tables on the page, but I noticed that the third one of these has an `id="data-table-ois"`. That must be the one we want. Let's extract it by name and convert it to an R data frame object.
+There appear to be four tables on the page, but I noticed that the third one of these has `id="data-table-ois"`. That must be the one we want. Let's extract it by name and convert it to an R data frame object.
 ```{r}
 # extract the data-table-ois by name
 page |> 
@@ -199,11 +212,11 @@ page |>
    html_elements("tbody a") |>
    html_attr("href")
 ```
-With that, we have been able to get all of the information for the first 25 OIS incidents. Now we have to "click" the Next button to get to the next set of 25 OIS incidents. First, I will check to see if it is disabled. Since we are still looking at the first page it will not be disabled, but when we are looking at the final page of OIS incidents then it will be disabled. To figure out the name of that Next button, in my browser I right-clicked on the Next button, selected Inspect, and then reviewed the resulting HTML code.
+With that we have been able to get all of the information for the first 25 OIS incidents. Now we have to "click" the Next button to get to the next set of 25 OIS incidents. First, I will check to see if it is disabled. Since we are still looking at the first page it will not be disabled, but when we are looking at the final page of OIS incidents then it will be disabled. To figure out the name of that Next button, in my browser I right-clicked on the Next button, selected Inspect, and then reviewed the resulting HTML code.
 ```html
 <a class="paginate_button next" aria-controls="data-table-ois" role="link" data-dt-idx="next" tabindex="0" id="data-table-ois_next">Next</a>
 ```
-I see that the HTML tag is `<a>` and its classes are `paginate` and `next`. So `a.paginate.next` will search the HTML code for an `<a>` element with both a `paginate` and `next` class.
+I see that the HTML tag is `<a>` and its classes are `paginate_button` and `next`. So `a.paginate_button.next` will search the HTML code for an `<a>` element with both a `paginate_button` and `next` class.
 ```{r}
 # check whether the Next button is disabled
 browser$Runtime$evaluate(
@@ -223,9 +236,10 @@ browser$Runtime$evaluate(
                    contains("disabled");') |>
    pluck("result","value")
 ```
-Either method gives the same response, the button is not disabled. That means we can click it to move on to the next page.
+Either method gives the same response: the button is not disabled. That means we can click it to move on to the next page.
 ```{r}
 #| results: hide
+#| message: false
 # Click the "Next" button
 browser$Runtime$evaluate(
   expression = 'document.
@@ -275,7 +289,7 @@ while(!isFinished)
     html_attr("href")
   ois[[iPage]]$url <- oisURLs
 
-  # is "Next" button is disabled?
+  # is "Next" button disabled?
   isFinished <- browser$Runtime$evaluate(
     expression = 'document.
                      querySelector("#data-table-ois_next").
@@ -317,12 +331,10 @@ tail(ois)
 
 Now let's dig into the details of the incident, starting with the first OIS. The hyperlink in the very first OIS incident points to the page [`r ois$url[1]`](`r ois$url[1]`). Let's read in the incident details from that page. In your browser, if you right-click and Inspect the text description of the incident, then you will find that the text has the id `ois-content-area`. We can grab that by name.
 ```{r}
-scan(ois$url[1], what="") |>
-  paste(collapse=" ") |> # collapse to single string
-  read_html() |>
-  html_element("div.ois-content-area") |>
-  html_text() |>
-  trimws() # trim whitespace
+read_html(ois$url[1], what="") |>
+   html_element("div.ois-content-area") |>
+   html_text() |>
+   trimws() # trim whitespace
 ```
 
 Now we are ready to read in all the incidents' details.
@@ -332,21 +344,20 @@ Now we are ready to read in all the incidents' details.
 ois$text <- NA
 for(i in 1:nrow(ois))
 {
-  a <- try( scan(ois$url[i], what="", sep="\n", quiet=TRUE) )
-
-  if(class(a)=="try-error")
-  { # in case a page does not exist
-    message(paste0("Could not access webpage for ",ois$id[i]))
-  } else
-  {
-    # grab text between <div class="ois-content-area"> and </div>
-    ois$text[i] <- a |>
-      paste(collapse=" ") |>
-      read_html() |>
-      html_element("div.ois-content-area") |>
-      html_text() |>
-      trimws()
-  }
+   # message(paste0("Incident: ",i))
+   a <- try( read_html(ois$url[i]) )
+   
+   if(inherits(a, "try-error"))
+   { # in case a page does not exist
+      message(paste0("Could not access webpage for ", ois$id[i]))
+   } else
+   {
+      # grab text between <div class="ois-content-area"> and </div>
+      ois$text[i] <- a |>
+         html_element("div.ois-content-area") |>
+         html_text() |>
+         trimws()
+   }
 }
 ```
 And let's just check that we have some descriptions now.
@@ -358,9 +369,19 @@ ois$text |> substring(1, 30)
 While the main OIS webpage did not give the date of the incident, the text details always show the date. We can extract those dates with regular expressions. The dates may come in a variety of formats, but we can use the `lubridate` package to parse them. Let's start with those where the date is spelled out.
 ```{r}
 # extract dates in January 11, 2024 format
-a <- gsub(".*(January|February|March|April|May|June|July|August|September|October|November|December)( [0-9]{1,2})(, 20[0-9]{2})?.*",
-          "\\1\\2\\3", ois$text)
+#    (?x) - ignore spaces and newlines
+#         lets me break regex into several lines
+#    (?s) - allows .* to include \n
+#    both (?x) and (?s) require perl=TRUE
+#    \s - whitespace (spaces, tabs, line feeds, carriage return)
+a <- gsub("(?xs)
+  .*?(January|February|March|April|May|June|
+         July|August|September|October|November|December)
+  \\s* ([0-9]{1,2})
+  ( , \\s* (20[0-9]{2}) )?.*",
+          "\\1 \\2\\3", ois$text, perl=TRUE)
 ```
+
 For those incidents matching that January 11, 2024 format, they should have less than 20 characters in them. Let's check those out.
 ```{r}
 a[nchar(a) < 20]
@@ -385,16 +406,22 @@ We have covered all the cases and can now create a column of incident dates extr
 ```{r}
 ois <- ois |>
    mutate(date = gsub(
-".*?(January|February|March|April|May|June|July|August|September|October|November|December)( [0-9]{1,2})(, 20[0-9]{2})?.*", 
-                      "\\1\\2\\3", text),
-          date = if_else(nchar(date)<20, date, NA),
-          date = if_else(!is.na(date) & !grepl("20[0-9]{2}", date),
-                         paste0(date, ", 20", substring(id,1,2)),
-                         date),
-          date = if_else(is.na(date),                         gsub(".*?([0-9]{1,2}[/-][0-9]{1,2}[/-](20)?[1-2][0-9])[^0-9].*",
-                              "\\1", text),
-                         date),
-          date = mdy(date))
+      "(?xs)
+  .*?(January|February|March|April|May|June|
+   July|August|September|October|November|December)
+  \\s* ([0-9]{1,2})
+  ( , \\s* (20[0-9]{2}) )?.*", 
+      "\\1 \\2\\3", text, perl=TRUE),
+      date = if_else(nchar(date)<20, date, NA),
+      date = if_else(!is.na(date) & !grepl("20[0-9]{2}", date),
+                     paste0(date, ", 20", substring(id,1,2)),
+                     date),
+      date = if_else(
+         is.na(date),
+         gsub(".*?([0-9]{1,2}[/-][0-9]{1,2}[/-](20)?[1-2][0-9])[^0-9].*",
+              "\\1", text),
+         date),
+      date = mdy(date))
 ```
 For a little test, let's check if there are any incidents where the year we scraped from the webpage differs from the first two digits of the incident ID.
 ```{r}
@@ -402,13 +429,13 @@ table(year(ois$date), substring(ois$id,1,2))
 ```
 That is a good sign!
 
-# Geocoding the OIS locations
+# Geocoding the OIS locations {#sec-geocoding}
 
 Our OIS data frame has the address for every incident, but to be more useful we really need the geographic coordinates. If we had the coordinates, then we could put them on a map, tabulate how many incident occur within an area, calculate distances, and answer questions about the geography of these data.
 
-Geocoding is the process of converting a text description of a location (typically an address or intersection) to obtain geographic coordinates (often longitude/latitude, but other coordinate systems are also possible). Google Maps currently reigns supreme in this area. Google Maps understand very general descriptions of locations. You can ask for the coordinates of something like "chipotle near UPenn" and it will understand that "UPenn" means the University of Pennsylvania and that "chipotle" is the burrito chain. Unfortunately, as of June 2018 Google Maps requires a credit card in order to access its geocoding service. Previously, anyone could geocode up to 2,500 locations per day without needing to register.
+Geocoding is the process of converting a text description of a location (typically an address or intersection) to obtain geographic coordinates (often longitude/latitude, but other coordinate systems are also possible). Google Maps currently reigns supreme in this area. Google Maps understands very general descriptions of locations. You can ask for the coordinates of something like "chipotle near UPenn" and it will understand that "UPenn" means the University of Pennsylvania and that "chipotle" is the burrito chain. Unfortunately, as of June 2018 Google Maps requires a credit card in order to access its geocoding service. Previously, anyone could geocode up to 2,500 locations per day without needing to register.
 
-We will use the the ArcGIS geocoder to get the coordinates of every location. Many web data sources use a standardized language for providing data. JSON (JavaScript Object Notation) is quite common and ArcGIS uses JSON. 
+We will use the ArcGIS geocoder to get the coordinates of every location. Many web data sources use a standardized language for providing data. JSON (JavaScript Object Notation) is quite common and ArcGIS uses JSON. 
 
 The URL for ArcGIS has the form
 
@@ -419,9 +446,10 @@ url <- "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find
 if (knitr::is_html_output()) 
 {
    cat('<pre style="white-space:pre-wrap; word-break:break-all; overflow-wrap:anywhere;">', url, '</pre>\n')
-} else if (knitr::is_latex_output()) 
+} else
 {
-   cat("\\begin{Verbatim}[breaklines,breakanywhere]\n", url, "\n\\end{Verbatim}\n")
+   #cat("\\begin{Verbatim}[breaklines,breakanywhere]\n", url, "\n\\end{Verbatim}\n")
+   cat(url,"\n")
 }
 ```
 
@@ -450,25 +478,30 @@ geocodeARCGIS <- function(address)
       fromJSON()
 }
 ```
-Let's test out `geocodeARCGIS()` by pulling up a up a map of the geocoded coordinates. Once we have the latitude and longitude for the McNeil Building, where we typically hold our crime data science courses at Penn, we can use `leaflet()` to show us a map of the area.
+Let's test out `geocodeARCGIS()` by pulling up a map of the geocoded coordinates. Once we have the latitude and longitude for the McNeil Building, where we typically hold our crime data science courses at Penn, we can use `leaflet()` to show us a map of the area.
 ```{r}
 #| message: false
-#| fig.cap: "ArcGIS geocoding result for 3718 Locust Walk"
-library(leaflet)
-
+#| label: fig-map3718Locust
+#| fig-cap: "ArcGIS geocoding result for 3718 Locust Walk"
 gcPenn <- geocodeARCGIS("3718 Locust Walk, Philadelphia, PA") |>
    pluck("candidates") |> 
    head(1) |>
    mutate(lon = location$x,
           lat = location$y)
 
-leaflet() |>
-   addTiles() |>
+leaflet(width = 1200, height = 800) |>
+   # addTiles() |>
+    addTiles(
+       urlTemplate = "https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key={key}",
+       options = tileOptions(key = Sys.getenv("MAPTILER_API_KEY"),
+                             tileSize = 512, 
+                             zoomOffset = -1),
+       attribution = '© MapTiler © OpenStreetMap contributors') |>
    setView(lng=gcPenn$lon, lat=gcPenn$lat, zoom=18) |>
    addCircleMarkers(lng=gcPenn$lon, 
                     lat=gcPenn$lat)
 ```
-`leaflet()` prepares the mapping process. `addTiles()` pulls in the relevant map image (buildings and streets). `setView()` takes the longitude and latitude from our `gcPenn` object, sets that as the center of the map, and zooms in to level "18," which is a fairly close zoom of about one block. `addCircleMarkers()` creates a circle at the selected point.
+`leaflet()` prepares the mapping process (the `width` and `height` do not have to be set, by I needed to for these notes). `addTiles()` pulls in the relevant map image (buildings and streets). Generally, you can use `addTiles()` with no other arguments. I regularly recompile these notes which hits the OpenStreetMaps server a little too much, so I have to rely on a different map provider that can better handle the load of requests. `setView()` takes the longitude and latitude from our `gcPenn` object, sets that as the center of the map, and zooms in to level "18," which is a fairly close zoom of about one block. `addCircleMarkers()` creates a circle at the selected point.
 
 We are almost ready to throw all of our addresses at the geocoder, but let's first make sure the addresses look okay. Several locations have `&` where the ArcGIS geocoder wants `and`.
 
@@ -505,7 +538,7 @@ Several other incidents have quirky addresses.
 ```{r}
 ois |>
   filter(id %in% c("16-30","16-10","17-08")) |>
-  select(id,location,text)
+  select(id, location, text)
 ```
 Reading the details of the incidents, we can come up with reasonable fixes to the addresses. OIS 17-08 is not a PPD shooting incident. Some PPD officers were present when New Castle County (Delaware) police officers shot someone. Let's drop this incident. The remaining incidents we can edit based on the contents of the OIS description. We will also tack on ", Philadelphia, PA" to the end of each location to improve geocoding accuracy.
 ```{r}
@@ -540,8 +573,7 @@ With that we are ready to run all of our addresses through the ArcGIS geocoder. 
 # takes about 3 minutes
 geoInfo <- foreach(i=1:nrow(ois), .combine=bind_rows) %do%
 {
-  message(paste0("#", i, " Address: ", ois$location[i]))
-
+  # message(paste0("#", i, " Address: ", ois$location[i]))
   a <- geocodeARCGIS(ois$location[i])
 
   data.frame(lon       = a$candidates$location$x[1],
@@ -553,7 +585,7 @@ geoInfo <- foreach(i=1:nrow(ois), .combine=bind_rows) %do%
 ois <- ois |> bind_cols(geoInfo)
 ```
 
-Now it we should have longitude and latitude for every incident. Let's check that they all look sensible.
+Now we should have longitude and latitude for every incident. Let's check that they all look sensible.
 ```{r}
 stem(ois$lat)
 stem(ois$lon)
@@ -571,37 +603,58 @@ One address should be at the Philadelphia Airport. This one geocoded just fine.
 ```{r}
 #| label: fig-geocode2505
 #| fig-cap: "Checking the location of OIS 25-05"
+#| results: hide
+#| message: false
 ois |>
   filter(id=="25-05") |>
-  leaflet() |>
-  addTiles() |>
+  leaflet(width = 1200, height = 800) |>
+    addTiles(
+       urlTemplate = "https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key={key}",
+       options = tileOptions(key = Sys.getenv("MAPTILER_API_KEY"),
+                             tileSize = 512, 
+                             zoomOffset = -1),
+       attribution = '© MapTiler © OpenStreetMap contributors') |>
   addCircleMarkers(~lon, ~lat,
                    radius=3, stroke=FALSE,
                    fillOpacity = 1) |>
   addPopups(~lon, ~lat, ~location)
 ```
-OIS 25-01 involves a dog shooting in Fairmount Park. The news stories about the incident place it 1 mile from Belmon/Edgely, close to Chamounix Drive and Ford Ave. 
+OIS 25-01 involves a dog shooting in Fairmount Park. The news stories about the incident place it 1 mile from Belmont/Edgely, close to Chamounix Drive and Ford Ave. 
 ```{r}
 #| label: fig-geocode2501
 #| fig-cap: "Checking the location of OIS 25-01"
+#| results: hide
+#| message: false
 ois |>
-  filter(id=="25-01") |>
-  leaflet() |>
-  addTiles() |>
-  addCircleMarkers(~lon, ~lat,
-                   radius=3, stroke=FALSE,
-                   fillOpacity = 1) |>
-  addPopups(~lon, ~lat, ~location)
+   filter(id=="25-01") |>
+   leaflet(width = 1200, height = 800) |>
+   addTiles(
+      urlTemplate = "https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key={key}",
+      options = tileOptions(key = Sys.getenv("MAPTILER_API_KEY"),
+                            tileSize = 512, 
+                            zoomOffset = -1),
+      attribution = '© MapTiler © OpenStreetMap contributors') |>
+   addCircleMarkers(~lon, ~lat,
+                    radius=3, stroke=FALSE,
+                    fillOpacity = 1) |>
+   addPopups(~lon, ~lat, ~location)
 geocodeARCGIS("Chamounix Drive and Ford Ave, Philadelphia, PA")
 ```
 OIS 21-14 has address "3800 Landsowne Drive". Presumably it intended to find 3800 Lansdowne Drive, but it could not place the 3800 block on Lansdowne Drive. The text describes the incident as occurring behind a school. Let's zoom in and see where this might have occurred. It must have occurred behind the School of the Future. I used Google Maps to find the coordinates behind this school.
 ```{r}
 #| label: fig-geocode2414
 #| fig-cap: "Checking the location of OIS 24-14"
+#| results: hide
+#| message: false
 ois |>
    filter(id=="21-14") |>
-   leaflet() |>
-   addTiles() |>
+   leaflet(width = 1200, height = 800) |>
+   addTiles(
+      urlTemplate = "https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key={key}",
+      options = tileOptions(key = Sys.getenv("MAPTILER_API_KEY"),
+                            tileSize = 512, 
+                            zoomOffset = -1),
+      attribution = '© MapTiler © OpenStreetMap contributors') |>
    addCircleMarkers(~lon, ~lat,
                     radius=3, stroke=FALSE,
                     fillOpacity = 1) |>
@@ -625,14 +678,19 @@ Here's a map of all of the incidents. For each incident I have added some pop-up
 #| message: false
 #| fig.cap: "All Philadelphia Officer-involved Shootings"
 ois |>
-  leaflet() |>
-  addTiles() |>
-  addCircleMarkers(~lon, ~lat,
-                   radius=4, stroke=FALSE,
-                   fillOpacity = 1,
-                   popup = paste("<b>",ois$location,"</b><br>",ois$text),
-                   popupOptions = popupOptions(autoClose = TRUE,
-                                               closeOnClick = FALSE))
+   leaflet(width = 1200, height = 800) |>
+   addTiles(
+      urlTemplate = "https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key={key}",
+      options = tileOptions(key = Sys.getenv("MAPTILER_API_KEY"),
+                            tileSize = 512, 
+                            zoomOffset = -1),
+      attribution = '© MapTiler © OpenStreetMap contributors') |>
+   addCircleMarkers(~lon, ~lat,
+                    radius=4, stroke=FALSE,
+                    fillOpacity = 1,
+                    popup = paste("<b>",ois$location,"</b><br>",ois$text),
+                    popupOptions = popupOptions(autoClose = TRUE,
+                                                closeOnClick = FALSE))
 ```
 
 # Working with shapefiles and coordinate systems
@@ -648,7 +706,7 @@ You can also get the same PSA boundaries using geoJSON.
 library(geojsonsf)
 PPDmap <- geojson_sf("https://opendata.arcgis.com/datasets/8dc58605f9dd484295c7d065694cdc0f_0.geojson")
 ```
-`PPDmap` is an `sf` (simple features) object. It is not unlike a data frame, but it contains a special column containing geographic information associated with a row of data. Here are the two columns in `PPDmap` that are of primary interest.
+`PPDmap` is an `sf` (simple features) object. It is not unlike a data frame, but it contains a special `geometry` column containing geographic information associated with a row of data. Here are the two columns in `PPDmap` that are of primary interest.
 ```{r}
 PPDmap |> select(PSA_NUM, geometry)
 ```
@@ -656,10 +714,11 @@ The first column shows the PSA number and the second column shows a truncated de
 ```{r}
 #| label: fig-PPDmap1
 #| fig-cap: "Map of Philadelphia Police Service Areas"
+#| out.width: "100%"
 plot(st_geometry(PPDmap))
 axis(side=1) # add x-axis
 axis(side=2) # add y-axis
-# extra the center points of each PSA
+# extract the center points of each PSA
 a <- st_coordinates(st_centroid(st_geometry(PPDmap)))
 # add the PSA number to the plot
 text(a[,1], a[,2], PPDmap$PSA_NUM, cex=0.5)
@@ -675,6 +734,7 @@ And we can use those coordinates to add additional features to our plot
 ```{r}
 #| label: fig-PPDmap2
 #| fig-cap: "Map of Philadelphia Police Service Areas highlighting the first PSA in `PPDmap`"
+#| out.width: "100%"
 plot(st_geometry(PPDmap))
 axis(side=1)
 axis(side=2)
@@ -689,9 +749,17 @@ We can also overlay a leaflet map with the `PPDmap` object.
 ```{r}
 #| label: fig-leafletPSAs
 #| fig-cap: "Map layer with the Philadelphia Police Service Areas (PSA)"
-leaflet(PPDmap) |>
+#| results: hide
+#| message: false
+PPDmap |>
+   leaflet(width = 1200, height = 800) |>
    addPolygons(weight=1, label=~PSA_NUM) |>
-   addTiles()
+   addTiles(
+      urlTemplate = "https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key={key}",
+      options = tileOptions(key = Sys.getenv("MAPTILER_API_KEY"),
+                            tileSize = 512, 
+                            zoomOffset = -1),
+      attribution = '© MapTiler © OpenStreetMap contributors')
 ```
 
 ## Coordinate systems
@@ -699,7 +767,7 @@ Geographic datasets that describe locations on the surface of the earth have a "
 ```{r}
 st_crs(PPDmap)
 ```
-The coordinate system used to describe the PPD boundaries is the World Geodetic System 1984 (WGS84) maintained by the United States National Geospatial-Intelligence Agency, one of several standards to aid in navigation and geography. The European Petroleum Survey Group (EPSG) maintains a catalog of different coordinate systems (should be no surprise that oil exploration has driven the development of high quality geolocation standards). They have assigned the standard longitude/latitude coordinate system to be [EPSG4326]((http://spatialreference.org/ref/epsg/4326/). You can find the full collection of coordinate systems at [spatialreference.org](http://spatialreference.org/ref/epsg/). You can see in the output above a reference to EPSG 4326.
+The coordinate system used to describe the PPD boundaries is the World Geodetic System 1984 (WGS84) maintained by the United States National Geospatial-Intelligence Agency, one of several standards to aid in navigation and geography. The European Petroleum Survey Group (EPSG) maintains a catalog of different coordinate systems (should be no surprise that oil exploration has driven the development of high quality geolocation standards). They have assigned the standard longitude/latitude coordinate system to be [EPSG4326](http://spatialreference.org/ref/epsg/4326/). You can find the full collection of coordinate systems at [spatialreference.org](http://spatialreference.org/ref/epsg/). You can see in the output above a reference to EPSG 4326.
 
 Many of us are comfortable with the longitude/latitude angular coordinate systems. However, the distance covered by a degree of longitude shrinks as you move towards the poles and only equals the distance covered by a degree of latitude at the equator. In addition, the earth is not very spherical so the coordinate system used for computing distances on the earth surface might need to depend on where you are on the earth surface. 
 
@@ -723,14 +791,15 @@ Now both PPD data and polygons are on the same scale
 ```{r}
 #| label: fig-OISmap
 #| fig-cap: "Map of OISs over PSAs"
-plot(st_geometry(PPDmap), axes=TRUE)
+#| out.width: "100%"
+plot(st_geometry(PPDmap), axes=TRUE, cex.axis=0.5)
 points(lat~lon, data=ois, col=rgb(1,0,0,0.5), pch=16)
 ```
 To make the dots a little transparent, I have used the `rgb()` function with which you can mix red, green, and blue colors and set the transparency. The `1` tells `rgb()` to use maximum red. The two `0`s tell `rgb()` to use no green or blue. The 0.5 tells `rgb()` to make the dots halfway transparent.
 
 ## Spatial joins
 
-Spatial joins is the process of linking two data sources by their geography. For the case of the OIS data, we want to know how many OISs occurred in each PSA. To do this we need to drop each OIS point location into the PSA polygons and have R tell us in which polygon did each OIS land.
+A _spatial join_ is the process of linking two data sources by their geography. For the case of the OIS data, we want to know how many OISs occurred in each PSA. To do this we need to drop each OIS point location into the PSA polygons and have R tell us in which polygon did each OIS land.
 
 First we need to convert our `ois` data frame to an `sf` object, communicating to R that the `lon` and `lat` columns are special. At this stage we also have to communicate in what coordinate system are the `lon` and `lat` values. `st_as_sf()` converts an R object into an `sf` object.
 ```{r}
@@ -744,11 +813,12 @@ You can see that `ois` now has one of those special geometry columns. We can plo
 ```{r}
 #| label: fig-OISoverPSAs
 #| fig-cap: "Map of OISs over PSAs using `sf` objects"
-plot(st_geometry(PPDmap), axes=TRUE)
+#| out.width: "100%"
+plot(st_geometry(PPDmap), axes=TRUE, cex=0.8)
 plot(st_geometry(ois), add=TRUE, col=rgb(1,0,0,0.5), pch=16)
 ```
 
-`st_join()` will match each row in `ois` to each polygon in PSA. When linking a a data frame with _point_ data (OIS location) to a data frame with polygon data (like PSAs), the points will join with the polygons in which they land. I just want to add the `PSA_NUM` column out of the `PPDmap` to our `ois` data.
+`st_join()` will match each row in `ois` to each polygon in PSA. When linking a data frame with _point_ data (OIS location) with a data frame with _polygon_ data (like PSAs), the points will join with the polygons in which they land. I just want to add the `PSA_NUM` column out of the `PPDmap` to our `ois` data.
 ```{r}
 PSAlookup <- ois |>
   st_join(PPDmap |> select(PSA_NUM))
@@ -762,11 +832,12 @@ Let's examine the PSA with the most OISs and highlight their incidents on the ma
 ```{r}
 #| label: fig-PPDmap3
 #| fig-cap: "Map of PSA with the largest number of OISs"
+#| out.width: "100%"
 PSAlookup |>
    count(PSA_NUM) |>
    slice_max(n)
 
-plot(st_geometry(PPDmap), axes=TRUE)
+plot(st_geometry(PPDmap), axes=TRUE, cex=0.8)
 PSAlookup |>
    st_join(PSAlookup |>
               count(PSA_NUM) |>
@@ -791,19 +862,14 @@ Now we see that Penn is in PSA 183 and we can highlight those points on the map.
 ```{r}
 #| label: fig-OISmapPenn
 #| fig-cap: "Map of OISs in the same PSA as Penn"
-plot(st_geometry(PPDmap), axes=TRUE)
+#| out.width: "100%"
+plot(st_geometry(PPDmap), axes=TRUE, cex=0.8)
 PSAlookup |>
   filter(PSA_NUM=="183") |>
   st_geometry() |>
   plot(add=TRUE, col="blue", pch=16)
 ```
-You can learn more about the incident near Penn.
-```{r}
-PSAlookup |>
-   filter(PSA_NUM=="183") |>
-   select(text) |>
-   st_drop_geometry()
-```
+We read about this incident earlier when fixing the OIS incident locations in @sec-geocoding.
 
 ## Coloring a map based on the value of a feature
 Lastly, we will tabulate the number of OISs in each PSA and color the map by the number of OISs.
@@ -823,6 +889,7 @@ We can see that `PPDmap` now has a new `nShoot` column. A histogram will show wh
 ```{r}
 #| label: fig-OIScountHist
 #| fig-cap: "Histogram of OIS incident counts by PSA"
+#| out.width: "100%"
 hist(PPDmap$nShoot, xlab="Number of OISs", ylab="Number of PSAs", main="")
 ```
 
@@ -836,6 +903,7 @@ PPDmap <- PPDmap |>
 ```
 `cut()` converts all of the individual counts into categories, like [1,5) or [25,30). For each of these categories we will associate a color for the map. `heat.colors()` will generate a sequence of colors in the yellow, orange, red range.
 ```{r}
+#| results: hold
 a <- data.frame(catShoot = levels(PPDmap$catShoot),
                 col      = rev(heat.colors(6,1)))
 a
@@ -850,6 +918,7 @@ Now we join `PPDmap` with our color lookup table in `a` and plot it.
 ```{r}
 #| label: fig-OIScountColorcodedMap
 #| fig-cap: "PSAs color-coded by number of OIS incidents"
+#| out.width: "100%"
 # match the color to category
 PPDmap <- PPDmap |>
   left_join(a, by=join_by(catShoot))
@@ -858,6 +927,7 @@ PPDmap |>
   st_geometry() |>
   plot(col=PPDmap$col, border="black")
 # add the number of shootings
+#   warning is reminder that it is collapsing polygon data down to a point
 b <- st_coordinates(st_centroid(PPDmap))
 text(b[,1], b[,2], PPDmap$nShoot, cex=0.7)
 ```
@@ -867,6 +937,7 @@ Those PSAs with the least shootings are a very pale yellow. As we examine PSAs w
 ```{r}
 #| label: fig-OIScountHistsf1
 #| fig-cap: "PSAs color-coded by number of OIS incidents, default `sf` colors"
+#| out.width: "100%"
 PPDmap |>
   select(nShoot) |>
   plot(main="")
@@ -875,6 +946,7 @@ You can change the color palette, for example, by using the yellow-orange-red pa
 ```{r}
 #| label: fig-OIScountHistsf2
 #| fig-cap: "PSAs color-coded by number of OIS incidents, YlOrRd HCL palette"
+#| out.width: "100%"
 PPDmap |>
   select(nShoot) |>
   plot(main="",
@@ -885,6 +957,7 @@ Lastly, I will share the classic _viridis_ palette, noted for being color-blind 
 ```{r}
 #| label: fig-OIScountHistsf3
 #| fig-cap: "PSAs color-coded by number of OIS incidents, viridis palette"
+#| out.width: "100%"
 # classic viridis palette
 library(viridis)
 PPDmap |>
@@ -898,16 +971,23 @@ And a leaflet version to end on.
 ```{r}
 #| label: fig-OIScountHistsLeaflet
 #| fig-cap: "Map of OIS counts by PSA"
+#| message: false
 PPDmap <- PPDmap |>
   mutate(label = paste("PSA:",PSA_NUM, "Count:",nShoot))
 
-leaflet(PPDmap) |>
+PPDmap |>
+   leaflet(width = 1200, height = 800) |>
    addPolygons(weight=1, col=~col, label=~label) |>
-   addTiles()
+   addTiles(
+      urlTemplate = "https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key={key}",
+      options = tileOptions(key = Sys.getenv("MAPTILER_API_KEY"),
+                            tileSize = 512, 
+                            zoomOffset = -1),
+      attribution = '© MapTiler © OpenStreetMap contributors')
 ```
 
 # Summary
-We started with just a web page linking to a collection of text descriptions. We used a variety of webscraping and regular expressions to extract everything we could from the web page tables. We had R "read" the text descriptions to extract the dates. We geocoded the stops so that we could put them on a map. Finally, we tabulated by PSA the number of OISs and mapped those as well.
+We started with just a web page linking to a collection of text descriptions. We used a variety of webscraping and regular expressions to extract everything we could from the web page tables. We had R "read" the text descriptions to extract the dates. We geocoded the incidents so that we could put them on a map. Finally, we tabulated by PSA the number of OISs and mapped those as well.
 
 If you have worked through all of this, then I would recommend that you save your objects, using `save(ois, PSAlookup, file="PPDOIS.RData")`. That way you will not have to scrape everything off the web again or redo any geocoding.
 
