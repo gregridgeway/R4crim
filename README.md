@@ -13,6 +13,6 @@ Table of contents
 7. [Crime hotspot maps](https://rawcdn.githack.com/gregridgeway/R4crim/master/07_Crime_Hotspot_Map.html)
 8. [Introduction to SQL, Part 2](https://rawcdn.githack.com/gregridgeway/R4crim/master/08_Introduction_to_SQL2.html)
 9. [Webscraping and Parallel Processing](https://rawcdn.githack.com/gregridgeway/R4crim/master/09_Webscraping_and_Parallel_Processing.html)
-10. [PPD shootings extracting from text geocoding](https://rawcdn.githack.com/gregridgeway/R4crim/master/10_PPD_shootings_extracting_from_text_geocoding.html)
+10. [PPD shootings extracting from text geocoding]([https://rawcdn.githack.com/gregridgeway/R4crim/master/10_PPD_shootings_extracting_from_text_geocoding.html)
 11. [Working with geographic data](https://rawcdn.githack.com/gregridgeway/R4crim/master/11_Working_with_geographic_data.html)
 
