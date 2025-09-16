@@ -1,0 +1,79 @@
+\usepackage{float}
+% --- listings setup that mimics Quarto (light) ---
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{upquote} % straight quotes in \ttfamily
+
+% for code/chunk output
+\usepackage{fvextra}
+\RecustomVerbatimEnvironment{Verbatim}{Verbatim}{breaklines,breakanywhere}
+\DefineVerbatimEnvironment{verbatim}{Verbatim}{breaklines,breakanywhere}
+
+% Colors
+\definecolor{QKeyword}{HTML}{0068B4}
+\definecolor{QFunction}{HTML}{0F766E}
+\definecolor{QString}{HTML}{DD1144}
+\definecolor{QComment}{HTML}{6A737D}
+\definecolor{QConst}{HTML}{6F42C1}
+\definecolor{QNumber}{HTML}{B000B5}
+\definecolor{QCodeBG}{HTML}{F8F9FA}
+
+% R language
+\lstdefinelanguage{R}{
+  keywords={if,else,repeat,while,function,for,in,next,break,return,foreach},
+  keywords=[2]{TRUE,FALSE,NULL,NA,NaN,Inf},
+  keywords=[3]{library,require,source,print,cat,stop,warning,message,
+               Sys.sleep,try,inherits,paste,paste0,Sys.getenv,
+               c,list,data.frame,as.data.frame,
+               nrow,head,tail,trimws,nchar,cut,levels,rev,
+               read.csv,readRDS,saveRDS,save,load,readLines,writeLines,scan,
+               mutate,select,filter,arrange,group_by,summarise,summary,
+               rename,pull,case_match,case_when,count,slice_max,slice_min,
+               join_by,
+               if_else,is.na,mdy,table,year,stem,
+               ggplot,aes,geom_point,geom_line,geom_bar,geom_sf,
+               left_join,inner_join,full_join,bind_rows,bind_cols,
+               map,walk,pluck,
+               grep,gsub,substring,gregexpr,grepl,
+               html_elements,html_table,read_html,html_attr,
+               fromJSON,
+               leaflet,addTiles,setView,addCircleMarkers,addPopups,
+               tileOptions,popupOptions,
+               st_read,geojson_sf,st_coordinates,st_centroid,st_geometry,
+               st_crs,st_transform,st_as_sf,st_join,
+               plot,axis,text,lines,points,rgb,hist,heat.colors,hcl.colors,
+               viridis_pal},
+  sensitive=true,
+  morekeywords={[4]{<-,<<-,->,->>,::,:::,$,@,|>,:=}},
+  alsoletter={._},
+  morecomment=[l]\#,
+  morestring=[d]",
+  morestring=[d]',
+  literate=
+%    {<-}{{\ensuremath{\leftarrow}}}2
+    {->}{{\ensuremath{\rightarrow}}}2
+    {<<-}{{\ensuremath{\twoheadleftarrow}}}3
+    {->>}{{\ensuremath{\twoheadrightarrow}}}3,
+}
+
+% listings defaults
+\lstset{
+  language=R,
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{QCodeBG},
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  upquote=true,
+  breaklines=true,
+  breakatwhitespace=false,
+  keywordstyle=\color{QKeyword},
+  keywordstyle=[2]\color{QConst},
+  keywordstyle=[3]\color{QFunction},
+  keywordstyle=[4]\color{QKeyword},
+  stringstyle=\color{QString},
+  commentstyle=\color{QComment}\itshape,
+  numberstyle=\color{QNumber},
+  frame=leftline, rulecolor=\color{QComment},
+  xleftmargin=0.6em
+}
