@@ -39,7 +39,7 @@ bibliography: G:/My Drive/docs/Greg/articles/mybib.bib
 <!-- In terminal -->
 <!-- quarto render 10_PPD_shootings_extracting_from_text_geocoding.qmd -->
 
-<!-- git commit 10-* -m "commit message" -->
+<!-- git commit 10_* -m "commit message" -->
 <!-- git status -->
 <!-- git push -->
 
