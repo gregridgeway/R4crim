@@ -31,13 +31,13 @@ editor_options:
 
 <!-- A function for automating the numbering and wording of the exercise questions -->
 ```{r echo=FALSE}
+# Use \x60 in place ` backtick in exercise questions
 .counterExercise <- 0
 .exerciseQuestions <- NULL
 .exNum <- function(.questionText="") 
 {
    .counterExercise <<- .counterExercise+1
    .exerciseQuestions <<- c(.exerciseQuestions, .questionText)
-   .questionText <- gsub("@@", "`", .questionText)
    return(paste0(.counterExercise,". ",.questionText))
 }
 ```

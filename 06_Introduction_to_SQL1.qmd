@@ -38,6 +38,7 @@ bibliography: G:/My Drive/docs/Greg/articles/mybib.bib
 <!-- Use \x60 inside exercise questions for backticks -->
 ```{r}
 #| echo: false
+# Use \x60 in place ` backtick in exercise questions
 .counterExercise <- 0
 .exerciseQuestions <- NULL
 .exNum <- function(.questionText="") 

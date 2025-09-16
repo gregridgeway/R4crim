@@ -29,12 +29,12 @@ bibliography: G:/My Drive/docs/Greg/articles/mybib.bib
 <!-- A function for automating the numbering and wording of the exercise questions -->
 ```{r}
 #| echo: false
+# Use \x60 in place ` backtick in exercise questions
 .counterExercise <- 0
 .exerciseQuestions <- NULL
 .exNum <- function(.questionText="") 
 {
    .counterExercise <<- .counterExercise+1
-   .questionText <- gsub("@@", "`", .questionText)
    .exerciseQuestions <<- c(.exerciseQuestions, .questionText)
    return(paste0(.counterExercise,". ",.questionText))
 }
@@ -272,7 +272,7 @@ With the new table `iucr` in the database, complete the following exercises.
 
 `r .exNum('How many IUCR codes are there for "ASSAULT"?')`
 
-`r .exNum('Try doing the prior exercise again using @@COUNT(*)@@ if you did not use it the first time')`
+`r .exNum('Try doing the prior exercise again using \x60COUNT(*)\x60 if you did not use it the first time')`
 
 
 # SQL dates

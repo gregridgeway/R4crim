@@ -36,12 +36,12 @@ bibliography: G:/My Drive/docs/Greg/articles/mybib.bib
 <!-- A function for automating the numbering and wording of the exercise questions -->
 ```{r}
 #| echo: false
+# Use \x60 in place ` backtick in exercise questions
 .counterExercise <- 0
 .exerciseQuestions <- NULL
 .exNum <- function(.questionText="") 
 {
    .counterExercise <<- .counterExercise+1
-   .questionText <- gsub("@@", "`", .questionText)
    .exerciseQuestions <<- c(.exerciseQuestions, .questionText)
    return(paste0(.counterExercise,". ",.questionText))
 }
