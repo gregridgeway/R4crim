@@ -331,7 +331,7 @@ tail(ois)
 
 Now let's dig into the details of the incident, starting with the first OIS. The hyperlink in the very first OIS incident points to the page [`r ois$url[1]`](`r ois$url[1]`). Let's read in the incident details from that page. In your browser, if you right-click and Inspect the text description of the incident, then you will find that the text has the id `ois-content-area`. We can grab that by name.
 ```{r}
-read_html(ois$url[1], what="") |>
+read_html(ois$url[1]) |>
    html_element("div.ois-content-area") |>
    html_text() |>
    trimws() # trim whitespace
@@ -431,7 +431,7 @@ That is a good sign!
 
 # Geocoding the OIS locations {#sec-geocoding}
 
-Our OIS data frame has the address for every incident, but to be more useful we really need the geographic coordinates. If we had the coordinates, then we could put them on a map, tabulate how many incident occur within an area, calculate distances, and answer questions about the geography of these data.
+Our OIS data frame has the address for every incident, but to be more useful we really need the geographic coordinates. If we had the coordinates, then we could put them on a map, tabulate how many incidents occur within an area, calculate distances, and answer questions about the geography of these data.
 
 Geocoding is the process of converting a text description of a location (typically an address or intersection) to obtain geographic coordinates (often longitude/latitude, but other coordinate systems are also possible). Google Maps currently reigns supreme in this area. Google Maps understands very general descriptions of locations. You can ask for the coordinates of something like "chipotle near UPenn" and it will understand that "UPenn" means the University of Pennsylvania and that "chipotle" is the burrito chain. Unfortunately, as of June 2018 Google Maps requires a credit card in order to access its geocoding service. Previously, anyone could geocode up to 2,500 locations per day without needing to register.
 
@@ -480,8 +480,8 @@ geocodeARCGIS <- function(address)
 ```
 Let's test out `geocodeARCGIS()` by pulling up a map of the geocoded coordinates. Once we have the latitude and longitude for the McNeil Building, where we typically hold our crime data science courses at Penn, we can use `leaflet()` to show us a map of the area.
 ```{r}
-#| message: false
 #| label: fig-map3718Locust
+#| message: false
 #| fig-cap: "ArcGIS geocoding result for 3718 Locust Walk"
 gcPenn <- geocodeARCGIS("3718 Locust Walk, Philadelphia, PA") |>
    pluck("candidates") |> 
@@ -501,7 +501,7 @@ leaflet(width = 1200, height = 800) |>
    addCircleMarkers(lng=gcPenn$lon, 
                     lat=gcPenn$lat)
 ```
-`leaflet()` prepares the mapping process (the `width` and `height` do not have to be set, by I needed to for these notes). `addTiles()` pulls in the relevant map image (buildings and streets). Generally, you can use `addTiles()` with no other arguments. I regularly recompile these notes which hits the OpenStreetMaps server a little too much, so I have to rely on a different map provider that can better handle the load of requests. `setView()` takes the longitude and latitude from our `gcPenn` object, sets that as the center of the map, and zooms in to level "18," which is a fairly close zoom of about one block. `addCircleMarkers()` creates a circle at the selected point.
+`leaflet()` prepares the mapping process (the `width` and `height` do not have to be set, by I needed to for these notes). `addTiles()` pulls in the relevant map image (buildings and streets). Generally, you can use `addTiles()` with no other arguments. I regularly recompile these notes which hits the OpenStreetMap server a little too much, so I have to rely on a different map provider that can better handle the load of requests. `setView()` takes the longitude and latitude from our `gcPenn` object, sets that as the center of the map, and zooms in to level "18," which is a fairly close zoom of about one block. `addCircleMarkers()` creates a circle at the selected point.
 
 We are almost ready to throw all of our addresses at the geocoder, but let's first make sure the addresses look okay. Several locations have `&` where the ArcGIS geocoder wants `and`.
 
@@ -603,7 +603,6 @@ One address should be at the Philadelphia Airport. This one geocoded just fine.
 ```{r}
 #| label: fig-geocode2505
 #| fig-cap: "Checking the location of OIS 25-05"
-#| results: hide
 #| message: false
 ois |>
   filter(id=="25-05") |>
@@ -623,7 +622,6 @@ OIS 25-01 involves a dog shooting in Fairmount Park. The news stories about the 
 ```{r}
 #| label: fig-geocode2501
 #| fig-cap: "Checking the location of OIS 25-01"
-#| results: hide
 #| message: false
 ois |>
    filter(id=="25-01") |>
@@ -638,13 +636,15 @@ ois |>
                     radius=3, stroke=FALSE,
                     fillOpacity = 1) |>
    addPopups(~lon, ~lat, ~location)
+```
+
+```{r}
 geocodeARCGIS("Chamounix Drive and Ford Ave, Philadelphia, PA")
 ```
 OIS 21-14 has address "3800 Landsowne Drive". Presumably it intended to find 3800 Lansdowne Drive, but it could not place the 3800 block on Lansdowne Drive. The text describes the incident as occurring behind a school. Let's zoom in and see where this might have occurred. It must have occurred behind the School of the Future. I used Google Maps to find the coordinates behind this school.
 ```{r}
 #| label: fig-geocode2414
-#| fig-cap: "Checking the location of OIS 24-14"
-#| results: hide
+#| fig-cap: "Checking the location of OIS 21-14"
 #| message: false
 ois |>
    filter(id=="21-14") |>
@@ -675,6 +675,7 @@ ois <- ois |>
 
 Here's a map of all of the incidents. For each incident I have added some pop-up text so that if you click on an incident it will show you the location of the incident and the text describing the incident.
 ```{r}
+#| label: fig-leafletAllOISs
 #| message: false
 #| fig.cap: "All Philadelphia Officer-involved Shootings"
 ois |>
@@ -715,9 +716,10 @@ The first column shows the PSA number and the second column shows a truncated de
 #| label: fig-PPDmap1
 #| fig-cap: "Map of Philadelphia Police Service Areas"
 #| out.width: "100%"
+#| fig-height: 5
 plot(st_geometry(PPDmap))
-axis(side=1) # add x-axis
-axis(side=2) # add y-axis
+axis(side=1, cex.axis=0.7) # add x-axis
+axis(side=2, cex.axis=0.7) # add y-axis
 # extract the center points of each PSA
 a <- st_coordinates(st_centroid(st_geometry(PPDmap)))
 # add the PSA number to the plot
@@ -735,9 +737,10 @@ And we can use those coordinates to add additional features to our plot
 #| label: fig-PPDmap2
 #| fig-cap: "Map of Philadelphia Police Service Areas highlighting the first PSA in `PPDmap`"
 #| out.width: "100%"
+#| fig-height: 5
 plot(st_geometry(PPDmap))
-axis(side=1)
-axis(side=2)
+axis(side=1, cex.axis=0.7)
+axis(side=2, cex.axis=0.7)
 a <- st_coordinates(st_centroid(st_geometry(PPDmap)))
 text(a[,1], a[,2], PPDmap$PSA_NUM, cex=0.5)
 a <- st_coordinates(PPDmap$geometry[1])
@@ -749,7 +752,6 @@ We can also overlay a leaflet map with the `PPDmap` object.
 ```{r}
 #| label: fig-leafletPSAs
 #| fig-cap: "Map layer with the Philadelphia Police Service Areas (PSA)"
-#| results: hide
 #| message: false
 PPDmap |>
    leaflet(width = 1200, height = 800) |>
@@ -771,7 +773,7 @@ The coordinate system used to describe the PPD boundaries is the World Geodetic 
 
 Many of us are comfortable with the longitude/latitude angular coordinate systems. However, the distance covered by a degree of longitude shrinks as you move towards the poles and only equals the distance covered by a degree of latitude at the equator. In addition, the earth is not very spherical so the coordinate system used for computing distances on the earth surface might need to depend on where you are on the earth surface. 
 
-Almost all web mapping tools (Google Maps, ESRI, OpenStreetMaps) use the pseudo-Mercator projection ([EPSG3857](http://spatialreference.org/ref/epsg/3857/)). Let's convert our PPD map to that coordinate system.
+Almost all web mapping tools (Google Maps, ESRI, OpenStreetMap) use the pseudo-Mercator projection ([EPSG3857](http://spatialreference.org/ref/epsg/3857/)). Let's convert our PPD map to that coordinate system.
 ```{r}
 PPDmap <- st_transform(PPDmap, crs=3857)
 st_crs(PPDmap)
@@ -787,12 +789,13 @@ Let's transform back to longitude/latitude. It really is best to work using a di
 ```{r}
 PPDmap <- st_transform(PPDmap, crs=4326)
 ```
-Now both PPD data and polygons are on the same scale
+Now both the PPD data and the polygons are on the same scale
 ```{r}
 #| label: fig-OISmap
 #| fig-cap: "Map of OISs over PSAs"
 #| out.width: "100%"
-plot(st_geometry(PPDmap), axes=TRUE, cex.axis=0.5)
+#| fig-height: 5
+plot(st_geometry(PPDmap), axes=TRUE, cex.axis=0.7)
 points(lat~lon, data=ois, col=rgb(1,0,0,0.5), pch=16)
 ```
 To make the dots a little transparent, I have used the `rgb()` function with which you can mix red, green, and blue colors and set the transparency. The `1` tells `rgb()` to use maximum red. The two `0`s tell `rgb()` to use no green or blue. The 0.5 tells `rgb()` to make the dots halfway transparent.
@@ -814,7 +817,8 @@ You can see that `ois` now has one of those special geometry columns. We can plo
 #| label: fig-OISoverPSAs
 #| fig-cap: "Map of OISs over PSAs using `sf` objects"
 #| out.width: "100%"
-plot(st_geometry(PPDmap), axes=TRUE, cex=0.8)
+#| fig-height: 5
+plot(st_geometry(PPDmap), axes=TRUE, cex.axis=0.7)
 plot(st_geometry(ois), add=TRUE, col=rgb(1,0,0,0.5), pch=16)
 ```
 
@@ -833,11 +837,12 @@ Let's examine the PSA with the most OISs and highlight their incidents on the ma
 #| label: fig-PPDmap3
 #| fig-cap: "Map of PSA with the largest number of OISs"
 #| out.width: "100%"
+#| fig-height: 5
 PSAlookup |>
    count(PSA_NUM) |>
    slice_max(n)
 
-plot(st_geometry(PPDmap), axes=TRUE, cex=0.8)
+plot(st_geometry(PPDmap), axes=TRUE, cex.axis=0.7)
 PSAlookup |>
    st_join(PSAlookup |>
               count(PSA_NUM) |>
@@ -863,7 +868,8 @@ Now we see that Penn is in PSA 183 and we can highlight those points on the map.
 #| label: fig-OISmapPenn
 #| fig-cap: "Map of OISs in the same PSA as Penn"
 #| out.width: "100%"
-plot(st_geometry(PPDmap), axes=TRUE, cex=0.8)
+#| fig-height: 5
+plot(st_geometry(PPDmap), axes=TRUE, cex.axis=0.7)
 PSAlookup |>
   filter(PSA_NUM=="183") |>
   st_geometry() |>
@@ -890,6 +896,7 @@ We can see that `PPDmap` now has a new `nShoot` column. A histogram will show wh
 #| label: fig-OIScountHist
 #| fig-cap: "Histogram of OIS incident counts by PSA"
 #| out.width: "100%"
+#| fig-height: 5
 hist(PPDmap$nShoot, xlab="Number of OISs", ylab="Number of PSAs", main="")
 ```
 
@@ -919,6 +926,7 @@ Now we join `PPDmap` with our color lookup table in `a` and plot it.
 #| label: fig-OIScountColorcodedMap
 #| fig-cap: "PSAs color-coded by number of OIS incidents"
 #| out.width: "100%"
+#| fig-height: 5
 # match the color to category
 PPDmap <- PPDmap |>
   left_join(a, by=join_by(catShoot))
@@ -938,6 +946,7 @@ Those PSAs with the least shootings are a very pale yellow. As we examine PSAs w
 #| label: fig-OIScountHistsf1
 #| fig-cap: "PSAs color-coded by number of OIS incidents, default `sf` colors"
 #| out.width: "100%"
+#| fig-height: 5
 PPDmap |>
   select(nShoot) |>
   plot(main="")
@@ -947,6 +956,7 @@ You can change the color palette, for example, by using the yellow-orange-red pa
 #| label: fig-OIScountHistsf2
 #| fig-cap: "PSAs color-coded by number of OIS incidents, YlOrRd HCL palette"
 #| out.width: "100%"
+#| fig-height: 5
 PPDmap |>
   select(nShoot) |>
   plot(main="",
@@ -958,6 +968,7 @@ Lastly, I will share the classic _viridis_ palette, noted for being color-blind 
 #| label: fig-OIScountHistsf3
 #| fig-cap: "PSAs color-coded by number of OIS incidents, viridis palette"
 #| out.width: "100%"
+#| fig-height: 5
 # classic viridis palette
 library(viridis)
 PPDmap |>
