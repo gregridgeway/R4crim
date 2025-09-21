@@ -9,7 +9,7 @@
 <meta name="author" content="Greg Ridgeway">
 <meta name="author" content="Ruth Moyer">
 <meta name="author" content="Li Sian Goh">
-<meta name="dcterms.date" content="2025-08-14">
+<meta name="dcterms.date" content="2025-09-21">
 
 <title>Working with National Crime Victimization Survey Data</title>
 <style>
@@ -187,7 +187,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">August 14, 2025</p>
+      <p class="date">September 21, 2025</p>
     </div>
   </div>
   
@@ -816,7 +816,7 @@ window.Quarto = {
 17  2023  (11) November 142</code></pre>
 </div>
 </div>
-<p>Note that the 2022 NCVS reports on crimes that occurred in 2022 and 2021. Similarly, the NCVS 2023 reports on crimes that occurred in 2023 and 2022. Remember that the NCVS surveys as respondents about any victimizations from the prior 12 months. We will going to stack the 2022 and 2023 incident extract data frames and then filter it to exclude 2021 and 2023.</p>
+<p>Note that the 2022 NCVS reports on crimes that occurred in 2022 and 2021. Similarly, the NCVS 2023 reports on crimes that occurred in 2023 and 2022. Remember that the NCVS surveys respondents about any victimizations from the prior 12 months. We are going to stack the 2022 and 2023 incident extract data frames and then filter it to exclude 2021 and 2023.</p>
 <p><code>bind_rows()</code> stacks data frames on top of each other, useful when combining two datasets that have the same structure. First we will check that they have the same columns in them.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(<span class="fu">names</span>(dataExt22), <span class="fu">names</span>(dataExt23))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1057,7 +1057,7 @@ window.Quarto = {
 <li><p><em>Base weight</em>: The inverse of the national sampling rate for the stratum of that unit (person or household).</p></li>
 <li><p><em>Weighting control</em>: Adjusts for any sub-sampling due to unexpected events in the field, such as new construction, area segments larger than anticipated, and other deviations from the overall stratum sampling rate.</p></li>
 <li><p><em>Household non-interview adjustment</em>: Adjusts for nonresponse at the household-level by increasing the weights of interviewed households most similar to households not interviewed in terms of race, MSA status of residence, and urban/suburban/rural status of residence. This inflates the weight value assigned to interviewed households so that they represent themselves and non-interviewed households. The non-interviewed cases are assigned a weight of zero, thereby excluding them from population estimates.</p></li>
-<li><p><em>Within-household non-interveiew adjustment</em>: Adjusts for non-response at the person-level by increasing the weight of interviewed persons most similar to persons not interviewed in terms of region, age, race, sex, and household composition. The adjustment inflates the weight value assigned to completed interviews, so that they represent themselves and sampled individuals who were not interviewed. The non-interviewed cases are assigned a weight of zero.</p></li>
+<li><p><em>Within-household non-interview adjustment</em>: Adjusts for non-response at the person-level by increasing the weight of interviewed persons most similar to persons not interviewed in terms of region, age, race, sex, and household composition. The adjustment inflates the weight value assigned to completed interviews, so that they represent themselves and sampled individuals who were not interviewed. The non-interviewed cases are assigned a weight of zero.</p></li>
 <li><p><em>First stage ratio estimates factor</em>: Adjusts for differences between characteristics of the sample non-self-representing (NSR) primary sampling units (PSUs) and independent measures of the population NSR PSUs. (For self-representing PSUs this factor is set to 1). This factor adjusts for PSU differences on region, MSA status, urban/suburban/rural status, and racial composition.</p></li>
 <li><p><em>Second stage ratio estimate factor</em>: A post-stratification factor defined for each person to adjust for the difference between weighted counts of persons (using the above five weight components) and independent estimates of the number of persons, within certain age by race by sex categories. These independent estimates are based on the Census population controls adjusted for the undercount.</p></li>
 </ol>
@@ -1082,7 +1082,7 @@ Always use the sampling weights
 <section id="tabulating-victimizations" class="level1" data-number="5">
 <h1 data-number="5"><span class="header-section-number">5</span> Tabulating victimizations</h1>
 <p>First, we need to be clear about what we are counting. BJS will report on <em>victimizations</em> and <em>incidents</em>. Victimizations count the number of times a US person was victimized. Incidents count the number of times a crime incident occurred and those incidents could involve multiple victims. BJS reports largely focus on criminal victimizations.</p>
-<p>We can start but just asking the NCVS data how many criminal victimizations there were in 2022. We compute that as the sum of all the weights.</p>
+<p>We can start by just asking the NCVS data how many criminal victimizations there were in 2022. We compute that as the sum of all the weights.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(dataExt<span class="sc">$</span>SERIES_WEIGHT)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">

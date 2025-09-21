@@ -203,7 +203,7 @@ Take a look at the month and year of the reported crime incidents.
 dataExt22 |> count(V4015, V4014)
 dataExt23 |> count(V4015, V4014)
 ```
-Note that the 2022 NCVS reports on crimes that occurred in 2022 and 2021. Similarly, the NCVS 2023 reports on crimes that occurred in 2023 and 2022. Remember that the NCVS surveys as respondents about any victimizations from the prior 12 months. We will going to stack the 2022 and 2023 incident extract data frames and then filter it to exclude 2021 and 2023.
+Note that the 2022 NCVS reports on crimes that occurred in 2022 and 2021. Similarly, the NCVS 2023 reports on crimes that occurred in 2023 and 2022. Remember that the NCVS surveys respondents about any victimizations from the prior 12 months. We are going to stack the 2022 and 2023 incident extract data frames and then filter it to exclude 2021 and 2023.
 
 `bind_rows()` stacks data frames on top of each other, useful when combining two datasets that have the same structure. First we will check that they have the same columns in them.
 ```{r}
@@ -345,7 +345,7 @@ Constructing the sampling weights is a complex process (see the User Guide "Weig
 
 3.  *Household non-interview adjustment*: Adjusts for nonresponse at the household-level by increasing the weights of interviewed households most similar to households not interviewed in terms of race, MSA status of residence, and urban/suburban/rural status of residence. This inflates the weight value assigned to interviewed households so that they represent themselves and non-interviewed households. The non-interviewed cases are assigned a weight of zero, thereby excluding them from population estimates.
 
-4.  *Within-household non-interveiew adjustment*: Adjusts for non-response at the person-level by increasing the weight of interviewed persons most similar to persons not interviewed in terms of region, age, race, sex, and household composition. The adjustment inflates the weight value assigned to completed interviews, so that they represent themselves and sampled individuals who were not interviewed. The non-interviewed cases are assigned a weight of zero. 
+4.  *Within-household non-interview adjustment*: Adjusts for non-response at the person-level by increasing the weight of interviewed persons most similar to persons not interviewed in terms of region, age, race, sex, and household composition. The adjustment inflates the weight value assigned to completed interviews, so that they represent themselves and sampled individuals who were not interviewed. The non-interviewed cases are assigned a weight of zero.
 
 5.  *First stage ratio estimates factor*: Adjusts for differences between characteristics of the sample non-self-representing (NSR) primary sampling units (PSUs) and independent measures of the population NSR PSUs. (For self-representing PSUs this factor is set to 1). This factor adjusts for PSU differences on region, MSA status, urban/suburban/rural status, and racial composition.
 
@@ -369,7 +369,7 @@ For a weighted percentage, total all the weights for respondents with the partic
 
 First, we need to be clear about what we are counting. BJS will report on *victimizations* and *incidents*. Victimizations count the number of times a US person was victimized. Incidents count the number of times a crime incident occurred and those incidents could involve multiple victims. BJS reports largely focus on criminal victimizations.
 
-We can start but just asking the NCVS data how many criminal victimizations there were in 2022. We compute that as the sum of all the weights.
+We can start by just asking the NCVS data how many criminal victimizations there were in 2022. We compute that as the sum of all the weights.
 ```{r}
 sum(dataExt$SERIES_WEIGHT)
 ```
