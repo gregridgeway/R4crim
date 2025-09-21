@@ -44,7 +44,7 @@ editor_options:
 
 # Introduction
 
-This is the first set of notes for an introduction to R programming from criminology and criminal justice. These notes assume that you have the latest version of R and R Studio installed. We are also assuming that you know how to start a new script file and submit code to the R console. From that basic knowledge about using R, we are going to start with `2+2` and by the end of this set of notes you will load in a dataset on protests in the United States (mostly), create a few plots, count some incidents, and be able to do some basic data manipulations. Our aim is to build a firm foundation on which we will build throughout this set of notes.
+This is the first set of notes for an introduction to R programming from criminology and criminal justice. These notes assume that you have the latest version of R and RStudio installed. We are also assuming that you know how to start a new script file and submit code to the R console. From that basic knowledge about using R, we are going to start with `2+2` and by the end of this set of notes you will load in a dataset on protests in the United States (mostly), create a few plots, count some incidents, and be able to do some basic data manipulations. Our aim is to build a firm foundation on which we will build throughout this set of notes.
 
 R sometimes provides useful help as to how to do something, such as choosing the right function or figuring what the syntax of a line of code should be. Let's say we're stumped as to what the `sqrt()` function does. Just type `?sqrt` at the R prompt to read documentation on `sqrt()`. Most help pages have examples at the bottom that can give you a better idea about how the function works. R has over 7,000 functions and an often seemingly inconsistent syntax. As you do more complex work with R (such as using new packages), the Help tab can be useful. 
 
@@ -155,7 +155,7 @@ setwd("C:/Users/greg_/CRIM6002/notes/R4crim")
 ```
 Note that for all platforms, Windows, Macs, and Linux, the working directory only uses forward slashes. So Windows users be careful... most Windows applications use backslashes, but in an effort to make R scripts work across all platforms, R requires forward slashes. Backslashes have a different use in R that you will meet later.
 
-If you do not know how to write your working directory, here comes R Studio to the rescue. In R Studio click Session -> Set Working Directory -> Choose Directory. Then click through to navigate to the working directory that you want to use. When you find it click "Select Folder". Then look over at the console. R Studio will construct the right `setwd()` syntax for you. Copy and paste that into your script for use later. No need to have to click through the Session menu again now that you have your `setwd()` set up.
+If you do not know how to write your working directory, here comes RStudio to the rescue. In RStudio click Session -> Set Working Directory -> Choose Directory. Then click through to navigate to the working directory that you want to use. When you find it click "Select Folder". Then look over at the console. RStudio will construct the right `setwd()` syntax for you. Copy and paste that into your script for use later. No need to have to click through the Session menu again now that you have your `setwd()` set up.
 
 Now you can use R functions to load in any datasets that are in your working folder. If you have done your `setwd()` correctly, you shouldn't get any errors because R will know exactly where to look for the data files. If the working directory that you've given in the `setwd()` isn't right, R will think the file doesn't even exist. For example, if you give the path for, say, your R4econ folder, R won't be able to load data because the file isn't stored in what R thinks is your working directory. With that out of the way, let's load a dataset.
 
@@ -317,7 +317,7 @@ Hmmm... it looks like there are some missing values in the `Attendees` column. R
 dataProtest |>
    summarize(mean(Attendees, na.rm=TRUE))
 ```
-Perhaps we are interested any several data summaries at the same time. No problem. Just include them all in `summarize()`.
+Perhaps we are interested in several data summaries at the same time. No problem. Just include them all in `summarize()`.
 ```{r}
 dataProtest |>
    summarize(average = mean(Attendees, na.rm=TRUE),
@@ -346,7 +346,7 @@ The first argument is the string from which to extract the substring. The second
 ```{r}
 str_sub("Philadelphia, PA", -2)
 ```
-There are other R functions that can extract substrings including `substring()`, `substr()`, and `gsub()`. I am introducing you to `str_sub()` since because it is the only one that lets you put negative numbers in the second and third arguments to easily grab substrings from the end. This is a very useful feature.
+There are other R functions that can extract substrings including `substring()`, `substr()`, and `gsub()`. I am introducing you to `str_sub()` because it is the only one that lets you put negative numbers in the second and third arguments to easily grab substrings from the end. This is a very useful feature.
 
 With `str_sub()` now in our toolbox, we can make a new column called `state` that contains the state in which the protest occurred. 
 ```{r}
@@ -354,7 +354,7 @@ dataProtest <- dataProtest |>
    mutate(state=str_sub(Location, -2))
 head(dataProtest)
 ```
-Peeking at the first few rows of `dataProtest` we can see that there is a new column with the state abbreviation. Please, always check that your code does what you intended to do. Run, check, run, check, one line at a time.
+Peeking at the first few rows of `dataProtest` we can see that there is a new column with the state abbreviation. Please always check that your code does what you intended to do. Run, check, run, check, one line at a time.
 
 So you can see that `mutate()` is useful for making new data features computed based on other features. We also will use it to edit or clean up data. Let's check what these state abbreviations look like. 
 ```{r}
@@ -523,7 +523,7 @@ Interested in which "state" has the largest average protest size? Use `slice_max
 dataProtest |>
   group_by(state) |>
   summarize(Average=mean(Attendees, na.rm=TRUE)) |>
-  slice_max(n=1,Average)
+  slice_max(Average)
 ```
 
 We can also simply arrange the rows in descending order of average protest size.
@@ -551,7 +551,7 @@ Note: You may encounter code with `melt()`, `cast()`, `reshape()`, `gather()`, a
 ```{r}
 library(tidyr)
 ```
-Let's say that we are interested in determining which states have fewer civil rights protesters than non-civil rights protesters. With our existing `group_by()` and `sumamrize()` skills we can tabulate the number of protesters by state and by type of protest.
+Let's say that we are interested in determining which states have fewer civil rights protesters than non-civil rights protesters. With our existing `group_by()` and `summarize()` skills we can tabulate the number of protesters by state and by type of protest.
 ```{r}
 dataProtest |>
    group_by(state, civilrights) |>
@@ -578,7 +578,7 @@ dataProtest |>
                names_prefix = "CR") |>
    filter(CR1 < CR0)
 ```
-By spreading the columns out wide made it easier to make our calculation within each state. There is usually a way to avoid `pivot_wider()` and still get the right answer. For example,
+Spreading the columns out wide made it easier to make our calculation within each state. There is usually a way to avoid `pivot_wider()` and still get the right answer. For example,
 ```{r}
 dataProtest |>
   group_by(state) |>
@@ -614,7 +614,7 @@ dataProtest |>
    group_by(state, timePeriod) |>
    summarize(totProtesters = sum(Attendees, na.rm=TRUE))
 ```
-The results is still "grouped" at this point. Be sure to `ungroup()` so that subsequent calculations do not just occur within each group. The sequence group()/summarize()/ungroup() is so common that there is a shortcut using `.by`. Either `ungroup()` or use `.by`. Then we `pivot_wider()`.
+The result is still "grouped" at this point. Be sure to `ungroup()` so that subsequent calculations do not just occur within each group. The sequence group()/summarize()/ungroup() is so common that there is a shortcut using `.by`. Either `ungroup()` or use `.by`. Then we `pivot_wider()`.
 ```{r}
 dataProtest |>
    filter(Date < "2021-01-01") |>
@@ -654,7 +654,7 @@ dataProtest |>
 
 We will finish our introduction to R by exploring `Tags` a little more through some barplots and a word cloud.
 
-I will start by a special version of `mostCommon()` that will take a collection of tags and return the most common tag. This will allow us to find the most common protest type in the dataset. This function splits up the tags as we did before, and then applies `mostCommon()` to the resulting collection of tags.
+I will start with a special version of `mostCommon()` that will take a collection of tags and return the most common tag. This will allow us to find the most common protest type in the dataset. This function splits up the tags as we did before, and then applies `mostCommon()` to the resulting collection of tags.
 
 ```{r}
 mostCommonType <- function(x)
@@ -703,7 +703,7 @@ a <- dataProtest |>
 barplot(a$Attendees, names.arg = a$state)
 ```
 
-The state name labels are two big so we can shrink the "character expansion" (`cex`) by half.
+The state name labels are too big so we can shrink the "character expansion" (`cex`) by half.
 ```{r}
 barplot(a$Attendees, names.arg = a$state, cex.names=0.5)
 ```
@@ -719,7 +719,7 @@ barplot(a$Attendees, names.arg = a$state,
 We can also create a bar plot of the number of protests for the top 5 reasons.
 ```{r}
 reasons <- dataProtest$Tags |> 
-  strsplit(";") |> 
+  strsplit("; ") |> 
   unlist() |> 
   table() |>
   sort(decreasing = TRUE) |>
@@ -745,7 +745,7 @@ dataProtest$Tags |>
 
 # Review
 
-As you saw in this script, R has a lot of functions. We started of figuring how to set our file path so R knows where to look for files. We loaded the data from a .RData file and we listed all the objects in R's environment.
+As you saw in this script, R has a lot of functions. We started off figuring out how to set our file path so R knows where to look for files. We loaded the data from a .RData file and we listed all the objects in R's environment.
 
 * `setwd()` set working directory
 * `load()` load R objects saved in a .RData file
@@ -769,7 +769,7 @@ Then we worked through some basic functions to work with R objects.
 
 When working with datasets, we covered all the standard functions needed to manipulate data.
 
-* `slice()`, `slice_max()`, `slice_min()` pick out rows by there position in the dataset or by the max/min values
+* `slice()`, `slice_max()`, `slice_min()` pick out rows by their position in the dataset or by the max/min values
 * `filter()` pick out rows based on a logical expression about what is in that row
 * `select()` pick out columns by name
 * `count()` count the number of rows in a dataset or the number of rows in a dataset by groups
