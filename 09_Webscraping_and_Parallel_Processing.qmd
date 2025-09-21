@@ -59,13 +59,13 @@ As a preliminary matter, some R packages, such as `rvest` and `chromote`, can he
 
 First, you will need to make sure that you can access the underlying HTML code for the webpage that you want to scrape. In most browsers you can simply right-click on a webpage and then click "View Page Source."  If you are using Microsoft Edge, you can right-click on the webpage, click "View Source," and then look at the "Debugger" tab. In Safari select "Settings," choose the "Advanced" tab, check "Show Develop menu," and then whenever viewing a page you can right-click and select "Show Page Source."
 
-Have a look at the webpage [http://www.the-numbers.com/box-office-chart/daily/2025/07/04](http://www.the-numbers.com/box-office-chart/daily/2025/07/04). This page contains information about the movies that were shown in theaters on July 4, 2025 and the amount of money (in dollars) that each of those movies grossed that day. 
+Have a look at the webpage [https://www.the-numbers.com/box-office-chart/daily/2025/07/04](https://www.the-numbers.com/box-office-chart/daily/2025/07/04). This page contains information about the movies that were shown in theaters on July 4, 2025 and the amount of money (in dollars) that each of those movies grossed that day. 
 
 Have a look at the HTML code by looking at the page source for this page using the methods described above. The first 10 lines should look  something like this:
 
 ```{r} 
 #| echo: false
-a <- scan("http://www.the-numbers.com/box-office-chart/daily/2025/07/04",
+a <- scan("https://www.the-numbers.com/box-office-chart/daily/2025/07/04",
           what="",sep="\n")
 cat(a[1:10], sep="\n")
 ```
@@ -82,7 +82,7 @@ I see _Jurassic World Rebirth_ and _F1: The Movie_. In addition to the movie nam
 ```{r}
 #| message: false
 library(dplyr)
-a <- scan("http://www.the-numbers.com/box-office-chart/daily/2025/07/04",
+a <- scan("https://www.the-numbers.com/box-office-chart/daily/2025/07/04",
           what="", sep="\n")
 # examine the first few lines
 a[1:5]
@@ -93,7 +93,7 @@ Some websites are more complex or use different text encoding. On those websites
 ```{r}
 #| eval: false
 library(httr)
-resp <- GET("http://www.the-numbers.com/box-office-chart/daily/2025/07/04")
+resp <- GET("https://www.the-numbers.com/box-office-chart/daily/2025/07/04")
 a1 <- content(resp, as="text")
 a1 <- strsplit(a1,"\n")[[1]]
 ```
@@ -101,7 +101,7 @@ a1 <- strsplit(a1,"\n")[[1]]
 Also, some Mac users will encounter snags with both of these methods and receive "403 Forbidden" errors while their Mac colleague right next to them on the same network will not. I have not figured out why this happens, but have found that making R masquerade as a different browser sometimes works.
 ```{r}
 #| eval: false
-resp <- GET("http://www.the-numbers.com/box-office-chart/daily/2025/07/04", 
+resp <- GET("https://www.the-numbers.com/box-office-chart/daily/2025/07/04", 
             user_agent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/537.13+ (KHTML, like Gecko) Version/5.1.7 Safari/534.57.2"))
 a1 <- content(resp, as="text")
 a1 <- strsplit(a1,"\n")[[1]]
@@ -349,13 +349,13 @@ Parallelization introduces some complications. If anything goes wrong in a paral
 This causes an error since this website does not exist (or not yet!).
 ```{r}
 #| error: true
-res <- scan("http://www.jaywalkingIsNotACrime.org", what="", sep="\n")
+res <- scan("https://www.jaywalkingIsNotACrime.org", what="", sep="\n")
 # res does not exist
 res
 ```
 If we wrap `scan()` with `try()`, then we can catch the error and write R code to gracefully handle the problem.
 ```{r}
-res <- try(scan("http://www.jaywalkingIsNotACrime.org", what="", sep="\n"),
+res <- try(scan("https://www.jaywalkingIsNotACrime.org", what="", sep="\n"),
            silent = TRUE) |>
    suppressWarnings()
 is(res)
