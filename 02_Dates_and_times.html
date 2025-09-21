@@ -8,7 +8,7 @@
 
 <meta name="author" content="Greg Ridgeway">
 <meta name="author" content="Ruth Moyer">
-<meta name="dcterms.date" content="2025-08-14">
+<meta name="dcterms.date" content="2025-09-21">
 
 <title>Dates and Times</title>
 <style>
@@ -127,7 +127,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">August 14, 2025</p>
+      <p class="date">September 21, 2025</p>
     </div>
   </div>
   
@@ -147,26 +147,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- A function for automating the numbering and wording of the exercise questions -->
 <section id="introduction" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
-<p>Working with dates and times is a lot different than working with the more familiar numbers. Months have different number of days. Sometimes we count hours of the day up to 12 and then start over. Sometimes we count hours up to 24 and then start over. Some years have 366 days. We have 24 times zones around the world. Twice a year we switch clocks for Daylight Saving Time, except in some places like Arizona. Arithmetic, such as adding one month to a date, is poorly defined. Which date is one month after January 31st? Is it February 28th? Or is it March 3rd?</p>
+<p>Working with dates and times is very different from working with the more familiar numbers. Months have different numbers of days. Sometimes we count hours of the day up to 12 and then start over. Sometimes we count hours up to 24 and then start over. Some years have 366 days. We have 24 time zones around the world. Twice a year we switch clocks for Daylight Saving Time, except in some places like Arizona. Arithmetic, such as adding one month to a date, is poorly defined. Which date is one month after January 31st? Is it February 28th? Or is it March 3rd?</p>
 <p>Fortunately, software for working with dates exists to make these tasks easier. Unfortunately, every system seems to make their own design decisions. Excel stores dates as the number of days since January 0, 1900… that’s not a typo… they count from January 0, 1900. Linux systems count days since January 1, 1970. SPSS stores times as the number of seconds since midnight October 14, 1582, the adoption date of the Gregorian calendar. Much of the world did not adopt the calendar in 1582. The American colonies did not adopt the Gregorian calendar until 1752 along with Great Britain. So beware if you are a historian digging through centuries old data. Aligning dates can become very messy.</p>
 <p>R has had a variety of attempts at providing a means for managing dates. We are going to use the <a href="https://www.jstatsoft.org/article/view/v040i03"><code>lubridate</code></a> package that address just about everything you might need to do with dates and times.</p>
 <p>Do not use <code>as.Date()</code>. <code>lubridate</code> has an easier to read date formatting, more intelligently handles dates of different formats, and has better date arithmetic.</p>
 <p><code>lubridate</code> is not part of R by default. You will need to install it. Simply run</p>
-<pre><code>install.packages("lubridate")</code></pre>
-<p>and R will hit the web, download the <code>lubridate</code> package and any supporting packages it needs (and it does need a few), and installs them. This is a one time event. Once you have <code>lubridate</code> on your machine you will not need to reinstall it every time you need it.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"lubridate"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>and R will hit the web, download the <code>lubridate</code> package and any supporting packages it needs (and it does need a few), and installs them. This is a one-time event. Once you have <code>lubridate</code> on your machine you will not need to reinstall it every time you need it.</p>
 <p>Some of our students, particularly on Macs, have encountered trouble installing some packages for R. R will sometimes try to download the source code for the packages and compile them from scratch on your machine. Sometimes that goes well and other times it requires that you have other tools installed on your machine. An easy solution is to run</p>
-<pre><code>install.packages("lubridate", type="mac.binary")</code></pre>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"lubridate"</span>, <span class="at">type=</span><span class="st">"mac.binary"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p>instead to insist that R finds and installs a ready-to-use version of the packages.</p>
 </section>
 <section id="working-with-dates" class="level1" data-number="2">
 <h1 data-number="2"><span class="header-section-number">2</span> Working with dates</h1>
-<p>While <code>lubridate</code> is now installed, once per R session you will need to load <code>lubridate</code>.</p>
+<p>Once <code>lubridate</code> is installed, you need to load it once in each R session where you wish to use its features.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>If you close R and restart it, then you’ll need to run this line again.</p>
-<p>Let’s reload the <a href="https://github.com/gregridgeway/R4criminology/blob/master/chicago%20crime%2020141124-20141209.RData">sample of Chicago crime data</a> discussed in the introductory notes, available on the <a href="https://github.com/gregridgeway/R4crim">R4Crim github site</a>.</p>
+<p>Let’s reload the <a href="https://github.com/gregridgeway/R4crim/blob/master/chicago%20crime%2020141124-20141209.RData">sample of Chicago crime data</a> discussed in the introductory notes, available on the <a href="https://github.com/gregridgeway/R4crim">R4Crim github site</a>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"chicago crime 20141124-20141209.RData"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -184,7 +188,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 5 11/24/2014 12:30:00 AM</code></pre>
 </div>
 </div>
-<p>As you can see the dates include the date in month/day/year format and the time on a 12 hour AM/PM clock. R has no idea that these values represent dates. You are familiar with this date formatting, but R just thinks they are strings of characters. Use <code>substring()</code> to just extract the date part, the first 10 characters of <code>Date</code>.</p>
+<p>As you can see, the dates include the date in month/day/year format and the time on a 12-hour AM/PM clock. R has no idea that these values represent dates. You are familiar with this date formatting, but R just thinks they are strings of characters. Use <code>substring()</code> to just extract the date part, the first 10 characters of <code>Date</code>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>textDate <span class="ot">&lt;-</span> chicagoCrime <span class="sc">|&gt;</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>   <span class="fu">select</span>(Date) <span class="sc">|&gt;</span></span>
@@ -206,7 +210,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 [1] "2014-12-09" "2014-12-05" "2014-12-02" "2014-11-28" "2014-11-24"</code></pre>
 </div>
 </div>
-<p><code>b</code> now stores those five dates in a format that recognizes the month, day, and year. <code>is(b)</code> tells us that R is storing <code>b</code> as a date. There are different functions for other date formats depending on the ordering of the day, month and year, like <code>dmy()</code> and <code>ymd()</code> and even <code>mdy_hms()</code> for month, day, year, hours, minutes, seconds format.</p>
+<p><code>b</code> now stores those five dates in a format that recognizes the month, day, and year. <code>is(b)</code> tells us that R is storing <code>b</code> as a date object. There are different functions for other date formats depending on the ordering of the day, month and year, like <code>dmy()</code> and <code>ymd()</code> and even <code>mdy_hms()</code> for month, day, year, hours, minutes, seconds format.</p>
 <p>Now that R knows these are dates, the <code>lubridate</code> package provides a lot of functions to help you work with dates.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">year</span>(b)</span>
@@ -235,7 +239,7 @@ Levels: Sun &lt; Mon &lt; Tue &lt; Wed &lt; Thu &lt; Fri &lt; Sat</code></pre>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">date</span>(<span class="fu">now</span>()) <span class="sc">-</span> b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Time differences in days
-[1] 3901 3905 3908 3912 3916</code></pre>
+[1] 3939 3943 3946 3950 3954</code></pre>
 </div>
 </div>
 <p>When subtracting dates, R will make a good guess for the unit of time to use in the result. Use <code>difftime()</code> if you want to be specific about the unit of time and not leave it up to R to decide.</p>
@@ -251,7 +255,7 @@ Levels: Sun &lt; Mon &lt; Tue &lt; Wed &lt; Thu &lt; Fri &lt; Sat</code></pre>
 [1]  192   96   24  -72 -168</code></pre>
 </div>
 </div>
-<p>We can add time to the dates as well</p>
+<p>We can add time to the dates as well.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>b <span class="sc">+</span> <span class="fu">dyears</span>(<span class="dv">1</span>) <span class="co"># adds 365 days, does not increase year by 1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -304,7 +308,7 @@ Levels: Sun &lt; Mon &lt; Tue &lt; Wed &lt; Thu &lt; Fri &lt; Sat</code></pre>
 <pre><code>[1] "2014-08-01 12:00:00 CDT"</code></pre>
 </div>
 </div>
-<p>Note that <code>force_tz()</code> keeps the dates and times the same, but overwrites the timezone. If you want to lookup what the date and time would be in a different timezone, then use <code>with_tz()</code>.</p>
+<p>Note that <code>force_tz()</code> keeps the dates and times the same, but overwrites the timezone. If you want to look up what the date and time would be in a different timezone, then use <code>with_tz()</code>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mdy_hms</span>(<span class="st">"8/1/2014 12:00:00"</span>) <span class="sc">|&gt;</span></span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>   <span class="fu">force_tz</span>(<span class="st">"America/Chicago"</span>) <span class="sc">|&gt;</span> <span class="co"># force to CDT</span></span>
@@ -340,7 +344,7 @@ Levels: Sun &lt; Mon &lt; Tue &lt; Wed &lt; Thu &lt; Fri &lt; Sat</code></pre>
 <h1 data-number="3"><span class="header-section-number">3</span> Exercises</h1>
 <ol type="1">
 <li>At what hour does Daylight Saving Time end? (Hint: Try using <code>dminutes()</code> to add time to the date DST ends)</li>
-<li>Thanksgiving occurs on the fourth Thursday in November. On what date will Thanksgiving fall in 2020? Hints:
+<li>Thanksgiving occurs on the fourth Thursday in November. On what date will Thanksgiving fall in 2025? Hints:
 <ul>
 <li>Try listing all dates in November</li>
 <li>Use <code>wday()</code> to get the weekday</li>
@@ -488,7 +492,7 @@ Levels: Sun &lt; Mon &lt; Tue &lt; Wed &lt; Thu &lt; Fri &lt; Sat</code></pre>
 </div>
 </div>
 <ol start="2" type="1">
-<li>On what date will Thanksgiving fall in 2020?</li>
+<li>On what date will Thanksgiving fall in 2025?</li>
 </ol>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">date=</span><span class="fu">mdy</span>(<span class="st">"11/1/2025"</span>) <span class="sc">+</span> <span class="fu">ddays</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">29</span>)) <span class="sc">|&gt;</span></span>
