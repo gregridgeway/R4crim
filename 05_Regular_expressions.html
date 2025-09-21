@@ -8,7 +8,7 @@
 
 <meta name="author" content="Greg Ridgeway">
 <meta name="author" content="Ruth Moyer">
-<meta name="dcterms.date" content="2025-09-15">
+<meta name="dcterms.date" content="2025-09-21">
 
 <title>Regular Expressions</title>
 <style>
@@ -166,7 +166,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 15, 2025</p>
+      <p class="date">September 21, 2025</p>
     </div>
   </div>
   
@@ -615,7 +615,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>This last one we will use a lot. The regular expression says start with a <code>&lt;</code>, then match several characters that are non <code>&gt;</code>, followed by a <code>&gt;</code>. Anything matching this pattern, like <code>&lt;td&gt;</code>, will get removed.</p>
 <p>The first argument of the <code>gsub()</code> function is the “find pattern,” what we are asking <code>gsub()</code> to find. The second argument is a “replacement pattern” that will replace whatever <code>gsub()</code> matched with the find pattern. Lastly, like <code>grep()</code>, we need to tell <code>gsub()</code> the name of the data object in which it should look for the pattern.</p>
-<p>With <code>gsub()</code> we will be using a lot of the same grammar, such as carats, brackets, and dashes, that we used with <code>grep()</code>. To illustrate, let’s remove anything that is not a number from text.</p>
+<p>With <code>gsub()</code> we will be using a lot of the same grammar, such as carets, brackets, and dashes, that we used with <code>grep()</code>. To illustrate, let’s remove anything that is not a number from text.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gsub</span>(<span class="st">"[^0-9]"</span>,<span class="st">""</span>,dataText)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -756,7 +756,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>Some of the commas in this text are separating values for race, sex, arrest charge, age, and recovered contraband. However, there are other commas inside the quotes listing the arrest charges and the contraband items. Fortunately, <code>read.csv()</code> is smart enough to keep quoted items together as one data element, as long as the parameter <code>quote = "\"'"</code>, which is the default. Other functions are not so kind. Later we will use <code>dbWriteTable()</code> to build an SQL database and it will think that all the commas separate the values. So it will think there is a separate <code>"loitering</code> data element and then a <code>narcotics</code>. And the same for <code>"knife</code> and <code>gun"</code>.</p>
-<p>So here is a very handy regular expression using lookaheads that changes commas that are not inside quotes to semicolons. You can also choose a stranger symbol, like | or @. This regular expression looks for a <code>,</code> and then it uses a lookahead for the reminder of the line. It will match that comma is there are no quotes for the rest of the line, <code>[^\"]</code>, or if there are only pairs of quotes each with non-quote characters inside of them, <code>\"[^\"]*\"</code>.</p>
+<p>So here is a very handy regular expression using lookaheads that changes commas that are not inside quotes to semicolons. You can also choose a stranger symbol, like | or @. This regular expression looks for a <code>,</code> and then it uses a lookahead for the remainder of the line. It will match that comma if there are no quotes for the rest of the line, <code>[^\"]</code>, or if there are only pairs of quotes each with non-quote characters inside of them, <code>\"[^\"]*\"</code>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb95"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gsub</span>(<span class="st">",(?=([^</span><span class="sc">\"</span><span class="st">]|</span><span class="sc">\"</span><span class="st">[^</span><span class="sc">\"</span><span class="st">]*</span><span class="sc">\"</span><span class="st">)*$)"</span>,<span class="st">";"</span>,text.w.quotes,<span class="at">perl=</span><span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
 <span id="cb95-2"><a href="#cb95-2" aria-hidden="true" tabindex="-1"></a>   <span class="fu">cat</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -900,7 +900,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Find text with a number immediately followed by a letter</li>
 </ol>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb113"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb113-1"><a href="#cb113-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"[0-9][A-z]"</span>, dataText,<span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb113"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb113-1"><a href="#cb113-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"[0-9][A-Za-z]"</span>, dataText,<span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "221B Baker St."</code></pre>
 </div>
@@ -935,7 +935,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Find text that starts with a number and ends with a letter</li>
 </ol>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb121"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb121-1"><a href="#cb121-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"^[0-9][0-z ]+[A-z]$"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb121"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb121-1"><a href="#cb121-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span>(<span class="st">"^[0-9][0-z ]+[A-Za-z]$"</span>, dataText, <span class="at">value=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "3718 Locust Walk"   "4 Privet Drive"     "10880 Malibu Point"
 [4] "2 children"        </code></pre>

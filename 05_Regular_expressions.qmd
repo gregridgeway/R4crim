@@ -336,7 +336,7 @@ This last one we will use a lot. The regular expression says start with a `<`, t
 
 The first argument of the `gsub()` function is the "find pattern," what we are asking `gsub()` to find. The second argument is a "replacement pattern" that will replace whatever `gsub()` matched with the find pattern. Lastly, like `grep()`, we need to tell `gsub()` the name of the data object in which it should look for the pattern.
 
-With `gsub()` we will be using a lot of the same grammar, such as carats, brackets, and dashes, that we used with `grep()`. To illustrate, let's remove anything that is not a number from text.
+With `gsub()` we will be using a lot of the same grammar, such as carets, brackets, and dashes, that we used with `grep()`. To illustrate, let's remove anything that is not a number from text.
 ```{r} 
 gsub("[^0-9]","",dataText)
 ```
@@ -415,7 +415,7 @@ cat(text.w.quotes,"\n")
 ```
 Some of the commas in this text are separating values for race, sex, arrest charge, age, and recovered contraband. However, there are other commas inside the quotes listing the arrest charges and the contraband items. Fortunately, `read.csv()` is smart enough to keep quoted items together as one data element, as long as the parameter `quote = "\"'"`, which is the default. Other functions are not so kind. Later we will use `dbWriteTable()` to build an SQL database and it will think that all the commas separate the values. So it will think there is a separate `"loitering` data element and then a `narcotics`. And the same for `"knife` and `gun"`.
 
-So here is a very handy regular expression using lookaheads that changes commas that are not inside quotes to semicolons. You can also choose a stranger symbol, like | or @. This regular expression looks for a `,` and then it uses a lookahead for the reminder of the line. It will match that comma is there are no quotes for the rest of the line, `[^\"]`, or if there are only pairs of quotes each with non-quote characters inside of them, `\"[^\"]*\"`.
+So here is a very handy regular expression using lookaheads that changes commas that are not inside quotes to semicolons. You can also choose a stranger symbol, like | or @. This regular expression looks for a `,` and then it uses a lookahead for the remainder of the line. It will match that comma if there are no quotes for the rest of the line, `[^\"]`, or if there are only pairs of quotes each with non-quote characters inside of them, `\"[^\"]*\"`.
 ```{r} 
 gsub(",(?=([^\"]|\"[^\"]*\")*$)",";",text.w.quotes,perl=TRUE) |>
    cat()
@@ -495,7 +495,7 @@ grep("[AEIOUaeiou]", dataText, value=TRUE)
 
 `r .exQ(2)`
 ```{r}
-grep("[0-9][A-z]", dataText,value=TRUE)
+grep("[0-9][A-Za-z]", dataText,value=TRUE)
 ```
 
 `r .exQ(3)`
@@ -513,7 +513,7 @@ grep("Roy$", dataText, value = TRUE)
 
 `r .exQ(5)`
 ```{r}
-grep("^[0-9][0-z ]+[A-z]$", dataText, value=TRUE)
+grep("^[0-9][0-z ]+[A-Za-z]$", dataText, value=TRUE)
 ```
 
 
