@@ -62,7 +62,7 @@ bibliography: G:/My Drive/docs/Greg/articles/mybib.bib
 
 # Introduction
 
-Geographic data includes 
+Geographic data include
 
  * point - crime locations, intersections, schools, transit stops
  * lines - roads, paths, routes
@@ -70,7 +70,7 @@ Geographic data includes
 
 Geographic data also include the data that go along with each of these shapes such as the area or length of the geographic object, the name of the object (e.g. City of Los Angeles), and other characteristics of the geography (e.g. population, date established).
 
-Many questions about crime and the justice system involve the use of geographic data. In this section we will work toward answering questions about the race distribution of residents inside Los Angeles gang injunction zones, the number of crimes with 100 feet of Wilshire Blvd, and examine crimes near Metrorail stations.
+Many questions about crime and the justice system involve the use of geographic data. In this section we will work toward answering questions about the race distribution of residents inside Los Angeles gang injunction zones, the number of crimes within 100 feet of Wilshire Blvd, and examine crimes near Metrorail stations.
 
 We will be learning how to use the `sf` package for managing spatial data, the `tigris` package for obtaining TIGER files storing boundaries and roads, and `jsonlite` and `tidycensus` for pulling population data about residents in an area, like number of residents or race distribution.
 
@@ -85,7 +85,7 @@ library(tidyr) # for pivot_wider/pivot_longer
 library(sf)
 library(lubridate)
 ```
-All of the spatial functions in the `sf` package have a prefix `st_`(spatial/temporal). We will first read in `allinjunction.shp`, a shapefile containing the geographic definition of Los Angeles gang injunctions. You should have a collection of four files related to `allinjunctions`, a .dbf file, a .prj file, a .shx file, and a .shp file. even though the `st_read()` function appears to just ask for the .shp file, you need to have all four files in the same folder.
+All of the spatial functions in the `sf` package have a prefix `st_` (spatial type). We will first read in `allinjunction.shp`, a shapefile containing the geographic definition of Los Angeles gang injunctions. You should have a collection of four files related to `allinjunctions`, a .dbf file, a .prj file, a .shx file, and a .shp file. Even though the `st_read()` function appears to just ask for the .shp file, you need to have all four files in the same folder.
 ```{r} 
 mapSZ <- st_read("11_shapefiles_and_data/allinjunctions.shp")
 ```
@@ -218,7 +218,7 @@ mapSZunion |>
 ```
 Every injunction area is shaded red. The white bands between the red shapes and the black outlines is the  1000-foot buffer.
 
-Previously we had to clean up some typos on the injunction dates data. The data can also have errors in the geography that requires fixing. Have a look at the MS13 gang injunction.
+Previously we had to clean up some typos on the injunction dates data. The data can also have errors in the geography that require fixing. Have a look at the MS13 gang injunction.
 ```{r}
 #| label: fig-mapGangInjunctionMS13
 #| fig-cap: Map of MS13 gang injunction, Case BC311766
@@ -449,7 +449,7 @@ fromJSON("https://api.census.gov/data/2010/acs/acs5?get=B01001_001E&for=tract:*&
 ```
 Many more examples are posted at the [Census API website](https://api.census.gov/data/2010/acs/acs5/examples.html).
 
-Now let's get something more complete that we can merge into our geographic data. For each census tract in Los Angeles County, we will extract the total population (`B03002001`), the number of non-Hispanic white residents (`B03002003`), non-Hispanic black residents (`B03002004`), and Hispanic residents (`B03002012`). 
+Now let's get something more complete that we can merge into our geographic data. For each census tract in Los Angeles County, we will extract the total population (`B03002_001`), the number of non-Hispanic white residents (`B03002_003`), non-Hispanic black residents (`B03002_004`), and Hispanic residents (`B03002_012`). 
 
 We could craft a JSON query to pull these data. However, the `tidycensus` package provides a handy set of tools that wrap around these JSON API calls. If you expect to hit the Census API a lot, then you need to create an account and get a Census API key. For the volume of requests we will do here (less than 500 per day), it is not necessary. Here we get ACS data on race using `get_acs()`.
 ```{r}
@@ -993,7 +993,7 @@ The file contains the geometry of each road (`geometry`), the name of the road (
 * U: U.S. highway (U.S. 101)
 * O: Other (e.g. forest roads, utility service roads)
 
-`MTFCC` stands for "[MAF/TIGER Feature Class Code](https://www.census.gov/library/reference/code-lists/mt-feature-class-codes.html)". There are numerous MTFCC one for just about every geographical feature you can think of (e.g shorelines, water towers, campgrounds), but some of the common ones for our purposes here are
+`MTFCC` stands for "[MAF/TIGER Feature Class Code](https://www.census.gov/library/reference/code-lists/mt-feature-class-codes.html)". There are numerous MTFCCs, one for just about every geographical feature you can think of (e.g shorelines, water towers, campgrounds), but some of the common ones for our purposes here are
 
 * s1100: Primary road (limited access highway)
 * s1200: Secondary road (main arteries and smaller highways)
@@ -1001,7 +1001,7 @@ The file contains the geometry of each road (`geometry`), the name of the road (
 * s1730: Alley
 * s1780: Parking lot
 
-We do not need all the streets of Los Angeles County, so let's just get the ones that intersect without southern MS13 safety zone. `st_filter()` by default uses `st_intersect()` to decide whether to keep a street or not. You can alter this default behavior by choosing a differ value for `.predicate` like `st_crosses()` or `st_within()`.
+We do not need all the streets of Los Angeles County, so let's just get the ones that intersect with the southern MS13 safety zone. `st_filter()` by default uses `st_intersect()` to decide whether to keep a street or not. You can alter this default behavior by choosing a different function for `.predicate` like `st_crosses()` or `st_within()`.
 
 ```{r}
 mapMS13street <- mapLAstreet |>
@@ -1346,7 +1346,7 @@ mapSZms13 |>
             delete_dsn = TRUE)
 ```
 
-Now you can navigate to [http://www.google.com/mymaps](http://www.google.com/mymaps), click import, select your `ms13.kml` file, and then it will be visible as an overlay on top of the usual Google map of Los Angeles.
+Now you can navigate to [https://www.google.com/mymaps](https://www.google.com/mymaps), click import, select your `ms13.kml` file, and then it will be visible as an overlay on top of the usual Google map of Los Angeles.
 
 
 # Solutions to the exercises
@@ -1531,7 +1531,7 @@ nSZcrimes
 #| message: false
 library(units)
 # use set_units() to convert to square miles
-#   equivalent to multiplying by 5820^2
+#   equivalent to multiplying by 5280^2
 set_units(nSZcrimes / st_area(st_union(mapSZ)), value="1/mile^2")
 ```
 
