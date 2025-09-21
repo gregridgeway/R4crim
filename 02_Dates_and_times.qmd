@@ -17,7 +17,7 @@ format:
     html-math-method: mathjax
   pdf:
     toc: true
-    prefer-html: true
+prefer-html: true
 number-sections: true
 editor_options: 
   chunk_output_type: console
@@ -50,7 +50,7 @@ editor_options:
 
 # Introduction
 
-Working with dates and times is a lot different than working with the more familiar numbers. Months have different number of days. Sometimes we count hours of the day up to 12 and then start over. Sometimes we count hours up to 24 and then start over. Some years have 366 days. We have 24 times zones around the world. Twice a year we switch clocks for Daylight Saving Time, except in some places like Arizona. Arithmetic, such as adding one month to a date, is poorly defined. Which date is one month after January 31st? Is it February 28th? Or is it March 3rd?
+Working with dates and times is very different from working with more familiar numbers. Months have different numbers of days. Sometimes we count hours of the day up to 12 and then start over. Sometimes we count hours up to 24 and then start over. Some years have 366 days. We have 24 time zones around the world. Twice a year we switch clocks for Daylight Saving Time, except in some places like Arizona. Arithmetic, such as adding one month to a date, is poorly defined. Which date is one month after January 31st? Is it February 28th? Or is it March 3rd?
 
 Fortunately, software for working with dates exists to make these tasks easier. Unfortunately, every system seems to make their own design decisions. Excel stores dates as the number of days since January 0, 1900... that's not a typo... they count from January 0, 1900. Linux systems count days since January 1, 1970. SPSS stores times as the number of seconds since midnight October 14, 1582, the adoption date of the Gregorian calendar. Much of the world did not adopt the calendar in 1582. The American colonies did not adopt the Gregorian calendar until 1752 along with Great Britain. So beware if you are a historian digging through centuries old data. Aligning dates can become very messy.
 
@@ -62,7 +62,7 @@ Do not use `as.Date()`. `lubridate` has an easier to read date formatting, more 
 ```
 install.packages("lubridate")
 ```
-and R will hit the web, download the `lubridate` package and any supporting packages it needs (and it does need a few), and installs them. This is a one time event. Once you have `lubridate` on your machine you will not need to reinstall it every time you need it.
+and R will hit the web, download the `lubridate` package and any supporting packages it needs (and it does need a few), and installs them. This is a one-time event. Once you have `lubridate` on your machine you will not need to reinstall it every time you need it.
 
 Some of our students, particularly on Macs, have encountered trouble installing some packages for R. R will sometimes try to download the source code for the packages and compile them from scratch on your machine. Sometimes that goes well and other times it requires that you have other tools installed on your machine. An easy solution is to run
 ```
@@ -72,7 +72,7 @@ instead to insist that R finds and installs a ready-to-use version of the packag
 
 
 # Working with dates
-While `lubridate` is now installed, once per R session you will need to load `lubridate`. 
+Once `lubridate` is installed, you need to load it at the start of each R session. 
 ```{r}
 #| comment: ""
 #| message: false
@@ -81,7 +81,7 @@ library(dplyr)
 ```
 If you close R and restart it, then you'll need to run this line again.
 
-Let's reload the [sample of Chicago crime data](https://github.com/gregridgeway/R4criminology/blob/master/chicago%20crime%2020141124-20141209.RData) discussed in the introductory notes, available on the [R4Crim github site](https://github.com/gregridgeway/R4crim).
+Let's reload the [sample of Chicago crime data](https://github.com/gregridgeway/R4crim/blob/master/chicago%20crime%2020141124-20141209.RData) discussed in the introductory notes, available on the [R4Crim github site](https://github.com/gregridgeway/R4crim).
 ```{r}
 #| comment: ""
 #| results: "hold"
@@ -96,7 +96,7 @@ chicagoCrime |>
    select(Date) |>
    slice(c(1,2500,5000,7500,10000))
 ```
-As you can see the dates include the date in month/day/year format and the time on a 12 hour AM/PM clock. R has no idea that these values represent dates. You are familiar with this date formatting, but R just thinks they are strings of characters. Use `substring()` to just extract the date part, the first 10 characters of `Date`.
+As you can see, the dates include the date in month/day/year format and the time on a 12-hour AM/PM clock. R has no idea that these values represent dates. You are familiar with this date formatting, but R just thinks they are strings of characters. Use `substring()` to just extract the date part, the first 10 characters of `Date`.
 ```{r}
 #| comment: ""
 #| results: "hold"
@@ -113,10 +113,10 @@ Now let's use the `mdy()` function from the `lubridate` package to tell R that t
 #| comment: ""
 #| results: "hold"
 b <- mdy(textDate)
-is(b)
+class(b)
 b
 ```
-`b` now stores those five dates in a format that recognizes the month, day, and year. `is(b)` tells us that R is storing `b` as a date. There are different functions for other date formats depending on the ordering of the day, month and year, like `dmy()` and `ymd()` and even `mdy_hms()` for month, day, year, hours, minutes, seconds format.
+`b` now stores those five dates in a format that recognizes the month, day, and year. `class(b)` tells us that R is storing `b` as a date object. There are different functions for other date formats depending on the ordering of the day, month, and year, like `dmy()` and `ymd()` and even `mdy_hms()` for month, day, year, hours, minutes, seconds format.
 
 Now that R knows these are dates, the `lubridate` package provides a lot of functions to help you work with dates.
 ```{r}
@@ -129,7 +129,7 @@ month(b, label=TRUE, abbr=FALSE)
 wday(b, label=TRUE)
 ```
 
-Subtraction will tell you the time between two dates. How many days since December 1, 2014? How many days have passed from the values in `b` to today? The `now()` function gives you the date and time, well... right now.
+Subtraction will tell you the time between two dates. How many days since December 1, 2014? How many days have passed from the values in `b` to today? The `now()` function gives you the date and time right now.
 ```{r}
 #| comment: ""
 b - mdy("12/01/2014")
@@ -143,7 +143,7 @@ difftime(b, mdy("12/01/2014"), units = "days")
 difftime(b, mdy("12/01/2014"), units = "hours")
 ```
 
-We can add time to the dates as well
+We can add time to the dates as well.
 ```{r}
 #| comment: ""
 b + dyears(1) # adds 365 days, does not increase year by 1
@@ -180,7 +180,7 @@ mdy_hms("8/1/2014 12:00:00") |>
    force_tz("America/Chicago")
 ```
 
-Note that `force_tz()` keeps the dates and times the same, but overwrites the timezone. If you want to lookup what the date and time would be in a different timezone, then use `with_tz()`.
+Note that `force_tz()` keeps the dates and times the same, but overwrites the timezone. If you want to look up what the date and time would be in a different timezone, then use `with_tz()`.
 
 ```{r}
 #| comment: ""
@@ -198,7 +198,7 @@ Looks like by 11am on November 2, 2025, Chicago is back to Central Standard Time
 
 # Exercises
 1. At what hour does Daylight Saving Time end? (Hint: Try using `dminutes()` to add time to the date DST ends)
-2. Thanksgiving occurs on the fourth Thursday in November. On what date will Thanksgiving fall in 2020? Hints:
+2. Thanksgiving occurs on the fourth Thursday in November. On what date will Thanksgiving fall in 2025? Hints:
      + Try listing all dates in November
      + Use `wday()` to get the weekday
      + find the fourth Thursday
@@ -237,7 +237,7 @@ a |>
    summarize(min(date), max(date))
 ```
 
-2. On what date will Thanksgiving fall in 2020?
+2. On what date will Thanksgiving fall in 2025?
 ```{r}
 #| comment: ""
 data.frame(date=mdy("11/1/2025") + ddays(0:29)) |>

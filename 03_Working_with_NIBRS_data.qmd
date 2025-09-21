@@ -15,7 +15,7 @@ format:
   pdf:
     toc: true
     exclude: true
-    prefer-html: true
+prefer-html: true
 number-sections: true
 editor_options: 
   chunk_output_type: console
@@ -78,7 +78,7 @@ library(lubridate)
 scan("2023_NIBRS_NATIONAL_MASTER_FILE.txt.gz",
      nlines=5, what="", sep="\n")
 ```
-As you can see the data are not pretty. This data is in "fixed-width format". Rather than separate each column of data with a delimiter (like a comma or tab), all of the data fields are placed side by side. This is a legacy format that has some benefits. First, there is no need to store delimiters. This is less important these days with cheap data storage, but storing delimiters in a dataset this size requires about 1 Gb... just to store a bunch of commas. Instead, the data come with a separate file that describes which columns of text correspond to different columns of data. The following table shows the first five rows of the NIBRS offense segment in the included `NIBRS Records Description updated.xlsx` file.
+As you can see the data are not pretty. These data are in "fixed-width format". Rather than separate each column of data with a delimiter (like a comma or tab), all of the data fields are placed side by side. This is a legacy format that has some benefits. First, there is no need to store delimiters. This is less important these days with cheap data storage, but storing delimiters in a dataset this size requires about 1 Gb... just to store a bunch of commas. Instead, the data come with a separate file that describes which columns of text correspond to different columns of data. The following table shows the first five rows of the NIBRS offense segment in the included `NIBRS Records Description updated.xlsx` file.
 
 | Positions | Field Length and Type | Field Name                              | 
 |-----------|-----------------------|-----------------------------------------|
@@ -90,7 +90,7 @@ As you can see the data are not pretty. This data is in "fixed-width format". Ra
 | 34-36     | A3                    | UCR OFFENSE CODE			               |
 | ...       | ...                   | ...                                     |
 
-The table tells us that for offense segments, the first two characters represent the segment level, characters 3 and 4 capture the state numeric code, characters 5-13 capture the ORI (a unique identifier for a law enforcement agency), and so on. The second column describes the data type, (A)lphanumeric or (N)umeric, and the width (number of characters) of the data field. Let's start by discussing the segment level. The NIBRS data is more complex than an already complex fixed-width format data file. The NIBRS data involve several data tables, separate tables for offenses, victims, offenders, property, and arrests. The data file we just loaded interleaves all of these tables. Note that the fourth row of the data we scanned in starts with "02" that signals that the rest of that row describes an offense and its format will align with the formatting table shown here. Since characters 3-4 are "50" we know from the format table that this number represents the state with code "50," which turns out to be Alaska. The next nine characters (AK0010200) is the ORI code for the law enforcement agency that reported the offense, which turns out to be the Fairbanks Police Department. If we look further to the right in that fourth row of data to characters 26-33 we get "20230101," which is the data of the criminal incident, January 1, 2023. And the three characters after the date give the offense code "23D," which is the code for theft from a building. 
+The table tells us that for offense segments, the first two characters represent the segment level, characters 3 and 4 capture the state numeric code, characters 5-13 capture the ORI (a unique identifier for a law enforcement agency), and so on. The second column describes the data type, (A)lphanumeric or (N)umeric, and the width (number of characters) of the data field. Let's start by discussing the segment level. The NIBRS data is more complex than an already complex fixed-width format data file. The NIBRS data involve several data tables, separate tables for offenses, victims, offenders, property, and arrests. The data file we just loaded interleaves all of these tables. Note that the fourth row of the data we scanned in starts with "02" that signals that the rest of that row describes an offense and its format will align with the formatting table shown here. Since characters 3-4 are "50" we know from the format table that this number represents the state with code "50," which turns out to be Alaska. The next nine characters (AK0010200) is the ORI code for the law enforcement agency that reported the offense, which turns out to be the Fairbanks Police Department. If we look further to the right in that fourth row of data to characters 26-33 we get "20230101," which is the date of the criminal incident, January 1, 2023. And the three characters after the date give the offense code "23D," which is the code for theft from a building. 
 
 This interpretation only works for lines of data with the first two characters equal to "02". The others are
 
@@ -111,7 +111,7 @@ This interpretation only works for lines of data with the first two characters e
 We will read each of these in and explore what they contain. The W1, W2, and W3 are "window segments" and represent a partial reporting. These are relatively rare records and mostly relate to arrests or recovered property related to offenses that do not appear in the 02 segment, most likely because the agency transitioned to NIBRS between the offense and the recovery/arrest.
 
 # Reading in the data
-Here's the strategy that we will use to read in the data. The data might be too big to read in all at once and still have computer memory available to clean and organize the data. Instead of reading all of it in, we are going to read in one million rows at a time. We will then examine the first two characters of each row and split rows of data by those first two characters. In this way, all the offense records will be together, and all the victim records will be together, and so one. Then we will write out all the records into segment specific files. Our computers will then have a separate file for each of the NIBRS segments.
+Here's the strategy that we will use to read in the data. The data might be too big to read in all at once and still have computer memory available to clean and organize the data. Instead of reading all of it in, we are going to read in one million rows at a time. We will then examine the first two characters of each row and split rows of data by those first two characters. In this way, all the offense records will be together, and all the victim records will be together, and so on. Then we will write out all the records into segment specific files. Our computers will then have a separate file for each of the NIBRS segments.
 
 First, I set up `infile` to connect to the large NIBRS data file, opening it in (r)ead mode. Next, I set up eight files, one for each of the segments, creating them in (w)rite mode to be gzip'd (compressed) as they are created. Then I set up a while-loop to continue to read one million lines at a time as long as there are more rows of data to read in. Within the loop I use `split()` to separate the lines of data I have read in based on the first two characters of the line. I combine the few window segments with the similar complete records (e.g. window segment on property goes with the rest of the property data). Lastly, inside the loop I write out the new batch of data, appending them to existing data from previous iterations of the while-loop. Closing all the files makes sure that all the read and write buffers get flushed to the data files and the connections are closed.
 
@@ -368,7 +368,7 @@ nibrsProp03 <- read_fwf("2023-03.txt.gz",
           STATE   = NUMERIC.STATE.CODE)
 ```
 
-Let's pull up the property record for the Fairbanks, Alaska incident 2300003 that we previously examined.
+Let's pull up the victim record for the Fairbanks, Alaska incident 2300003 that we previously examined.
 ```{r}
 nibrsProp03 |>  
    filter(ORI=="AK0010200" & INCIDENT.NUMBER=="23000003") |> 
@@ -418,7 +418,7 @@ nibrsVic04 <- read_fwf("2023-04.txt.gz",
 ```
 
 
-Let's pull up the property record for the Fairbanks, Alaska incident 2300003 that we previously examined.
+Let's pull up the victim record for the Fairbanks, Alaska incident 2300003 that we previously examined.
 ```{r}
 nibrsVic04 |>
    filter(ORI=="AK0010200" & INCIDENT.NUMBER=="23000003") |> 
@@ -492,7 +492,7 @@ nibrsOff05 |>
 If the reporting agency arrests an offender for the reported offense after submitting the initial report, the agency later submits an updated arrestee segment as an update to the initial report. The [NIBRS User's Manual](https://le.fbi.gov/file-repository/nibrs-user-manual.pdf) notes that as cases develop, police can update, delete, or add to previously submitted records. However, the submission date cuts off on March 15 of subsequent year.
 
 ```{r readArrestee} 
-# select only the rows for victim segment
+# select only the rows for the arrestee segment
 i <- grep('LEVEL "06"', fmtXL$DataField)
 j <- grep('LEVEL "07"', fmtXL$DataField)
 
@@ -605,7 +605,7 @@ nibrsBH <- read_fwf("2023-BH.txt.gz",
           STATE   = NUMERIC.STATE.CODE)
 ```
 
-Some particularly important columns are `DATE.ORI.WENT.NIBRS` containing the date when the agency first reported data to NIBRS, the `AGENCY.INDICATOR` describing what type of law enforcement agency it is (eg. city, county, state, college, tribal) or whether the agency relies on another to file its NIBRS reports (such as a transit police that reports through the municipal police). The batch header contains an estimate of the size of the population that the agency covers, but breaks down the reporting by county. Oklahoma City, for example, intersects with four different counties, so that the Oklahoma City Police Department reports their population separately for each.
+Some particularly important columns are `DATE.ORI.WENT.NIBRS` containing the date when the agency first reported data to NIBRS, the `AGENCY.INDICATOR` describing what type of law enforcement agency it is (e.g. city, county, state, college, tribal) or whether the agency relies on another to file its NIBRS reports (such as a transit police that reports through the municipal police). The batch header contains an estimate of the size of the population that the agency covers, but breaks down the reporting by county. Oklahoma City, for example, intersects with four different counties, so that the Oklahoma City Police Department reports their population separately for each.
 
 ```{r}
 #| cache: true
@@ -690,12 +690,21 @@ save(nibrsAdmin01, nibrsCrm02, nibrsProp03, nibrsVic04, nibrsOff05,
 # Examples using NIBRS
 
 For several of these examples we are going to need to work with dates. So, let's start by converting all the dates to proper date formats.
+We will also keep the earliest arrest per incident to reuse across the examples.
 ```{r}
 nibrsCrm02 <- nibrsCrm02 |>
    mutate(INCIDENT.DATE = ymd(INCIDENT.DATE))
 nibrsArr06 <- nibrsArr06 |>
    mutate(INCIDENT.DATE = ymd(INCIDENT.DATE),
           ARREST.DATE = ymd(ARREST.DATE))
+
+# earliest arrest date for each incident
+firstArrests <- nibrsArr06 |>
+   summarize(dateFirstArrest = {
+               non_missing <- ARREST.DATE[!is.na(ARREST.DATE)]
+               if (length(non_missing) == 0) as.Date(NA) else min(non_missing)
+            },
+            .by = c(ORI, INCIDENT.NUMBER))
 ```
 
 ## What percentage of burglaries result in an arrest? 
@@ -709,17 +718,14 @@ We will use UCR code 220 to select all the burglary offenses and check that `OFF
 ```{r examplePctBurgArrest}
 #| cache: true
 nibrsCrm02 |>
-  filter(UCR.OFFENSE.CODE=="220" &            # burglary offense code 
+  filter(UCR.OFFENSE.CODE=="220" &            # burglary offense code
          OFFENSE.ATTEMPTED.COMPLETED=="C") |> # completed
   select(ORI, INCIDENT.NUMBER) |> # incidents are only unique within ORI
   distinct() |> # remove any duplicate ORI/INCIDENT.NUMBER combos
   # compress arrest data to ORI, INCIDENT.NUMBER, and first arrest
-  left_join(nibrsArr06 |>
-               group_by(ORI, INCIDENT.NUMBER) |>
-               summarize(dataFirstArrest = min(ARREST.DATE, na.rm=TRUE),
-                         .groups="drop"),
+  left_join(firstArrests,
             by = join_by(ORI, INCIDENT.NUMBER)) |>
-  summarize(pctArrest = mean(!is.na(dataFirstArrest)))
+  summarize(pctArrest = mean(!is.na(dateFirstArrest)))
 ```
 
 ## What percentage of crimes are cleared with an arrest by month in which the offense occurred?
@@ -730,13 +736,10 @@ nibrsCrm02 |>
   mutate(INCIDENT.MONTH=month(INCIDENT.DATE, label=TRUE)) |>
   select(ORI, INCIDENT.NUMBER, INCIDENT.MONTH) |>
   distinct() |>
-  left_join(nibrsArr06 |>
-               group_by(ORI, INCIDENT.NUMBER) |>
-               summarize(dataFirstArrest = min(ARREST.DATE, na.rm=TRUE),
-                         .groups="drop"),
+  left_join(firstArrests,
             by = join_by(ORI, INCIDENT.NUMBER)) |>
   group_by(INCIDENT.MONTH) |>
-  summarize(pctArrest = mean(!is.na(dataFirstArrest)))
+  summarize(pctArrest = mean(!is.na(dateFirstArrest)))
 ```
 
 ## What is the range of times to arrest for crimes resulting in arrest?
@@ -745,15 +748,12 @@ This next example shows the issue with the March 15 cutoff for reporting to NIBR
 
 ```{r exampleTimeToArrest}
 #| cache: true
-nibrsArr06 |>
-   group_by(ORI, INCIDENT.NUMBER) |>
-   summarize(dateFirstArrest = min(ARREST.DATE, na.rm=TRUE),
-             .groups="drop") |>
-   left_join(nibrsCrm02 |> 
+firstArrests |>
+   left_join(nibrsCrm02 |>
                 select(ORI, INCIDENT.NUMBER, INCIDENT.DATE) |>
                 distinct(),
              by = join_by(ORI, INCIDENT.NUMBER)) |>
-   mutate(timeToArrest = difftime(dateFirstArrest, INCIDENT.DATE, 
+   mutate(timeToArrest = difftime(dateFirstArrest, INCIDENT.DATE,
                                   units="days") ,
           INCIDENT.MONTH = month(INCIDENT.DATE, label=TRUE)) |>
    group_by(INCIDENT.MONTH) |>
@@ -762,20 +762,17 @@ nibrsArr06 |>
    print(width=Inf)
 ```
 
-For a more fair comparison across months we can look at the percentage of crimes that result in an arrest within two months of the crime incident date. Technically, crimes on December 31st have until March 15th to have any arrests recorded (75 days), but I am going to set the threshold to within 60 days just in case it takes a few days for arrests in February for December crimes to get posted to NIBRS. Here we see that the percentage of crimes cleared with an arrest within 60 days is nearly constant across month of the year.
+For a more fair comparison across months we can look at the percentage of crimes that result in an arrest within two months of the crime incident date. Technically, crimes on December 31st have until March 15th to have any arrests recorded (75 days), but I am going to set the threshold to within 60 days just in case it takes a few days for arrests in February for December crimes to get posted to NIBRS. Here we see that the percentage of crimes cleared with an arrest within 60 days is nearly constant across the months of the year.
 ```{r exampleArrestIn2Months}
 #| cache: true
 nibrsCrm02 |>
    select(ORI, INCIDENT.NUMBER, INCIDENT.DATE) |>
    distinct() |>
-   left_join(nibrsArr06 |> 
-                group_by(ORI, INCIDENT.NUMBER, ARREST.DATE) |>
-                summarize(dateFirstArrest = min(ARREST.DATE, na.rm=TRUE),
-                          .groups = "drop"),
+   left_join(firstArrests,
              by = join_by(ORI, INCIDENT.NUMBER)) |>
-   mutate(timeToArrest = difftime(dateFirstArrest, INCIDENT.DATE, 
+   mutate(timeToArrest = difftime(dateFirstArrest, INCIDENT.DATE,
                                   units="days"),
-          arrest2Months = as.numeric(!is.na(timeToArrest) & timeToArrest <= 60),
+          arrest2Months = as.numeric(!is.na(timeToArrest) & as.numeric(timeToArrest) <= 60),
           INCIDENT.MONTH = month(INCIDENT.DATE, label=TRUE)) |>
    group_by(INCIDENT.MONTH) |>
    summarize(mean=mean(arrest2Months, na.rm=TRUE)) |>
