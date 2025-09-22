@@ -25,6 +25,11 @@ editor_options:
 bibliography: G:/My Drive/docs/Greg/articles/mybib.bib
 ---
 
+<!-- quarto render 08_Introduction_to_SQL2.qmd -->
+
+<!-- git commit 08* -m "commit message" -->
+<!-- git status -->
+<!-- git push -->
 
 <!-- A function for automating the numbering and wording of the exercise questions -->
 ```{r}
@@ -95,7 +100,7 @@ Let's start by reconnecting to the Chicago crime database.
 ```{r} 
 #| message: false
 library(dplyr)
-library(sqldf)
+library(RSQLite)
 con <- dbConnect(SQLite(), "chicagocrime.db")
 ```
 

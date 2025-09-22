@@ -68,12 +68,12 @@ In the previous section, you built a SQLite database to store and manage the lar
 Here we will make hotspot maps with our Chicago crime data (which requires use of SQL). Of course, if you have acquired a dataset with latitude and longitude not in a SQL database, you could use these same methods to make a hotspot map using only R.
 
 # Setting up the data
-Let's first load up the `sqldf` library and reconnect to our Chicago crime database.
+Let's first load up the `RSQLite` library and reconnect to our Chicago crime database.
 
 ```{r}
 #| cache: false
 #| message: false
-library(sqldf)
+library(RSQLite)
 con <- dbConnect(SQLite(), dbname="chicagocrime.db")
 ```
 

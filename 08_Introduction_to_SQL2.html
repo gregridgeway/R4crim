@@ -8,7 +8,7 @@
 
 <meta name="author" content="Greg Ridgeway">
 <meta name="author" content="Ruth Moyer">
-<meta name="dcterms.date" content="2025-08-31">
+<meta name="dcterms.date" content="2025-09-21">
 
 <title>Introduction to SQL, Part 2</title>
 <style>
@@ -138,7 +138,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">August 31, 2025</p>
+      <p class="date">September 21, 2025</p>
     </div>
   </div>
   
@@ -150,6 +150,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
+<!-- quarto render 08_Introduction_to_SQL2.qmd -->
+<!-- git commit 08* -m "commit message" -->
+<!-- git status -->
+<!-- git push -->
 <!-- A function for automating the numbering and wording of the exercise questions -->
 <div class="cell">
 <div class="cell-output cell-output-stdout">
@@ -363,7 +367,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Let’s start by reconnecting to the Chicago crime database.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sqldf)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RSQLite)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(<span class="fu">SQLite</span>(), <span class="st">"chicagocrime.db"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The SQL keyword <code>DISTINCT</code> will filter out any duplicated rows in the result set so that every row is a unique combination of values.</p>
@@ -1634,10 +1638,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>timeIUCRjoin</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   user  system elapsed 
-  13.04    1.95   15.78 </code></pre>
+  10.43    1.78   12.48 </code></pre>
 </div>
 </div>
-<p>For each record in <code>crime</code>, SQLite looks up the crime’s IUCR code in the <code>iucr</code> table and links in the FBI code. SQLite is fast. This query took 15.78 seconds, but this linking does take time, especially for really large datasets and large lookup tables. For the above query, SQLite scans through the <code>iucr</code> table until it finds the right IUCR code. This is not very efficient. If you were to look up the word “query” in the dictionary, you would not start on page 1 and scan through every word until you arrived at “query”. Instead, you would start about two-thirds of the way through the dictionary, see if the words are before or after “query,” and revise your search until you find the word. Rather than search hundreds of pages, you might only need to look at nine pages.</p>
+<p>For each record in <code>crime</code>, SQLite looks up the crime’s IUCR code in the <code>iucr</code> table and links in the FBI code. SQLite is fast. This query took 12.48 seconds, but this linking does take time, especially for really large datasets and large lookup tables. For the above query, SQLite scans through the <code>iucr</code> table until it finds the right IUCR code. This is not very efficient. If you were to look up the word “query” in the dictionary, you would not start on page 1 and scan through every word until you arrived at “query”. Instead, you would start about two-thirds of the way through the dictionary, see if the words are before or after “query,” and revise your search until you find the word. Rather than search hundreds of pages, you might only need to look at nine pages.</p>
 <p>In the same way, we can create an index for the <code>iucr</code> table to help speed up the search. An index does not always make queries faster and can require storing a large index in some cases. Let’s try this example.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dbExecute</span>(con, <span class="st">"</span></span>
@@ -1661,10 +1665,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb66-11"><a href="#cb66-11" aria-hidden="true" tabindex="-1"></a>timeIUCRjoinIndex</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   user  system elapsed 
-   7.89    1.50    9.75 </code></pre>
+   7.50    1.45    8.97 </code></pre>
 </div>
 </div>
-<p>That query now takes 9.75 seconds. Creating an index is not always worth it. If you have queries that are taking too long, it is worth experimenting with creating an index to see if it helps.</p>
+<p>That query now takes 8.97 seconds. Creating an index is not always worth it. If you have queries that are taking too long, it is worth experimenting with creating an index to see if it helps.</p>
 <p>You may come across SQL queries that join two tables with a <code>WHERE</code> clause like this.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="st">"</span></span>
