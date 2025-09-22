@@ -69,17 +69,17 @@ These are some basic clauses in a SQL query that we will explore:
 -  GROUP BY  	list of fields to group
 -  ORDER BY  	list of fields to sort by
 
-However, before being able to use SQL as a tool in R, it will first be necessary to load the `sqldf` package.
+However, before being able to use SQL as a tool in R, we first need to load the `RSQLite` package, which provides the software tools to connect to a SQLite database.
 ```{r}
 #| cache: false
 #| message: false
 library(dplyr)
-library(sqldf)
+library(RSQLite)
 ```
 
 # Getting the data into proper form
 
-We will be working with Chicago crime data, which is accessible comma-separated value (csv) format. Before we can even being learning SQL, we are going to have to do a fair bit of work to acquire the dataset, format it so that it is ready for SQLite, and then load it into the SQLite database.
+We will be working with Chicago crime data, which is accessible in comma-separated value (csv) format. Before we can even begin learning SQL, we are going to have to do a fair bit of work to acquire the dataset, format it so that it is ready for SQLite, and then load it into the SQLite database.
 
 Navigate to the Chicago open data website to get the [data](https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-present/ijzp-q8t2). Click the "Export" button and select the "CSV" option, or directly download from [here](https://data.cityofchicago.org/api/views/ijzp-q8t2/rows.csv?accessType=DOWNLOAD)
 
@@ -295,7 +295,7 @@ SQL does not like column names with special characters. Only letters (first char
 
 `r .exNum('Make a table of the number of assaults (IUCR 0560) by Ward')`
 
-# `GROUP_BY` and aggregation functions
+# `GROUP BY` and aggregation functions
 
 We have already covered SQL clauses `SELECT`, `WHERE`, and `FROM`. The SQL function `COUNT(*)` and `GROUP BY` are also very useful. For example, the following query counts how many assaults (IUCR 0560) occurred by ward. `COUNT()` is a SQL "aggregate" function, a function that performs a calculation on a group of values and returns a single number. Other SQL aggregate functions include `AVG()`, `MIN()`, `MAX()`, and `SUM()`. This query will group all the records by `Ward` and then apply the aggregate function `COUNT()` and report that value in a column called `crimecount`. `AS` allows us to give clear column names in the results. Without the `AS crimecount` column of counts would be called `COUNT(*)`, which has several characters about which SQL will complain.
 
@@ -319,7 +319,7 @@ The `GROUP BY` clause is critical. If you forget it then the result is not well 
 `r .exNum('Count the number of crimes by \x60LocationDescription\x60')`. `LocationDescription` is the variable that tells us where (e.g., a parking lot, a barbershop, a fire station, a CTA train, or a motel) a crime occurred
 
 
-# `ORDER_BY` and `UPDATE`
+# `ORDER BY` and `UPDATE`
 
 `MAX`, `MIN`, `SUM`, `AVG` are common (and useful) aggregating functions. The `ORDER BY` clause sorts the results for us. It is the SQL version of the `sort()` or `arrange()` functions. Here is an illustration that gives the range of beat numbers in each policing district.
 

@@ -9,7 +9,7 @@
 <meta name="author" content="Greg Ridgeway">
 <meta name="author" content="Ruth Moyer">
 <meta name="author" content="Li Sian Goh">
-<meta name="dcterms.date" content="2025-08-31">
+<meta name="dcterms.date" content="2025-09-21">
 
 <title>Introduction to SQL</title>
 <style>
@@ -92,11 +92,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">4.1</span> Exercises</a></li>
   </ul></li>
-  <li><a href="#group_by-and-aggregation-functions" id="toc-group_by-and-aggregation-functions" class="nav-link" data-scroll-target="#group_by-and-aggregation-functions"><span class="header-section-number">5</span> <code>GROUP_BY</code> and aggregation functions</a>
+  <li><a href="#group-by-and-aggregation-functions" id="toc-group-by-and-aggregation-functions" class="nav-link" data-scroll-target="#group-by-and-aggregation-functions"><span class="header-section-number">5</span> <code>GROUP BY</code> and aggregation functions</a>
   <ul class="collapse">
   <li><a href="#exercises-1" id="toc-exercises-1" class="nav-link" data-scroll-target="#exercises-1"><span class="header-section-number">5.1</span> Exercises</a></li>
   </ul></li>
-  <li><a href="#order_by-and-update" id="toc-order_by-and-update" class="nav-link" data-scroll-target="#order_by-and-update"><span class="header-section-number">6</span> <code>ORDER_BY</code> and <code>UPDATE</code></a>
+  <li><a href="#order-by-and-update" id="toc-order-by-and-update" class="nav-link" data-scroll-target="#order-by-and-update"><span class="header-section-number">6</span> <code>ORDER BY</code> and <code>UPDATE</code></a>
   <ul class="collapse">
   <li><a href="#exercises-2" id="toc-exercises-2" class="nav-link" data-scroll-target="#exercises-2"><span class="header-section-number">6.1</span> Exercises</a></li>
   </ul></li>
@@ -148,7 +148,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">August 31, 2025</p>
+      <p class="date">September 21, 2025</p>
     </div>
   </div>
   
@@ -181,15 +181,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>GROUP BY list of fields to group</li>
 <li>ORDER BY list of fields to sort by</li>
 </ul>
-<p>However, before being able to use SQL as a tool in R, it will first be necessary to load the <code>sqldf</code> package.</p>
+<p>However, before being able to use SQL as a tool in R, we first need to load the <code>RSQLite</code> package, which provides the software tools to connect to a SQLite database.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sqldf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RSQLite)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="getting-the-data-into-proper-form" class="level1" data-number="2">
 <h1 data-number="2"><span class="header-section-number">2</span> Getting the data into proper form</h1>
-<p>We will be working with Chicago crime data, which is accessible comma-separated value (csv) format. Before we can even being learning SQL, we are going to have to do a fair bit of work to acquire the dataset, format it so that it is ready for SQLite, and then load it into the SQLite database.</p>
+<p>We will be working with Chicago crime data, which is accessible in comma-separated value (csv) format. Before we can even begin learning SQL, we are going to have to do a fair bit of work to acquire the dataset, format it so that it is ready for SQLite, and then load it into the SQLite database.</p>
 <p>Navigate to the Chicago open data website to get the <a href="https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-present/ijzp-q8t2">data</a>. Click the “Export” button and select the “CSV” option, or directly download from <a href="https://data.cityofchicago.org/api/views/ijzp-q8t2/rows.csv?accessType=DOWNLOAD">here</a></p>
 <p>The Chicago crime data is huge, more than 2.0 Gb. It contains over 8.3 million records on all crimes reported to the Chicago police department since 2001. R does not handle really large datasets well. By using SQL, you will learn how to more efficiently work with large datasets and learn a data language that is used absolutely everywhere.</p>
 <p>Let’s use <code>scan()</code> to just peek at the first five rows of the file.</p>
@@ -524,8 +524,8 @@ coercing other values of type real</code></pre>
 </ol>
 </section>
 </section>
-<section id="group_by-and-aggregation-functions" class="level1" data-number="5">
-<h1 data-number="5"><span class="header-section-number">5</span> <code>GROUP_BY</code> and aggregation functions</h1>
+<section id="group-by-and-aggregation-functions" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> <code>GROUP BY</code> and aggregation functions</h1>
 <p>We have already covered SQL clauses <code>SELECT</code>, <code>WHERE</code>, and <code>FROM</code>. The SQL function <code>COUNT(*)</code> and <code>GROUP BY</code> are also very useful. For example, the following query counts how many assaults (IUCR 0560) occurred by ward. <code>COUNT()</code> is a SQL “aggregate” function, a function that performs a calculation on a group of values and returns a single number. Other SQL aggregate functions include <code>AVG()</code>, <code>MIN()</code>, <code>MAX()</code>, and <code>SUM()</code>. This query will group all the records by <code>Ward</code> and then apply the aggregate function <code>COUNT()</code> and report that value in a column called <code>crimecount</code>. <code>AS</code> allows us to give clear column names in the results. Without the <code>AS crimecount</code> column of counts would be called <code>COUNT(*)</code>, which has several characters about which SQL will complain.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="st">"</span></span>
@@ -600,8 +600,8 @@ coercing other values of type real</code></pre>
 </ol>
 </section>
 </section>
-<section id="order_by-and-update" class="level1" data-number="6">
-<h1 data-number="6"><span class="header-section-number">6</span> <code>ORDER_BY</code> and <code>UPDATE</code></h1>
+<section id="order-by-and-update" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> <code>ORDER BY</code> and <code>UPDATE</code></h1>
 <p><code>MAX</code>, <code>MIN</code>, <code>SUM</code>, <code>AVG</code> are common (and useful) aggregating functions. The <code>ORDER BY</code> clause sorts the results for us. It is the SQL version of the <code>sort()</code> or <code>arrange()</code> functions. Here is an illustration that gives the range of beat numbers in each policing district.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dbGetQuery</span>(con, <span class="st">"</span></span>
@@ -949,7 +949,7 @@ coercing other values of type string</code></pre>
 <span id="cb75-11"><a href="#cb75-11" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   user  system elapsed 
-   3.14    2.04    5.37 </code></pre>
+   6.69    4.56   11.93 </code></pre>
 </div>
 </div>
 <p>Or we could make SQL do all the work selecting and tabulating.</p>
@@ -966,7 +966,7 @@ coercing other values of type string</code></pre>
 <span id="cb77-10"><a href="#cb77-10" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   user  system elapsed 
-   0.71    1.83    2.62 </code></pre>
+   1.24    3.39    4.77 </code></pre>
 </div>
 </div>
 <p>Generally, SQL will be much faster for general selecting, filtering, tabulating, and linking data.</p>
