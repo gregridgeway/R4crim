@@ -3,7 +3,22 @@ Notes for learning and applying R to questions about crime and the justice syste
 
 Best viewed at the [R4crim github.io site](https://gregridgeway.github.io/R4crim/)
 
-These notes form the basis of Penn Criminology's Criminal Justice Data Science course that I've taught since 2014. Students code in R to answer questions like "what happens to crime when big movies come out?" and "where are Chicago's crime hotspots?" and "which crimes happen inside LA's gang injunction areas?". On the way to answering these questions students learn about regular expressions, SQL, web scraping, parallel processing, geographic data, official data sources (NIBRS, NCVS, ACS), and basic data coding skills.
+These notes form the basis of Penn Criminology's Criminal Justice Data Science course that I've taught since 2014. Students code in R to answer questions like 
+
+-  What happens to crime when big movies come out?
+-  Where are Chicago's crime hotspots?
+-  Which crimes happen inside LA's gang injunction areas?
+-  If the police shoot someone, do they tranfer them to the nearest hospital?
+
+On the way to answering these questions students learn about 
+
+-  regular expressions
+-  SQL
+-  web scraping
+-  parallel processing
+-  geographic data
+-  official data sources (NIBRS, NCVS, ACS), and
+-  a lot of basic data coding skills
 
 Table of contents
 1. [Intro to R](01_Intro_to_R_protests.html) (replacing the older [Intro to R](01-Intro-to-R.html))
