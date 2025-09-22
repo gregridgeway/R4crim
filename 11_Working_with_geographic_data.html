@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Greg Ridgeway">
-<meta name="dcterms.date" content="2025-09-21">
+<meta name="dcterms.date" content="2025-09-22">
 
 <title>Working with Geographic Data</title>
 <style>
@@ -150,7 +150,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 21, 2025</p>
+      <p class="date">September 22, 2025</p>
     </div>
   </div>
   
@@ -170,14 +170,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- A function for automating the numbering and wording of the exercise questions -->
 <section id="introduction" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
-<p>Geographic data includes</p>
+<p>Geographic data include</p>
 <ul>
 <li>point - crime locations, intersections, schools, transit stops</li>
 <li>lines - roads, paths, routes</li>
 <li>polygons - area within city boundaries, gang injunction safety zones, areas within 1000 ft of a school, census tracts</li>
 </ul>
 <p>Geographic data also include the data that go along with each of these shapes such as the area or length of the geographic object, the name of the object (e.g.&nbsp;City of Los Angeles), and other characteristics of the geography (e.g.&nbsp;population, date established).</p>
-<p>Many questions about crime and the justice system involve the use of geographic data. In this section we will work toward answering questions about the race distribution of residents inside Los Angeles gang injunction zones, the number of crimes with 100 feet of Wilshire Blvd, and examine crimes near Metrorail stations.</p>
+<p>Many questions about crime and the justice system involve the use of geographic data. In this section we will work toward answering questions about the race distribution of residents inside Los Angeles gang injunction zones, the number of crimes within 100 feet of Wilshire Blvd, and examine crimes near Metrorail stations.</p>
 <p>We will be learning how to use the <code>sf</code> package for managing spatial data, the <code>tigris</code> package for obtaining TIGER files storing boundaries and roads, and <code>jsonlite</code> and <code>tidycensus</code> for pulling population data about residents in an area, like number of residents or race distribution.</p>
 </section>
 <section id="exploring-los-angeles-gang-injunction-maps" class="level1" data-number="2">
@@ -190,7 +190,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>All of the spatial functions in the <code>sf</code> package have a prefix <code>st_</code>(spatial/temporal). We will first read in <code>allinjunction.shp</code>, a shapefile containing the geographic definition of Los Angeles gang injunctions. You should have a collection of four files related to <code>allinjunctions</code>, a .dbf file, a .prj file, a .shx file, and a .shp file. even though the <code>st_read()</code> function appears to just ask for the .shp file, you need to have all four files in the same folder.</p>
+<p>All of the spatial functions in the <code>sf</code> package have a prefix <code>st_</code> (spatial type). We will first read in <code>allinjunction.shp</code>, a shapefile containing the geographic definition of Los Angeles gang injunctions. You should have a collection of four files related to <code>allinjunctions</code>, a .dbf file, a .prj file, a .shx file, and a .shp file. Even though the <code>st_read()</code> function appears to just ask for the .shp file, you need to have all four files in the same folder.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>mapSZ <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"11_shapefiles_and_data/allinjunctions.shp"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -410,7 +410,7 @@ Figure&nbsp;2: Map of Los Angeles gang injunctions, PC027254 highlighted in red
 <img src="11_Working_with_geographic_data_files/figure-html/fig-mapGangInjunctionsByDecade-1.svg" class="img-fluid figure-img" style="width:100.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mapGangInjunctionsByDecade-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3: Map of Los Angeles gang injunctions. Those initiated prior to 2000 are in red, those initiatied between 2000 and 2010 are in green, and those initiated after 2010 are in blue
+Figure&nbsp;3: Map of Los Angeles gang injunctions. Those initiated prior to 2000 are in red, those initiated between 2000 and 2010 are in green, and those initiated after 2010 are in blue
 </figcaption>
 </figure>
 </div>
@@ -478,7 +478,7 @@ Figure&nbsp;5: A 1000-foot buffer around the Los Angeles gang injunctions
 </div>
 </div>
 <p>Every injunction area is shaded red. The white bands between the red shapes and the black outlines is the 1000-foot buffer.</p>
-<p>Previously we had to clean up some typos on the injunction dates data. The data can also have errors in the geography that requires fixing. Have a look at the MS13 gang injunction.</p>
+<p>Previously we had to clean up some typos on the injunction dates data. The data can also have errors in the geography that require fixing. Have a look at the MS13 gang injunction.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>mapSZms13 <span class="ot">&lt;-</span> mapSZ <span class="sc">|&gt;</span></span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>   <span class="fu">filter</span>(case_no<span class="sc">==</span><span class="st">"BC311766"</span>)</span>
@@ -921,14 +921,14 @@ Figure&nbsp;12: Map of all census tracts that overlap the MS13 injunction
 </div>
 </div>
 <p>Many more examples are posted at the <a href="https://api.census.gov/data/2010/acs/acs5/examples.html">Census API website</a>.</p>
-<p>Now let’s get something more complete that we can merge into our geographic data. For each census tract in Los Angeles County, we will extract the total population (<code>B03002001</code>), the number of non-Hispanic white residents (<code>B03002003</code>), non-Hispanic black residents (<code>B03002004</code>), and Hispanic residents (<code>B03002012</code>).</p>
+<p>Now let’s get something more complete that we can merge into our geographic data. For each census tract in Los Angeles County, we will extract the total population (<code>B03002_001</code>), the number of non-Hispanic white residents (<code>B03002_003</code>), non-Hispanic black residents (<code>B03002_004</code>), and Hispanic residents (<code>B03002_012</code>).</p>
 <p>We could craft a JSON query to pull these data. However, the <code>tidycensus</code> package provides a handy set of tools that wrap around these JSON API calls. If you expect to hit the Census API a lot, then you need to create an account and get a Census API key. For the volume of requests we will do here (less than 500 per day), it is not necessary. Here we get ACS data on race using <code>get_acs()</code>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidycensus)</span>
 <span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a>dataRace <span class="ot">&lt;-</span> </span>
 <span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a>   <span class="fu">get_acs</span>(<span class="at">geography =</span> <span class="st">"tract"</span>,</span>
-<span id="cb65-4"><a href="#cb65-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">variables =</span> <span class="fu">c</span>(<span class="st">"B03002_001E"</span>,<span class="st">"B03002_003E"</span>,</span>
-<span id="cb65-5"><a href="#cb65-5" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"B03002_004E"</span>,<span class="st">"B03002_012E"</span>),</span>
+<span id="cb65-4"><a href="#cb65-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">variables =</span> <span class="fu">c</span>(<span class="st">"B03002_001"</span>,<span class="st">"B03002_003"</span>,</span>
+<span id="cb65-5"><a href="#cb65-5" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"B03002_004"</span>,<span class="st">"B03002_012"</span>),</span>
 <span id="cb65-6"><a href="#cb65-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">state     =</span> <span class="st">"CA"</span>,</span>
 <span id="cb65-7"><a href="#cb65-7" aria-hidden="true" tabindex="-1"></a>           <span class="at">county    =</span> <span class="st">"Los Angeles"</span>,</span>
 <span id="cb65-8"><a href="#cb65-8" aria-hidden="true" tabindex="-1"></a>           <span class="at">year      =</span> <span class="dv">2010</span>,</span>
@@ -1814,7 +1814,7 @@ Projected CRS: NAD83 / California zone 5 (ftUS)
 <li>U: U.S. highway (U.S. 101)</li>
 <li>O: Other (e.g.&nbsp;forest roads, utility service roads)</li>
 </ul>
-<p><code>MTFCC</code> stands for “<a href="https://www.census.gov/library/reference/code-lists/mt-feature-class-codes.html">MAF/TIGER Feature Class Code</a>”. There are numerous MTFCC one for just about every geographical feature you can think of (e.g shorelines, water towers, campgrounds), but some of the common ones for our purposes here are</p>
+<p><code>MTFCC</code> stands for “<a href="https://www.census.gov/library/reference/code-lists/mt-feature-class-codes.html">MAF/TIGER Feature Class Code</a>”. There are numerous MTFCCs, one for just about every geographical feature you can think of (e.g shorelines, water towers, campgrounds), but some of the common ones for our purposes here are</p>
 <ul>
 <li>s1100: Primary road (limited access highway)</li>
 <li>s1200: Secondary road (main arteries and smaller highways)</li>
@@ -1822,7 +1822,7 @@ Projected CRS: NAD83 / California zone 5 (ftUS)
 <li>s1730: Alley</li>
 <li>s1780: Parking lot</li>
 </ul>
-<p>We do not need all the streets of Los Angeles County, so let’s just get the ones that intersect without southern MS13 safety zone. <code>st_filter()</code> by default uses <code>st_intersect()</code> to decide whether to keep a street or not. You can alter this default behavior by choosing a differ value for <code>.predicate</code> like <code>st_crosses()</code> or <code>st_within()</code>.</p>
+<p>We do not need all the streets of Los Angeles County, so let’s just get the ones that intersect with the southern MS13 safety zone. <code>st_filter()</code> by default uses <code>st_intersect()</code> to decide whether to keep a street or not. You can alter this default behavior by choosing a different function for <code>.predicate</code> like <code>st_crosses()</code> or <code>st_within()</code>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb135"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb135-1"><a href="#cb135-1" aria-hidden="true" tabindex="-1"></a>mapMS13street <span class="ot">&lt;-</span> mapLAstreet <span class="sc">|&gt;</span></span>
 <span id="cb135-2"><a href="#cb135-2" aria-hidden="true" tabindex="-1"></a>   <span class="fu">st_filter</span>(mapSZms13s)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -2265,7 +2265,7 @@ Writing layer `ms13' to data source `ms13.kml' using driver `KML'
 Writing 1 features with 5 fields and geometry type Multi Polygon.</code></pre>
 </div>
 </div>
-<p>Now you can navigate to <a href="http://www.google.com/mymaps">http://www.google.com/mymaps</a>, click import, select your <code>ms13.kml</code> file, and then it will be visible as an overlay on top of the usual Google map of Los Angeles.</p>
+<p>Now you can navigate to <a href="https://www.google.com/mymaps">https://www.google.com/mymaps</a>, click import, select your <code>ms13.kml</code> file, and then it will be visible as an overlay on top of the usual Google map of Los Angeles.</p>
 </section>
 <section id="solutions-to-the-exercises" class="level1" data-number="10">
 <h1 data-number="10"><span class="header-section-number">10</span> Solutions to the exercises</h1>
@@ -2284,10 +2284,11 @@ Writing 1 features with 5 fields and geometry type Multi Polygon.</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb167"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb167-1"><a href="#cb167-1" aria-hidden="true" tabindex="-1"></a><span class="co"># or a more complete solution that combines areas by case number</span></span>
 <span id="cb167-2"><a href="#cb167-2" aria-hidden="true" tabindex="-1"></a>mapSZ <span class="sc">|&gt;</span></span>
-<span id="cb167-3"><a href="#cb167-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(case_no) <span class="sc">|&gt;</span></span>
-<span id="cb167-4"><a href="#cb167-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">area =</span> <span class="fu">st_area</span>(<span class="fu">st_union</span>(geometry))) <span class="sc">|&gt;</span></span>
-<span id="cb167-5"><a href="#cb167-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(area) <span class="sc">|&gt;</span></span>
-<span id="cb167-6"><a href="#cb167-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span>,<span class="fu">n</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb167-3"><a href="#cb167-3" aria-hidden="true" tabindex="-1"></a>   <span class="fu">group_by</span>(case_no) <span class="sc">|&gt;</span></span>
+<span id="cb167-4"><a href="#cb167-4" aria-hidden="true" tabindex="-1"></a>   <span class="fu">summarize</span>(<span class="at">area =</span> <span class="fu">st_area</span>(<span class="fu">st_union</span>(geometry))) <span class="sc">|&gt;</span></span>
+<span id="cb167-5"><a href="#cb167-5" aria-hidden="true" tabindex="-1"></a>   <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb167-6"><a href="#cb167-6" aria-hidden="true" tabindex="-1"></a>   <span class="fu">arrange</span>(area) <span class="sc">|&gt;</span></span>
+<span id="cb167-7"><a href="#cb167-7" aria-hidden="true" tabindex="-1"></a>   <span class="fu">slice</span>(<span class="dv">1</span>,<span class="fu">n</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Simple feature collection with 2 features and 2 fields
 Geometry type: POLYGON
@@ -2561,7 +2562,7 @@ was `overlaps'
 <div class="cell">
 <div class="sourceCode cell-code" id="cb181"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb181-1"><a href="#cb181-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(units)</span>
 <span id="cb181-2"><a href="#cb181-2" aria-hidden="true" tabindex="-1"></a><span class="co"># use set_units() to convert to square miles</span></span>
-<span id="cb181-3"><a href="#cb181-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   equivalent to multiplying by 5820^2</span></span>
+<span id="cb181-3"><a href="#cb181-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   equivalent to multiplying by 5280^2</span></span>
 <span id="cb181-4"><a href="#cb181-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set_units</span>(nSZcrimes <span class="sc">/</span> <span class="fu">st_area</span>(<span class="fu">st_union</span>(mapSZ)), <span class="at">value=</span><span class="st">"1/mile^2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>913.4101 [1/mile^2]</code></pre>

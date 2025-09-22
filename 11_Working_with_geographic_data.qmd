@@ -166,7 +166,7 @@ mapSZ <- mapSZ |>
 Now let's highlight the injunctions before 2000 in red, those between 2000 and 2010 in green, and those after 2010 in blue. Since many of the polygons overlap, we are going to make the colors a little transparent so that we can see the overlap.
 ```{r}
 #| label: fig-mapGangInjunctionsByDecade
-#| fig-cap: Map of Los Angeles gang injunctions. Those initiated prior to 2000 are in red, those initiatied between 2000 and 2010 are in green, and those initiated after 2010 are in blue
+#| fig-cap: Map of Los Angeles gang injunctions. Those initiated prior to 2000 are in red, those initiated between 2000 and 2010 are in green, and those initiated after 2010 are in blue
 #| out.width: "100%"
 #| fig-height: 5
 mapSZ |>
@@ -456,8 +456,8 @@ We could craft a JSON query to pull these data. However, the `tidycensus` packag
 library(tidycensus)
 dataRace <- 
    get_acs(geography = "tract",
-           variables = c("B03002_001E","B03002_003E",
-                         "B03002_004E","B03002_012E"),
+           variables = c("B03002_001","B03002_003",
+                         "B03002_004","B03002_012"),
            state     = "CA",
            county    = "Los Angeles",
            year      = 2010,
@@ -1361,10 +1361,11 @@ mapSZ |>
 
 # or a more complete solution that combines areas by case number
 mapSZ |>
-  group_by(case_no) |>
-  summarize(area = st_area(st_union(geometry))) |>
-  arrange(area) |>
-  slice(1,n())
+   group_by(case_no) |>
+   summarize(area = st_area(st_union(geometry))) |>
+   ungroup() |>
+   arrange(area) |>
+   slice(1,n())
 ```
 
 `r .exQ(2)`
