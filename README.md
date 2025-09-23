@@ -21,7 +21,7 @@ On the way to answering these questions students learn about
 -  a variety of data and coding skills
 
 Table of contents
-1. [Intro to R](https://gregridgeway.github.io/R4crim/01_Intro_to_R_protests.html) (replacing the older [Intro to R](01-Intro-to-R.html))
+1. [Intro to R](https://gregridgeway.github.io/R4crim/01_Intro_to_R_protests.html)
 2. [Dates and times](https://gregridgeway.github.io/R4crim/02_Dates_and_times.html)
 3. [Working with NIBRS data](https://gregridgeway.github.io/R4crim/03_Working_with_NIBRS_data.html) (replacing the older notes on [Working with UCR data](03-Working-with-UCR-data.html))
 4. [Working with NCVS data](https://gregridgeway.github.io/R4crim/04_Working_with_NCVS_data.html)
