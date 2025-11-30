@@ -23,7 +23,7 @@ format:
             word-break: break-all;
             overflow-wrap: anywhere;
           }
-        </style>    
+          </style>
   pdf:
     toc: true
     prefer-html: true
