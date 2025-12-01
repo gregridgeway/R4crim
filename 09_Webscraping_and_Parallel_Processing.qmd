@@ -63,10 +63,15 @@ Have a look at the webpage [https://www.the-numbers.com/box-office-chart/daily/2
 
 Have a look at the HTML code by looking at the page source for this page using the methods described above. The first 10 lines should look  something like this:
 
-```{r} 
+```{r read0704}
 #| echo: false
-a <- scan("https://www.the-numbers.com/box-office-chart/daily/2025/07/04",
-          what="",sep="\n")
+repeat
+{
+   a <- try(scan("https://www.the-numbers.com/box-office-chart/daily/2025/07/04",
+             what="",sep="\n"))
+   if(!inherits(a,"try-error")) break
+   Sys.sleep(10)
+}
 cat(a[1:10], sep="\n")
 ```
 
@@ -79,11 +84,18 @@ cat(a[i:(i+20)], sep="\n")
 I see _Jurassic World Rebirth_ and _F1: The Movie_. In addition to the movie name, there are ticket sales, number of theaters, and more. It is all wrapped in a lot of HTML code to make it look pretty on a web page, but for our purposes we just want to pull those numbers out.
 
 `scan()` is a basic R function for reading in text, from the keyboard, from files, from the web, ... however data might arrive. Giving `scan()` a URL causes `scan()` to pull down the HTML code for that page and return it to you. Let's try one page of movie data. `what=""` tells `scan()` to expect plain text and `sep="\n"` tells `scan()` to separate each element when it reaches a line feed character, signaling the end of a line.
-```{r}
+
+Here I have wrapped `scan()` inside `try()`. More on this later. Briefly, this `try()` inside the `repeat{}` loop will allow for errors, like the website being unavailable for a moment. If `scan()` cannot reach the website, then `Sys.sleep(10)` will pause for 10 seconds before trying again.
+```{r read0704wTry}
 #| message: false
 library(dplyr)
-a <- scan("https://www.the-numbers.com/box-office-chart/daily/2025/07/04",
-          what="", sep="\n")
+repeat
+{
+   a <- try(scan("https://www.the-numbers.com/box-office-chart/daily/2025/07/04",
+             what="",sep="\n"))
+   if(!inherits(a,"try-error")) break
+   Sys.sleep(10)
+}
 # examine the first few lines
 a[1:5]
 ```
@@ -161,9 +173,14 @@ tail(data0)
 ## Movies with no titles
 
 Some movies have missing titles. Have a look at the February 21, 2011 movies.
-```{r}
-a <- scan("https://www.the-numbers.com/box-office-chart/daily/2011/02/21",
-          what="", sep="\n")
+```{r read20110221}
+repeat
+{
+   a <- try(scan("https://www.the-numbers.com/box-office-chart/daily/2011/02/21",
+             what="",sep="\n"))
+   if(!inherits(a,"try-error")) break
+   Sys.sleep(10)
+}
 i <- grep("Genesis-Code", a)
 a[-10:10 + i]
 ```
@@ -224,13 +241,19 @@ for(iDate in 1:length(dates2scrape))
 {
    # useful to know how much is done/left to go
    message(dates2scrape[iDate])
+   cat(as.character(dates2scrape[iDate]), "\n", file=stderr())
 
    # construct URL
    urlText <- paste0("https://www.the-numbers.com/box-office-chart/daily/",
                      gsub("-", "/", dates2scrape[iDate]))
 
    # read in the HTML code
-   a <- scan(urlText, what="", sep="\n", fileEncoding="UTF-8")
+   repeat
+   {
+      a <- try(scan(urlText, what="", sep="\n", fileEncoding="UTF-8"))
+      if(!inherits(a, "try-error")) break
+      Sys.sleep(10)
+   }
 
    # find movies
    i <- grep("#tab=box-office", a)
@@ -392,7 +415,7 @@ movieData <- with_progress(
       urlText <- paste0("https://www.the-numbers.com/box-office-chart/daily/",
                         gsub("-", "/", dates2scrape[iDate]))
    
-      # retry up to 5 times with short backoff
+      # retry up to 10 times with short backoff
       tries <- 0
       repeat 
       {
@@ -400,7 +423,7 @@ movieData <- with_progress(
          a <- try(scan(urlText, what = "", sep = "\n",
                        fileEncoding = "UTF-8", quiet = TRUE), 
                   silent = TRUE)
-         if(!inherits(a, "try-error") || tries >= 5) break
+         if(!inherits(a, "try-error") || tries >= 10) break
          Sys.sleep(10)
       }
       # skip this date on persistent failure
