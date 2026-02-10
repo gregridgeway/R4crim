@@ -1,0 +1,728 @@
+---
+title: "Web scraping and Parallel Processing"
+author:
+- affiliation: University of Pennsylvania
+  email: gridge@upenn.edu
+  name: Greg Ridgeway
+- affiliation: University of Pennsylvania
+  email: moyruth@upenn.edu
+  name: Ruth Moyer
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+format:
+  html:
+    theme: 
+      dark: darkly
+      light: default
+    toc: true
+    html-math-method: mathjax
+    fig-format: svg
+  pdf:
+    toc: true
+    prefer-html: true
+number-sections: true
+editor_options: 
+  chunk_output_type: console
+bibliography: G:/My Drive/docs/Greg/articles/mybib.bib
+---
+
+<!-- In terminal -->
+<!-- quarto render 09_Webscraping_and_Parallel_Processing.qmd -->
+
+<!-- git commit 09-* -m "commit message" -->
+<!-- git status -->
+<!-- git push -->
+
+
+<!-- A function for automating the numbering and wording of the exercise questions -->
+```{r}
+#| echo: false
+# Use \x60 in place ` backtick in exercise questions
+.counterExercise <- 0
+.exerciseQuestions <- NULL
+.exNum <- function(.questionText="") 
+{
+   .counterExercise <<- .counterExercise+1
+   .exerciseQuestions <<- c(.exerciseQuestions, .questionText)
+   return(paste0(.counterExercise,". ",.questionText))
+}
+.exQ <- function(i)
+{
+   return( paste0(i,". ",.exerciseQuestions[i]) )
+}
+```
+
+
+# Introduction 
+At the end of our discussion about regular expressions, we introduced the concept of web scraping. Not all online data is in a tidy, downloadable format such as a .csv or .RData file. Yet, patterns in the underlying HTML code and regular expressions together provide a valuable way to "scrape" data off of a webpage. Here, we are going to work through an example of web scraping. We are going to get data on ticket sales of every movie, for every day going back to 2010. 
+
+As a preliminary matter, some R packages, such as `rvest` and `chromote`, can help with web scraping. Eventually you may wish to explore those packages. For now, we are going to work with basic fundamentals so that you have the most flexibility to extract data from most websites.
+
+First, you will need to make sure that you can access the underlying HTML code for the webpage that you want to scrape. In most browsers you can simply right-click on a webpage and then click "View Page Source."  If you are using Microsoft Edge, you can right-click on the webpage, click "View Source," and then look at the "Debugger" tab. In Safari select "Settings," choose the "Advanced" tab, check "Show Develop menu," and then whenever viewing a page you can right-click and select "Show Page Source."
+
+Have a look at the webpage [https://www.the-numbers.com/box-office-chart/daily/2025/07/04](https://www.the-numbers.com/box-office-chart/daily/2025/07/04). This page contains information about the movies that were shown in theaters on July 4, 2025 and the amount of money (in dollars) that each of those movies grossed that day. 
+
+Have a look at the HTML code by looking at the page source for this page using the methods described above. The first 10 lines should look  something like this:
+
+```{r read0704}
+#| echo: false
+repeat
+{
+   a <- try(scan("https://www.the-numbers.com/box-office-chart/daily/2025/07/04",
+             what="",sep="\n"))
+   if(!inherits(a,"try-error")) break
+   Sys.sleep(10)
+}
+cat(a[1:10], sep="\n")
+```
+
+This is all HTML code to set up the page. If you scroll down a few hundred lines, you will find code that looks like this:
+```{r}
+#| echo: false
+i <- min(grep("#tab=box-office",a))-4
+cat(a[i:(i+20)], sep="\n")
+```
+I see _Jurassic World Rebirth_ and _F1: The Movie_. In addition to the movie name, there are ticket sales, number of theaters, and more. It is all wrapped in a lot of HTML code to make it look pretty on a web page, but for our purposes we just want to pull those numbers out.
+
+`scan()` is a basic R function for reading in text, from the keyboard, from files, from the web, ... however data might arrive. Giving `scan()` a URL causes `scan()` to pull down the HTML code for that page and return it to you. Let's try one page of movie data. `what=""` tells `scan()` to expect plain text and `sep="\n"` tells `scan()` to separate each element when it reaches a line feed character, signaling the end of a line.
+
+Here I have wrapped `scan()` inside `try()`. More on this later. Briefly, this `try()` inside the `repeat{}` loop will allow for errors, like the website being unavailable for a moment. If `scan()` cannot reach the website, then `Sys.sleep(10)` will pause for 10 seconds before trying again.
+```{r read0704wTry}
+#| message: false
+library(dplyr)
+repeat
+{
+   a <- try(scan("https://www.the-numbers.com/box-office-chart/daily/2025/07/04",
+             what="",sep="\n"))
+   if(!inherits(a,"try-error")) break
+   Sys.sleep(10)
+}
+# examine the first few lines
+a[1:5]
+```
+
+
+Some websites are more complex or use different text encoding. On those websites `scan()` produces unintelligible text. The `GET()` function from the `httr` package can sometimes resolve this.
+```{r}
+#| eval: false
+library(httr)
+resp <- GET("https://www.the-numbers.com/box-office-chart/daily/2025/07/04")
+a1 <- content(resp, as="text")
+a1 <- strsplit(a1,"\n")[[1]]
+```
+
+Also, some Mac users will encounter snags with both of these methods and receive "403 Forbidden" errors while their Mac colleague right next to them on the same network will not. I have not figured out why this happens, but have found that making R masquerade as a different browser sometimes works.
+```{r}
+#| eval: false
+resp <- GET("https://www.the-numbers.com/box-office-chart/daily/2025/07/04", 
+            user_agent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/537.13+ (KHTML, like Gecko) Version/5.1.7 Safari/534.57.2"))
+a1 <- content(resp, as="text")
+a1 <- strsplit(a1,"\n")[[1]]
+```
+
+# Scraping one page
+
+Now that we have stored in the variable `a` the HTML code for one day's movie data in R, let's apply some regular expressions to extract the data. The HTML code includes a lot of lines that do not involve data that interests us. There is code for making the page look nice and code for presenting advertisements. Let's start by finding the lines that have the movie names in them.
+
+Going back to the HTML code, I noticed that both the line with _Jurassic World Rebirth_ and _F1: The Movie_ have the sequence of characters "#tab=box-office". By finding a pattern of characters that always precedes the text that interests us, we can use it to grep the lines we want. Let's find every line that has "#tab=box-office" in it.
+
+```{r}
+i <- grep("#tab=box-office", a)
+i
+```
+These are the line numbers that, if the pattern holds, contain our movie titles. Note that the numbers you get on your computer might be a little different from the line numbers shown here. Even if you run this code on a different day, you might get different line numbers because some of the code, code for advertisements in particular, can frequently change.
+
+Let's see what these lines of HTML code look like.
+```{r}
+a[i]
+```
+
+Double-checking and indeed the first line here is _Jurassic World Rebirth_ and the last line is _The King of Kings_. This matches what is on the web page. We now are quite close to having a list of movies that played in theaters on July 4, 2025. However, as you can see, we have a lot of excess symbols and HTML code to eliminate before we can have a neat list of movie names.
+
+HTML tags always have the form `<some code here>`. Therefore, we should remove any text between a less than and greater than symbol. Here is a regular expression that looks for a `<` followed by any number of characters that are not `>`, and then a closing `>`... and `gsub()` will delete them.
+
+```{r}
+gsub("<[^>]*>", "", a[i])
+```
+
+Perfect! Now we just have movie names. You will see some movie names have strange symbols, like `&hellip;`. That is the HTML code for horizontal ellipses or "...". These make the text look prettier on a webpage, but you might need to do more work with `gsub()` if it is important that these movie names look right.
+
+Let's put these movie names in a data frame, `data0`. This data frame currently has only one column. 
+
+```{r}
+data0 <- data.frame(movie=gsub("<[^>]*>", "", a[i]))
+```
+
+Now we also want to get the daily gross for each movie. Let's take another look at the HTML code for  _Jurassic World Rebirth_.
+```{r}
+a[i[1] + 0:8]
+```
+Note that the movie gross is two lines after the movie name. It turns out that this is consistent for all movies. Since `i` has the line numbers for the movie names, then `i+2` must be the line numbers containing the daily gross.
+```{r}
+a[i+2]
+```
+Again we need to strip out the HTML tags. We will also remove the dollar signs and commas so that R will recognize it as a number. We will add this to `data0` also.
+```{r}
+data0$gross <- as.numeric(gsub("<[^>]*>|[$,]", "", a[i+2]))
+```
+Take a look at the webpage and compare it to the dataset you have now created. All the values should now match.
+```{r}
+head(data0)
+tail(data0)
+```
+
+## Movies with no titles
+
+Some movies have missing titles. Have a look at the February 21, 2011 movies.
+```{r read20110221}
+repeat
+{
+   a <- try(scan("https://www.the-numbers.com/box-office-chart/daily/2011/02/21",
+             what="",sep="\n"))
+   if(!inherits(a,"try-error")) break
+   Sys.sleep(10)
+}
+i <- grep("Genesis-Code", a)
+a[-10:10 + i]
+```
+Note that the line for _The Genesis Code_ has the movie title in the `href` attribute, but no movie title is between the `<a></a>` tags. In these cases let's pull the movie title from the `href` attribute.
+
+```{r}
+i <- grep("#tab=box-office",a)
+data0 <- data.frame(movie = gsub("<[^>]*>","",a[i]),
+                    gross = as.numeric(gsub("<[^>]*>|[,$]","",a[i+2])))
+# which ones are blank?
+j <- which(data0$movie=="")
+a[i[j]]
+
+# test regex to pull movie title
+gsub(".*/movie/([^#]*)#.*", "\\1", a[i[j]])
+# replace empty movie names
+data0$movie[j] <- gsub(".*/movie/([^#]*)#.*", "\\1", a[i[j]]) |>
+  gsub("-", " ", x=_)
+```
+
+# Scraping Multiple Pages
+
+We have now successfully scraped data for one day. This is usually the hardest part. But if we have R code that can correctly scrape one day's worth of data _and_ the website is consistent across days, then it is simple to adapt our code to work for _all_ days. So let's get all movie data from January 1, 2010 through July 31, 2025. That means we are going to be web scraping `r difftime(lubridate::mdy("7/31/2025"), lubridate::mdy("12/31/2009")) |> as.numeric() |> format(big.mark=",")` pages of data.
+
+First note that the URL for July 4, 2025 was 
+
+`https://www.the-numbers.com/box-office-chart/daily/2025/07/04`
+
+We can extract data from any other date by using the same URL, but changing the ending to match the date that we want. Importantly, the 07 and the 04 in the URL must have leading zeros for the URL to return the correct page.
+
+To start, let's make a list of all the dates that we intend to scrape.
+```{r}
+#| message: false
+library(lubridate)
+# create a sequence of all days to scrape
+dates2scrape <- seq(ymd("2010-01-01"), ymd("2025-07-31"), by="days")
+```
+
+Now `dates2scrape` contains a collection of all the dates with movie data that we wish to scrape. 
+```{r}
+dates2scrape[1:5]
+# gsub() to change - to / matching appearance of thenumbers.com URL
+gsub("-", "/", dates2scrape[1:5])
+```
+Our plan is to construct a for-loop within which we will construct a URL from `dates2scrape`, pull down the HTML code from that URL, scrape the movie data into a data frame, and then combine each day's data frame into one data frame with all of the movie data. First we create a list that will contain each day's data frame.
+```{r}
+results <- vector("list", length(dates2scrape))
+```
+On iteration `i` of our for loop we will store that day's movie data frame in `results[[i]]`. The following for loop can take several minutes to run and its speed will depend on your network connection and how responsive the web site is. Before running the entire for loop, it may be a good idea to temporarily set the dates to a short period of time (e.g., a month or two) just to verify that your code is functioning properly. Once you have concluded that the code is doing what you want it to do, you can set the dates so that the for loop runs for the entire analysis period.
+
+This loop takes about an hour to pull all the data.
+```{r webscraping}
+#| message: false
+#| results: hide
+#| cache: true
+timeStart <- Sys.time() # record the starting time
+for(iDate in 1:length(dates2scrape))
+{
+   # useful to know how much is done/left to go
+   message(dates2scrape[iDate])
+   cat(as.character(dates2scrape[iDate]), "\n", file=stderr())
+
+   # construct URL
+   urlText <- paste0("https://www.the-numbers.com/box-office-chart/daily/",
+                     gsub("-", "/", dates2scrape[iDate]))
+
+   # read in the HTML code
+   repeat
+   {
+      a <- try(scan(urlText, what="", sep="\n", fileEncoding="UTF-8"))
+      if(!inherits(a, "try-error")) break
+      Sys.sleep(10)
+   }
+
+   # find movies
+   i <- grep("#tab=box-office", a)
+   
+   # get movie names and gross
+   data0 <- data.frame(movie = gsub("<[^>]*>", "", a[i]),
+                       gross = as.numeric(gsub("<[^>]*>|[$,]","",a[i+2])),
+                       date  = dates2scrape[iDate])
+   
+   # replace empty movie names
+   j <- which(data0$movie=="")
+   data0$movie[j] <- gsub(".*/movie/([^#]*)#.*", "\\1", a[i[j]]) |>
+      gsub("-", " ", x=_)
+
+   results[[iDate]] <- data0
+}
+# calculate how long it took
+timeEnd <- Sys.time()
+timeEnd-timeStart
+```
+
+Let's look at the first 3 lines of the first and last 3 days.
+```{r}
+# first 6 rows of first 3 days
+results |> head(3) |> lapply(head)
+# first 6 rows of last 3 days
+results |> tail(3) |> lapply(head)
+```
+
+Looks like we got them all. Now let's combine them into one big data frame. `bind_rows()` takes a list of data frames, like `results[[1]]`, `results[[2]]`, ..., and stacks them all on top of each other.
+```{r}
+movieData <- bind_rows(results)
+
+# check that the number of rows and dates seem reasonable
+nrow(movieData)
+range(movieData$date)
+head(movieData)
+tail(movieData)
+```
+
+If you ran that for-loop to gather 15 years worth of data, most likely you walked away from your computer to do something more interesting than watch its progress. In these situations, I like to send myself a text message when it is complete. The `emayili` package is a convenient way to send yourself an email or text. If you fill it in with your email, username, and gmail app password, the following code will send you an email or text message when the script reaches this point. (as of August 2025 I have not been able to get this to work)
+```{r}
+#| eval: false
+library(emayili)
+
+# https://myaccount.google.com/apppasswords
+#    get a 16 character "app password"
+smtp <- server(host = "smtp.gmail.com", 
+               port = 587,
+               username = "you@gmail.com",
+               password = "REPLACE WITH 16 CHARACTER APP PASSWORD",
+               starttls = TRUE,
+               use_ssl  = FALSE)
+
+# Verizon:  5551234567@vtext.com
+# AT&T:     5551234567@txt.att.net
+# T-Mobile: 5551234567@tmomail.net
+email <- envelope() |>
+   from("you@gmail.com") |>
+   to("5551234567@vtext.com") |>
+   text("Come back! Your movie data is ready!")
+
+smtp(email, verbose = TRUE)
+```
+Note that the password here is in plain text so do not try this on a public computer. R also saves your history so even if it is not on the screen it might be saved somewhere else on the computer.
+
+# Parallel Computing
+
+Since 1965 Moore's Law has predicted the power of computation over time. Moore's Law predicted the doubling of transistors about every two years. Moore's prediction has held true for decades. However, to get that speed the transistors were made smaller and smaller. Moore's Law cannot continue indefinitely. The diameter of a silicon atom is 0.2nm. Transistors today contain less than 70 atoms and some transistor dimensions are between 10nm and 40nm. Since 2012, computing power has not changed greatly signaling that we might be getting close to the end of Moore's Law, at least with silicon-based computing. What has changed is the widespread use of multicore processors. Rather than having a single processor, a typical laptop might have an 8 or 16 core processor (meaning they have 8 or 16 processors that share some resources like high speed memory).
+
+R can guess how many cores your computer has on hand.
+```{r}
+#| message: false
+library(future)
+library(doFuture)
+parallelly::availableCores()
+```
+
+Having access to multiple cores allows you to write scripts that send different tasks to different processors to work on simultaneously. While one processor is busy scraping the data for January 1st, the second can get to work on January 2nd, and another can work on January 3rd. All the processors will be fighting over the one connection you have to the internet, but they can `grep()` and `gsub()` at the same time other processors are working on other dates.
+
+To write a script to work in parallel, you will need the `foreach` and `future` packages. Let's first test whether parallelization actually speeds things up. There are two `foreach` loops below. In both of them, each iteration of the loop does not really do anything except pause for 2 seconds. The first loop, which does not use parallelization, includes 10 iterations and so should take 20 seconds to run. The second `foreach` loop looks the same, except right before the `foreach` loop we have told R to make use of two of the computer's processors rather than the default of one processor. This should cause one processor to sleep for 2 seconds 10 times and the other processor to sleep for 2 seconds 10 times. In total this should take about 10 seconds.
+
+```{r}
+library(foreach)
+
+# should take 10*2=20 seconds
+system.time( # time how long this takes
+  foreach(i=1:10) %do% # not in parallel
+  {
+     Sys.sleep(2)  # wait for 2 seconds
+     return(i)
+  }
+)
+
+# set up R to use 2 cores
+plan(multisession, workers = 2)
+# tells %dopar% to use the plan's 2 cores
+registerDoFuture()
+
+# with two processors should take about 10 seconds
+system.time(
+  foreach(i=1:10) %dopar% # run in parallel
+  {
+    Sys.sleep(2)
+    return(i)
+  }
+)
+```
+
+Sure enough, the parallel implementation was able to complete 20 seconds worth of sleeping in about 10 seconds. To set up code to run in parallel, the key steps are to set up the cores using `plan()` and to tell parallel `foreach()` to use that cluster of processors with `registerDoFuture()`. Note that the key difference between the two `foreach()` statements is that the first `foreach()` is followed by a `%do%` while the second is followed by a `%dopar%`. When `foreach()` sees the `%dopar%` it will check what was set up in the `registerDoFuture()` call and spread the computation among those cores.
+
+Note that the `foreach()` differs a little bit in its syntax compared with our previous use of for-loops. While for-loops have the syntax `for(i in 1:10)` the syntax for `foreach()` looks like `foreach(i=1:10)` and is followed by a `%do%` or a `%dopar%`. Lastly, note that the final step inside the `{ }` following  a `foreach()` is a `return()` statement. `foreach()` will take the returned values of each of the iterations and assemble them into a single list by default. In the following `foreach()` we have added `.combine=bind_rows` to the `foreach()` so that the final results will be stacked into one data frame, avoiding the need for a separate `bind_rows()` like we used previously.
+
+Parallelization introduces some complications. If anything goes wrong in a parallelized script, then the whole `foreach()` fails. For example, let's say that after scraping movie data from 2000-2016 you briefly lose your internet connection. If this happens, then `scan()` fails and the whole `foreach()` will end with an error, tossing all of your completed work. To avoid this you need to either be sure you have a solid internet connection, or wrap the call to `scan()` in a `try()` and a `repeat` loop that is smart enough to wait a few seconds and try the scan again rather than fail completely.
+
+This causes an error since this website does not exist (or not yet!).
+```{r}
+#| error: true
+res <- scan("https://www.jaywalkingIsNotACrime.org", what="", sep="\n")
+# res does not exist
+res
+```
+If we wrap `scan()` with `try()`, then we can catch the error and write R code to gracefully handle the problem.
+```{r}
+res <- try(scan("https://www.jaywalkingIsNotACrime.org", what="", sep="\n"),
+           silent = TRUE) |>
+   suppressWarnings()
+is(res)
+if(inherits(res, "try-error"))
+{
+   message("Could not find that website")
+} else
+{
+   message("Found that website")
+}
+```
+With all this in mind, let's web scrape the movie data using multiple cores with `try()`/`repeat{}`. Typically, any attempts to print from inside a parallel `foreach()` do not appear in the console, since that print is running in a separate, parallel R session. The `progressr` package offers a way to print a progress bar to the console that also offers an estimated time to completion.
+```{r}
+#| eval: false
+# setup a Command-Line Interface progress bar
+library(progressr)
+handlers("cli")
+
+plan(multisession, workers = 8)
+registerDoFuture()
+
+timeStart <- Sys.time() # record the starting time
+# wrap the foreach inside the progress monitor
+movieData <- with_progress(
+{
+   # create a progress bar how many total steps in the foreach loop
+   p <- progressor(steps = length(dates2scrape))
+   
+   result <- foreach(iDate=1:length(dates2scrape),
+                     .combine = bind_rows) %dopar%
+   {
+      # update progress bar
+      p(paste("Working on", dates2scrape[iDate]))
+      urlText <- paste0("https://www.the-numbers.com/box-office-chart/daily/",
+                        gsub("-", "/", dates2scrape[iDate]))
+   
+      # retry up to 10 times with short backoff
+      tries <- 0
+      repeat 
+      {
+         tries <- tries + 1
+         a <- try(scan(urlText, what = "", sep = "\n",
+                       fileEncoding = "UTF-8", quiet = TRUE), 
+                  silent = TRUE)
+         if(!inherits(a, "try-error") || tries >= 10) break
+         Sys.sleep(10)
+      }
+      # skip this date on persistent failure
+      if(inherits(a, "try-error")) return(NULL)
+
+      i <- grep("#tab=box-office", a)
+      data0 <- data.frame(movie = gsub("<[^>]*>", "", a[i]),
+                          gross = as.numeric(gsub("<[^>]*>|[$,]","",a[i+2])),
+                          date  = dates2scrape[iDate])
+       
+      # replace empty movie names
+      j <- which(data0$movie=="")
+      data0$movie[j] <- gsub(".*/movie/([^#]*)#.*", "\\1", a[i[j]]) |>
+         gsub("-", " ", x=_)
+
+        return(data0)
+   }
+   
+   # the last object in with_progress() will be returned
+   result
+})
+
+# calculate how long it took
+timeEnd <- Sys.time()
+timeEnd-timeStart
+```
+This code made use of 8 processors. Unlike our 2 second sleep example, this script may not be exactly 8 times faster. Each processor still needs to wait its turn in order to pull down its webpage from the internet. However, you should observe the parallel version finishing much sooner than the first version. In just a few lines of code and about 10 minutes of waiting, you now have 15 years worth of movie data.
+
+Before moving on, let's do a final check that everything looks okay.
+```{r}
+nrow(movieData)
+range(movieData$date)
+head(movieData)
+tail(movieData)
+```
+Check for movie names with HTML codes.
+```{r}
+movieData$movie |> grep("&[A-Za-z]+;", x=_, value=TRUE) |> unique() |> head()
+```
+Those HTML characters in movie titles are annoying to look at. Let's fix it now.
+```{r}
+# change HTML codes to something prettier
+movieData <- movieData |>
+   mutate(movie = gsub("&hellip;", "...", movie))
+```
+
+It is probably wise at this point to save `movieData` so that you will not have to rerun this if you mess up your dataset. With `movieData` saved you should feel free to test out your ideas. You can always `load("movieData.RData")` if you make a mistake.
+```{r}
+save(movieData, file="movieData.RData", compress=TRUE)
+```
+
+# Fun With Movie Data
+
+You can use the dataset to answer questions such as "which movie yielded the largest gross?"
+```{r}
+movieData |> slice_max(gross)
+```
+Which ten movies had the largest total gross during the period this dataset covers? 
+```{r}
+movieData |>
+   summarize(gross=sum(gross), .by=movie) |>
+   slice_max(gross, n=10)
+```
+Which days of the week yielded the largest total gross?
+```{r}
+movieData |>
+   mutate(weekday=wday(date, label=TRUE)) |>
+   summarize(gross=sum(gross), .by=weekday) |>
+   arrange(desc(gross))
+```
+
+## Adjusting for Inflation
+As you may have noticed, the price of a movie ticket keeps increasing. the-numbers.com tracks the average movie ticket price, which we can use to create a movie-specific inflation factor. Let's scrape the average ticket price from [https://www.the-numbers.com/market/](https://www.the-numbers.com/market/) and compute an inflation adjustment factor. That factor will vary by year. It will tell you how much you need to multiply, say, a ticket purchased in 2010 so that it equates to 2025 prices.
+```{r}
+a <- scan("https://www.the-numbers.com/market/",
+          what="", sep="\n")
+i <- grep("Ticket Price|Number of Wide Releases", a)
+a <- a[i[1]:i[2]]
+i <- grep("market",a)
+inflation <- data.frame(year = gsub("<[^>]*>","",a[i]),
+                        avgPrice = gsub("<[^>]*>|\\$","",a[i+4])) |>
+  mutate(year = as.numeric(year),
+         avgPrice = as.numeric(avgPrice),
+         adjustment = avgPrice[1]/avgPrice) |>
+  filter(year >= 2010)
+
+inflation
+```
+Now we link each movie to our inflation factor table to compute ticket sales adjusted to 2025 prices.
+```{r}
+movieData <- movieData |>
+   mutate(year=year(date)) |>
+   left_join(inflation, join_by(year==year)) |>
+   mutate(grossAdj=gross*adjustment) |>
+   select(-avgPrice, -adjustment)
+
+movieData |>
+  summarize(grossAdj=sum(grossAdj), .by=movie) |>
+  slice_max(grossAdj, n=10)
+```
+_Twilight_ joins the top 10 list. However, _Twilight_ and _Potter_ fans in previous classes have pointed out that _Twilight: Breaking Dawn_ and _Harry Potter and the Deathly Hallows_ were broken up into two movies. Because the-numbers.com truncates the movie titles with ..., R has lumped Part 1 and Part 2 together for both of these movies. Sure, we could look up when those open nights were, but let's try using the data instead. 
+
+```{r}
+#| fig.cap: "Daily gross for _Harry Potter and the Deathly Hallows_"
+movieData |>
+  filter(movie=="Harry Potter and the Deat...") |>
+  summarize(gross = sum(gross)/1000000,  # gross in millions
+               .by = date) |>
+  plot(gross~date, data=_,
+       xlab="Date", ylab="Gross (millions of dollars)")
+abline(v=ymd(c("2010-11-19", "2011-07-15")))
+```
+
+```{r}
+#| fig.cap: "Daily gross for _The Twilight Saga: Breaking Dawn_"
+movieData |>
+  filter(movie=="The Twilight Saga: Breaki...") |>
+  summarize(gross = sum(gross)/1000000, .by = date) |>
+  plot(gross~date, data=_,
+       xlab="Date", ylab="Gross (millions of dollars)")
+abline(v=ymd(c("2011-11-18", "2012-11-16")))
+```
+In both of these figures we see the enormous ticket sales in the first several days followed by a steady decline over the subsequent months. Then, another large spike in ticket sales indicating a second installment. When we find a large spike in ticket sales, we will mark that as indicating the second part. For each movie, here are the four days with the largest jumps in ticket sales from the day before.
+```{r}
+movieData |>
+   filter(movie %in% c("Harry Potter and the Deat...",
+                       "The Twilight Saga: Breaki...")) |>
+   summarize(gross = sum(gross), # total sales by date and movie
+             .by=c(movie, date)) |>
+   group_by(movie) |> # now find large change within movie
+   arrange(movie, date) |>
+   mutate(change = gross - lag(gross), # lag is NA for 1st one
+          change = if_else(is.na(change), Inf, change)) |>
+   # find the largest jumps in sales
+   slice_max(change, n=4)
+```
+If there are several days close together, like 2011-07-14 and 2011-07-15, then we should only keep the earlier one... the first big jump.
+```{r}
+part2date <- movieData |>
+   filter(movie %in% c("Harry Potter and the Deat...",
+                       "The Twilight Saga: Breaki...")) |>
+   summarize(gross = sum(gross), # total sales by date and movie
+             .by=c(movie, date)) |>
+   group_by(movie) |> # now find large change within movie
+   arrange(movie, date) |>
+   mutate(change = gross - lag(gross), # lag is NA for 1st one
+          change = if_else(is.na(change), Inf, change)) |>
+   # find the largest jumps in sales
+   slice_max(change, n=4) |>
+   arrange(movie, date) |>
+   # keep the first of any dates close to each other
+   mutate(diffDays = date - lag(date)) |>
+   filter(is.na(diffDays) | diffDays > 60) |>
+   # one with later date is Part 2
+   slice_max(date) |>
+   ungroup() |>
+   rename(date2 = date) |>
+   select(movie, date2)
+```
+Before altering `movieData`, let's make sure we get this join right.
+```{r}
+# test the merge
+movieData |>
+   left_join(part2date, 
+             join_by(movie == movie)) |>
+   mutate(moviePart = 
+             case_when(
+                # use three days before Part 2 as cutoff
+                !is.na(date2) & date < date2 - ddays(3) ~ "Part 1",
+                !is.na(date2) & date > date2 - ddays(3) ~ "Part 2",
+                .default = "")) |>
+   filter(movie %in% c("Harry Potter and the Deat...",
+                       "The Twilight Saga: Breaki...")) |>
+   select(movie, gross, date, moviePart) |>
+   group_by(movie, moviePart) |> 
+   slice_head()
+```
+Great! Looks like the `moviePart` has the right values given the dates. Now we can paste the Part 1 and Part 2 on the end of the movie name.
+```{r}
+movieData <- movieData |>
+   left_join(part2date, 
+             join_by(movie == movie)) |>
+   mutate(moviePart = 
+             case_when(
+                # use three days before Part 2 as cutoff
+                !is.na(date2) & date < date2 - ddays(3) ~ "Part 1",
+                !is.na(date2) & date > date2 - ddays(3) ~ "Part 2",
+                .default = ""),
+          movie = paste0(movie, moviePart)) |>
+   select(-date2, -moviePart)
+```
+Now we can redo our list of top 10 movies by inflation-adjusted gross. No more Harry Potter or Twilight.
+```{r}
+movieData |>
+  summarize(grossAdj=sum(grossAdj), .by=movie) |>
+  slice_max(grossAdj, n=10)
+```
+They have moved far down the list of highest grossing movies.
+```{r}
+movieData |>
+   summarize(grossAdj=sum(grossAdj), .by=movie) |>
+   mutate(rank = rank(-grossAdj)) |> # ranks so 1 is largest grossAdj
+   filter(grepl("Harry Potter and the Deat...|The Twilight Saga: Breaki...",
+                movie))
+```
+Are there other movies that have multiple parts that we have lumped together? Let's search for other large jumps in ticket sales.
+```{r}
+movieJumps <- movieData |>
+   summarize(gross = sum(gross), .by = c(movie, date)) |>
+   arrange(movie, date) |>
+   group_by(movie) |>
+   mutate(prev_gross  = lag(gross),
+          prev_gross = if_else(is.na(prev_gross), 0, prev_gross),
+          change      = gross - prev_gross,
+          # NA -> first appearance
+          change = if_else(is.na(change), Inf, change),
+          pct_change  = 100*change / pmax(prev_gross, 1)) |>  # guard div-by-zero
+   filter(!is.na(change), change > 0)
+
+movieJumps |>
+   group_by(movie) |>
+   slice_max(change, n=10, with_ties = FALSE) |>
+   arrange(movie, date) |>
+   mutate(diffDays = date - lag(date)) |>
+   filter(is.na(diffDays) | diffDays > 30) |>
+   summarize(first_date   = min(date),
+             second_date  = max(date),
+             sep_days     = as.integer(diff(range(date))),
+             min_top_pct  = min(pct_change),
+             max_top_abs  = max(change)) |>
+   ungroup() |>
+   filter(sep_days    >= 100,        # spikes 100+ days apart
+          min_top_pct >= 100,        # jump at least 100%
+          max_top_abs >= 1000000) |> # jump at least $1m
+   arrange(desc(min_top_pct)) |>
+   print(n=Inf)
+```
+Looks like several more movies need parts added to them. _The Hunger Games: Mockingjay_ had two parts. _Guardians of the Galaxy_ had Volume 1, 2, and 3 (first one was simply _Guardians of the Galaxy_). _Teenage Mutant Ninja Turtles_ was released in 2014, _Teenage Mutant Ninja Turtles: Out of the Shadows_ was released in 2016, and _Teenage Mutant Ninja Turtles: Mutant Mayhem_ was released in 2023 (more planned for 2027!). There have been five _Pirates of the Caribbean_ movies, two of which were released after 2010. _Robin Hood_ is two different movies with the same title, one starring Russell Crowe and another starring Taron Egerton. Some we can safely ignore, such as the re-releases.
+```{r}
+toFix <- c("Guardians of the Galaxy V...",
+           "Teenage Mutant Ninja Turt...",
+           "The Hunger Games: Mocking...",
+           "Alvin and the Chipmunks: ...",
+           "Paranormal Activity: The ...",
+           "Pirates of the Caribbean:...",
+           "Robin Hood",
+           "How to Train Your Dragon",
+           "The Lion King",
+           "The Way Back",
+           "Together",
+           "Every Day")
+
+partDates <- movieData |>
+   filter(movie %in% toFix) |>
+   summarize(gross = sum(gross), .by=c(movie, date)) |>
+   arrange(movie, date) |>
+   group_by(movie) |>
+   mutate(change = gross - lag(gross),
+          # change NA means first date ever
+          change = if_else(is.na(change), Inf, change)) |>
+   slice_max(change, n=4) |>
+   arrange(movie, date) |>
+   mutate(daysDiff = as.numeric(date-lag(date))) |>
+   # choose first date and dates separated 30+ days
+   filter(is.na(daysDiff) | (daysDiff>30)) |>
+   mutate(start = date-ddays(3),
+          end = lead(date, default = ymd("2100-01-01"))-ddays(3),
+          year = year(date)) |>
+   ungroup() |>
+   # Alvin opened in December 2009
+   mutate(start = if_else(start <= "2010-01-31",
+                          ymd("2010-01-01"),
+                          start))
+partDates |> print(n=Inf)
+
+movieData <- movieData |>
+   select(-year) |>
+   left_join(partDates |> select(-date, -gross, -change, -daysDiff),
+             join_by(movie,
+                     date >=start,
+                     date < end)) |>
+   mutate(moviePart = if_else(!is.na(year),
+                              paste0("(",year,")"),
+                              ""),
+          movie = paste0(movie, moviePart)) |>
+   select(-start, -end, -year, -moviePart)
+```
+As always, double check that the new movie names seem to be labeled in the correct years.
+```{r}
+movieData |>
+   filter(gsub("\\([0-9]{4}\\)", "", movie) %in% toFix) |>
+   mutate(year = year(date)) |>
+   select(movie, year) |>
+   distinct() |>
+   arrange(movie)
+```
+Let's save our final movie dataset with inflation-adjusted gross and corrected movie titles.
+```{r}
+save(movieData, file="movieDataFinal.RData", compress=TRUE)
+```
+Now that you have movie data and, in a previous section you assembled Chicago crime data, combine the two datasets so that you can answer the question "What happens to crime when big movies come out?"
+
