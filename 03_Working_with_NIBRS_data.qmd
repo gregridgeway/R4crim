@@ -12,6 +12,7 @@ format:
       light: default
     toc: true
     html-math-method: mathjax
+    embed-resources: true
   pdf:
     toc: true
     exclude: true
