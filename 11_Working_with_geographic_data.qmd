@@ -13,7 +13,7 @@ format:
     toc: true
     html-math-method: mathjax
     fig-format: svg
-    embed-resources: false
+    embed-resources: true
     code-overflow: wrap
     include-in-header:
       text: |
