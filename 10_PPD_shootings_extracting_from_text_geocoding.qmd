@@ -13,7 +13,7 @@ format:
     toc: true
     html-math-method: mathjax
     fig-format: svg
-    embed-resources: false
+    embed-resources: true
     code-overflow: wrap
     include-in-header:
       text: |
@@ -709,7 +709,7 @@ PPDmap <- geojson_sf("https://opendata.arcgis.com/datasets/8dc58605f9dd484295c7d
 ```
 `PPDmap` is an `sf` (simple features) object. It is not unlike a data frame, but it contains a special `geometry` column containing geographic information associated with a row of data. Here are the two columns in `PPDmap` that are of primary interest.
 ```{r}
-PPDmap |> select(PSA_NUM, geometry)
+PPDmap |> select(psa_num, geometry)
 ```
 The first column shows the PSA number and the second column shows a truncated description of the geometry associated with this row. In this case, `geometry` contains the coordinates of the boundary of the PSA for each row. Use `st_geometry()` to extract these coordinates.
 ```{r}
@@ -723,7 +723,7 @@ axis(side=2, cex.axis=0.7) # add y-axis
 # extract the center points of each PSA
 a <- st_coordinates(st_centroid(st_geometry(PPDmap)))
 # add the PSA number to the plot
-text(a[,1], a[,2], PPDmap$PSA_NUM, cex=0.5)
+text(a[,1], a[,2], PPDmap$psa_num, cex=0.5)
 ```
 
 We can extract the actual coordinates of one of the polygons if we wish.
@@ -742,11 +742,11 @@ plot(st_geometry(PPDmap))
 axis(side=1, cex.axis=0.7)
 axis(side=2, cex.axis=0.7)
 a <- st_coordinates(st_centroid(st_geometry(PPDmap)))
-text(a[,1], a[,2], PPDmap$PSA_NUM, cex=0.5)
+text(a[,1], a[,2], PPDmap$psa_num, cex=0.5)
 a <- st_coordinates(PPDmap$geometry[1])
 lines(a[,1], a[,2], col="red", lwd=3)
 ```
-So this highlighted in red PSA `r PPDmap$PSA_NUM[1]`.
+So this highlighted in red PSA `r PPDmap$psa_num[1]`.
 
 We can also overlay a leaflet map with the `PPDmap` object.
 ```{r}
@@ -755,7 +755,7 @@ We can also overlay a leaflet map with the `PPDmap` object.
 #| message: false
 PPDmap |>
    leaflet(width = 1200, height = 800) |>
-   addPolygons(weight=1, label=~PSA_NUM) |>
+   addPolygons(weight=1, label=~psa_num) |>
    addTiles(
       urlTemplate = "https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key={key}",
       options = tileOptions(key = Sys.getenv("MAPTILER_API_KEY"),
@@ -822,15 +822,15 @@ plot(st_geometry(PPDmap), axes=TRUE, cex.axis=0.7)
 plot(st_geometry(ois), add=TRUE, col=rgb(1,0,0,0.5), pch=16)
 ```
 
-`st_join()` will match each row in `ois` to each polygon in PSA. When linking a data frame with _point_ data (OIS location) with a data frame with _polygon_ data (like PSAs), the points will join with the polygons in which they land. I just want to add the `PSA_NUM` column out of the `PPDmap` to our `ois` data.
+`st_join()` will match each row in `ois` to each polygon in PSA. When linking a data frame with _point_ data (OIS location) with a data frame with _polygon_ data (like PSAs), the points will join with the polygons in which they land. I just want to add the `psa_num` column out of the `PPDmap` to our `ois` data.
 ```{r}
 PSAlookup <- ois |>
-  st_join(PPDmap |> select(PSA_NUM))
+  st_join(PPDmap |> select(psa_num))
 PSAlookup |>
-   select(id, date, location, PSA_NUM, geometry) |>
+   select(id, date, location, psa_num, geometry) |>
    head()
 ```
-Now our `PSAlookup` contains everything from `ois` but also adds a new column `PSA_NUM`.
+Now our `PSAlookup` contains everything from `ois` but also adds a new column `psa_num`.
 
 Let's examine the PSA with the most OISs and highlight their incidents on the map.
 ```{r}
@@ -839,15 +839,15 @@ Let's examine the PSA with the most OISs and highlight their incidents on the ma
 #| out.width: "100%"
 #| fig-height: 5
 PSAlookup |>
-   count(PSA_NUM) |>
+   count(psa_num) |>
    slice_max(n)
 
 plot(st_geometry(PPDmap), axes=TRUE, cex.axis=0.7)
 PSAlookup |>
    st_join(PSAlookup |>
-              count(PSA_NUM) |>
+              count(psa_num) |>
               slice_max(n) |>
-              select(-PSA_NUM),
+              select(-psa_num),
            left=FALSE) |> # right join
   st_geometry() |>
   plot(add=TRUE, col=rgb(0,1,0,0.5), pch=16)
@@ -861,7 +861,7 @@ st_as_sf(gcPenn,
          coords=c("lon","lat"),
          crs=4326) |> # tell R that the coords are lon/lat
    st_join(PPDmap) |>
-   select(PSA_NUM)
+   select(psa_num)
 ```
 Now we see that Penn is in PSA 183 and we can highlight those points on the map.
 ```{r}
@@ -871,7 +871,7 @@ Now we see that Penn is in PSA 183 and we can highlight those points on the map.
 #| fig-height: 5
 plot(st_geometry(PPDmap), axes=TRUE, cex.axis=0.7)
 PSAlookup |>
-  filter(PSA_NUM=="183") |>
+  filter(psa_num=="183") |>
   st_geometry() |>
   plot(add=TRUE, col="blue", pch=16)
 ```
@@ -883,9 +883,9 @@ Lastly, we will tabulate the number of OISs in each PSA and color the map by the
 # merge the shooting count into the PPDmap data
 PPDmap <- PPDmap |>
    left_join(PSAlookup |>
-                count(PSA_NUM) |>
+                count(psa_num) |>
                 st_drop_geometry(), 
-            by=join_by(PSA_NUM)) |>
+            by=join_by(psa_num)) |>
   rename(nShoot=n) |>
   mutate(nShoot=replace_na(nShoot, 0))
 
@@ -984,7 +984,7 @@ And a leaflet version to end on.
 #| fig-cap: "Map of OIS counts by PSA"
 #| message: false
 PPDmap <- PPDmap |>
-  mutate(label = paste("PSA:",PSA_NUM, "Count:",nShoot))
+  mutate(label = paste("PSA:",psa_num, "Count:",nShoot))
 
 PPDmap |>
    leaflet(width = 1200, height = 800) |>
