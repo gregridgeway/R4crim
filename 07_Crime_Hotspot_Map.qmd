@@ -18,6 +18,7 @@ format:
       light: default
     toc: true
     html-math-method: mathjax
+    embed-resources: true
   pdf:
     toc: true
     prefer-html: true
