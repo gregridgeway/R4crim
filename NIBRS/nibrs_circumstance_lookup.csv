@@ -1,0 +1,18 @@
+circumstance_code,circumstance
+01,Argument
+02,Assault on Law Enforcement Officer(s)
+03,Drug Dealing
+04,Gangland
+05,Juvenile Gang
+06,Domestic Violence
+07,Mercy Killing
+08,Other Felony Involved
+09,Other Circumstances
+10,Unknown Circumstances
+20,Criminal Killed by Private Citizen
+21,Criminal Killed by Police Officer
+30,Child Playing With Weapon
+31,Gun-Cleaning Accident
+32,Hunting Accident
+33,Other Negligent Weapon Handling
+34,Other Negligent Killing

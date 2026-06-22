@@ -1,0 +1,57 @@
+state_code,state_abbr,state_name
+50,AK,Alaska
+01,AL,Alabama
+03,AR,Arkansas
+54,AS,American Samoa
+02,AZ,Arizona
+04,CA,California
+05,CO,Colorado
+06,CT,Connecticut
+52,CZ,Canal Zone
+08,DC,District of Columbia
+07,DE,Delaware
+09,FL,Florida
+10,GA,Georgia
+55,GM,Guam
+51,HI,Hawaii
+14,IA,Iowa
+11,ID,Idaho
+12,IL,Illinois
+13,IN,Indiana
+15,KS,Kansas
+16,KY,Kentucky
+17,LA,Louisiana
+20,MA,Massachusetts
+19,MD,Maryland
+18,ME,Maine
+21,MI,Michigan
+22,MN,Minnesota
+24,MO,Missouri
+23,MS,Mississippi
+25,MT,Montana
+26,NB,Nebraska
+32,NC,North Carolina
+33,ND,North Dakota
+28,NH,New Hampshire
+29,NJ,New Jersey
+30,NM,New Mexico
+27,NV,Nevada
+31,NY,New York
+34,OH,Ohio
+35,OK,Oklahoma
+36,OR,Oregon
+37,PA,Pennsylvania
+53,PR,Puerto Rico
+38,RI,Rhode Island
+39,SC,South Carolina
+40,SD,South Dakota
+41,TN,Tennessee
+42,TX,Texas
+43,UT,Utah
+62,VI,Virgin Islands
+45,VA,Virginia
+44,VT,Vermont
+46,WA,Washington
+48,WI,Wisconsin
+47,WV,West Virginia
+49,WY,Wyoming

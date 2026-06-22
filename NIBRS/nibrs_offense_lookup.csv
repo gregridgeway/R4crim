@@ -1,0 +1,64 @@
+ucr_code,crime_cat,crime
+720,Animal Cruelty Offenses,Animal Cruelty
+200,Arson,Arson
+13A,Assault Offenses,Aggravated Assault
+13B,Assault Offenses,Simple Assault
+13C,Assault Offenses,Intimidation
+510,Bribery,Bribery
+220,Burglary/Breaking & Entering,Burglary/Breaking & Entering
+250,Counterfeiting/Forgery,Counterfeiting/Forgery
+290,Destruction/Damage/Vandalism of Property,Destruction/Damage/Vandalism of Property
+35A,Drug/Narcotic Offenses,Drug/Narcotic Violations
+35B,Drug/Narcotic Offenses,Drug Equipment Violations
+270,Embezzlement,Embezzlement
+210,Extortion/Blackmail,Extortion/Blackmail
+26A,Fraud Offenses,False Pretenses/Swindle/Confidence Game
+26B,Fraud Offenses,Credit Card/Automated Teller Machine Fraud
+26C,Fraud Offenses,Impersonation
+26D,Fraud Offenses,Welfare Fraud
+26E,Fraud Offenses,Wire Fraud
+26F,Fraud Offenses,Identity Theft
+26G,Fraud Offenses,Hacking/Computer Invasion
+39A,Gambling Offenses,Betting/Wagering
+39B,Gambling Offenses,Operating/Promoting/Assisting Gambling
+39C,Gambling Offenses,Gambling Equipment Violations
+39D,Gambling Offenses,Sports Tampering
+09A,Homicide Offenses,Murder & Non-negligent Manslaughter
+09B,Homicide Offenses,Negligent Manslaughter
+09C,Homicide Offenses,Justifiable Homicide
+64A,Human Trafficking,"Human Trafficking, Commercial Sex Acts"
+64B,Human Trafficking,"Human Trafficking, Involuntary Servitude"
+100,Kidnapping/Abduction,Kidnapping/Abduction
+23A,Larceny/Theft Offenses,Pocket-picking
+23B,Larceny/Theft Offenses,Purse-snatching
+23C,Larceny/Theft Offenses,Shoplifting
+23D,Larceny/Theft Offenses,Theft From Building
+23E,Larceny/Theft Offenses,Theft From Coin-Operated Machine or Device
+23F,Larceny/Theft Offenses,Theft From Motor Vehicle
+23G,Larceny/Theft Offenses,Theft of Motor Vehicle Parts or Accessories
+23H,Larceny/Theft Offenses,All Other Larceny
+240,Motor Vehicle Theft,Motor Vehicle Theft
+370,Pornography/Obscene Material,Pornography/Obscene Material
+40A,Prostitution Offenses,Prostitution
+40B,Prostitution Offenses,Assisting or Promoting Prostitution
+40C,Prostitution Offenses,Purchasing Prostitution
+120,Robbery,Robbery
+11A,Sex Offenses,Rape
+11B,Sex Offenses,Sodomy
+11C,Sex Offenses,Sexual Assault With An Object
+11D,Sex Offenses,Fondling
+36A,Sex Offenses,Incest
+36B,Sex Offenses,Statutory Rape
+280,Stolen Property Offenses,Stolen Property Offenses
+520,Weapon Law Violations,Weapon Law Violations
+90A,Bad Checks,Bad Checks
+90B,Curfew/Loitering/Vagrancy Violations,Curfew/Loitering/Vagrancy Violations
+90C,Disorderly Conduct,Disorderly Conduct
+90D,Driving Under the Influence,Driving Under the Influence
+90E,Drunkenness,Drunkenness
+90F,"Family Offenses, Nonviolent","Family Offenses, Nonviolent"
+90G,Liquor Law Violations,Liquor Law Violations
+90H,Peeping Tom,Peeping Tom
+90I,Runaway1,Runaway
+90J,Trespass of Real Property,Trespass of Real Property
+90Z,All Other Offenses,All Other Offenses

@@ -1,0 +1,69 @@
+property_code,property_type
+01,Aircraft
+02,Alcohol
+03,Automobiles
+04,Bicycles
+05,Buses
+06,Clothes/Furs
+07,Computer Hardware/Software
+08,Consumable Goods
+09,Credit/Debit Cards
+10,Drugs/Narcotics
+11,Drug/Narcotic Equipment
+12,Farm Equipment
+13,Firearms
+14,Gambling Equipment
+15,Heavy Construction/Industrial Equipment
+16,Household Goods
+17,Jewelry/Precious Metals
+18,Livestock
+19,Merchandise
+20,Money
+21,Negotiable Instruments
+22,Nonnegotiable Instruments
+23,Office-Type Equipment
+24,Other Motor Vehicles
+25,Purses/Handbags/Wallets
+26,Radios/TVs/VCRs
+27,Recordings - Audio/Visual
+28,Recreational Vehicles
+29,Structures - Single Occupancy Dwellings
+30,Structures - Other Dwellings
+31,Structures - Commercial/Business
+32,Structures - Industrial/Manufacturing
+33,Structures - Public/Community
+34,Structures - Storage
+35,Structures - Other
+36,Tools - Power/Hand
+37,Trucks
+38,Vehicle Parts/Accessories
+39,Watercraft
+41,Aircraft Parts/Accessories
+42,Artistic Supplies/Accessories
+43,Building Materials
+44,Camping/Hunting/Fishing Equipment
+45,Chemicals
+46,Collections/Collectibles
+47,Crops
+48,Documents - Personal or Business
+49,Explosives
+59,Firearm Accessories
+64,Fuel
+65,Identity Documents
+66,Identity - Intangible
+67,Law Enforcement Equipment
+68,Lawn/Yard/Garden Equipment
+69,Logging Equipment
+70,Medical/Medical Lab Equipment
+71,Metals - Non-Precious
+72,Musical Instruments
+73,Pets
+74,Photographic/Optical Equipment
+75,Portable Electronic Communications
+76,Recreational/Sports Equipment
+77,Other
+78,Trailers
+79,Watercraft Equipment/Parts/Accessories
+80,Weapons - Other
+88,Pending Inventory
+99,Special Category

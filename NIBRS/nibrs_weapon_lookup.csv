@@ -1,0 +1,18 @@
+weapon_code,weapon_type
+11,Firearm (type not stated)
+12,Handgun
+13,Rifle
+14,Shotgun
+15,Other Firearm
+20,Knife/Cutting Instrument
+30,Blunt Object
+35,Motor Vehicle/Vessel
+40,Personal Weapons (hands/feet/teeth)
+50,Poison (including gas)
+60,Explosives
+65,Fire/Incendiary Device
+70,Drugs/Narcotics/Sleeping Pills
+85,Asphyxiation
+90,Other
+95,Unknown
+99,None

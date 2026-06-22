@@ -1,0 +1,46 @@
+location_code,location_type
+01,Air/Bus/Train Terminal
+02,Bank/Savings and Loan
+03,Bar/Nightclub
+04,Church/Synagogue/Temple
+05,Commercial/Office Building
+06,Construction Site
+07,Convenience Store
+08,Department/Discount Store
+09,Drug Store/Doctor's Office/Hospital
+10,Field/Woods
+11,Government/Public Building
+12,Grocery/Supermarket
+13,Highway/Road/Alley
+14,Hotel/Motel
+15,Jail/Prison
+16,Lake/Waterway
+17,Liquor Store
+18,Parking Lot/Garage
+19,Rental Storage Facility
+20,Residence/Home
+21,Restaurant
+22,School/College
+23,Service/Gas Station
+24,Specialty Store
+25,Other/Unknown
+37,Abandoned/Condemned Structure
+38,Amusement Park
+39,Arena/Stadium/Fairgrounds/Coliseum
+40,ATM Separate from Bank
+41,Auto Dealership New/Used
+44,Daycare Facility
+45,Dock/Wharf/Freight/Modal Terminal
+46,Farm Facility
+47,Gambling Facility/Casino/Race Track
+48,Industrial Site
+49,Military Installation
+50,Park/Playground
+51,Rest Area
+52,School - College/University
+53,School - Elementary/Secondary
+54,Shelter - Mission/Homeless
+55,Shopping Mall
+56,Tribal Lands
+57,Community Center
+58,Cyberspace

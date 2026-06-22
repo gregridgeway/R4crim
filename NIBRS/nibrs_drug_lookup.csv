@@ -1,0 +1,19 @@
+drug_code,drug_type
+A,Crack Cocaine
+B,Cocaine (all forms except Crack)
+C,Hashish
+D,Heroin
+E,Marijuana
+F,Morphine
+G,Opium
+H,Other Narcotics (Codeine/Methadone/etc.)
+I,LSD
+J,PCP
+K,Other Hallucinogens (Mescaline/Psilocybin/etc.)
+L,Amphetamines/Methamphetamines
+M,Other Stimulants (Ritalin/Benzedrine/etc.)
+N,Barbiturates
+O,Other Depressants (Quaalude/Talwin/etc.)
+P,Other Drugs (Antidepressants/Tranquilizers/etc.)
+U,Unknown Type Drug
+X,Over 3 Drug Types
