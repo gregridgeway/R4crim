@@ -65,7 +65,9 @@ The NCVS contains information about nonfatal personal crimes, such as rape and r
 
 # Acquiring the NCVS data
 
-The University of Michigan consolidates the NCVS data into a format that is easily accessible in R. We will be using data collected in 2022 and 2023 to assemble a dataset that covers victimizations occurring in 2022. Since respondents are asked about crime in the previous six months, respondents completing surveys in May 2023 will still be reporting about crimes in December 2022.
+The University of Michigan consolidates the NCVS data into a format that is easily accessible in R. We will be using data collected in 2022 and 2023 to assemble a dataset that covers victimizations occurring in 2022. Since respondents are asked about crime in the previous six months, respondents completing surveys in May 2023 will still be reporting about crimes in December 2022. 
+
+Why am I not using 2024 or 2025 data? In 2024 BJS changed the survey instrument for half of the randomly selected households. They have not released the data for the half randomly selected to get the new instrument. Data collection for crimes that occurred in 2025 will continued through June of 2026. Data collected in 2026 will not be posted until fall 2027.
 
 First, we will download the NCVS 2022 data, [ICPSR 38603](https://www.icpsr.umich.edu/web/NACJD/studies/38603). Click on Download, select R, save the resulting file (called something like ICPSR_38603-V1.zip), extract the contents of the zipped file to a convenient folder, and give it a more understandable folder name, like NCVS2022. Repeat the process for downloading the NCVS 2023 data, [ICPSR 38962](https://www.icpsr.umich.edu/web/NACJD/studies/38962). New NCVS data tends to appear in mid-September. Typically we need to wait about nine months to get the results from the previous year.
 
