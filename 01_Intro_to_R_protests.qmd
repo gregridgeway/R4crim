@@ -100,7 +100,14 @@ Note in the examples below that you can also have a collection of non-numerical 
 c("CRIM6000","CRIM6001","CRIM6002","CRIM6003")
 c("yes","no","no",NA,NA,"yes")
 ```
-In R, `NA` means a missing value. We'll do more exercises later using data containing some `NA` values. In any dataset in the wild, you are virtually guaranteed to find some `NA`s. The function `is.na()` helps determine whether there are any missing values (any NAs). In some of the problems below, we will use `is.na()`.
+In R, `NA` means a missing value. We will do more exercises later using data containing some `NA` values. In any dataset in the wild, you are virtually guaranteed to find some `NA`s. The function `is.na()` helps determine whether there are any missing values (any NAs). In some of the problems below, we will use `is.na()`.
+
+One strange but important thing about `NA` is that R treats it as "unknown." If you ask whether one unknown value equals another unknown value, R still cannot know the answer. This surprises a lot of new R users.
+```{r}
+NA == NA
+is.na(NA)
+```
+Use `is.na()` when you want to test whether a value is missing. Do not use `== NA`.
 
 You can use double quotes or single quotes in R as long as you are consistent. When you have quotes inside the text you need to be particularly careful.
 ```{r}
@@ -141,15 +148,51 @@ min(c(1,10,3,6,2,5,8,4,7,9)) # what is the smallest value in vector?
 which.min(c(1,10,3,6,2,5,8,4,7,9)) # in which "spot" would we find it?
 ```
 
+# Things R will complain about
+
+When you are learning R, you will see error messages. This is normal. Error messages are R's way of saying, "I cannot do what you asked me to do yet."
+
+R is case sensitive. That means `Attendees`, `attendees`, and `ATTENDEES` are three different names. If you ask R for an object that does not exist, it will complain that the object is not found.
+```{r}
+#| error: true
+attendees
+```
+
+R also needs all function inputs to be separated by commas. If a comma is missing, R often says something like "unexpected numeric constant" or "unexpected symbol."
+```{r}
+#| error: true
+c(1 2 3)
+```
+
+R needs opening and closing parentheses to match. If you start a function with `(`, you need to close it with `)`. If you neglect the closing parenthesis, like `sqrt(25`, R cannot finish reading the code. In the console, it will usually display a `+`, R's way of saying "I'm waiting for you to finish your thought. You're leaving me hanging here." When rendering this document, R reports it as an incomplete expression.
+```
+> sqrt(25
++ 
+```
+To get out of this, either type the missing `)` or hit escape to abandon the calculation.
+
+Text values need quotes. Without quotes, R thinks you are naming an object.
+```{r}
+#| error: true
+c(yes, no, yes)
+```
+
+File names and folder names have to be exactly right. If R says that it cannot open a file or that a file does not exist, check the spelling, the folder, and the working directory. (We will load this file later, but here it is missing an "s" in `protests.RData`)
+```{r}
+#| error: true
+load("protest.RData")
+```
+
+The fastest debugging strategy is usually to read the error message, check spelling and capitalization, check commas and parentheses, and then run just one line at a time.
 
 # Setting the working directory
-Now that we have covered a lot of fundamental R features, it is time to load in a real dataset. However, before we do that, R needs to know where to find the data file. So we first need to talk about "the working directory". When you start R, it has a default folder or directory on your computer where it will retrieve or save any files. You can run `getwd()` to get the current working directory. Here's our current working directory, which will not be the same as yours.
+Now that we have covered a lot of fundamental R features, it is time to load in a real dataset. However, before we do that, R needs to know where to find the data file. So we first need to talk about "the working directory". When you start R, it has a default folder or directory on your computer where it will retrieve or save any files. You can run `getwd()` to get the current working directory. Here's my current working directory, which will not be the same as yours.
 ```{r}
 getwd()    
 ```
 Almost certainly this default directory is *not* where you plan to have all of your datasets and files stored. Instead, you probably have an "analysis" or "project" or "R4crim" folder somewhere on your computer where you would like to store your data and work.
 
-Use `setwd()` to tell R what folder you want it to use as the working directory. If you do not set the working directory, R will not know where to find the data you wish to import and will save your results in a location in which you would probably never look. Make it a habit to have `setwd()` as the first line of every script you write. If you know the working directory you want to use, then you can just put it inside the `setwd()` function.
+Use `setwd()` to tell R what folder you want it to use as the working directory. If you do not set the working directory, R will not know where to find the data you wish to import and will save your results in a location in which you would probably never look. For this example, we are going to use `setwd()` as the first line of this script. Later we will talk about setting up a more portable R Studio project.
 ```{r}
 #| eval: false
 setwd("C:/Users/greg_/CRIM6002/notes/R4crim")    
@@ -158,7 +201,7 @@ Note that for all platforms, Windows, Macs, and Linux, the working directory onl
 
 If you do not know how to write your working directory, here comes RStudio to the rescue. In RStudio click Session -> Set Working Directory -> Choose Directory. Then click through to navigate to the working directory that you want to use. When you find it click "Select Folder". Then look over at the console. RStudio will construct the right `setwd()` syntax for you. Copy and paste that into your script for use later. No need to have to click through the Session menu again now that you have your `setwd()` set up.
 
-Now you can use R functions to load in any datasets that are in your working folder. If you have done your `setwd()` correctly, you shouldn't get any errors because R will know exactly where to look for the data files. If the working directory that you've given in the `setwd()` isn't right, R will think the file doesn't even exist. For example, if you give the path for, say, your R4econ folder, R won't be able to load data because the file isn't stored in what R thinks is your working directory. With that out of the way, let's load a dataset.
+Now you can use R functions to load in any datasets that are in your working folder. If you have done your `setwd()` correctly, you should not get any errors because R will know exactly where to look for the data files. If the working directory that you have given in the `setwd()` is not right, R will think the file does not even exist. For example, if you give the path for, say, your R4econ folder, R will not be able to load data because the file is not stored in what R thinks is your working directory. With that out of the way, let's load a dataset.
 
 # Loading a first dataset, protests in the United States
 
@@ -228,6 +271,32 @@ dataProtest$Date[1:10]
 dataProtest$Location[1:10]
 ```
 
+# Indexing basics
+
+The square brackets `[]` are used to pick out parts of an object by position. This is called indexing. R starts counting at 1 (I note this because some programming languages start at 0).
+```{r}
+dataProtest$Date[1]
+dataProtest$Date[1:5]
+```
+
+For a vector, like `dataProtest$Date`, we use one position inside the square brackets. For a data frame, which has rows and columns, we use two positions: `[row, column]`. The row position comes first, then a comma, then the column position.
+```{r}
+dataProtest[1, 1]
+dataProtest[1, ]
+dataProtest[, 1]
+```
+
+The code `dataProtest[1, 1]` returns the value in the first row and first column. The code `dataProtest[1, ]` returns the entire first row. The code `dataProtest[, 1]` returns the entire first column. Leaving one side of the comma blank means "give me all of them."
+
+You can also use column names inside the square brackets.
+```{r}
+dataProtest[1:5, c("Date", "Location")]
+```
+
+In this script we will mostly use `slice()`, `select()`, `filter()`, and the `$` operator because they are often easier to read. But you will see bracket indexing in a lot of R code, so it is worth knowing the basic pattern.
+
+# Creating objects
+
 So far every time we run some R code the results are dumped to the console. This is R's default behavior. If you do not indicate otherwise, it will dump the results to the console and promptly forget those results. When we want to store the results, we can use the assignment operator `<-`. For example, to save the first 10 dates to a variable `a` you can use 
 ```{r}
 a <- dataProtest$Date[1:10]
@@ -249,7 +318,10 @@ If a line of R code does not have a `<-`, then the results will not be stored. I
 dataProtest <- dataProtest |>
    select(Date, Location, Attendees, Tags)
 ```
-Now if you run `head(dataProtest)` you will see that the dataset only has the `Date`, `Location`, `Attendees`, and `Tags` columns. The other columns have been removed. `select()` also allows you to indicate which features to drop by prefixing their names with a minus sign. Instead of listing the features we wanted to keep, we could have listed the features we wanted to drop, using `select(-Event..legacy..see.tags., -Source, -Curated, -Total.Articles)`. 
+Now if you run `head(dataProtest)` you will see that the dataset only has the `Date`, `Location`, `Attendees`, and `Tags` columns. The other columns have been removed. `select()` also allows you to indicate which features to drop by prefixing their names with a minus sign. Instead of listing the features we wanted to keep, we could have listed the features we wanted to drop, using `select(-Event..legacy..see.tags., -Source, -Curated, -Total.Articles)`.
+
+When naming objects in R, choose names that are short, clear, and meaningful. Object names can contain letters, numbers, underscores (`_`), and periods (`.`), but they should not start with a number and should not contain spaces. As previously noted, R is case sensitive, so `protestData`, `ProtestData`, and `protestdata` are three different objects. I like starting with a lowercase label of what the object is, like the `data` in `dataProtest`. I tend to use "camel case," which capitalizes separate words in an object name, like `listIceCreamFlavors`. Clear names make your code easier to read, easier to debug, and easier to return to later when you no longer remember exactly what you were thinking.
+
 
 ## Exercises
 `r .exNum("What is the date of the protest in line 10000 of the dataset?")`
@@ -381,15 +453,14 @@ Lots of different kinds of errors here. Five of them are just lower case. One is
 ```{r}
 dataProtest <- dataProtest |>
    filter(state != "co") |>  # drop Mexico
-   mutate(state = 
-             case_match(state,
-                        "ce" ~ "Space",
-                        "te" ~ "IN",
-                        .default = toupper(state)))
+   mutate(state = toupper(state),
+          state = replace_values(state,
+                                 "CE" ~ "Space",
+                                 "TE" ~ "IN"))
 dataProtest |> 
    count(state)
 ```
-Several things are happening here. First, we are using `case_match()` to change the state abbreviations. Note its structure. The first argument is the variable that we are matching (`state`). Then we list all the changes that we want to make. We are changing "ce" to "Space" and "te" to "IN". The `.default` argument is used to keep all other state abbreviations the same. The `toupper()` function is used to make sure that all state abbreviations are in upper case. Finally we rerun the `count()` function to see if our changes worked. All looks good now.
+Several things are happening here. First, the `toupper()` function is used to make sure that all state abbreviations are in upper case. Then we are using `replace_values()` to change the state abbreviations that need special fixes. Note its structure. The first argument is the variable that we are changing (`state`). Then we list all the replacements that we want to make. We are changing "CE" to "Space" and "TE" to "IN". Finally we rerun the `count()` function to see if our changes worked. All looks good now.
 
 The last feature that we have yet to explore is the `Tags` column. This column contains a list of reasons for the protest. The format of the tags is to have the reasons separated by a semicolon and a space. For example, a protest might have the tags "Civil Rights; Against pandemic intervention; Police brutality". We can use the `strsplit()` function to split the tags into separate reasons. For example, to split the tags in the first three rows of the dataset, we can use the following code. 
 ```{r}
@@ -417,12 +488,12 @@ load("protests.RData")
 dataProtest <- dataProtest |>
    select(Date, Location, Attendees, Tags) |>
    filter(Location != "Ciudad Juarez, Mexico") |>
-   mutate(state=str_sub(Location, -2),
-          state=case_match(state,
-                           "ce" ~ "Space",
-                           "te" ~ "IN",
-                           .default = toupper(state)),
-          civilrights=as.numeric(grepl("Civil Rights", Tags)))
+   mutate(state = str_sub(Location, -2),
+          state = toupper(state),
+          state = replace_values(state,
+                                 "CE" ~ "Space",
+                                 "TE" ~ "IN"),
+          civilrights = as.numeric(grepl("Civil Rights", Tags)))
 head(dataProtest)
 ```
 
@@ -541,7 +612,7 @@ dataProtest |>
 `r .exNum("Are civil rights protests larger on average than non-civil rights protests?")` (Hint: use group_by/summarize)
 
 
-# `pivot_wider()`/`pivot_longer()`
+# Pivot wider and longer
 
 Note: You may encounter code with `melt()`, `cast()`, `reshape()`, `gather()`, and `spread()`. All of these are legacy versions of `pivot_wider()` and `pivot_longer()`.
 
@@ -662,6 +733,7 @@ mostCommonType <- function(x)
 {
   reasons <- strsplit(x, "; ")
   reasons <- unlist(reasons)
+
   return( mostCommon(reasons) )
 }
 
@@ -672,11 +744,22 @@ mostCommonType(dataProtest$Tags[1:10])
 
 Now we can use `mostCommonType()` to find the most common protest type in the dataset. Note that `mostCommonType()` can return more than one value. `summarize()` will complain if it gets more than one value. 
 ```{r}
+#| error: true
 dataProtest |>
   group_by(state) |>
   summarize(mostCommonType(Tags)) |> 
   print(n=Inf)
 ```
+Why is it complaining about Guam? `separate_longer_delim()` can help here.
+```{r}
+dataProtest |>
+  filter(state == "GU") |>
+  separate_longer_delim(Tags, delim = "; ") |> # from tidyr
+  count(Tags) |>
+  arrange(desc(n))
+```
+Civil Rights and Other are themes in six protests... a tie.
+
 So let's redo that with `reframe()` instead. `reframe()` is like `summarize()` but allows for multiple values.
 ```{r}
 dataProtest |>
@@ -687,12 +770,10 @@ dataProtest |>
 So why does Puerto Rico show up three times in these results? 
 ```{r}
 dataProtest |>
-  filter(state=="PR") |>
-  pull(Tags) |>
-  strsplit("; ") |>
-  unlist() |>
-  table() |>
-  sort()
+  filter(state == "PR") |>
+  separate_longer_delim(Tags, delim = "; ") |> # from tidyr
+  count(Tags) |>
+  slice_max(n)
 ```
 There are three tags all with 11 protests each, a three-way tie for the largest number of protests. So `mostCommonType()` returns all three tags.
 
@@ -765,6 +846,7 @@ R, of course, has all the basic math operations that you might need to do with a
 Then we worked through some basic functions to work with R objects.
 
 * `c()` combine numbers and other R objects together in a collection
+* `[]` index an object to pick out selected values, rows, or columns
 * `nrow()`, `ncol()`
 * `head()`, `tail()`
 
@@ -776,7 +858,7 @@ When working with datasets, we covered all the standard functions needed to mani
 * `count()` count the number of rows in a dataset or the number of rows in a dataset by groups
 * `mutate()` create new columns or edit existing columns
 * `str_sub()` extract substrings from a string
-* `case_match()` used inside `mutate()` to create new columns based on the values in another column 
+* `replace_values()` used inside `mutate()` to change selected values in a column 
 * `group_by()`, `summarize()`, `reframe()` used to summarize data by groups
 * `arrange()` sort rows in a dataset
 * `pivot_wider()` and `pivot_longer()` to organize data in wide or long form
