@@ -1,5 +1,5 @@
 # Run this script once to create the two pre-made lookup files that students
-# need alongside 03_Working_with_NIBRS_data.qmd:
+# need alongside 05_Working_with_NIBRS_data.qmd:
 #   nibrs_format.csv         -- column specs for every NIBRS segment
 #   nibrs_offense_lookup.csv -- UCR code -> crime category -> crime description
 #
@@ -62,6 +62,12 @@ nibrs_format <- nibrs_format |>
       duplicated(paste(segment, col_name)),
     "estimated_quantity_1000ths",
     col_name))
+
+# Shorten the unwieldy type_property_loss_etc name
+nibrs_format <- nibrs_format |>
+  mutate(col_name = if_else(col_name == "type_property_loss_etc",
+                            "type_property_loss",
+                            col_name))
 
 # ---- Batch header (first sheet) ----
 

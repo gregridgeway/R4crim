@@ -50,7 +50,7 @@ numeric_state_code,c,2,03
 originating_agency_identifier_ori,c,9,03
 incident_number,c,12,03
 incident_date,c,8,03
-type_property_loss_etc,c,1,03
+type_property_loss,c,1,03
 property_description,c,2,03
 value_of_property,c,9,03
 date_recovered,c,8,03
