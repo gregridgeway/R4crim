@@ -11,7 +11,7 @@ date: "`r format(Sys.time(), '%B %d, %Y')`"
 format:
   html:
     theme: 
-      dark: darkly
+      dark: [darkly, dark.scss]
       light: default
     toc: true
     html-math-method: mathjax
@@ -45,217 +45,532 @@ editor_options:
    .exerciseQuestions <<- c(.exerciseQuestions, .questionText)
    return(paste0(.counterExercise,". ",.questionText))
 }
+.exQ <- function(i)
+{
+   return(paste0(i,". ",.exerciseQuestions[i]))
+}
 ```
 
 
 
 # Introduction
 
-Working with dates and times is very different from working with the more familiar numbers. Months have different numbers of days. Sometimes we count hours of the day up to 12 and then start over. Sometimes we count hours up to 24 and then start over. Some years have 366 days. We have 24 time zones around the world. Twice a year we switch clocks for Daylight Saving Time, except in some places like Arizona. Arithmetic, such as adding one month to a date, is poorly defined. Which date is one month after January 31st? Is it February 28th? Or is it March 3rd?
+Working with dates and times is very different from working with more familiar numbers. Months have different numbers of days. Some years have 366 days. Clocks restart after 12 or 24 hours. Locations around the world use many different time zones. Most of the United States changes its clocks twice a year for daylight saving time, but places such as Arizona do not. We constantly debate making daylight saving time permanent... or discarding it entirely. Even apparently simple arithmetic can be ambiguous. Which date is one month after January 31st? Is it February 28th, or should we count 31 days and arrive in March?
 
-Fortunately, software for working with dates exists to make these tasks easier. Unfortunately, every system seems to make their own design decisions. Excel stores dates as the number of days since January 0, 1900... that's not a typo... they count from January 0, 1900. Linux systems count days since January 1, 1970. SPSS stores times as the number of seconds since midnight October 14, 1582, the adoption date of the Gregorian calendar. Much of the world did not adopt the calendar in 1582. The American colonies did not adopt the Gregorian calendar until 1752 along with Great Britain. So beware if you are a historian digging through centuries old data. Aligning dates can become very messy.
+Fortunately, software for working with dates exists to make these tasks easier. Unfortunately, systems have made different design decisions. Excel's default date system stores dates as serial numbers, with January 1, 1900 represented by 1. Unix-like systems commonly measure time from January 1, 1970. SPSS measures time in seconds from October 14, 1582, near the introduction of the Gregorian calendar. Much of the world did not adopt that calendar in 1582. Great Britain and its American colonies did not adopt it until 1752. Historians working across calendar systems need to be especially careful.
 
-R has had a variety of attempts at providing a means for managing dates. We are going to use the [`lubridate`](https://www.jstatsoft.org/article/view/v040i03) package that address just about everything you might need to do with dates and times.
+R has several ways to represent dates and times. We will use the [`lubridate`](https://lubridate.tidyverse.org/) package, which provides readable functions for parsing dates, extracting their components, working with time zones, and doing date arithmetic.
 
-Do not use `as.Date()`. `lubridate` has an easier to read date formatting, more intelligently handles dates of different formats, and has better date arithmetic.
+Do not use `as.Date()` or `as.POSIXct()`. `lubridate` has easier-to-read date formatting, handles dates in different formats more intelligently, and has better date arithmetic.
 
 `lubridate` is not part of R by default. You will need to install it. Simply run
 ```{r}
 #| eval: false
 install.packages("lubridate")
 ```
-and R will hit the web, download the `lubridate` package and any supporting packages it needs (and it does need a few), and installs them. This is a one-time event. Once you have `lubridate` on your machine you will not need to reinstall it every time you need it.
+and R will hit the web, download the `lubridate` package and any supporting packages it needs, and install them. This is a one-time event. Once you have `lubridate` on your machine you will not need to reinstall it every time you need it.
 
 Some of our students, particularly on Macs, have encountered trouble installing some packages for R. R will sometimes try to download the source code for the packages and compile them from scratch on your machine. Sometimes that goes well and other times it requires that you have other tools installed on your machine. An easy solution is to run
 ```{r}
 #| eval: false
 install.packages("lubridate", type="mac.binary")
 ```
-instead to insist that R finds and installs a ready-to-use version of the packages.
+instead to tell R to find and install a ready-to-use version of the package.
 
-
-# Working with dates
-Once `lubridate` is installed, you need to load it once in each R session where you wish to use its features. 
+Once `lubridate` is installed, load it once in each R session where you want to use its features. We will also use `dplyr` to manipulate data.
 ```{r}
 #| comment: ""
 #| message: false
 library(lubridate)
 library(dplyr)
 ```
-If you close R and restart it, then you'll need to run this line again.
 
-Let's reload the [sample of Chicago crime data](https://github.com/gregridgeway/R4crim/blob/master/chicago%20crime%2020141124-20141209.RData) discussed in the introductory notes, available on the [R4Crim github site](https://github.com/gregridgeway/R4crim).
+
+# New York City Office of Administrative Trials and Hearings (OATH)
+
+This lesson uses records from the New York City Office of Administrative Trials and Hearings (OATH). OATH is an administrative court that hears summonses alleging public-safety and quality-of-life violations. Its [Hearings Division Case Status dataset](https://data.cityofnewyork.us/City-Government/OATH-Hearings-Division-Case-Status/jz4z-kudi) includes the date and time of a violation, its scheduled hearing, the decision date, and the hearing result.
+
+We will pull data directly from the NYC Open Data API. We will select NYPD-issued summonses with violation dates beginning January 1, 2026. The results may change from one day to the next as OATH posts new records and updates existing cases every day.
+
+The API speaks a query language called Socrata Query Language (SoQL), very similar to SQL. The query below asks for only the columns we need, restricts the records to NYPD summonses from 2026 onward, orders the records by violation date, and allows up to 100,000 results. `URLencode()` converts spaces and punctuation into a form that is safe to include in a web address. Finally, `read.csv()` reads the API's response directly into R.
 ```{r}
-#| comment: ""
-#| results: "hold"
-load("chicago crime 20141124-20141209.RData")
+#| label: retrieveOATHdata
+#| message: false
+
+# assemble a Socrata query
+oathQuery <-
+   "select ticket_number, violation_date, violation_time,
+           issuing_agency, charge_1_code_description,
+           hearing_date, hearing_time, decision_date, hearing_result
+    where violation_date >= '2026-01-01T00:00:00' and
+          issuing_agency = 'POLICE DEPARTMENT'
+    order by violation_date
+    limit 100000" |>
+   gsub("\n", " ", x=_) |>   # remove line breaks
+   gsub("  +", " ", x=_)     # remove double spaces
+
+oathURL <- paste0(
+   "https://data.cityofnewyork.us/resource/jz4z-kudi.csv?$query=",
+   URLencode(oathQuery, reserved=TRUE))
+
+dataOATH <- read.csv(oathURL,
+                     na.strings=c("", "NA"),
+                     colClasses="character")
+nrow(dataOATH)
 ```
 
-Let's extract five dates from the `chicagoCrime` dataset.
+The query downloaded `r format(nrow(dataOATH), big.mark=",")` records. If the number of downloaded records reaches the 100,000-row limit, the query will need to be split into pages to ensure that all records are downloaded.
+
+Let's peek at a few rows.
 ```{r}
-#| comment: ""
-#| results: "hold"
-chicagoCrime |>
-   select(Date) |>
-   slice(c(1,2500,5000,7500,10000))
+dataOATH |>
+   slice(c(1, round(n()/2), n()))
 ```
-As you can see, the dates include the date in month/day/year format and the time on a 12-hour AM/PM clock. R has no idea that these values represent dates. You are familiar with this date formatting, but R just thinks they are strings of characters. Use `substring()` to just extract the date part, the first 10 characters of `Date`.
+
+Although the values look like dates and times to us, `read.csv()` initially stores them as character strings. R does not yet know that it can perform date arithmetic with them.
 ```{r}
-#| comment: ""
-#| results: "hold"
-textDate <- chicagoCrime |>
-   select(Date) |>
-   mutate(Date = substring(Date, 1, 10)) |>
-   slice(c(1,2500,5000,7500,10000)) |>
-   pull(Date)
+class(dataOATH$violation_date)
+```
+
+
+
+# Parsing dates and times
+
+The date portion of `violation_date` is arranged year-month-day, perfect for `lubridate`'s `ymd()` function. Other arrangements have matching functions, including `mdy()` and `dmy()`. When dates are stored as character strings, use year-month-day. It is the only common date format in which ordinary text sorting also produces chronological order. After a string has been converted to a proper `Date` value, R sorts it chronologically regardless of how the date is displayed.
+
+Let's `substring()` the first 10 characters to extract the date part of five scattered values from `violation_date`.
+```{r}
+textDate <- dataOATH$violation_date[c(1,100,1000,10000,20000)] |>
+   substring(1, 10)
 textDate
-```
 
-Now let's use the `mdy()` function from the `lubridate` package to tell R that these are not just strings of characters, but they actually represent months, days, and years.
+realDate <- ymd(textDate)
+class(realDate)
+realDate
+```
+It may look like nothing has really changed, but the most important line is the result of `class(realDate)` showing that R knows it is of type `Date` now.
+
+Where `ymd()` becomes really handy is that it can process dates in all kinds of formats. The following are all valid ways to express the same date, and `ymd()` will parse them all correctly.
+```{r}
+c("2026, July 4",
+  "2026, Jul 4",
+  "2026-07-04",
+  "26-7-4",
+  "2026/07/04",
+  "2026.07.04",
+  "20260704") |>
+   ymd()
+```
+You can also use `mdy()` and `dmy()` to parse dates in month-day-year and day-month-year formats, respectively. You need to know which format your data uses. If you choose the wrong function, an ambiguous date may be silently interpreted incorrectly. A date that would require an impossible month or day will instead return `NA`.
+```{r}
+# incorrectly using ymd() when the month is first
+ymd("July 4, 2026")
+ymd("7/4/2026")
+# incorrectly using dmy()
+dmy("7/4/2026")    # returns April 7!
+dmy("7/31/2026")   # wrong format, returns NA
+# there's a limit
+mdy("Jly 7, 2026") # too sloppy
+```
+Note that, when successful, all of these functions produce proper `Date` values, which R displays in year-month-day format. Those `Date` values sort chronologically. If we format them as month-day-year text before sorting, however, R sorts the character strings alphabetically. Do the following seem chronologically sorted to you?
+```{r}
+format(realDate, "%b %d, %Y") |>
+   sort()
+```
+They are alphabetized instead of chronologically ordered.
+
+The violation date and violation time are in separate columns. `paste()` can join them, and `ymd_hms()` can parse the result as a date and time (year-month-day hours-minutes-seconds). Because all these summonses were issued in New York City, we also tell R that the clock readings use the `"America/New_York"` time zone.
+
+We will do the same for the hearing date and time and the decision date.
 ```{r}
 #| comment: ""
 #| results: "hold"
-b <- mdy(textDate)
-is(b)
-b
-```
-`b` now stores those five dates in a format that recognizes the month, day, and year. `is(b)` tells us that R is storing `b` as a date object. There are different functions for other date formats depending on the ordering of the day, month and year, like `dmy()` and `ymd()` and even `mdy_hms()` for month, day, year, hours, minutes, seconds format.
+dataOATH <- dataOATH |>
+   mutate(
+      violationDate = ymd_hms(
+         paste(substr(violation_date, 1, 10), violation_time),
+         tz="America/New_York"),
+      hearingDate = ymd_hms(
+         paste(substr(hearing_date, 1, 10), hearing_time),
+         tz="America/New_York"),
+      decisionDate = ymd_hms(
+         decision_date, tz="America/New_York"))
 
-Now that R knows these are dates, the `lubridate` package provides a lot of functions to help you work with dates.
+dataOATH |>
+   select(ticket_number, violationDate,
+          hearingDate, decisionDate) |>
+   slice(c(1, round(n()/2), n()))
+```
+
+It is worth checking that the new date-time columns are not missing values when the original text columns were not missing. The following three filters should return zero rows.
+```{r}
+dataOATH |>
+   filter(is.na(hearingDate) & !is.na(hearing_date))
+dataOATH |>
+   filter(is.na(violationDate) & !is.na(violation_date))
+dataOATH |>
+   filter(is.na(decisionDate) & !is.na(decision_date))
+```
+
+Let's tidy up by deleting the old date and time columns now that we have properly formatted and stored date objects.
+```{r}
+dataOATH <- dataOATH |>
+   select(-violation_date, -violation_time,
+          -hearing_date,   -hearing_time,
+          -decision_date)
+```
+
+The standardized display is easier for computers to interpret: year, month, day, time, and time-zone abbreviation. More importantly, these columns are now date-time objects rather than text.
 ```{r}
 #| comment: ""
-#| results: "hold"
-year(b)
-month(b)
-month(b, label=TRUE)
-month(b, label=TRUE, abbr=FALSE)
-wday(b, label=TRUE)
+class(dataOATH$violationDate)
+```
+`POSIXct` is the class R uses for date-time objects. It is a numeric representation of the number of seconds since January 1, 1970, 00:00:00 UTC. The `lubridate` package provides functions to convert between `POSIXct` and human-readable formats.
+
+
+# Extracting parts of a date
+
+Once R recognizes a date, `lubridate` can extract its year, month, day, hour, or weekday. The `label=TRUE` option asks for readable month and weekday labels rather than numbers.
+```{r}
+exampleDates <- dataOATH |>
+   slice(1, 100, 1000, 10000, 20000) |>
+   pull(violationDate)
+
+year(exampleDates)
+month(exampleDates)
+month(exampleDates, label=TRUE)
+month(exampleDates, label=TRUE, abbr=FALSE)
+wday(exampleDates) # Sunday is 1
+wday(exampleDates, label=TRUE)
+wday(exampleDates, label=TRUE, abbr=FALSE)
+hour(exampleDates)
 ```
 
-Subtraction will tell you the time between two dates. How many days since December 1, 2014? How many days have passed from the values in `b` to today? The `now()` function gives you the date and time, well... right now.
+Weekday and hour now let us ask when NYPD-issued OATH summonses occur. `week_start=1` starts the labels on Monday rather than Sunday.
+```{r}
+# count summonses by day of the week
+dataOATH |>
+   count(weekday=wday(violationDate, label=TRUE, week_start=1))
+```
+
+```{r}
+# count summonses by hour of the day
+dataOATH |>
+   count(hour=hour(violationDate)) |>
+   arrange(desc(n))
+```
+
+::: {.callout-note title="Exercise"}
+`r .exNum('What are the top five weekday and hour combinations with the most NYPD-issued OATH summonses?')`
+:::
+
+
+
+# Subtracting dates and `difftime()`
+
+When calculating the difference between two dates or times, use `difftime()` instead of the minus sign. The minus sign allows R to choose the units for the result, and R may not choose the units you actually want. With `difftime()`, you specify the units explicitly, such as `units="days"` or `units="hours"`, which makes both the calculation and your intent clear. Note in the following example that the minus sign returns results with two different time units.
+```{r}
+# four hour difference
+ymd_hm("2026-07-04 16:00") -
+   ymd_hm("2026-07-04 12:00")
+
+# one year and four hour difference
+ymd_hm("2026-07-04 16:00") -
+   ymd_hm("2025-07-04 12:00")
+```
+It is dangerous to let R choose units that can change from one calculation to the next. Use `difftime()` and clearly state your desired time units.
+
+Let's use `difftime()` to see how up-to-date NYC OATH data are by comparing the most recent decision date and time in the data with the current date and time.
+```{r}
+dataOATH |>
+   summarize(
+      records        = n(),
+      firstDecision  = min(decisionDate, na.rm=TRUE),
+      latestDecision = max(decisionDate, na.rm=TRUE),
+      currentTime    = now(tzone="America/New_York"),
+      daysBehind     = difftime(currentTime, latestDecision,
+                                units="days"))
+```
+
+We can also calculate the elapsed time between an alleged violation and the currently listed hearing.
+```{r}
+dataOATH |>
+   filter(!is.na(hearingDate)) |>
+   mutate(timeToHearing=difftime(hearingDate,
+                                 violationDate,
+                                 units="days")) |>
+   slice_head(n=5)
+```
+
+We can create elapsed-time columns and summarize the whole dataset. The decision field is missing for cases that have not yet been resolved. We also exclude negative intervals, which can arise when the portal's current hearing date reflects rescheduling or when a record contains an error.
+```{r}
+caseTimes <- dataOATH |>
+   mutate(daysToHearing = as.numeric(
+         difftime(hearingDate, violationDate, units="days")),
+      daysToDecision = as.numeric(
+         difftime(decisionDate, violationDate, units="days")))
+
+caseTimes |>
+   summarize(
+      casesWithHearings =
+         sum(daysToHearing >= 0, na.rm=TRUE),
+      medianDaysToHearing =
+         median(daysToHearing[daysToHearing >= 0], na.rm=TRUE),
+      casesWithDecisions =
+         sum(daysToDecision >= 0, na.rm=TRUE),
+      medianDaysToDecision =
+         median(daysToDecision[daysToDecision >= 0], na.rm=TRUE))
+```
+Be careful when interpreting time calculations that drop missing values. Many recent cases have not yet reached a decision. Cases that take longer are less likely to appear among the completed cases, especially near the end of the observation period. As a result, the calculated median may make decisions appear to occur faster than they actually do. This bias comes from ignoring right-censored cases, not from censoring by itself.
+
+
+## Estimating time to a decision with censored cases
+
+The Kaplan-Meier method lets us include cases that are still awaiting a decision. A completed case contributes the number of days from the violation to the decision. A pending case contributes the number of days from the violation through the date of our analysis. We know that the pending case has lasted at least that long, but we do not yet know its eventual time to a decision. We call that case right censored.
+
+The `Surv()` function combines each case's observed time with an indicator showing whether a decision occurred. The `survfit()` function then estimates the proportion of cases still awaiting a decision as time passes.
+
+We will use the `survival` package to calculate the Kaplan-Meier estimate. This package is included with most standard R installations.
+```{r}
+library(survival)
+
+analysisDate <- now(tzone="America/New_York")
+
+decisionTimes <- dataOATH |>
+   filter(is.na(decisionDate) | decisionDate >= violationDate) |>
+   mutate(
+      decisionObserved = !is.na(decisionDate) &
+         decisionDate <= analysisDate,
+      lastObservedDate = if_else(
+         decisionObserved, decisionDate, analysisDate),
+      observedDays = as.numeric(
+         difftime(lastObservedDate, violationDate, units="days"))) |>
+   filter(observedDays >= 0)
+
+decisionFit <- survfit(Surv(observedDays, decisionObserved) ~ 1,
+                       data=decisionTimes)
+
+decisionFit
+```
+
+The Kaplan-Meier curve begins with all cases awaiting a decision. It steps downward whenever one or more decisions occur. A censored case does not make the curve drop because we did not observe a decision for that case. It still contributes information for every day that it was observed. The estimated median is the point where the curve first reaches 50 percent, meaning that half of cases are estimated to have received decisions and half are still awaiting decisions.
+
 ```{r}
 #| comment: ""
-b - mdy("12/01/2014")
-date(now()) - b
+medianDecisionDays <- unname(
+   summary(decisionFit)$table["median"])
+
+plot(decisionFit,
+     conf.int=FALSE,
+     mark.time=FALSE,
+     xlab="Days since violation",
+     ylab="Estimated proportion still awaiting a decision")
+
+if (is.finite(medianDecisionDays))
+{
+   segments(0, 0.5, medianDecisionDays, 0.5,
+            col="firebrick", lty=2)
+   segments(medianDecisionDays, 0, medianDecisionDays, 0.5,
+            col="firebrick", lty=2)
+   points(medianDecisionDays, 0.5,
+          col="firebrick", pch=19)
+   text(medianDecisionDays, 0.55,
+        paste0("Median = ", round(medianDecisionDays, 1), " days"),
+        col="firebrick", pos=4)
+}
 ```
 
-When subtracting dates, R will make a good guess for the unit of time to use in the result. Use `difftime()` if you want to be specific about the unit of time and not leave it up to R to decide.
+Kaplan-Meier assumes that censoring is not informative about the remaining time to a decision. Among otherwise comparable cases that have waited the same number of days, cases censored at that point should have the same prospects for a future decision as cases that continue to be observed. Delayed or selective entry of decisions into the database could violate this assumption.
+
+
+::: {.callout-note title="Exercises"}
+`r .exNum('For cases with a nonmissing hearing date, calculate the number of hours from the alleged violation to the scheduled hearing. Store the result in a column named \x60hoursToHearing\x60 and display the ticket number, violation date, hearing date, and new column for the first five cases.')`
+
+`r .exNum('Among cases with nonnegative values of \x60daysToDecision\x60, what is the mean number of days from the alleged violation to the decision?')`
+:::
+
+
+
+# Adding time: periods and durations
+
+We can add time to a date. `weeks(1)` represents one calendar week, while `ddays(30)` represents a duration of exactly 30 times 24 hours.
 ```{r}
 #| comment: ""
-difftime(b, mdy("12/01/2014"), units = "days")
-difftime(b, mdy("12/01/2014"), units = "hours")
+exampleViolation <- dataOATH$violationDate[1]
+
+exampleViolation
+exampleViolation + weeks(1)
+exampleViolation + ddays(30)
+```
+Calendar time and exact elapsed time are not always the same. In New York, Daylight Saving Time begins on March 8 in 2026. At 2:00 a.m. the clock moves forward to 3:00 a.m., making that local day only 23 hours long.
+
+`days(1)` is a **period**: it advances the calendar by one day and preserves the same local clock time. `ddays(1)` is a **duration**: it adds exactly 24 hours. Notice the different results across the spring clock change.
+```{r}
+beforeDST <- ymd_hms("2026-03-07 12:00:00", tz="America/New_York")
+
+beforeDST
+beforeDST + days(1)   # same local time on the next calendar day
+beforeDST + ddays(1)  # exactly 24 elapsed hours later
 ```
 
-We can add time to the dates as well.
+This distinction matters in justice settings. "Return tomorrow at noon" describes a calendar period. "The deadline is exactly 24 hours after filing" describes a duration.
+
+Adding months raises a different problem because months have different lengths. `lubridate` returns a missing value rather than silently inventing a meaning for one month after January 31st.
+```{r}
+# okay... possible to increase month by 1
+ymd("2026-01-01") + months(1)
+# NA... there is no February 31
+ymd("2026-01-31") + months(1)
+
+# adds 365.25/12 = 30.4375 days to each date
+ymd("2026-01-01") + dmonths(1)
+ymd("2026-01-31") + dmonths(1)
+```
+
+
+
+# Coordinated Universal Time and time zones
+
+Computers need a common reference for representing the same instant around the world. That reference is Coordinated Universal Time, abbreviated UTC. The order of the letters is intentional. According to the [National Institute of Standards and Technology](https://www.nist.gov/pml/time-and-frequency-division/how-utcnist-related-coordinated-universal-time-utc-international), the English name would suggest CUT while the French *temps universel coordonné* would suggest TUC. The International Telecommunication Union selected UTC as a single, language-neutral abbreviation.
+
+The OATH data provide times without an explicit time zone. During our data cleanup, we assigned those dates and times to `"America/New_York"`. Another way to assign a time zone to a date-time that was parsed without the correct zone is `force_tz()`.
+```{r}
+hearingWithoutCorrectZone <- ymd_hms("2026-07-29 09:30:00")
+hearingInNewYork <- force_tz(hearingWithoutCorrectZone,
+                             "America/New_York")
+
+hearingWithoutCorrectZone
+hearingInNewYork
+```
+
+`force_tz()` preserves the numbers on the clock and changes the time zone assigned to them. It is appropriate here because we know that 9:30 was a New York clock reading.
+
+Use `with_tz()` for a different task: displaying the *same instant* as it would appear on a clock somewhere else. For example, someone attending the New York hearing remotely would need to know its local time.
+```{r}
+hearingInNewYork
+with_tz(hearingInNewYork, "America/Los_Angeles")
+with_tz(hearingInNewYork, "America/Phoenix")
+with_tz(hearingInNewYork, "UTC")
+```
+
+::: {.callout-note title="Exercise"}
+`r .exNum('A remote OATH hearing is scheduled for January 15, 2026, at 9:00 a.m. in New York. Create this date-time in the \x60America/New_York\x60 time zone, then use \x60with_tz()\x60 to find the local hearing time in Phoenix.')`
+:::
+
+The `OlsonNames()` function lists the time-zone names R recognizes.
+```{r}
+head(OlsonNames())
+```
+
+
+
+# Daylight Saving Time
+
+R's time-zone database knows when Daylight Saving Time begins and ends in each location. `dst()` reports whether a date-time falls in Daylight Saving Time.
+```{r}
+winter <- ymd_hms("2026-01-15 12:00:00", tz="America/New_York")
+summer <- ymd_hms("2026-07-15 12:00:00", tz="America/New_York")
+
+winter
+dst(winter)
+summer
+dst(summer)
+```
+
+The autumn change is especially interesting because one hour occurs twice. In New York on November 1, 2026, the clock reaches 1:59 a.m. EDT and then returns to 1:00 a.m. EST. Adding exact one-hour durations makes the repeated hour visible.
 ```{r}
 #| comment: ""
-b + dyears(1) # adds 365 days, does not increase year by 1
-b + ddays(31)
+ymd_hms("2026-11-01 00:30:00", tz="America/New_York") + dhours(0:3)
 ```
 
-Now let's go ahead and create a new column in our Chicago dataset containing properly stored dates.
+This is why a timestamp such as "November 1 at 1:30 a.m." is incomplete: there are two such instants that morning. The date, clock time, and time zone (or UTC offset) are needed to identify the time unambiguously.
+
+We can have R identify the transition by generating minutes around it and grouping by DST status.
 ```{r}
 #| comment: ""
-#| results: "hold"
-chicagoCrime <-
-   chicagoCrime |>
-   mutate(realdate = mdy_hms(Date))
-
-chicagoCrime |>
-   select(Date, realdate) |>
-   head() # show the dates in the first few rows
-```
-`lubridate` has converted the date and time formats to a more standardized form, one that is easier to use on a computer.
-
-The default timezone is Coordinated Universal Time abbreviated UTC, which is the same as Greenwich Mean Time. Interestingly, the abbreviation CUT would make more sense in English, but TCU would make more sense in French, so the compromise was to universally abbreviate as UTC. Since all of these crimes occurred in Chicago, let's explicitly set the timezone to Central Time. The function `OlsonNames()` will give you a list of all possible time zones you can use.
-```{r}
-#| comment: ""
-#| results: "hold"
-chicagoCrime <-
-   chicagoCrime |>
-   mutate(realdate = force_tz(realdate, "America/Chicago"))
-chicagoCrime$realdate[1:5]   # show just the first five dates
-```
-Now when printed you can see that the timezone is set to Central Standard Time. R will automatically handle Daylight Saving Time. Note that an August date reports Central Daylight Time.
-```{r}
-#| comment: ""
-mdy_hms("8/1/2014 12:00:00") |> 
-   force_tz("America/Chicago")
+data.frame(date=ymd_hms("2026-11-01 00:00:00",
+                        tz="America/New_York") +
+              dminutes(0:240)) |>
+   group_by(inDaylightSavingTime=dst(date)) |>
+   summarize(first=min(date), last=max(date))
 ```
 
-Note that `force_tz()` keeps the dates and times the same, but overwrites the timezone. If you want to look up what the date and time would be in a different timezone, then use `with_tz()`.
 
+
+# Thanksgiving exercises
+
+::: {.callout-note title="Exercises"}
+`r .exNum('Thanksgiving occurs on the fourth Thursday in November. On what date will Thanksgiving fall in 2026? List all dates in November, use \x60wday()\x60 to identify Thursdays, then select the fourth Thursday.')`
+
+`r .exNum('Make a function that takes a year as input and returns the date of Thanksgiving in that year.')`
+
+Here is a template for the function.
 ```{r}
-#| comment: ""
-mdy_hms("8/1/2014 12:00:00") |>
-   force_tz("America/Chicago") |> # force to CDT
-   with_tz("America/New_York")    # get time in EDT
-```
-
-We can actually find out when Daylight Saving Time ends. Generate all November dates and convert them to Chicago time.
-```{r}
-#| comment: ""
-mdy_hms("11/1/2025 12:00:00", tz="America/Chicago") + ddays(0:29)
-```
-Looks like by 11am on November 2, 2025, Chicago is back to Central Standard Time.
-
-# Exercises
-1. At what hour does Daylight Saving Time end? (Hint: Try using `dminutes()` to add time to the date DST ends)
-2. Thanksgiving occurs on the fourth Thursday in November. On what date will Thanksgiving fall in 2025? Hints:
-     + Try listing all dates in November
-     + Use `wday()` to get the weekday
-     + find the fourth Thursday
-3. Make a function that takes as input a year and returns the date of Thanksgiving in that year. Here's a template to start
-
-```{r}
+#| eval: false
 tday <- function(year)
 {
 
    return( )
 }
 ```
+:::
 
-# Solutions to the exercises 
-1. At what hour does Daylight Saving Time end?
+
+
+# Solutions to the exercises
+
+`r .exQ(1)`
 ```{r}
 #| comment: ""
-mdy("11/2/2025", tz="America/Chicago") + dminutes(1:180)
-```
-What happens after "2025-11-02 01:59:00 CDT"? You can see that it ends when the clock strikes two in the morning. If you want R to really do all the work, use `lubridate`'s `dst()` function and find the minimum and maximum times before and after the switch to daylight saving time.
-```{r}
-#| comment: ""
-a <- data.frame(date = mdy("11/2/2025", tz="America/Chicago") + dminutes(1:180))
-# the latest time that is still in Daylight Saving Time
-a |>
-   filter(dst(date)) |>
-   slice_max(date)
-# the earliest time that is no longer in Daylight Saving Time
-a |>
-   filter(!dst(date)) |>
-   slice_min(date)
-
-# more succinctly
-a |> 
-   group_by(dst(date)) |>
-   summarize(min(date), max(date))
+dataOATH |>
+   count(weekday=wday(violationDate, label=TRUE, week_start=1),
+         hour=hour(violationDate)) |>
+   arrange(desc(n)) |>
+   slice_head(n=5)
 ```
 
-2. On what date will Thanksgiving fall in 2025?
+`r .exQ(2)`
 ```{r}
 #| comment: ""
-data.frame(date=mdy("11/1/2025") + ddays(0:29)) |>
+dataOATH |>
+   filter(!is.na(hearingDate)) |>
+   mutate(hoursToHearing=difftime(hearingDate,
+                                  violationDate,
+                                  units="hours")) |>
+   select(ticket_number, violationDate, hearingDate,
+          hoursToHearing) |>
+   slice_head(n=5)
+```
+
+`r .exQ(3)`
+```{r}
+#| comment: ""
+caseTimes |>
+   filter(daysToDecision >= 0) |>
+   summarize(meanDaysToDecision=mean(daysToDecision, na.rm=TRUE))
+```
+
+`r .exQ(4)`
+```{r}
+#| comment: ""
+ymd_hm("2026-01-15 09:00", tz="America/New_York") |>
+   with_tz("America/Phoenix")
+```
+
+`r .exQ(5)`
+```{r}
+#| comment: ""
+data.frame(date=mdy("11/1/2026") + ddays(0:29)) |>
    filter(wday(date, label=TRUE) == "Thu") |>
    slice(4)
 
-
 # or using some base R code
-a <- mdy(paste0("11/",1:30,"/2025"))
+a <- mdy(paste0("11/",1:30,"/2026"))
 a[wday(a,label=TRUE)=="Thu"][4]
 ```
 
-3. Make a function that takes as input a year and returns the date of Thanksgiving in that year.
+`r .exQ(6)`
 ```{r}
-#| comment: ""
 tday <- function(year)
 {
    data.frame(date=mdy(paste0("11/1/",year)) + ddays(0:29)) |>
@@ -263,6 +578,6 @@ tday <- function(year)
       slice(4) |>
       pull(date)
 }
-tday(2025)
-lapply(2025:2100, tday)
+tday(2026)
+sapply(2026:2100, tday) |> as_date() # sapply() strips the Date class
 ```
