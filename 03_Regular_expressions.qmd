@@ -11,7 +11,7 @@ date: "`r format(Sys.time(), '%B %d, %Y')`"
 format:
   html:
     theme: 
-      dark: darkly
+      dark: [darkly, dark.scss]
       light: default
     toc: true
     html-math-method: mathjax
@@ -53,7 +53,7 @@ bibliography: G:/My Drive/docs/Greg/articles/mybib.bib
 
 # Introduction
 
-A regular expression is a sequence of characters that defines a search pattern. Sometimes we use regular expressions to help us find a pattern in text that we want, like the Find functionality in Word. Other times, we use a regular expression to help us find and *replace* a piece of text, like the Find and Replace functionality in Word. The two main R functions that we will learn about are `grep()` and `gsub()`. You may use them in verb form (e.g., "I need to grep all the gun cases," "I was grepping like crazy to find all the opioid cases," "I first had to gsub the commas with semicolons"). Regular expressions are available in numerous other software packages, so everything you learn here will port over to using regular expressions in Linux, Stata, Python, Java, ArcGIS, and many others.
+A regular expression is a sequence of characters that defines a search pattern. Sometimes we use regular expressions to help us find a pattern in text that we want, like the Find functionality in Word. Other times, we use a regular expression to help us find and *replace* a piece of text, like the Find and Replace functionality in Word. The two main R functions that we will learn about are `grep()` and `gsub()`. You may use them in verb form (e.g., "I need to grep all the gun cases," "I was grepping like crazy to find all the opioid cases," "I first had to gsub the commas with semicolons"). Regular expressions are available in numerous other software packages. Most of the concepts you learn here will transfer to regular expressions in Linux, Stata, Python, Java, ArcGIS, and many others, although the exact syntax and supported features can vary.
 
 We have already had a brief introduction to regular expressions. When we wanted to select protests in Philadelphia, we ran
 ```{r}
@@ -61,14 +61,16 @@ We have already had a brief introduction to regular expressions. When we wanted 
 dataProtest |>
   filter(grepl("Philadelphia, PA", Location))
 ```
-Later, when we work with NIBRS, we will use a regular expression to clean up column names that contain multiple periods.
+Later, when we work with NIBRS, we will use a regular expression to find agencies in Pennsylvania by looking for "PA" at the start of their ORI code inside an SQL query.
 ```{r}
 #| eval: false
-fmtNames <- fmt$Description |>
-   strsplit(split = " - ", fixed = TRUE) |>
-   sapply(head, n=1) |>
-   make.names() |>
-   gsub("\\.+(\\.|$)", "\\1", x=_)
+initExtension(con, "regexp")
+
+dbGetQuery(con, "
+  SELECT DISTINCT ori
+  FROM   batch_header
+  WHERE  ori REGEXP '^PA'
+  LIMIT  10")
 ```
 In the next set of notes, we will work with NCVS data and use a regular expression to select crime labels containing "rape" or "sex."
 ```{r}
@@ -81,7 +83,7 @@ The examples involving NCVS and NIBRS are previews. The syntax used in all three
 
 # Finding patterns in text with `grep()`
 
-First we will learn about `grep()`, which was first developed in the early 1970s. `grep()` searches data for lines that match a given expression. The name `grep` stands for "globally search a regular expression and print." Some tangible examples will help us see how `grep()` works.
+First we will learn about `grep()`, which was first developed in the early 1970s. `grep()` searches data for lines that match a given expression. The name `grep` comes from the `ed` command `g/re/p`, meaning "global regular expression print." Some tangible examples will help us see how `grep()` works.
 
 Run the following line that provides a collection of text elements with a diverse range of capitalization, letters, punctuation, and other features. We will use this for practice and testing.
 
@@ -135,11 +137,11 @@ Let's try another example. Instead of a letter, let's try to find a number such 
 grep("1", dataText, value=TRUE)
 ```
 
-We can also search for multiple characters, instead of individual characters. We place our list of desired characters within square brackets `[  ]`. For example, let's find items that contain numbers. 
+We can also search for any one of several characters. We place the possible characters within square brackets `[ ]`. For example, let's find items that contain numbers.
 ```{r}
 grep("[0123456789]", dataText, value=TRUE)
 ```
-If we wanted items that contain an odd number, we could do this.
+If we wanted items that contain an odd digit, we could do this.
 ```{r}
 grep("[13579]", dataText, value=TRUE)
 ```
@@ -147,13 +149,13 @@ So the `[]` in a regular expression means "match any of these characters." We ca
 ```{r}
 grep("[0-9][0-9][0-9][0-9]", dataText, value=TRUE)
 ```
-Note that we can use the shorthand `0-9` to mean any number between 0 and 9, including 0 and 9. This regular expression says "find a number, followed by a number, followed by another number, followed by another number." Alternatively we can use `{4}` to mean "match four of the previous character".
+Note that we can use the shorthand `0-9` to mean any number between 0 and 9, including 0 and 9. This regular expression says "find a number, followed by a number, followed by another number, followed by another number." Alternatively we can use `{4}` to mean "match the preceding item exactly four times."
 ```{r}
 grep("[0-9]{4}", dataText, value=TRUE)
 ```
 `{n}` means the preceding item will be matched exactly n times. Note that this also matches text that has five or more numbers in a row, since if they have five numbers in a row, then they will also have four numbers in a row. Later we will learn about how to find exactly four numbers in a row.
 
-It is not used often, but we can also use the squiggly brackets to make a range.
+It is not used often, but we can also use squiggly or curly braces to make a range.
 ```{r}
 grep("[0-9]{5,10}", dataText, value=TRUE)
 ```
@@ -163,7 +165,7 @@ Thus `{n,m}` will find something matched between n and m times. We have used exa
 #| results: 'hold'
 grep("[a-zA-Z]{5}", dataText, value=TRUE)
 ```
-Note how we used the shorthand `a-z` to mean any lowercase letter and `A-Z` to mean any uppercase letter. `grep()` will match a different set of elements if we just search for lower case letters.
+Note how we used the shorthand `a-z` to mean any lowercase letter and `A-Z` to mean any uppercase letter. `grep()` will match a different set of elements if we just search for lowercase letters.
 ```{r} 
 grep("[a-z]{5}", dataText, value=TRUE)
 ```
@@ -172,18 +174,19 @@ Searches using `grep()` are case-sensitive. For example, let's find all items th
 grep("[A-Z]", dataText, value=TRUE)
 ```
 
-### Exercises
+::: {.callout-note title="Exercises"}
 `r .exNum('Find text with vowels')`
 
 `r .exNum('Find text with a number immediately followed by a letter')`
 
 `r .exNum('What is the difference between \x60grep("Roy", dataText, value=TRUE)\x60 and \x60grep("[Roy]", dataText, value=TRUE)\x60?')`
+:::
 
 
 ## More symbols that help with grepping
-So far you have seen that we use `[]` to match any character listed between the `[]`, the `-` to specify a range to match like `0-9`, `a-z`, and `A-Z`, and the `{}` to match the previous character multiple times.
+So far you have seen that we use `[]` to match any character listed between the `[]`, the `-` to specify a range to match like `0-9`, `a-z`, and `A-Z`, and the `{}` to match the preceding item multiple times.
 
-In addition to these, there are several more symbols or sequences of symbols that are useful. The number of symbols on the keyboard are fairly limited compared to the numerous combinations of patterns of text we might wish to find. As a result you will see that some of these symbols are used in very different ways depending on the context.
+In addition to these, there are several more symbols or sequences of symbols that are useful. The number of symbols on the keyboard is fairly limited compared to the numerous combinations of patterns of text we might wish to find. As a result you will see that some of these symbols are used in very different ways depending on the context.
 
 
 ### Carets `^`
@@ -193,24 +196,24 @@ grep("[^A-Za-z ][A-Za-z]", dataText, value=TRUE)
 ```
 "221B Baker St." has a character that is not a letter (1) immediately followed by a letter (B).
 
-Outside of square brackets the `^` means something *completely* different. When we put the `^` outside of square bracket, it means "the beginning of the text". For example, the following regular expression matches text where the first character is either an upper-case or a lower-case letter.
+Outside square brackets, the `^` means something *completely* different.  It means "the beginning of the text".  For example, the following regular expression matches text where the first character is either an uppercase or a lowercase letter.
 ```{r} 
 grep("^[A-Za-z]", dataText, value=TRUE)
 ```
 
 ### Dollar Signs `$`
-While we use carets to signal the beginning of the text, the dollar sign signals the end of the text. For example, to search for all items that end with either an upper-case or lower-case letter, we would do the following:
+While we use carets to signal the beginning of the text, the dollar sign signals the end of the text. For example, to search for all items that end with either an uppercase or lowercase letter, we would do the following:
 ```{r} 
 grep("[A-Za-z]$", dataText, value=TRUE)
 ```
-Note how all of these have a letter as the last character. We can be more specific and ask for text that end with the letter "y" or end with a 7.
+Note how all of these have a letter as the last character. We can be more specific and ask for text that ends with the letter "y" or end with a 7.
 ```{r} 
 grep("y$", dataText, value=TRUE)
 grep("7$", dataText, value=TRUE)
 ```
 
 ### Plus Sign `+`
-The `+` means "at least one of the previous." For example, suppose we wanted to find items in our list that have numbers and those numbers are followed by letters.
+The `+` means "match the preceding item one or more times." For example, suppose we wanted to find items in our list that have numbers and those numbers are followed by letters.
 ```{r} 
 grep("[0-9]+[A-Za-z]+", dataText, value=TRUE)
 ```
@@ -220,14 +223,15 @@ Or search for text that starts with some numbers, then has a space, followed by 
 grep("^[0-9]+ [A-Za-z]+$", dataText, value=TRUE)
 ```
 
-### Exercises
+::: {.callout-note title="Exercises"}
 `r .exNum('Find the Roy children')`. That is, pick out Kendall, Roman, and Siobhan Roy.
 
 `r .exNum('Find text that starts with a number and ends with a letter')`. (Hint: You will probably need to use `^`, `$`, and `+`).
+:::
 
 
 ### Parentheses `()`
-Parentheses group together characters as words. For example, suppose we wanted to find the word "two".
+Parentheses group part of a regular expression into a single unit. This becomes especially useful with alternatives and optional text. For example, suppose we wanted to find the word "two".
 ```{r} 
 grep("(two)", dataText, value=TRUE)
 ```
@@ -243,7 +247,7 @@ Let's find all Los Angeles and Washington DC ZIP codes.
 grep("(902|200)[0-9][0-9]", dataText, value=TRUE)
 ```
 
-Here's how we can find words that have exactly four characters. To be exactly four characters, on either side of them there needs to be a space or the beginning or end of the line.
+Here's how we can find four-letter words that are separated by spaces or occur at the beginning or end of the text.
 ```{r} 
 grep("( |^)[A-Za-z]{4}( |$)", dataText, value=TRUE)
 ```
@@ -258,7 +262,7 @@ It is also not too hard to find the hyphenated phone number pattern.
 grep("[0-9]{3}-[0-9]{3}-[0-9]{4}", dataText, value=TRUE)
 ```
 
-The phone number format with parentheses needs a little more caution. We pointed out earlier that parentheses have special meaning in regular expressions. In fact, there are several "special characters" in regular expressions, `\ ^ $ {} [] () . * + ? | -`. If you actually want to search for the symbol itself you need to "protect" it with a backslash `\`. However, the `\` is a special character for R too and R will think that something special is coming next after the `\`. So to tell R "no really, I really want a backslash here" you have to protect the backslash too. So to look for those phone numbers with parentheses we use a regular expression like this.
+The phone number format with parentheses needs a little more caution. Parentheses have special meaning in regular expressions. Several other characters can also have special meanings, including `\ ^ $ { } [ ] ( ) . * + ? |`. A hyphen has special meaning inside square brackets, where it can define a range. To search for a special character literally, we usually place a backslash before it. However, the backslash is also special in an R string, so it must itself be preceded by another backslash. To look for phone numbers with parentheses, we use a regular expression like this.
 ```{r} 
 grep("\\([0-9]{3}\\) [0-9]{3}-[0-9]{4}", dataText, value=TRUE)
 ```
@@ -285,22 +289,28 @@ grep("Phil(adelphia)?", dataText, value=TRUE)
 ```
 The first one is no different from searching for the word "Philadelphia," but the second one says that the "adelphia" part is optional. Note that this regular expression also picked up "Dr. Phil". Again we will need a more careful regular expression to avoid matching this name and only select abbreviations and nicknames for Philadelphia.
 
-### Boundaries `\b` 
-`\b` will try to find boundaries around words. This includes spaces, punctuation, and the beginning and end of the text. So another way to find all text with four letter words, including "Phil.", is
+### Boundaries `\b` and `\B`
+`\b` matches a position at the edge of a word, such as where a word meets a space or punctuation, or at the beginning or end of the text. So another way to find all text with four-letter words, including "Phil.", is
 ```{r} 
 grep("\\b[A-Za-z]{4}\\b", dataText, value=TRUE)
 ```
 Remember, the `\` is a special character for R. To "protect" the backslash we put another backslash in front of it. If we did not include the `\b` in this regular expression, then we would have also matched words with five or more letters too.
 
+For several backslash shortcuts, the uppercase version means "not" the lowercase version. `\B` matches a position that is not at the edge of a word. Similarly, `\w` matches a word character, while `\W` matches a character that is not a word character. We can use `\B` to find `Phil` only when more word characters follow it.
+```{r}
+# Phil followed by something that is not a word boundary
+grep("Phil\\B", dataText, value=TRUE)
+```
 
-### Exercises
+
+::: {.callout-note title="Exercises"}
 Write regular expressions to find the following items in `dataText`.
 
 `r .exNum('Find commas')`
 
 `r .exNum('Find ZIP codes')` 
 
-`r .exNum('Find those with six letter word')` 
+`r .exNum('Find text containing a six-letter word')`
 
 `r .exNum('Find mentions of Philadelphia')` 
 
@@ -309,6 +319,7 @@ Write regular expressions to find the following items in `dataText`.
 `r .exNum('Find the addresses')` 
 
 `r .exNum('Find a shorter way to get phone numbers using \x60?\x60')` 
+:::
 
 
 
@@ -324,7 +335,7 @@ or remove all the Roy last names
 ```{r} 
 gsub(" Roy$","",dataText)
 ```
-or turn all punctuation to "X"
+or turn selected punctuation to "X"
 ```{r} 
 gsub("[.)($-]","X", dataText)
 ```
@@ -333,7 +344,7 @@ or remove HTML tags from text (very very handy!!!).
 gsub("<[^>]+>", "", 
      "<td><b><a href=\"/movie/Dont-Breathe-2-(2021)#tab=box-office\">Don't Breathe 2</a></b></td>")
 ```
-This last one we will use a lot. The regular expression says start with a `<`, then match several characters that are non `>`, followed by a `>`. Anything matching this pattern, like `<td>`, will get removed.
+This last one we will use a lot. The regular expression starts with `<`, matches one or more characters other than `>`, and ends with `>`. Anything matching this pattern, like `<td>`, will get removed.
 
 The first argument of the `gsub()` function is the "find pattern," what we are asking `gsub()` to find. The second argument is a "replacement pattern" that will replace whatever `gsub()` matched with the find pattern. Lastly, like `grep()`, we need to tell `gsub()` the name of the data object in which it should look for the pattern.
 
@@ -342,26 +353,27 @@ With `gsub()` we will be using a lot of the same grammar, such as carets, bracke
 gsub("[^0-9]","",dataText)
 ```
 
-### Exercises
-`r .exNum('Remove the all the commas')`. Note that we probably just want to remove them from the numbers, but we do not quite yet have the tools to avoid removing the comma from Roy Wood, Jr.
+::: {.callout-note title="Exercise"}
+`r .exNum('Remove all the commas')`. Note that we probably just want to remove them from the numbers, but we do not quite yet have the tools to avoid removing the comma from Roy Wood, Jr.
+:::
 
 
-## Back-Referencing
-A bit more complicated aspect of `gsub()` is "backreferencing." Any part of the regular expression in the find pattern that is wrapped in parentheses gets stored in a "register." You can have multiple pairs of parentheses and, therefore, save different parts of what gets matched in the find pattern. You can then recall what `gsub()` stored in the registers in the replacement pattern, using `\\1` for what was stored in the first register, `\\2` for what was stored in the second register, and so on.
+## Backreferences
+A slightly more complicated aspect of `gsub()` is using backreferences. Parentheses form a capturing group that saves the text matched by that part of the pattern. You can use multiple pairs of parentheses to capture different parts of the matched text. In the replacement pattern, `\\1` refers to the text captured by the first group, `\\2` refers to the text captured by the second group, and so on.
 
 For example, let's delete the "plus four" part of the ZIP codes in our data.
 ```{r} 
 gsub("([0-9]{5})-[0-9]{4}","\\1",dataText)
 ```
-We wrapped the parentheses around the first five digits, so only those first five digits get stored in register 1. Then the replacement pattern replaces everything that the find pattern matched (the entirety of the five digits, the hyphen, and the plus four digits) with the contents of register 1, containing just the first five digits.
+We wrapped parentheses around the first five digits, so the first capturing group contains only those digits. The replacement pattern replaces everything matched by the find pattern, including the five digits, hyphen, and plus-four digits, with the text captured by the first group.
 
 Let's use `gsub()` to just keep the first two "words" in each element of `dataText`.
 ```{r} 
 gsub("^([^ ]+ [^ ]+) .*$", "\\1", dataText)
 ```
-This regular expression says: start at the beginning of the text, find a bunch of characters that are not spaces (remember that the `+` means one or more of the previous), then find a space, then find another bunch of characters that are not spaces, followed by another space, followed by anything else until the end of the text. The `.` is a wild card that matches any one character. The `*` is like the `+` but it means *zero* or more of the previous character (the `+` matches *one* or more of the previous character). Note how we have used the parentheses. They are wrapped around those first two words. Those words get stored in register 1 and the replacement pattern just recalls whatever got stored in register 1.
+This regular expression says: start at the beginning of the text, find a bunch of characters that are not spaces (remember that the `+` matches the preceding item one or more times), then find a space, then find another bunch of characters that are not spaces, followed by another space, followed by anything else until the end of the text. The `.` is a wildcard that matches any one character. The `*` is like the `+` but it matches the preceding item *zero* or more times. Note how we have used the parentheses. They are wrapped around those first two words. The first capturing group saves those words, and the replacement pattern recalls the captured text with `\\1`.
 
-An alternative strategy is to use `\w`, which means a "word character" (any numbers of letters) and `\s`, which means any "whitespace character" (spaces, tabs, line feeds, non-breaking space).
+An alternative strategy is to use `\w`, which matches a "word character," meaning a letter, number, or underscore, and `\s`, which matches a whitespace character, such as a space, tab, or line break. The `+` following `\w` means to match one or more word characters.
 ```{r} 
 gsub("^(\\w+\\s\\w+)\\s.*$","\\1",dataText)
 ```
@@ -369,10 +381,11 @@ When working with `grep()`, we wrote a regular expression to find all the phone 
 ```{r} 
 gsub("^\\(?([0-9]{3})(\\) |-)?([0-9]{3})-?([0-9]{4})","\\1-\\3-\\4",dataText)
 ```
-Note that register 2 captures whatever text matches the optional text `(\\) |-)`. That's why you don't see `\\2` in the replacement pattern.
+Note that the second capturing group contains whatever text matches the optional pattern `(\\) |-)`. We do not need that text in the result, so the replacement pattern does not include `\\2`.
 
-### Exercise
+::: {.callout-note title="Exercise"}
 `r .exNum('Add commas to these numbers \x60c("9453","2332","4645","1234")\x60.')` That is, make these numbers look like 9,453 and 2,332 and so on. Fill in the find pattern and replacement pattern in `gsub("", "", c("9453","2332","4645","1234"))`
+:::
    
 ## Lookaheads
 Although not as commonly used as a backreference, a "lookahead" can be helpful to find what comes next or, more generally, to `gsub()` items that are a bit more complicated.  Let's say you wanted to check that every q is followed by a u. If it's not, then insert the u after the q.
@@ -383,7 +396,7 @@ gsub("q[^u]","qu",c("quiet","quick","quagmire","qixotic"))
 ```
 As you can see, it doesn't quite do what we wanted. It problematically drops the "i" from "quixotic." Remember that the replacement pattern will overwrite whatever matches the find pattern. This find pattern will match the "qi," the q *and* the adjacent character that is not a u.
 
-A "lookahead" just peeks at the next character to see what it is, but does not consider it part of the match. In parentheses we signal a lookahead with `?` and then to ask for a character that is not a "u" we use `!u`.
+A lookahead checks the characters that come next without including them in the match. `(?!u)` is a negative lookahead. The `!` means that the next character must not be `u`. Therefore, `q(?!u)` matches a `q` only when it is not followed by a `u`.
 ```{r} 
 gsub("q(?!u)", "qu", c("quiet","quick","quagmire","qixotic"), perl=TRUE)
 ```
@@ -391,19 +404,19 @@ Now we have "quixotic" spelled properly as `gsub()` looked ahead to check for a 
 
 Let's say we want to add commas to large numbers to display like 1,234,567 instead of 1234567. Ready for this one?
 ```{r} 
-gsub("(?<!\\.)([0-9])(?=([0-9]{3})+($|\\.))", "\\1,",
+gsub("(?<!\\.[0-9]{0,100})([0-9])(?=([0-9]{3})+($|\\.))", "\\1,",
      c("$1234567890","234","1234","12345","12345.6789"),
      perl=TRUE)
 ```
-First note the replacement text, `\\1,`. This is going to take whatever is in register 1 and produce it again followed by a `,`. The challenge for the matching part is to write a regular expression that identifies those digits where a comma is needed to its right. There are three parts to the regular expression.
+First note the replacement text, `\\1,`. This reproduces the text captured by the first group, followed by a `,`. The challenge for the matching part is to write a regular expression that identifies those digits where a comma is needed to its right. There are three parts to the regular expression.
 
--  `(?<!\\.)`: This is a "lookbehind" that first makes sure there are no decimals to the left of the digit
--  `([0-9])`: Match a single digit and store it in register 1
+-  `(?<!\\.[0-9]{0,100})`: This negative lookbehind makes sure there is no decimal point followed by up to 100 digits to the left of the digit. We use `{0,100}` because the unbounded repetition symbol `*` is not allowed in a lookbehind
+-  `([0-9])`: Match a single digit and save it in the first capturing group
 -  `(?=([0-9]{3})+($|\\.))`: This is a "lookahead" checking that there are blocks of 3 digits to the right until either the end or a decimal
 
 This gets you a handy regular expression to produce nicer looking numbers. Just so you know, R also provides some handy tools for formatting numbers.
 ```{r}
-prettyNum(c(1234567890,234,1234,12345,12345.6789), big.mark=",")
+prettyNum(c(1234567890, 234, 1234, 12345, 12345.6789), big.mark=",")
 ```
 
 Here's how lookaheads are going to be very important for us in working with data. We often get datasets in comma-separated value format, typically with a ".csv" extension on the file name. The R function `read.csv()` can read in data in this format. Problems can occur when values in the dataset have commas inside of them.
@@ -423,7 +436,7 @@ gsub(",(?=([^\"]|\"[^\"]*\")*$)",";",text.w.quotes,perl=TRUE) |>
 ```
 As you can see, commas inside the quotes are preserved and those outside have been transformed into `;`. Now we would be able to tell a function like `dbWriteTable()` that the data elements are separated by `;` and it will read in the data properly.
 
-### Exercises
+::: {.callout-note title="Exercises"}
 Make the following changes to `dataText`.
 
 `r .exNum('Change Dr. Phil to Dr. Phillip')`
@@ -433,11 +446,12 @@ Make the following changes to `dataText`.
 `r .exNum('Keep just the first word or first number')`
 
 `r .exNum('Keep only area codes of phone numbers')`
+:::
 
 
-# Introduction to Webscraping: A Practical Application of Regular Expressions
+# Introduction to Web Scraping: A Practical Application of Regular Expressions
 
-As you have already seen, regular expressions are an extremely valuable tool when working with data. In fact, we are going to learn about webscraping next. Webscraping enables us to extract data from a website by searching the underlying HTML code for the website and extracting the desired data. To do webscraping, you are going to rely heavily on regular expressions.
+As you have already seen, regular expressions are an extremely valuable tool when working with data. In fact, we are going to learn about web scraping next. Web scraping enables us to extract data from a website by searching the underlying HTML code for the website and extracting the desired data. To do web scraping, you are going to rely heavily on regular expressions.
 
 ## The 10,000 most common English words
 
@@ -446,47 +460,43 @@ Suppose we want a list of the 10,000 most common words in English. [wiktionary.o
 The `scan()` function in R can read data from a text file, but if given a URL, it will download the HTML code for that page.
 
 ```{r} 
-words <- scan("https://en.wiktionary.org/wiki/Wiktionary:Frequency_lists/PG/2006/04/1-10000",
-          what="",sep="\n")
+url <- "https://en.wiktionary.org/wiki/Wiktionary:Frequency_lists/PG/2006/04/1-10000"
+html <- scan(url, what="", sep="\n")
 ```
-If instead you got a message like "Read 50706 items" then you are in luck. You just used R to scrape a webpage. You might get a number different from 50706 and it might change if you run the script another day. Websites make updates to headers, footers, and banners and these alterations change the number of lines of HTML code required to generate the page.
+The number of items may change as Wiktionary updates its headers, footers, and other page elements. Instead of relying on particular line numbers, we will use regular expressions to identify the HTML table cells that contain the data.
 
-The first several lines of HTML code in `words` all contain HTML code to set up the page.
+The first several elements contain HTML code that sets up the page.
 ```{r} 
-words[1:5]
+html[1:5]
 ```
-There is nothing of interest to us here. We just want the part with the 10,000 most common words. Let's look further down the page.
+The HTML tag `<td>` marks a cell in a table. The caret in `^<td>` restricts the match to elements that begin with that tag. We can use `grep()` to retain those elements.
 ```{r} 
-words[490+0:9]
+tableCells <- grep("^<td>", html, value=TRUE)
+tableCells[1:9]
 ```
-Here we start finding some words! Note that every line that has one of the words we are looking for has `title=\"`. We can use that phrase to find lines that have the 10,000 words on them. Use `grep()` to find those lines and print out the first 10 of them to see if this will work for us.
-```{r} 
-words <- grep("title=\"", words, value=TRUE)
-words[23:30]
+Each element still contains HTML tags. The following regular expression finds a `<`, followed by zero or more characters that are not `>`, followed by a `>`. We use `gsub()` to remove every matching tag.
+```{r}
+tableCells <- gsub("<[^>]*>", "", tableCells)
+tableCells[1:9]
 ```
-While the first 24 lines do have the phrase `title=\"`, they are not the ones with the 10,000 words. But starting at line 25 we start seeing the most common words: the, of, and, to. So let's cut the first 24 lines from `words` and keep the next 10,000 lines. `title=\"` shows up more in the HTML code in the footer after the 10,000th word.
-```{r} 
-words <- words[-(1:24)]
-words <- words[1:10000]
-head(words) # look at the first several rows
-tail(words) # look at the last several rows
+The table cells occur in groups of three: rank, word, and count. The first group contains the table headers, so we start with the fifth cell, the first word, and then keep every third cell.
+```{r}
+words <- tableCells[seq(5, length(tableCells), by=3)]
+length(words)
 ```
-These lines have the text we need, but there are still a lot of HTML tags, all that HTML code wrapped in `< >`. `<td>` is the HTML tag marking a cell in a table and `<a>` is the HTML tag for creating hyperlinks to other pages. Each of these also has ending tags `</td>` and `</a>`. Fortunately for us they are all contained within the `<` and `>` characters. So let's use `gsub()` to remove all the HTML tags.
-```{r} 
-words <- gsub("<[^>]*>","",words)
-```
-This regular expression looks for a `<`, then a bunch of characters that are not a `>`, followed by a `>` and replaces them with nothing. Now `words` contains just our list of 10,000 most common words. Here are the first 50 of them.
+Now `words` contains the list of 10,000 most common words. Here are the first 50.
 ```{r} 
 words[1:50]
 ```
 
-### Exercises
+::: {.callout-note title="Exercises"}
 
 `r .exNum('We were told "i before e except after c, or when sounded like a as in neighbor or weigh". Is that true?')`
 
 `r .exNum('Find words with punctuation')`
 
 `r .exNum('Find words that do not have aeiou in the first four characters')`
+:::
 
 # Solutions to the exercises 
 `r .exQ(1)`
@@ -500,7 +510,7 @@ grep("[0-9][A-Za-z]", dataText,value=TRUE)
 ```
 
 `r .exQ(3)`
-`Roy` will only match text that is exactly "Roy", while `[Roy]` will match text that has any one of the characters "R", "o", or "y".
+`Roy` matches the sequence "Roy" anywhere in the text, so it matches names such as "Kendall Roy" as well as "Royal Caribbean." `[Roy]` matches any single "R", "o", or "y" character. To match only text that is exactly "Roy", use `^Roy$`.
 ```{r}
 grep("Roy", dataText,value=TRUE)
 grep("[Roy]", dataText,value=TRUE)
@@ -514,6 +524,7 @@ grep("Roy$", dataText, value = TRUE)
 
 `r .exQ(5)`
 ```{r}
+# note that 0-z includes : ; < = > ? @ [ \ ] ^ _ `
 grep("^[0-9][0-z ]+[A-Za-z]$", dataText, value=TRUE)
 ```
 
@@ -528,6 +539,11 @@ Remember that not every regular expression is complicated. Sometimes you just ne
 ```{r}
 grep("^[0-9]{5}$|^[0-9]{5}-", dataText, value=TRUE)
 ```
+or
+```{r}
+grep("^[0-9]{5}(-[0-9]{4})?$", dataText, value=TRUE)
+```
+
 
 `r .exQ(8)`
 ```{r}
@@ -580,11 +596,11 @@ gsub("Phil$","Phillip",dataText)
 
 `r .exQ(16)`
 ```{r}
-gsub(("Phil(adelphia|ly|a)"), "Philadelphia", dataText)
+gsub("Phil(adelphia|ly|a)", "Philadelphia", dataText)
 ```
 or
 ```{r}
-gsub("Phil[^\\b]+", "Philadelphia", dataText)
+gsub("Phil\\B\\w*", "Philadelphia", dataText)
 ```
 
 `r .exQ(17)`
@@ -603,10 +619,10 @@ gsub("^\\(?([0-9]{3})(\\) |-| )?[0-9]{3}-?[0-9]{4}","\\1",dataText)
 
 `r .exQ(19)`
 ```{r}
-grep("[^c]ei", words, value=TRUE)
+grep("(^|[^c])ei", words, value=TRUE)
 grep("cie", words, value=TRUE)
 ```
-There are a lot of words with "ei" where the letter before the "ei"" is not a "c". Also, there are a lot of words that have "ie" immediately following a "c".
+There are many words with "ei" either at the beginning or following a letter other than "c". There are also many words with "ie" immediately following "c".
 
 `r .exQ(20)`
 ```{r}
@@ -616,12 +632,12 @@ or
 ```{r}
 grep("[[:punct:]]", words, value=TRUE)
 ```
-`[:punct:]` is a special set containing all punctuation characters.
+`[[:punct:]]` is a character class containing punctuation characters.
 or
 ```{r}
 grep("\\W", words, value=TRUE)
 ```
-`\W` matches any character that is not a number or a letter.
+`\W` matches any character that is not a letter, number, or underscore.
 
 `r .exQ(21)`
 ```{r}
