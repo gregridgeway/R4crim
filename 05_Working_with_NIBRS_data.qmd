@@ -94,7 +94,7 @@ library(RSQLite)
 #   (deletes any existing nibrs2025.db and re-reads all 70 million records,
 #    which takes several minutes). Set to FALSE to reuse the existing
 #   nibrs2025.db and skip the slow rebuild.
-rebuildDB <- FALSE
+rebuildDB <- TRUE
 
 # find out what files are packed inside the zip file
 unzip("NIBRS/nibrs-2025.zip", list = TRUE)
@@ -253,9 +253,11 @@ while ((length(a <- readLines(infile, n=1000000)) > 0))
       # population covered is split by counties (for agencies spanning counties)
       #   compute total population
       if (seg == "BH")
+      {
          df <- df |> 
-         mutate(total_pop = rowSums(across(starts_with("current_pop")),
-                                    na.rm=TRUE))
+            mutate(total_pop = rowSums(across(starts_with("current_pop")),
+                                       na.rm=TRUE))
+      }
       
       dbWriteTable(con, seg_tables[[seg]], df, append=TRUE)
    }
