@@ -139,7 +139,7 @@ a[i]
 
 Double-checking and indeed the first line here is _Minions and Monsters_ and the last line is _Erupcja_. This matches what is on the web page. We now are quite close to having a list of movies that played in theaters on July 4, 2026.
 
-You might notice that the movie names are listed twice. Half way through the list you can see _Minions and Monsters_ again. The technical reason is that the webpage has a "deskop" and a "mobile" version, and the HTML contains code for both versions. We can find the lines that start each version.
+You might notice that the movie names are listed twice. Half way through the list you can see _Minions and Monsters_ again. The technical reason is that the webpage has a "desktop" and a "mobile" version, and the HTML contains code for both versions. We can find the lines that start each version.
 ```{r}
 grep("chart-desktop", a)
 grep("chart-mobile", a)
@@ -159,7 +159,7 @@ We still have a lot of excess symbols and HTML code to eliminate before we can h
 gsub("<[^>]*>", "", a[i])
 ```
 
-Perfect! Now we just have movie names. You will see some movie names have strange symbols, like `&amp`, `&hellip;`, or `&#039;`. These are the HTML codes for the ampersand "\&", horizontal ellipses "..." and a smart apostrophe. These make the text look prettier on a webpage. In a moment, we will use `textutils::HTMLdecode()` to clean these up.
+Perfect! Now we just have movie names. You will see some movie names have strange symbols, like `&amp;`, `&hellip;`, or `&#039;`. These are the HTML codes for the ampersand "\&", horizontal ellipses "..." and a smart apostrophe. These make the text look prettier on a webpage. In a moment, we will use `textutils::HTMLdecode()` to clean these up.
 
 Let's put these movie names in a data frame, `data0`. This data frame currently has only one column. 
 
@@ -331,7 +331,7 @@ head(movieData)
 tail(movieData)
 ```
 
-If you ran that for-loop to gather 15 years worth of data, most likely you walked away from your computer to do something more interesting than watch its progress. In these situations, I like to send myself a text message when it is complete. The `emayili` package is a convenient way to send yourself an email or text. If you fill it in with your email, username, and gmail app password, the following code will send you an email or text message when the script reaches this point.
+If you ran that for-loop to gather over 15 years worth of data, most likely you walked away from your computer to do something more interesting than watch its progress. In these situations, I like to send myself a text message when it is complete. The `emayili` package is a convenient way to send yourself an email or text. If you fill it in with your email, username, and gmail app password, the following code will send you an email or text message when the script reaches this point.
 ```{r}
 #| eval: false
 library(emayili)
@@ -369,7 +369,7 @@ parallelly::availableCores()
 
 Having access to multiple cores allows you to write scripts that send different tasks to different processors to work on simultaneously. While one processor is busy scraping the data for January 1st, the second can get to work on January 2nd, and another can work on January 3rd. All the processors will be fighting over the one connection you have to the internet, but they can `grep()` and `gsub()` at the same time other processors are working on other dates.
 
-To write a script to work in parallel, you will need the `foreach` and `future` packages. Let's first test whether parallelization actually speeds things up. There are two `foreach` loops below. In both of them, each iteration of the loop does not really do anything except pause for 2 seconds. The first loop, which does not use parallelization, includes 10 iterations and so should take 20 seconds to run. The second `foreach` loop looks the same, except right before the `foreach` loop we have told R to make use of two of the computer's processors rather than the default of one processor. This should cause one processor to sleep for 2 seconds 10 times and the other processor to sleep for 2 seconds 10 times. In total this should take about 10 seconds.
+To write a script to work in parallel, you will need the `foreach` and `future` packages. Let's first test whether parallelization actually speeds things up. There are two `foreach` loops below. In both of them, each iteration of the loop does not really do anything except pause for 2 seconds. The first loop, which does not use parallelization, includes 10 iterations and so should take 20 seconds to run. The second `foreach` loop looks the same, except right before the `foreach` loop we have told R to make use of two of the computer's processors rather than the default of one processor. With two processors, each processor will generally handle five iterations and sleep for 2 seconds five times. The exact allocation can depend on how the parallel tasks are scheduled. In total this should take about 10 seconds.
 
 ```{r}
 library(foreach)
@@ -547,7 +547,7 @@ movieData |>
 
 ## Adjusting for Inflation
 
-As you may have noticed, the price of a movie ticket keeps increasing (along with everything else!). The Bureau of Labor Statistics (BLS) tracks the Consumer Price Index (CPI) for "Admission to movies, theaters, and concerts" (series `CUUR0000SS62031`). The CPI is an index, not a dollar price — the base period (1998) equals 100, so a value of 240 means tickets cost 2.4× what they did in the late 1990s. What matters for us is the _ratio_ between years, which gives us the inflation adjustment factor. That factor will vary by year. It will tell you how much you need to multiply, say, a ticket purchased in 2010 so that it equates to 2026 prices.
+As you may have noticed, the price of a movie ticket keeps increasing (along with everything else!). The Bureau of Labor Statistics (BLS) tracks the Consumer Price Index (CPI) for "Admission to movies, theaters, and concerts" (series `CUUR0000SS62031`). The CPI is an index, not a dollar price. The base period (1998) equals 100, so a value of 240 means tickets cost 2.4× what they did in the late 1990s. What matters for us is the _ratio_ between years, which gives us the inflation adjustment factor. That factor will vary by year. It will tell you how much you need to multiply, say, a ticket purchased in 2010 so that it equates to 2026 prices.
 
 The BLS public API limits unauthenticated requests to 10 years of data per call, so we make two requests and combine them. The API returns monthly values (periods `M01`–`M12`). We will average those to get one index value per year.
 ```{r}
@@ -664,7 +664,7 @@ summary(lm1)
 ```
 The `Estimate` associated with `movieGross` is an estimate of the slope drawn through the middle of the cloud of points. It suggests that every additional million dollars in ticket sales is associated with an increase in `r round(coef(lm1)[2],2)` crimes.
 
-The linear model fit using `lm()` assumes that an increase from \$10M to \$11M in ticket sales has the same effect on crime as an increase from \$100M to \$101M. This is probably not a reasonable assumption. Perhaps a more plausible assumption is multiplicative instead of additive, that a 10\% increase in ticket sales has the same effect on crime regardless of whether the increase is from \$10M to \$11M or from \$100M to \$110M. To model this, we can use a generalized linear model (GLM) with a log link function.
+The linear model fit using `lm()` assumes that an increase from \$10M to \$11M in ticket sales has the same effect on crime as an increase from \$100M to \$101M. This is probably not a reasonable assumption. Perhaps a more plausible assumption is multiplicative instead of additive... a \$1M increase in ticket sales is associated with the same percentage change in crime, regardless of whether ticket sales increase from \$10M to \$11M or from \$100M to \$101M. To model this, we can use a generalized linear model (GLM) with a log link function.
 ```{r}
 glm1 <- glm(crimeCount~movieGross, 
             family = quasipoisson, 
@@ -717,7 +717,7 @@ lines(y~x)
 
 ## What about really big movie days?
 
-The previous analysis risks a lot of confounding. For example, a hot summer day might increase both movie ticket sales and crime. To reduce confounding, we can look at the change in movie ticket sales from one week to the next and see if that is associated with a change in crime.  In particulary, I am interested in those days where the big blockbuster comes out while one week earlier ticket sales were low. Let's conduct a matched analysis where each day is matched to itself one week earlier.
+The previous analysis risks a lot of confounding. For example, a hot summer day might increase both movie ticket sales and crime. To reduce confounding, we can look at the change in movie ticket sales from one week to the next and see if that is associated with a change in crime.  In particularly, I am interested in those days where the big blockbuster comes out while one week earlier ticket sales were low. Let's conduct a matched analysis where each day is matched to itself one week earlier.
 
 ```{r}
 # add crime counts and movie gross from one week ago
@@ -745,7 +745,7 @@ dCrimeMovie <- dCrimeMovie |>
 
 boxplot(dCrimeMovie$pctgain, ylab="% gross increase over 7 days")
 ```
-There are a number of days whether the gross more than doubled from one week earlier. Let's study crime changes on those days where the ticket sales at least double.
+There are a number of days where the gross more than doubled from one week earlier. Let's study crime changes on those days where the ticket sales at least double.
 
 
 ```{r}
