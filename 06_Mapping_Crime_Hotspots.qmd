@@ -387,7 +387,7 @@ allDays[spring_transitions] + days(1)
 # spring DST dates
 datesSpringDST <- date(allDays[spring_transitions] + days(1))
 ```
-If we see any these dates with a time between 2:00 AM and 2:59 AM, we will add one hour to them... Some officer did not set their watch ahead, but we can do that for them.
+If we see any of these dates with a time between 2:00 AM and 2:59 AM, we will add one hour to them... Some officer did not set their watch ahead, but we can do that for them.
 ```{r}
 crime <- crime |>
    mutate(datetime0 = mdy_hms(date, tz = "UTC"), # UTC ignores DST
@@ -460,7 +460,7 @@ crime |>
    filter(iucr=="0263")
 ```
 
-A lot more to go so let's check on another IUCR code.
+There are a lot more to go so let's check on another IUCR code.
 ```{r}
 crime |> 
    distinct(iucr, primary_type, fbi_code, description, year) |>
@@ -571,7 +571,7 @@ crime |>
           !between(longitude, -87.95, -87.50)) |>
    distinct()
 ```
-Interesting. Over 100 cases are located outside Brandsville, Missouri, about 500 miles away from Chicago. From the addresses we can see that they have what seem to be Chicago addresses.  In a later lesson we will cover geocoding, where you can take addresses and look up their longitude and latitude. That would be the right thing to do here. I save the introduction of those skills later and for now just flag cases that are clearly outside of Chicago or have no coordinates at all.
+Interesting. Over 100 cases are located outside Brandsville, Missouri, about 500 miles away from Chicago. From the addresses we can see that they have what seem to be Chicago addresses.  In a later lesson we will cover geocoding, where you can take addresses and look up their longitude and latitude. That would be the right thing to do here. I save those skills for a later lesson and, for now, just flag cases that are clearly outside of Chicago or have no coordinates at all.
 
 ```{r}
 #| label: validCoordinates
@@ -674,6 +674,11 @@ crime <- crime |>
    select(-fbi_code, -primary_type, -description, -year)
 ```
 
+It is a good time to save our cleaned up data to a file so we can load it quickly in the future without having to repeat all of the cleanup steps.
+```{r}
+save(crime, iucrLookup, file = "dataChicagoCrime.RData", compress=TRUE)
+```
+Whenever you need to work with this data again, you can load it quickly with `load("dataChicagoCrime.RData")`. This will recreate the `crime` and `iucrLookup` objects in your R session.
 
 Now with our data cleaned up and our coordinates validated, we are ready to start mapping.
 
@@ -702,10 +707,10 @@ crime |>
 ```
 Leaflet has placed dots all over the map for ward 22. With so many dots, it is rather difficult to determine where exactly there is a higher crime density. It seems that crime is simply everywhere in ward 22. 
 
-Instead of showing all the dots, we are going to explore ways to color and highlight maps to reveal areas of higher crime density. Let's start by examining assaults in 2026.
+Instead of showing all the dots, we are going to explore ways to color and highlight maps to reveal areas of higher crime density. Let's start by examining assaults in 2026 to date.
 ```{r}
 #| label: fig-clustered-assault-point-map
-#| fig-cap: "Clustered map of reported assaults in Chicago, 2026"
+#| fig-cap: "Clustered map of reported assaults in Chicago, 2026 to date"
 crime  |>
    filter(valid_coordinates &
              year(date) == 2026) |>
@@ -838,7 +843,7 @@ sfGrid <- sfGrid |>
 
 sfGrid
 ```
-Now `sfGrid` has three new columns associating to each hexagon an assault count, the area of the hexagon (all should be identical), and the assault density.
+Now `sfGrid` has three new columns associating with each hexagon an assault count, the area of the hexagon (all should be identical), and the assault density.
 
 We want to break up that density into bins and assign a color to each bin. This way we can color-code each hexagon based on the assault density. `colorBin()` creates a function that will take a density value and return a color. The combination of `bins = 9` and `pretty = TRUE` will create some nice intervals for the different colors. Viridis is a family of color palettes that has been engineered to be perceptually uniform (equal steps in data values look like equal steps in color), colorblind-friendly, printer-friendly (maintains contrast in grayscale), and readable on screens and projectors. In its default direction, the viridis palette runs from dark purple for low values to yellow for high values. Therefore, the highest-density hexagons on this map will be the lightest and yellowest, while the lowest-density hexagons will be dark purple.
 ```{r}
@@ -960,7 +965,7 @@ Hexagons make the aggregation areas visible. Kernel density estimation offers a 
 
 ## Kernel density estimation
 
-The hexagonal tiles are rather blocky.  There is no smoothness to them where we would expect crime rates to be smoother.  Kernel density estimation (KDE) transforms a set of incident locations into a smoothed estimate of an incident rate, to highlight regions where incidents concentrate.  KDE places a smooth bump, called a *kernel*, over each point and adds the heights of the bumps together at a large grid of points. The resulting surface estimates incident intensity across space.
+The hexagonal tiles are rather blocky.  There is no smoothness to them where we would expect crime rates to be smoother.  Kernel density estimation (KDE) transforms a set of incident locations into a smoothed estimate of an incident intensity, to highlight regions where incidents concentrate.  KDE places a smooth bump, called a *kernel*, over each point and adds the heights of the bumps together at a large grid of points. The resulting surface estimates incident intensity across space.
 
 Before applying KDE to a map, let's work through a one-dimensional example. Imagine a single street that is 6 kilometers long, with eight incidents at the locations marked below.
 
@@ -1384,7 +1389,7 @@ leaflet() |>
       highlightOptions = 
          highlightOptions(weight = 2, bringToFront = TRUE))
 ```
-Also, let's make the hotspot map only highlight the hottest spots, those with a crime rate exceeding 80 incidents per km$^2$ per year. Zoom in on some of the brightest areas to see what is in these high assault rate areas.
+Also, let's make the hotspot map only highlight the hottest spots, those with a crime rate exceeding 80 incidents per km$^2$ per year. Zoom in on some of the brightest areas to see what is in these high-assault-rate areas.
 ```{r}
 #| label: fig-highest-assault-hotspots
 #| fig-cap: "Highest-intensity reported assault hotspots clipped to the concave hull"
@@ -1784,7 +1789,7 @@ ggplot(aes(x = longitude, y = latitude)) +
 
 ```{r}
 #| label: fig-solution-vehicle-theft-point-map1
-#| fig-cap: "Unclustered motor vehicle theft point maps, Chicago, 2024"
+#| fig-cap: "Unclustered motor vehicle theft point map, Chicago, 2024"
 vehicle_theft <- crime |>
    filter(valid_coordinates & (year(date) == 2024)) |>
    semi_join(iucrLookup |>
@@ -1805,7 +1810,7 @@ vehicle_theft_map |>
 
 ```{r}
 #| label: fig-solution-vehicle-theft-point-map2
-#| fig-cap: "Clustered motor vehicle theft point maps, Chicago, 2026"
+#| fig-cap: "Clustered motor vehicle theft point map, Chicago, 2024"
 vehicle_theft_map |>
    addCircleMarkers(lng = ~longitude,
                     lat = ~latitude,
