@@ -1,0 +1,1011 @@
+---
+title: "Extracting data from text and geocoding to study officer-involved shootings"
+author:
+- affiliation: University of Pennsylvania
+  email: gridge@upenn.edu
+  name: Greg Ridgeway
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+format:
+  html:
+    theme: 
+      dark: darkly
+      light: default
+    toc: true
+    html-math-method: mathjax
+    fig-format: svg
+    embed-resources: true
+    code-overflow: wrap
+    include-in-header:
+      text: |
+        <style>
+          pre code {
+            white-space: pre-wrap;
+            word-break: break-all;
+            overflow-wrap: anywhere;
+          }
+        </style>    
+  pdf:
+    toc: true
+    prefer-html: true
+    listings: true
+    include-in-header: preamble.tex
+number-sections: true
+editor_options: 
+  chunk_output_type: console
+bibliography: G:/My Drive/docs/Greg/articles/mybib.bib
+---
+
+
+<!-- In terminal -->
+<!-- quarto render 10_PPD_shootings_extracting_from_text_geocoding.qmd -->
+
+<!-- git commit 10_* -m "commit message" -->
+<!-- git status -->
+<!-- git push -->
+
+<!-- A function for automating the numbering and wording of the exercise questions -->
+```{r}
+#| echo: false
+# Use \x60 in place ` backtick in exercise questions
+.counterExercise <- 0
+.exerciseQuestions <- NULL
+.exNum <- function(.questionText="") 
+{
+   .counterExercise <<- .counterExercise+1
+   .exerciseQuestions <<- c(.exerciseQuestions, .questionText)
+   return(paste0(.counterExercise,". ",.questionText))
+}
+.exQ <- function(i)
+{
+   return( paste0(i,". ",.exerciseQuestions[i]) )
+}
+
+if (knitr::is_latex_output()) {
+  knitr::knit_hooks$set(output = function(x, options) {
+    paste0("\\begin{Verbatim}[breaklines,breakanywhere]\n",
+           x,
+           "\\end{Verbatim}\n")
+  })
+}
+```
+
+```{css, echo=FALSE}
+.wrapped-output pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+```
+
+# Introduction
+
+In this section, we are going to explore officer-involved shootings (OIS) in Philadelphia. The Philadelphia Police Department posts a lot of information about officer-involved shootings online going back to 2016. Have a look at their [OIS webpage](https://www.phillypolice.com/ois/). While a lot of information has been posted to the webpage, more information is buried in text linked to each of the incidents. In order for us to explore these data, we are going to scrape the basic information from the webpage, have R dig into the text for dates, clean up addresses using regular expressions, geocode the addresses to latitude/longitude with the ArcGIS geocoder (using JSON), and then make maps describing the shootings.
+
+Start by loading the packages we will need.
+```{r}
+#| warning: false
+#| message: false
+library(lubridate)
+library(jsonlite)
+library(sf)
+library(leaflet)
+library(dplyr)
+library(tidyr)
+library(foreach)
+
+library(chromote) # steer Chrome from R
+library(rvest)    # helpful webscraping tools
+library(purrr)    # for pluck()
+```
+
+# Scraping the OIS data
+
+We can run `scan()`, as we did previously, on the PPD OIS webpage and regex our way to a data frame with the data elements that we want to store. 
+
+```{r}
+# pull the whole OIS page
+a <- scan("https://www.phillypolice.com/accountability/ois/", 
+          what="", sep="\n")
+# search for the start of a table
+i <- grep("<tbody>", a)
+a[i] |> substring(1, 500)
+
+# search for start of table <tbody> in a[i]
+iStart <- gregexpr("<tbody>",  a[i]) |> unlist()
+a[i] |> substring(iStart, iStart+500)
+```
+Buried in the HTML code are the entries in the table. Even though all the information does not appear on the main webpage, it is in the HTML. This is not always the case. Some pages dynamically generate information as the user interacts with a page and the page elements. We are going to use this as an opportunity to learn more advanced webscraping methods.
+
+Instead of using `scan()`, we are going to use the `chromote` package to open a hidden Chrome browser that we can control remotely from R. For this to work you do need to have a [Chrome browser](https://www.google.com/chrome/) installed on your computer. From R, we can simulate user actions, like typing a URL in the address bar, selecting elements on the page, and clicking buttons. 
+
+The _page source_ is the static HTML the browser receives from the server (e.g. what `scan()` would capture). The _Document Object Model_ (DOM) is the live, in-memory object the browser constructs from that source and then updates as JavaScript runs. When we interact with a webpage, like clicking, we are interacting with the DOM.
+
+Start by initiating a new hidden Chrome browser.
+```{r}
+browser <- ChromoteSession$new()
+# Good idea to setup the browser to close when we exit R
+#    When creating these notes it runs too soon, so commented out here
+# on.exit(browser$close(), add = TRUE)
+```
+Nothing will be visible on your screen at this point. If you want to watch what the browser is doing in response to R actions, you can use `view()`, but this is not necessary.
+```{r}
+#| eval: false
+browser$view()
+```
+Let's tell our hidden browser to navigate over to the PPD OIS webpage. Sometimes pages take a moment to load. `go_to()` waits for the navigation to finish before allowing R to move on to the next line of code.
+```{r}
+browser$go_to("https://www.phillypolice.com/accountability/ois/")
+```
+I will grab a screenshot to show that everything is working so far.
+```{r}
+#| results: hide
+#| message: false
+# get page size
+pageSize <- browser$Page$getLayoutMetrics()$contentSize
+browser$screenshot(cliprect = c(left=0, top=0, 
+                                width=pageSize$width, height=800))
+```
+
+```{r}
+#| label: fig-screenshot
+#| fig-cap: Screenshot from the hidden Chrome browser view of the PPD OIS
+#| echo: false
+#| out.width: "100%"
+knitr::include_graphics("screenshot.png")
+```
+Let's take a little cybersecurity detour for a moment. If you right-click on a webpage and select "Inspect," then you can see the DOM for the page. Right-click and Inspect the OIS table and you will find that the table's ID is `#data-table-ois`. From R I can tell the DOM to change elements on the page. To demonstrate, I will change the address in the 25th row to 3718 Locust Walk. `tr:nth-child(25)` selects the 25th row and `td:nth-child(2)` selects the column. Setting `.textContent = '3718 Locust Walk'` changes the cell text in the DOM immediately.
+```{r}
+browser$Runtime$evaluate("document.querySelector('#data-table-ois tr:nth-child(25) td:nth-child(2)').textContent = '3718 Locust Walk';")
+```
+Now let's look at the page
+```{r}
+#| results: hide
+#| message: false
+pageSize <- browser$Page$getLayoutMetrics()$contentSize
+browser$screenshot("screenshot2.png",
+             cliprect = c(left=0, top=pageSize$height-800, 
+                          width=pageSize$width, height=800))
+```
+
+```{r}
+#| label: fig-screenshot2
+#| fig-cap: Screenshot of the manipulated PPD OIS webpage
+#| echo: false
+#| out.width: "100%"
+knitr::include_graphics("screenshot2.png")
+```
+This is how the "refund/overpayment scam" works. A fraudster gets the victim to view their account webpage and to give the fraudster some level of remote control. The fraudster then manipulates the DOM to give the impression that they have mistakenly sent the victim \$10,000 instead of \$1,000. The fraudster then convinces the victim to send the \$9,000 difference even though no money was ever given to them.
+
+Rather than try to scam someone, let's get back to the business of pulling all the OIS data into R. I will first get the ID of the main HTML from the DOM. Then I will read in the HTML associated with that ID.
+```{r}
+# get the ID of the main HTML
+html <- browser$DOM$getDocument()$root$nodeId
+html
+# pull in raw html source code, like view page source or scan()
+page_html <- browser$DOM$getOuterHTML(nodeId = html)$outerHTML
+# page_html is one long string of HTML code
+#   look at a few lines
+page_html |> 
+   substring(1,1500)
+```
+
+Now convert all that HTML code into an HTML document object with which R knows how to work.
+```{r}
+page <- read_html(page_html)
+page
+```
+In this page we are looking for any `table` elements.
+```{r}
+page |> html_elements("table") 
+```
+There appear to be four tables on the page, but I noticed that the third one of these has `id="data-table-ois"`. That must be the one we want. Let's extract it by name and convert it to an R data frame object.
+```{r}
+# extract the data-table-ois by name
+page |> 
+   html_elements("table#data-table-ois") |> 
+   html_table() |>
+   data.frame()
+```
+Looks like we got all 25 of the OIS incidents from the first page. Note that it still has our manipulated address for the 25th OIS incident. Shortly we will refresh the webpage to scrape all of the incidents and that will reset the addresses to their original values. On the PPD's page, each OIS's ID has a hyperlink that gets us more detailed information about each incident. Extract those URLs by looking for elements in the table body with an `<a>` HTML tag. Eventually we will store these URLs so that we can scrape them for the OIS details.
+```{r}
+page |> 
+   html_elements("table#data-table-ois") |> 
+   html_elements("tbody a") |>
+   html_attr("href")
+```
+With that we have been able to get all of the information for the first 25 OIS incidents. Now we have to "click" the Next button to get to the next set of 25 OIS incidents. First, I will check to see if it is disabled. Since we are still looking at the first page it will not be disabled, but when we are looking at the final page of OIS incidents then it will be disabled. To figure out the name of that Next button, in my browser I right-clicked on the Next button, selected Inspect, and then reviewed the resulting HTML code.
+```html
+<a class="paginate_button next" aria-controls="data-table-ois" role="link" data-dt-idx="next" tabindex="0" id="data-table-ois_next">Next</a>
+```
+I see that the HTML tag is `<a>` and its classes are `paginate_button` and `next`. So `a.paginate_button.next` will search the HTML code for an `<a>` element with both a `paginate_button` and `next` class.
+```{r}
+# check whether the Next button is disabled
+browser$Runtime$evaluate(
+  expression = 'document.
+                   querySelector("a.paginate_button.next").
+                   classList.
+                   contains("disabled");') |>
+   pluck("result","value")
+```
+On a single page there might be several such buttons. A more robust method of finding the right button is to query it by name, in this case `data-table-ois_next`.
+```{r}
+# check whether the Next button is disabled
+browser$Runtime$evaluate(
+  expression = 'document.
+                   querySelector("#data-table-ois_next").
+                   classList.
+                   contains("disabled");') |>
+   pluck("result","value")
+```
+Either method gives the same response: the button is not disabled. That means we can click it to move on to the next page.
+```{r}
+#| results: hide
+#| message: false
+# Click the "Next" button
+browser$Runtime$evaluate(
+  expression = 'document.
+                   querySelector("#data-table-ois_next").
+                   click();')
+```
+
+Armed with all the skills to navigate and extract key information from this site, we can wrap these ideas in a `while()` loop that will keep scraping OIS data as long as the Next button is active.
+
+```{r}
+#| label: scrapingAll
+#| cache: true
+# reset page to beginning
+browser$go_to("https://www.phillypolice.com/accountability/ois/")
+# give the browser additional time to fully load page
+Sys.sleep(5)
+# you can force scroll to bottom if you have the view open
+#   browser$Runtime$evaluate("window.scrollTo(0, document.body.scrollHeight);")
+
+# store results from each page in ois (a list of data frames)
+ois <- list()
+isFinished <- FALSE
+iPage <- 1
+while(!isFinished)
+{
+  message(paste0("Read HTML from page ",iPage))
+  # get ID of main HTML
+  html <- browser$DOM$getDocument()$root$nodeId
+  # raw html source code
+  page_html <- browser$DOM$getOuterHTML(nodeId = html)$outerHTML
+  # parse the HTML into a structured document
+  page <- read_html(page_html)
+
+  # Pull the table
+  oisTable <- page |>
+    html_elements("table#data-table-ois")
+
+  # extract the table text to a data frame
+  ois[[iPage]] <- oisTable |>
+     html_table() |>
+     data.frame()
+  message("Read in ", nrow(ois[[iPage]]), " rows")
+
+  # extract the URLs from each row
+  oisURLs <- oisTable |>
+    html_elements("tbody a") |>
+    html_attr("href")
+  ois[[iPage]]$url <- oisURLs
+
+  # is "Next" button disabled?
+  isFinished <- browser$Runtime$evaluate(
+    expression = 'document.
+                     querySelector("#data-table-ois_next").
+                     classList.
+                     contains("disabled");') |>
+     pluck("result","value")
+
+  if(!isFinished)
+  {
+    # Click the "Next" button
+    browser$Runtime$evaluate(
+      expression = 'document.
+                       querySelector("#data-table-ois_next").
+                       click();')
+    Sys.sleep(2)
+    iPage <- iPage + 1
+  }
+}
+# close the browser
+browser$close()
+
+# combine pages into single data frame
+#   drop year since we are going to extract the actual date later
+ois <- bind_rows(ois) |>
+  select(-Year) |>
+  rename(id = Title,
+         location  = Location,
+         subInjury = Subject.Injury,
+         subArrest = Subject.Arrested,
+         offInjury = Officer.Injury)
+```
+Let's check that it read everything in.
+```{r}
+head(ois)
+tail(ois)
+```
+
+# Extracting OIS incident details
+
+Now let's dig into the details of the incident, starting with the first OIS. The hyperlink in the very first OIS incident points to the page [`r ois$url[1]`](`r ois$url[1]`). Let's read in the incident details from that page. In your browser, if you right-click and Inspect the text description of the incident, then you will find that the text has the id `ois-content-area`. We can grab that by name.
+```{r}
+read_html(ois$url[1]) |>
+   html_element("div.ois-content-area") |>
+   html_text() |>
+   trimws() # trim whitespace
+```
+
+Now we are ready to read in all the incidents' details.
+```{r}
+#| label: scrapeOISdetails
+#| cache: true
+ois$text <- NA
+for(i in 1:nrow(ois))
+{
+   # message(paste0("Incident: ",i))
+   a <- try( read_html(ois$url[i]) )
+   
+   if(inherits(a, "try-error"))
+   { # in case a page does not exist
+      message(paste0("Could not access webpage for ", ois$id[i]))
+   } else
+   {
+      # grab text between <div class="ois-content-area"> and </div>
+      ois$text[i] <- a |>
+         html_element("div.ois-content-area") |>
+         html_text() |>
+         trimws()
+   }
+}
+```
+And let's just check that we have some descriptions now.
+```{r}
+ois$text |> substring(1, 30)
+```
+
+# Extracting dates from the text
+While the main OIS webpage did not give the date of the incident, the text details always show the date. We can extract those dates with regular expressions. The dates may come in a variety of formats, but we can use the `lubridate` package to parse them. Let's start with those where the date is spelled out.
+```{r}
+# extract dates in January 11, 2024 format
+#    (?x) - ignore spaces and newlines
+#         lets me break regex into several lines
+#    (?s) - allows .* to include \n
+#    both (?x) and (?s) require perl=TRUE
+#    \s - whitespace (spaces, tabs, line feeds, carriage return)
+a <- gsub("(?xs)
+  .*?(January|February|March|April|May|June|
+         July|August|September|October|November|December)
+  \\s* ([0-9]{1,2})
+  ( , \\s* (20[0-9]{2}) )?.*",
+          "\\1 \\2\\3", ois$text, perl=TRUE)
+```
+
+For those incidents matching that January 11, 2024 format, they should have less than 20 characters in them. Let's check those out.
+```{r}
+a[nchar(a) < 20]
+```
+The code seems to work for many dates, but we also see that some of the dates did not include the year. The first two digits of the incident ID are the last two digits of the year.
+```{r}
+a[nchar(a) < 20 & !grepl("20[0-9]{2}", a)]
+# first two digits of id have the year
+i <- nchar(a) < 20 & !grepl("20[0-9]{2}", a)
+paste0(a[i], ", 20", substring(ois$id[i],1,2))
+```
+The rest of the dates have formats that are in some variation of 01/11/2024 or 01-11-2024 or 01/11/24 or 01-11-24, sometimes with / separators and sometimes with - separators and sometimes with a four digit year and sometimes with a two digit year. We can craft our regular expression to capture all these variations.
+```{r}
+# get the remaining dates in #/#/# or #-#-# format
+#   .*  is "greedy" and will absorb as much as possible
+#   .*? is "lazy" and will stop at the first pattern match
+gsub(".*?([0-9]{1,2}[/-][0-9]{1,2}[/-](20)?[1-2][0-9]).*",
+     "\\1",
+     a[nchar(a) > 20])
+```
+We have covered all the cases and can now create a column of incident dates extracted from the incident details.
+```{r}
+ois <- ois |>
+   mutate(date = gsub(
+      "(?xs)
+  .*?(January|February|March|April|May|June|
+   July|August|September|October|November|December)
+  \\s* ([0-9]{1,2})
+  ( , \\s* (20[0-9]{2}) )?.*", 
+      "\\1 \\2\\3", text, perl=TRUE),
+      date = if_else(nchar(date)<20, date, NA),
+      date = if_else(!is.na(date) & !grepl("20[0-9]{2}", date),
+                     paste0(date, ", 20", substring(id,1,2)),
+                     date),
+      date = if_else(
+         is.na(date),
+         gsub(".*?([0-9]{1,2}[/-][0-9]{1,2}[/-](20)?[1-2][0-9])[^0-9].*",
+              "\\1", text),
+         date),
+      date = mdy(date))
+```
+For a little test, let's check if there are any incidents where the year we scraped from the webpage differs from the first two digits of the incident ID.
+```{r}
+table(year(ois$date), substring(ois$id,1,2))
+```
+That is a good sign!
+
+# Geocoding the OIS locations {#sec-geocoding}
+
+Our OIS data frame has the address for every incident, but to be more useful we really need the geographic coordinates. If we had the coordinates, then we could put them on a map, tabulate how many incidents occur within an area, calculate distances, and answer questions about the geography of these data.
+
+Geocoding is the process of converting a text description of a location (typically an address or intersection) to obtain geographic coordinates (often longitude/latitude, but other coordinate systems are also possible). Google Maps currently reigns supreme in this area. Google Maps understands very general descriptions of locations. You can ask for the coordinates of something like "chipotle near UPenn" and it will understand that "UPenn" means the University of Pennsylvania and that "chipotle" is the burrito chain. Unfortunately, as of June 2018 Google Maps requires a credit card in order to access its geocoding service. Previously, anyone could geocode up to 2,500 locations per day without needing to register.
+
+We will use the ArcGIS geocoder to get the coordinates of every location. Many web data sources use a standardized language for providing data. JSON (JavaScript Object Notation) is quite common and ArcGIS uses JSON. 
+
+The URL for ArcGIS has the form
+
+```{r}
+#| results: asis
+#| echo: false
+url <- "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&singleLine=38th%20and%20Walnut,%20Philadelphia,%20PA&outFields=Match_addr,Addr_type"
+if (knitr::is_html_output()) 
+{
+   cat('<pre style="white-space:pre-wrap; word-break:break-all; overflow-wrap:anywhere;">', url, '</pre>\n')
+} else
+{
+   #cat("\\begin{Verbatim}[breaklines,breakanywhere]\n", url, "\n\\end{Verbatim}\n")
+   cat(url,"\n")
+}
+```
+
+You can see the address for Penn's McNeil Building embedded in this URL. Spaces need to be replaced with `%20` (the space character has ASCII code 20). Let's see what data we get back from this URL.
+
+```{r}
+scan("https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&singleLine=38th%20and%20Walnut,%20Philadelphia,%20PA&outFields=Match_addr,Addr_type",
+     what="", sep="\n")
+```
+It is messy, but readable. You can see embedded in this text the `lat` and `lon` for this address. You can also see that it should not be too hard for a machine to extract these coordinates, and the rest of the information here, from this block of text. This is the point of JSON, producing data in a format that a human could understand in a small batch, but a machine could process fast and easily.
+
+The `jsonlite` R package facilitates the conversion of JSON text like this into convenient R objects.
+```{r}
+library(jsonlite)
+fromJSON("https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&singleLine=38th%20and%20Walnut,%20Philadelphia,%20PA&outFields=Match_addr,Addr_type")
+```
+`fromJSON()` converts the JSON results from the ArcGIS geocoder to an R `list` object. The JSON tags turn into list names and columns in a data frame.
+
+To make geocoding a little more convenient, here is an R function that automates the process of taking an address, filling in special characters (like spaces) with their ASCII codes with `URLencode()`, and retrieving the JSON results from the ArcGIS geocoding service.
+```{r}
+geocodeARCGIS <- function(address)
+{
+   paste0("https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&singleLine=",
+          URLencode(address),
+          "&outFields=Match_addr,Addr_type") |>
+      fromJSON()
+}
+```
+Let's test out `geocodeARCGIS()` by pulling up a map of the geocoded coordinates. Once we have the latitude and longitude for the McNeil Building, where we typically hold our crime data science courses at Penn, we can use `leaflet()` to show us a map of the area.
+```{r}
+#| label: fig-map3718Locust
+#| message: false
+#| fig-cap: "ArcGIS geocoding result for 3718 Locust Walk"
+gcPenn <- geocodeARCGIS("3718 Locust Walk, Philadelphia, PA") |>
+   pluck("candidates") |> 
+   head(1) |>
+   mutate(lon = location$x,
+          lat = location$y)
+
+leaflet(width = 1200, height = 800) |>
+   # addTiles() |>
+    addTiles(
+       urlTemplate = "https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key={key}",
+       options = tileOptions(key = Sys.getenv("MAPTILER_API_KEY"),
+                             tileSize = 512, 
+                             zoomOffset = -1),
+       attribution = '© MapTiler © OpenStreetMap contributors') |>
+   setView(lng=gcPenn$lon, lat=gcPenn$lat, zoom=18) |>
+   addCircleMarkers(lng=gcPenn$lon, 
+                    lat=gcPenn$lat)
+```
+`leaflet()` prepares the mapping process (the `width` and `height` do not have to be set, by I needed to for these notes). `addTiles()` pulls in the relevant map image (buildings and streets). Generally, you can use `addTiles()` with no other arguments. I regularly recompile these notes which hits the OpenStreetMap server a little too much, so I have to rely on a different map provider that can better handle the load of requests. `setView()` takes the longitude and latitude from our `gcPenn` object, sets that as the center of the map, and zooms in to level "18," which is a fairly close zoom of about one block. `addCircleMarkers()` creates a circle at the selected point.
+
+We are almost ready to throw all of our addresses at the geocoder, but let's first make sure the addresses look okay. Several locations have `&` where the ArcGIS geocoder wants `and`.
+
+```{r}
+# & -> and for geocoding
+grep('&', ois$location, value=TRUE)
+```
+Many addresses just give the block, like "3700 block of Locust Walk." We will need to change these to the midpoint of the block like "3750 Locust Walk" so that we get a geocoding hit that is nearby.
+```{r}
+grep("[Bb]lock", ois$location, value=TRUE)
+```
+Lastly, there are some addresses with the word "near" that need to be deleted.
+```{r}
+grep("[Nn]ear", ois$location, value=TRUE)
+```
+Let's make all these fixes.
+```{r}
+ois <- ois |>
+   mutate(location = gsub("&","and",location),
+          location = gsub("00 [Bb]lock( of)?", "50", location),
+          location = gsub("[Uu]nit [Bb]lock( of)?", "50", location),
+          location = gsub("[Nn]ear ", "", location))
+```
+
+Some OIS incidents are missing locations.
+```{r}
+ois |>
+  filter(grepl("[Ww]ithheld", location)) |>
+  pull(text)
+```
+The text of OIS 16-18 gives a nearby address (3250 Wellington Street). We will drop incident 16-26, since it is not really a police shooting. 
+
+Several other incidents have quirky addresses.
+```{r}
+ois |>
+  filter(id %in% c("16-30","16-10","17-08")) |>
+  select(id, location, text)
+```
+Reading the details of the incidents, we can come up with reasonable fixes to the addresses. OIS 17-08 is not a PPD shooting incident. Some PPD officers were present when New Castle County (Delaware) police officers shot someone. Let's drop this incident. The remaining incidents we can edit based on the contents of the OIS description. We will also tack on ", Philadelphia, PA" to the end of each location to improve geocoding accuracy.
+```{r}
+ois <- ois |>
+  filter(id != "17-08" &    # not a PPD shooting
+         id != "16-26") |>  # not really a police shooting
+  mutate(location = case_match(id,
+           "16-18" ~ "3250 Wellington Street",
+           # two locations, let's use the first one
+           "16-10" ~ "5750 N. Broad Street",
+           # pick the location where the police shooting occurred
+           "16-30" ~ "4850 Sansom Street",
+           .default=location),
+         location = # add the city
+           paste0(location,", Philadelphia, PA"))
+``` 
+Let's test out the process for just the first location. The code here shows how you can extract each bit of information that we want from geocoding an address: the coordinates (long,lat), the specific address that the geocoding service translated our requested address to, a quality-of-match score, and location type (e.g. StreetInt, PointAddress, StreetAddress).
+```{r}
+a <- geocodeARCGIS(ois$location[1])
+# collect (long,lat), matched address, address match score, and location type
+a$candidates$location$x[1]
+a$candidates$location$y[1]
+a$candidates$address[1]
+a$candidates$score[1]
+a$candidates$attributes$Addr_type[1]
+```
+
+With that we are ready to run all of our addresses through the ArcGIS geocoder. We could have geocoded all these addresses with the more simple code `lapply(ois$location, geocodeARCGIS)`. However, if the JSON connection to the geocoder fails for even one of the addresses (likely if you have a poor internet connection), then the whole `lapply()` function fails. With the for-loop implementation, if the connection fails, then `ois` still keeps all of the prior geocoding results and you can restart the for-loop at the point where it failed.
+
+```{r geocodeLocations}
+#| cache: true
+# takes about 3 minutes
+geoInfo <- foreach(i=1:nrow(ois), .combine=bind_rows) %do%
+{
+  # message(paste0("#", i, " Address: ", ois$location[i]))
+  a <- geocodeARCGIS(ois$location[i])
+
+  data.frame(lon       = a$candidates$location$x[1],
+             lat       = a$candidates$location$y[1],
+             addrmatch = a$candidates$address[1],
+             score     = a$candidates$score[1],
+             addrtype  = a$candidates$attributes$Addr_type[1])
+}
+ois <- ois |> bind_cols(geoInfo)
+```
+
+Now we should have longitude and latitude for every incident. Let's check that they all look sensible.
+```{r}
+stem(ois$lat)
+stem(ois$lon)
+```
+All the points have latitude around 39 and 40 and longitude around -75. That is a good sign! 
+
+Let's check the "address type". We should worry about addresses geocode to a "StreetName." That means the incident got geocoded to, say, "Market Street" but we are not sure where along Market Street the incident actually occurred. The geocoder most likely placed the incident at the midpoint of the street.
+```{r}
+ois |> count(addrtype)
+ois |> 
+   filter(addrtype=="StreetName") |>
+   select(id, location, addrmatch)
+```
+One address should be at the Philadelphia Airport. This one geocoded just fine.
+```{r}
+#| label: fig-geocode2505
+#| fig-cap: "Checking the location of OIS 25-05"
+#| message: false
+ois |>
+  filter(id=="25-05") |>
+  leaflet(width = 1200, height = 800) |>
+    addTiles(
+       urlTemplate = "https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key={key}",
+       options = tileOptions(key = Sys.getenv("MAPTILER_API_KEY"),
+                             tileSize = 512, 
+                             zoomOffset = -1),
+       attribution = '© MapTiler © OpenStreetMap contributors') |>
+  addCircleMarkers(~lon, ~lat,
+                   radius=3, stroke=FALSE,
+                   fillOpacity = 1) |>
+  addPopups(~lon, ~lat, ~location)
+```
+OIS 25-01 involves a dog shooting in Fairmount Park. The news stories about the incident place it 1 mile from Belmont/Edgely, close to Chamounix Drive and Ford Ave. 
+```{r}
+#| label: fig-geocode2501
+#| fig-cap: "Checking the location of OIS 25-01"
+#| message: false
+ois |>
+   filter(id=="25-01") |>
+   leaflet(width = 1200, height = 800) |>
+   addTiles(
+      urlTemplate = "https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key={key}",
+      options = tileOptions(key = Sys.getenv("MAPTILER_API_KEY"),
+                            tileSize = 512, 
+                            zoomOffset = -1),
+      attribution = '© MapTiler © OpenStreetMap contributors') |>
+   addCircleMarkers(~lon, ~lat,
+                    radius=3, stroke=FALSE,
+                    fillOpacity = 1) |>
+   addPopups(~lon, ~lat, ~location)
+```
+
+```{r}
+geocodeARCGIS("Chamounix Drive and Ford Ave, Philadelphia, PA")
+```
+OIS 21-14 has address "3800 Landsowne Drive". Presumably it intended to find 3800 Lansdowne Drive, but it could not place the 3800 block on Lansdowne Drive. The text describes the incident as occurring behind a school. Let's zoom in and see where this might have occurred. It must have occurred behind the School of the Future. I used Google Maps to find the coordinates behind this school.
+```{r}
+#| label: fig-geocode2414
+#| fig-cap: "Checking the location of OIS 21-14"
+#| message: false
+ois |>
+   filter(id=="21-14") |>
+   leaflet(width = 1200, height = 800) |>
+   addTiles(
+      urlTemplate = "https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key={key}",
+      options = tileOptions(key = Sys.getenv("MAPTILER_API_KEY"),
+                            tileSize = 512, 
+                            zoomOffset = -1),
+      attribution = '© MapTiler © OpenStreetMap contributors') |>
+   addCircleMarkers(~lon, ~lat,
+                    radius=3, stroke=FALSE,
+                    fillOpacity = 1) |>
+   addPopups(~lon, ~lat, ~location)
+```
+Let's record these fixes.
+```{r}
+ois <- ois |>
+  mutate(lat = case_match(id,
+                          "21-14" ~ 39.975984,
+                          "25-01" ~ 39.99711,
+                          .default = lat),
+         lon = case_match(id,
+                          "21-14" ~ -75.203309,
+                          "25-01" ~ -75.20474,
+                          .default = lon))
+```
+
+Here's a map of all of the incidents. For each incident I have added some pop-up text so that if you click on an incident it will show you the location of the incident and the text describing the incident.
+```{r}
+#| label: fig-leafletAllOISs
+#| message: false
+#| fig.cap: "All Philadelphia Officer-involved Shootings"
+ois |>
+   leaflet(width = 1200, height = 800) |>
+   addTiles(
+      urlTemplate = "https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key={key}",
+      options = tileOptions(key = Sys.getenv("MAPTILER_API_KEY"),
+                            tileSize = 512, 
+                            zoomOffset = -1),
+      attribution = '© MapTiler © OpenStreetMap contributors') |>
+   addCircleMarkers(~lon, ~lat,
+                    radius=4, stroke=FALSE,
+                    fillOpacity = 1,
+                    popup = paste("<b>",ois$location,"</b><br>",ois$text),
+                    popupOptions = popupOptions(autoClose = TRUE,
+                                                closeOnClick = FALSE))
+```
+
+# Working with shapefiles and coordinate systems
+
+The Philadelphia Police Department divides the city into Police Service Areas (PSAs). The city provides a _shapefile_, a file containing geographic data, that describes the boundaries of the PSAs at Philadelphia's [open data site](https://www.opendataphilly.org/dataset/police-service-areas). R can read these files using the `st_read()` function provided in the `sf` (simple features) package. Even though `st_read()` appears to only be accessing `Boundaries_PSA.shp`, you should have all of the `Boundaries_PSA` files in your `10_shapefiles_and_data` folder. The other files have information that `st_read()` needs, like the coordinate system stored in `Boundaries_PSA.prj`. If you do not have all `Boundaries_PSA` files in your folder, then in a few lines you will get errors like "the sfc object should have crs set," meaning that the Coordinate Reference System (CRS) is missing.
+```{r}
+#| message: false
+library(sf)
+PPDmap <- st_read("10_shapefiles_and_data/Boundaries_PSA.shp")
+```
+You can also get the same PSA boundaries using geoJSON.
+```{r}
+library(geojsonsf)
+PPDmap <- geojson_sf("https://opendata.arcgis.com/datasets/8dc58605f9dd484295c7d065694cdc0f_0.geojson")
+```
+`PPDmap` is an `sf` (simple features) object. It is not unlike a data frame, but it contains a special `geometry` column containing geographic information associated with a row of data. Here are the two columns in `PPDmap` that are of primary interest.
+```{r}
+PPDmap |> select(psa_num, geometry)
+```
+The first column shows the PSA number and the second column shows a truncated description of the geometry associated with this row. In this case, `geometry` contains the coordinates of the boundary of the PSA for each row. Use `st_geometry()` to extract these coordinates.
+```{r}
+#| label: fig-PPDmap1
+#| fig-cap: "Map of Philadelphia Police Service Areas"
+#| out.width: "100%"
+#| fig-height: 5
+plot(st_geometry(PPDmap))
+axis(side=1, cex.axis=0.7) # add x-axis
+axis(side=2, cex.axis=0.7) # add y-axis
+# extract the center points of each PSA
+a <- st_coordinates(st_centroid(st_geometry(PPDmap)))
+# add the PSA number to the plot
+text(a[,1], a[,2], PPDmap$psa_num, cex=0.5)
+```
+
+We can extract the actual coordinates of one of the polygons if we wish.
+```{r}
+a <- st_coordinates(PPDmap$geometry[1])
+head(a)
+tail(a)
+```
+And we can use those coordinates to add additional features to our plot
+```{r}
+#| label: fig-PPDmap2
+#| fig-cap: "Map of Philadelphia Police Service Areas highlighting the first PSA in `PPDmap`"
+#| out.width: "100%"
+#| fig-height: 5
+plot(st_geometry(PPDmap))
+axis(side=1, cex.axis=0.7)
+axis(side=2, cex.axis=0.7)
+a <- st_coordinates(st_centroid(st_geometry(PPDmap)))
+text(a[,1], a[,2], PPDmap$psa_num, cex=0.5)
+a <- st_coordinates(PPDmap$geometry[1])
+lines(a[,1], a[,2], col="red", lwd=3)
+```
+So this highlighted in red PSA `r PPDmap$psa_num[1]`.
+
+We can also overlay a leaflet map with the `PPDmap` object.
+```{r}
+#| label: fig-leafletPSAs
+#| fig-cap: "Map layer with the Philadelphia Police Service Areas (PSA)"
+#| message: false
+PPDmap |>
+   leaflet(width = 1200, height = 800) |>
+   addPolygons(weight=1, label=~psa_num) |>
+   addTiles(
+      urlTemplate = "https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key={key}",
+      options = tileOptions(key = Sys.getenv("MAPTILER_API_KEY"),
+                            tileSize = 512, 
+                            zoomOffset = -1),
+      attribution = '© MapTiler © OpenStreetMap contributors')
+```
+
+## Coordinate systems
+Geographic datasets that describe locations on the surface of the earth have a "coordinate reference system" (CRS). Let's extract the CRS for `PPDmap`.
+```{r}
+st_crs(PPDmap)
+```
+The coordinate system used to describe the PPD boundaries is the World Geodetic System 1984 (WGS84) maintained by the United States National Geospatial-Intelligence Agency, one of several standards to aid in navigation and geography. The European Petroleum Survey Group (EPSG) maintains a catalog of different coordinate systems (should be no surprise that oil exploration has driven the development of high quality geolocation standards). They have assigned the standard longitude/latitude coordinate system to be [EPSG4326](http://spatialreference.org/ref/epsg/4326/). You can find the full collection of coordinate systems at [spatialreference.org](http://spatialreference.org/ref/epsg/). You can see in the output above a reference to EPSG 4326.
+
+Many of us are comfortable with the longitude/latitude angular coordinate systems. However, the distance covered by a degree of longitude shrinks as you move towards the poles and only equals the distance covered by a degree of latitude at the equator. In addition, the earth is not very spherical so the coordinate system used for computing distances on the earth surface might need to depend on where you are on the earth surface. 
+
+Almost all web mapping tools (Google Maps, ESRI, OpenStreetMap) use the pseudo-Mercator projection ([EPSG3857](http://spatialreference.org/ref/epsg/3857/)). Let's convert our PPD map to that coordinate system.
+```{r}
+PPDmap <- st_transform(PPDmap, crs=3857)
+st_crs(PPDmap)
+```
+The CRS now indicates that this is a Mercator projection with distance measured in meters (`LENGTHUNIT["metre",1]`). There are special coordinate systems for every part of the world. A useful coordinate system for the Philadelphia area is [EPSG2272](http://spatialreference.org/ref/epsg/2272/). Let's convert our PPD map to that coordinate system.
+```{r}
+PPDmap <- st_transform(PPDmap, crs=2272)
+st_crs(PPDmap)
+```
+This coordinate system is the Lambert Conic Conformal (LCC). This particular projection of the `PPDmap` is tuned to provide good precision for the southern part of Pennsylvania (note the parallel coordinates are at the latitude of southern Pennsylvania and the meridian is a little west of Philadelphia) and distances are measured in feet (note the `LENGTHUNIT["US survey foot",0.304800609601219]` tag in the CRS description).
+
+Let's transform back to longitude/latitude. It really is best to work using a different coordinate system, but I'm going to stick with longitude/latitude so that the values make a little more sense to us.
+```{r}
+PPDmap <- st_transform(PPDmap, crs=4326)
+```
+Now both the PPD data and the polygons are on the same scale
+```{r}
+#| label: fig-OISmap
+#| fig-cap: "Map of OISs over PSAs"
+#| out.width: "100%"
+#| fig-height: 5
+plot(st_geometry(PPDmap), axes=TRUE, cex.axis=0.7)
+points(lat~lon, data=ois, col=rgb(1,0,0,0.5), pch=16)
+```
+To make the dots a little transparent, I have used the `rgb()` function with which you can mix red, green, and blue colors and set the transparency. The `1` tells `rgb()` to use maximum red. The two `0`s tell `rgb()` to use no green or blue. The 0.5 tells `rgb()` to make the dots halfway transparent.
+
+## Spatial joins
+
+A _spatial join_ is the process of linking two data sources by their geography. For the case of the OIS data, we want to know how many OISs occurred in each PSA. To do this we need to drop each OIS point location into the PSA polygons and have R tell us in which polygon did each OIS land.
+
+First we need to convert our `ois` data frame to an `sf` object, communicating to R that the `lon` and `lat` columns are special. At this stage we also have to communicate in what coordinate system are the `lon` and `lat` values. `st_as_sf()` converts an R object into an `sf` object.
+```{r}
+ois <- st_as_sf(ois, 
+                coords=c("lon","lat"),
+                crs=4326)
+ois |> select(-text, -url, -addrmatch)
+```
+You can see that `ois` now has one of those special geometry columns. We can plot the OISs over the PSA map.
+
+```{r}
+#| label: fig-OISoverPSAs
+#| fig-cap: "Map of OISs over PSAs using `sf` objects"
+#| out.width: "100%"
+#| fig-height: 5
+plot(st_geometry(PPDmap), axes=TRUE, cex.axis=0.7)
+plot(st_geometry(ois), add=TRUE, col=rgb(1,0,0,0.5), pch=16)
+```
+
+`st_join()` will match each row in `ois` to each polygon in PSA. When linking a data frame with _point_ data (OIS location) with a data frame with _polygon_ data (like PSAs), the points will join with the polygons in which they land. I just want to add the `psa_num` column out of the `PPDmap` to our `ois` data.
+```{r}
+PSAlookup <- ois |>
+  st_join(PPDmap |> select(psa_num))
+PSAlookup |>
+   select(id, date, location, psa_num, geometry) |>
+   head()
+```
+Now our `PSAlookup` contains everything from `ois` but also adds a new column `psa_num`.
+
+Let's examine the PSA with the most OISs and highlight their incidents on the map.
+```{r}
+#| label: fig-PPDmap3
+#| fig-cap: "Map of PSA with the largest number of OISs"
+#| out.width: "100%"
+#| fig-height: 5
+PSAlookup |>
+   count(psa_num) |>
+   slice_max(n)
+
+plot(st_geometry(PPDmap), axes=TRUE, cex.axis=0.7)
+PSAlookup |>
+   st_join(PSAlookup |>
+              count(psa_num) |>
+              slice_max(n) |>
+              select(-psa_num),
+           left=FALSE) |> # right join
+  st_geometry() |>
+  plot(add=TRUE, col=rgb(0,1,0,0.5), pch=16)
+```
+
+Let's identify which OISs occurred in the same PSA as the University of Pennsylvania. We've already geocoded Penn and have its coordinates. Let's join it with `PPDmap` to find out which PSA it is in.
+```{r}
+gcPenn
+
+st_as_sf(gcPenn,
+         coords=c("lon","lat"),
+         crs=4326) |> # tell R that the coords are lon/lat
+   st_join(PPDmap) |>
+   select(psa_num)
+```
+Now we see that Penn is in PSA 183 and we can highlight those points on the map.
+```{r}
+#| label: fig-OISmapPenn
+#| fig-cap: "Map of OISs in the same PSA as Penn"
+#| out.width: "100%"
+#| fig-height: 5
+plot(st_geometry(PPDmap), axes=TRUE, cex.axis=0.7)
+PSAlookup |>
+  filter(psa_num=="183") |>
+  st_geometry() |>
+  plot(add=TRUE, col="blue", pch=16)
+```
+We read about this incident earlier when fixing the OIS incident locations in @sec-geocoding.
+
+## Coloring a map based on the value of a feature
+Lastly, we will tabulate the number of OISs in each PSA and color the map by the number of OISs.
+```{r}
+# merge the shooting count into the PPDmap data
+PPDmap <- PPDmap |>
+   left_join(PSAlookup |>
+                count(psa_num) |>
+                st_drop_geometry(), 
+            by=join_by(psa_num)) |>
+  rename(nShoot=n) |>
+  mutate(nShoot=replace_na(nShoot, 0))
+
+head(PPDmap)
+```
+We can see that `PPDmap` now has a new `nShoot` column. A histogram will show what kinds of counts we observe in the PSAs.
+```{r}
+#| label: fig-OIScountHist
+#| fig-cap: "Histogram of OIS incident counts by PSA"
+#| out.width: "100%"
+#| fig-height: 5
+hist(PPDmap$nShoot, xlab="Number of OISs", ylab="Number of PSAs", main="")
+```
+
+Let's discretize the OIS counts into a few categories.
+```{r}
+PPDmap <- PPDmap |>
+  mutate(catShoot =
+           cut(nShoot,
+               breaks=c(0,1,2,3,4,8,Inf),
+               right=FALSE))
+```
+`cut()` converts all of the individual counts into categories, like [1,5) or [25,30). For each of these categories we will associate a color for the map. `heat.colors()` will generate a sequence of colors in the yellow, orange, red range.
+```{r}
+#| results: hold
+a <- data.frame(catShoot = levels(PPDmap$catShoot),
+                col      = rev(heat.colors(6,1)))
+a
+# some other color options
+#    col = rev(rainbow(6,1))
+#    or generate a range of red colors
+#    col = rgb(seq(0,1,length=6),0,0,1)
+```
+These are eight digit codes describing the color. The first two digits correspond to red, digits three and four correspond to green, digits five and six correspond to blue, and the last two digits correspond to transparency. These are hexadecimal numbers (base 16). Hexadecimal numbers use the digits 0-9, like normal decimal system numbers, and then denote 10 as A, 11 as B, on up to 15 as F. So FF as a decimal is $15 \times 16 + 15 = 255$, which is the maximum value for a two digit hexadecimal. The hexadecimal 80 as a decimal is $8 \times 16 + 0 = 128$, which is in the middle of the range 0 to 255. So the first color code, FFFF80FF, means maximum red, maximum green, half blue, and not transparent at all. This mixture is known more commonly as "yellow".
+
+Now we join `PPDmap` with our color lookup table in `a` and plot it.
+```{r}
+#| label: fig-OIScountColorcodedMap
+#| fig-cap: "PSAs color-coded by number of OIS incidents"
+#| out.width: "100%"
+#| fig-height: 5
+# match the color to category
+PPDmap <- PPDmap |>
+  left_join(a, by=join_by(catShoot))
+
+PPDmap |>
+  st_geometry() |>
+  plot(col=PPDmap$col, border="black")
+# add the number of shootings
+#   warning is reminder that it is collapsing polygon data down to a point
+b <- st_coordinates(st_centroid(PPDmap))
+text(b[,1], b[,2], PPDmap$nShoot, cex=0.7)
+```
+Those PSAs with the least shootings are a very pale yellow. As we examine PSAs with a greater number of OISs, their colors get redder and redder.
+
+`sf` objects have their own default plotting method to accomplish these kind of "heat maps." The default palette is generated with `sf.colors()`.
+```{r}
+#| label: fig-OIScountHistsf1
+#| fig-cap: "PSAs color-coded by number of OIS incidents, default `sf` colors"
+#| out.width: "100%"
+#| fig-height: 5
+PPDmap |>
+  select(nShoot) |>
+  plot(main="")
+```
+You can change the color palette, for example, by using the yellow-orange-red palette from HCL (hue, chroma, luminance) color set.
+```{r}
+#| label: fig-OIScountHistsf2
+#| fig-cap: "PSAs color-coded by number of OIS incidents, YlOrRd HCL palette"
+#| out.width: "100%"
+#| fig-height: 5
+PPDmap |>
+  select(nShoot) |>
+  plot(main="",
+       pal = hcl.colors(6, "YlOrRd", rev = TRUE),
+       nbreaks = 6)
+```
+Lastly, I will share the classic _viridis_ palette, noted for being color-blind friendly and "perceptually uniform".
+```{r}
+#| label: fig-OIScountHistsf3
+#| fig-cap: "PSAs color-coded by number of OIS incidents, viridis palette"
+#| out.width: "100%"
+#| fig-height: 5
+# classic viridis palette
+library(viridis)
+PPDmap |>
+  select(nShoot) |>
+  plot(main="",
+       pal = viridis_pal(option="D"),
+       nbreaks = 12)
+```
+
+And a leaflet version to end on.
+```{r}
+#| label: fig-OIScountHistsLeaflet
+#| fig-cap: "Map of OIS counts by PSA"
+#| message: false
+PPDmap <- PPDmap |>
+  mutate(label = paste("PSA:",psa_num, "Count:",nShoot))
+
+PPDmap |>
+   leaflet(width = 1200, height = 800) |>
+   addPolygons(weight=1, col=~col, label=~label) |>
+   addTiles(
+      urlTemplate = "https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key={key}",
+      options = tileOptions(key = Sys.getenv("MAPTILER_API_KEY"),
+                            tileSize = 512, 
+                            zoomOffset = -1),
+      attribution = '© MapTiler © OpenStreetMap contributors')
+```
+
+# Summary
+We started with just a web page linking to a collection of text descriptions. We used a variety of webscraping and regular expressions to extract everything we could from the web page tables. We had R "read" the text descriptions to extract the dates. We geocoded the incidents so that we could put them on a map. Finally, we tabulated by PSA the number of OISs and mapped those as well.
+
+If you have worked through all of this, then I would recommend that you save your objects, using `save(ois, PSAlookup, file="PPDOIS.RData")`. That way you will not have to scrape everything off the web again or redo any geocoding.
+
+# Exercises
+`r .exNum('Revisit the geocoding section discussing geocoding errors. Examine the OISs that have not been geocoded to specific locations. Fix their addresses and redo the geocoding of these OISs to improve the accuracy of the data.')`
+
+`r .exNum('Identify officer-involved shootings that resulted in the offender being transported to the Hospital at the University of Pennsylvania. Create a map marking the location of HUP, the location of officer-involved shootings resulting in the offender being transported to HUP, and the locations of all other shootings.')`
+
+`r .exNum('For each shooting determine which hospital treated the offender. Use \x60st_distance()\x60 to determine what percentage of those shot in an OIS went to the closest hospital.')`
+
