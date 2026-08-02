@@ -27,7 +27,7 @@ Table of contents
 4. [Working with the National Crime Victimization Survey data](https://gregridgeway.github.io/R4crim/04_Working_with_NCVS_data.html)
 5. [Working with the National Incident-Based Reporting System and SQL databases](https://gregridgeway.github.io/R4crim/05_Working_with_NIBRS_data.html) 
 6. [Open data portals and mapping Chicago crime hotspots](https://gregridgeway.github.io/R4crim/06_Mapping_Crime_Hotspots.html)
-7. [Webscraping, parallel processing, and the effect of movies on crime](https://gregridgeway.github.io/R4crim/09_Webscraping_and_Parallel_Processing.html)
-8. [Extracting data from text, geocoding, and Philadelphia police shootings](https://gregridgeway.github.io/R4crim/10_PPD_shootings_extracting_from_text_geocoding.html)
-9. [Working with geographic data and Los Angeles gang injunctions](https://gregridgeway.github.io/R4crim/11_Working_with_geographic_data.html)
+7. [Webscraping, parallel processing, and the effect of movies on crime](https://gregridgeway.github.io/R4crim/07_Webscraping_and_Parallel_Processing.html)
+8. [Extracting data from text, geocoding, and Philadelphia police shootings](https://gregridgeway.github.io/R4crim/08_PPD_shootings_extracting_from_text_geocoding.html)
+9. [Working with geographic data and Los Angeles gang injunctions](https://gregridgeway.github.io/R4crim/09_Working_with_geographic_data.html)
 
