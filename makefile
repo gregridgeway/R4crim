@@ -1,12 +1,10 @@
 QMD_FILES = \
   01_Intro_to_R_protests.qmd \
   02_Dates_and_times.qmd \
-  03_Working_with_NIBRS_data.qmd \
+  03_Regular_expressions.qmd \
   04_Working_with_NCVS_data.qmd \
-  05_Regular_expressions.qmd \
-  06_Introduction_to_SQL1.qmd \
-  07_Crime_Hotspot_Map.qmd \
-  08_Introduction_to_SQL2.qmd \
+  05_Working_with_NIBRS_data.qmd \
+  06_Mapping_Crime_Hotspots.qmd \
   09_Webscraping_and_Parallel_Processing.qmd \
   10_PPD_shootings_extracting_from_text_geocoding.qmd \
   11_Working_with_geographic_data.qmd
