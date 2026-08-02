@@ -1,0 +1,2019 @@
+---
+title: "Mapping Crime Hotspots"
+author:
+- affiliation: University of Pennsylvania
+  email: gridge@upenn.edu
+  name: Greg Ridgeway
+- affiliation: University of Pennsylvania
+  name: Ruth Moyer
+- affiliation: University of Pennsylvania
+  name: Li Sian Goh
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+format:
+  html:
+    theme:
+      dark: [darkly, dark.scss]
+      light: default
+    toc: true
+    html-math-method: mathjax
+    embed-resources: true
+  pdf:
+    toc: true
+    prefer-html: true
+    fig-format: png
+number-sections: true
+editor_options:
+  chunk_output_type: console
+bibliography: G:/My Drive/docs/Greg/articles/mybib.bib
+---
+
+<!-- In terminal -->
+<!-- quarto render 06_Mapping_Crime_Hotspots.qmd -->
+
+<!-- A function for automating the numbering and wording of the exercise questions -->
+<!-- Use \x60 inside exercise questions for backticks -->
+```{r}
+#| echo: false
+
+updateChicagoData <- FALSE
+
+.counterExercise <- 0
+.exerciseQuestions <- NULL
+.exNum <- function(.questionText="")
+{
+   .counterExercise <<- .counterExercise + 1
+   .exerciseQuestions <<- c(.exerciseQuestions, .questionText)
+   return(paste0(.counterExercise, ". ", .questionText))
+}
+.exQ <- function(i)
+{
+   return(paste0(i, ". ", .exerciseQuestions[i]))
+}
+```
+
+# Introduction
+
+This lesson covers two complementary topics:
+
+1.  How to evaluate and work with city open data portals
+
+2.  How to create hotspot maps of crime incidents
+
+City open data portals make government records available to anyone with an internet connection.  Police departments, courts, transit agencies, health departments, and other public agencies use these portals to publish data in tables that can be viewed online or downloaded for analysis. These portals create opportunities for public-interest research, but a download button does not guarantee that a dataset is complete, stable, or ready to analyze.
+
+The concept of determining the geographic locations where crime is most intense, a crime hotspot, is very important to criminological theory as well as to the very practical question of where to focus public safety efforts. 
+
+In this lesson we will use the City of Chicago's [Crimes, 2001 to Present](https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-Present/ijzp-q8t2) dataset. During our exploration of this dataset we will
+
+- Learn how to evaluate a city open data portal and its documentation
+
+- Download and load a large data file
+
+- Clean and validate incident-level crime data
+
+- Build point, hexagonal-bin, kernel-density, and time-comparison hotspot maps
+
+Let's get started by loading several libraries that we will need.
+```{r}
+#| message: false
+#| warning: false
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(ggplot2)
+
+# for large datasets
+library(data.table)
+# for gzip compression
+library(R.utils)
+
+# for hotspot maps
+library(sf)
+library(isoband)
+library(leaflet)
+```
+
+
+# Understanding an open data portal
+
+Many city portals use the Socrata platform, although the same general workflow applies to ArcGIS Hub and other systems. Before downloading anything, find the dataset's landing page and answer the following questions:
+
+- Who created and maintains the data
+
+- What event or unit does one row represent
+
+- Which dates are covered
+
+- How often the data are updated
+
+- Which records are excluded
+
+- Whether locations and sensitive information are obscured
+
+- Whether classifications can change after publication
+
+These data contain reported incidents from 2001 to the present, excluding the most recent seven days.  The data are updated daily, addresses are shown only at the block level, and mapped locations are approximate.
+
+These details affect interpretation. This is a dataset of crimes reported to the Chicago Police Department, not a measure of all victimization. Reporting, recording, enforcement, and classification practices all shape the records.
+
+
+# Downloading and importing the Chicago crime data
+
+You can download the file in a browser or let R do it. Let's try having R download from the portal.
+
+```{r}
+#| label: downloadChicagoData1
+#| eval: !expr updateChicagoData
+# this will take awhile... increase download timeout
+options(timeout = max(3600, getOption("timeout")))
+
+download.file(
+   "https://data.cityofchicago.org/api/v3/views/ijzp-q8t2/export.csv",
+   destfile = "Crimes_-_2001_to_Present.csv",
+   method = "libcurl",
+   mode = "wb",
+   quiet = FALSE)
+```
+
+Just how big is this file?
+```{r}
+file.info("Crimes_-_2001_to_Present.csv") |>
+   transmute(size_gb = size / 10^9)  # transmute = mutate + select
+```
+
+You can save space by compressing the file.
+```{r}
+#| label: compressCSV
+#| eval: !expr updateChicagoData
+R.utils::gzip("Crimes_-_2001_to_Present.csv",
+              remove = FALSE,
+              overwrite = TRUE)
+```
+
+```{r}
+file.info("Crimes_-_2001_to_Present.csv.gz") |>
+   transmute(size_gb = size / 10^9)
+```
+
+
+Let's peek at the first few rows. `scan()` can read directly from a compressed CSV file and makes no attempt at formatting or organizing the data.
+```{r}
+scan(file="Crimes_-_2001_to_Present.csv.gz",
+     nmax = 3,
+     what="",
+     sep="\n") |>
+   gsub('"', '', x=_) # clear out quotes to be more readable
+```
+
+The data appear to be fairly clear, plus the portal provides a data dictionary. These fields are especially useful for our analysis.
+
+| Field | Meaning | 
+|:--|:--|
+| `ID` | Unique row identifier |
+| `Case Number` | Police Records Division number |
+| `Date` | Estimated date and time of occurrence |
+| `Block` | Partially redacted block address |
+| `IUCR` | Illinois Uniform Crime Reporting code |
+| `Primary Type` | Broad category associated with the IUCR code |
+| `Description` | More detailed offense description |
+| `Location Description` | Type of place where the incident occurred |
+| `Arrest` | Whether an arrest was made |
+| `Domestic` | Whether the incident was marked domestic |
+| `Beat` | Small police patrol area |
+| `District` | Police district |
+| `Ward` | City Council ward |
+| `Community Area` | One of Chicago's 77 community areas |
+| `Year` | Calendar year associated with the record |
+| `Latitude`, `Longitude` | Approximate mapped location |
+
+The complete file also includes x and y coordinates in a projected coordinate system, an update timestamp, and a combined `Location` field. We will keep only the columns needed for this lesson. Selecting columns during import reduces memory use.
+
+The `fread()` function in the `data.table` package is much faster and more memory-efficient than base R's `read.csv()` for a file of this size. It can directly read compressed CSV files and also lets us pick which columns to import, which reduces memory use.
+```{r}
+#| label: loadFullData
+crime <- fread(
+   "Crimes_-_2001_to_Present.csv.gz",
+   select = c("ID", "Case Number", "Date", "Block", "IUCR", "Primary Type",
+              "Description", "Location Description", "Arrest", "Domestic",
+              "Beat", "District", "Ward", "Community Area", "FBI Code", "Year",
+              "Latitude", "Longitude"),
+   # make sure these get stored as characters
+   colClasses = list(character = c("IUCR", "FBI Code", "Beat", "District", 
+                                   "Ward", "Community Area")),
+   na.strings = c("", "NA"),
+   showProgress = TRUE)
+
+# set nicer names (no spaces)
+setnames(crime,
+         new = c("id", "case_number", "date", "block", "iucr", 
+                 "primary_type","description", "location_description", 
+                 "arrest", "domestic", "beat", "district", "ward",
+                 "community_area", "fbi_code", "year", 
+                 "latitude", "longitude"))
+```
+
+Check how much memory the imported object occupies.
+```{r}
+object.size(crime) |> format(units = "GB")
+```
+
+How many rows and columns?
+```{r}
+dim(crime)
+```
+What are the columns in this dataset?
+```{r}
+str(crime)
+```
+
+Should we worry about missing data?
+```{r}
+#| label: missingData
+crime |>
+   summarize(across(everything(), ~sum(is.na(.x)))) |>
+   pivot_longer(everything(),
+                names_to = "field",
+                values_to = "missing") |>
+   arrange(desc(missing)) |>
+   print(n=Inf)
+```
+
+The yearly totals in @fig-crime-by-year show that this extract spans `r min(crime$year)` through `r max(crime$year)`. Counts generally decline over much of the period. What might explain the lower counts in `r max(crime$year)`?
+
+```{r}
+#| label: fig-crime-by-year
+#| fig-cap: "Reported crimes by year in the raw Chicago crime extract."
+crime |>
+   count(year) |>
+   ggplot(aes(x = year, y = n)) +
+   geom_col() +
+   scale_x_continuous(breaks = seq(min(crime$year), max(crime$year), by = 2)) +
+   scale_y_continuous(labels = scales::label_comma()) +
+   labs(x = "Year", y = "Reported crimes") +
+   theme_minimal()
+```
+
+
+# Cleaning and validating the records
+
+In this section we will march through the columns and see if there is some cleanup and formatting to do before we can work with the data.
+
+
+## Identifiers and duplicates
+
+The portal describes `ID` as the unique row identifier. Confirm that claim.
+
+```{r}
+#| label: idCount
+crime |> 
+   summarize(rows                = n(),
+             unique_ids          = n_distinct(id),
+             duplicated_ids      = sum(duplicated(id)),
+             unique_case_numbers = n_distinct(case_number))
+```
+
+`id` is unique, but `case_number` is not. Let's count how many records are associated with each case number.
+
+```{r}
+#| label: caseNumberCounts
+case_number_counts <- crime |>
+   count(case_number, name = "records") |>
+   filter(records > 1)
+head(case_number_counts)
+
+# how many times are these case numbers duplicated?
+case_number_counts |>
+   count(records, name = "case_numbers")
+```
+
+Most repeated case numbers occur twice, although a few occur as many as six times. How many records are involved, and what kinds of crimes are they?
+
+```{r}
+#| label: repeatedCaseRecords
+# semi-join keeps rows first data frame when they match the second data frame
+#   It returns only columns from first data frame
+repeated_case_records <- crime |>
+   semi_join(case_number_counts, by = "case_number")
+
+repeated_case_records |>
+   summarize(repeated_case_numbers = n_distinct(case_number),
+             records = n(),
+             additional_records = n() - n_distinct(case_number))
+
+repeated_case_records |>
+   count(primary_type, iucr, description, sort = TRUE)
+```
+
+In this extract, `r n_distinct(repeated_case_records$case_number)` case numbers occur more than once, involving `r nrow(repeated_case_records)` records. All of them are homicides with IUCR code 0110 and the description `FIRST DEGREE MURDER`. This is consistent with the portal's statement that murder records represent victims rather than incidents. The largest case numbers illustrate the pattern.
+
+```{r}
+largest_cases <- case_number_counts |>
+   slice_max(records, n = 5, with_ties = FALSE)
+largest_cases
+
+repeated_case_records |>
+   semi_join(largest_cases, by = "case_number") |>
+   select(id, case_number, date, iucr, primary_type, description) |>
+   arrange(case_number, date, id)
+```
+
+These are not duplicated rows. Every record has a different `ID`, and records sharing a case number can have different dates and times. 
+```{r}
+#| label: exampleMassHomicide
+crime |>
+   select(id, case_number, date, block, description) |>
+   filter(case_number == "JC470284")
+```
+
+Deduplicating on `case_number` would incorrectly collapse multiple homicide victims into one record. Whether homicide should be counted by victim or by case depends on the research question.
+
+
+## Dates
+
+Let's start by formatting the date and setting the time zone.
+
+```{r}
+crime <- crime |>
+   mutate(dateFormatted = mdy_hms(date, tz = "America/Chicago"))
+```
+There are some warnings about invalid dates. Let's check on why some of those date conversions failed.
+```{r}
+#| cache: true
+crime |>
+   filter(is.na(dateFormatted)) |>
+   select(id, date, dateFormatted)
+```
+Are the dates just missing in certain years?
+```{r}
+#| cache: true
+crime |>
+   summarize(n_missing = sum(is.na(dateFormatted)),
+             .by = "year") |>
+   arrange(desc(year))
+```
+Looks like problems with the dates are a thing of the past... and really not that common. But still, why are they missing?
+
+I can see that the original date looks okay. I also notice that a lot of the dates that end up as `NA` after applying `mdy_hms()` are around 2:00 AM.  Why would `mdy_hms()` have trouble with that?  Let's run some tests.
+```{r}
+mdy_hms("03/08/2020 02:30:00 AM", tz = "America/Chicago")
+```
+Something appears to be special about this particular time, because other times work just fine.
+```{r}
+mdy_hms("03/08/2020 01:30:00 AM", tz = "America/Chicago")
+mdy_hms("03/08/2020 03:30:00 AM", tz = "America/Chicago")
+mdy_hms("03/08/2020 02:30:00 PM", tz = "America/Chicago")
+```
+Do you notice something about these formatted dates that holds the secret? Note that the 1:30 AM and 3:30 AM times are formatted correctly. But the 1:30 AM timezone is Central Standard Time (CST) and the 3:30 AM timezone is Central Daylight Time (CDT).  This is because daylight saving time started on March 8, 2020 at 2:00 AM.  The clocks were moved forward one hour to 3:00 AM, so 2:30 AM cannot possibly happen on that day!
+
+Two things to remember:
+
+1.  Time zones and daylight saving time can be tricky
+2.  Checking the original data often reveals the source of a problem
+
+```{r}
+# generate all days since 2001
+allDays <- ymd_hms("2001-01-01 12:00:00", tz="America/Chicago") + 
+   days(0:floor(26*365.25)) # for 26 years
+
+head(allDays)
+# on which days do we see DST change
+spring_transitions <- which(diff(dst(allDays)) == 1)
+
+# here is the day just before the change
+allDays[spring_transitions]
+# if we add one day...
+allDays[spring_transitions] + days(1)
+
+# spring DST dates
+datesSpringDST <- date(allDays[spring_transitions] + days(1))
+```
+If we see any these dates with a time between 2:00 AM and 2:59 AM, we will add one hour to them... Some officer did not set their watch ahead, but we can do that for them.
+```{r}
+crime <- crime |>
+   mutate(datetime0 = mdy_hms(date, tz = "UTC"), # UTC ignores DST
+      datetime0 = if_else(
+         date(datetime0) %in% datesSpringDST &
+            hour(datetime0) == 2,
+         datetime0 + hours(1),
+         datetime0),
+      # force_tz() keeps HMS, just changes the time zone
+      dateFormatted = force_tz(datetime0, tzone = "America/Chicago"))
+
+# any missing now?
+sum(is.na(crime$dateFormatted))
+```
+No more missing dates. Let's tidy up before moving on.
+```{r}
+crime <- crime |>
+   select(-c(date, datetime0)) |>
+   rename(date = dateFormatted) |>
+   relocate(date, .after = case_number)
+```
+
+And let's do a final quick check that the dates agree with year.
+```{r}
+crime |>
+   summarize(sum(year != year(date)))
+```
+
+## Redundant information
+
+The data have columns for `iucr`, `primary_type`, `fbi_code`, and `description`. Let's peek at the first couple of rows.
+```{r}
+crime |>
+   select(iucr, primary_type, fbi_code, description) |>
+   head()
+```
+These four fields are all connected and offer different descriptions about the same offense.  `iucr`, the Illinois Uniform Crime Reporting code, is the key field that everything hooks on. Once you know the IUCR code, then the other three fields must follow.  Let's check if there are any IUCR codes that have more than one label in the other three fields.
+
+```{r}
+crime |>
+   distinct(iucr, primary_type, fbi_code, description) |>
+   count(iucr, name = "n_labels") |>
+   filter(n_labels > 1) |>
+   arrange(desc(n_labels))
+```
+Looks like there are many fields with more than one label.  Let's see what they are.
+```{r}
+crime |> 
+   distinct(iucr, primary_type, fbi_code, description, year) |>
+   filter(iucr=="0263") |>
+   arrange(desc(year))
+```
+Looks like there have been some changes in spelling and abbreviations over time. This might take some work, but we need to harmonize the labels to avoid problems later on.
+```{r}
+crime <- crime |>
+   mutate(primary_type = 
+             replace_values(primary_type,
+                            "CRIM SEXUAL ASSAULT"~"CRIMINAL SEXUAL ASSAULT"),
+          description = 
+             replace_values(description,
+                            "AGGRAVATED: KNIFE/CUT INSTR" ~
+                               "AGGRAVATED - KNIFE / CUTTING INSTRUMENT",
+                            "AGGRAVATED: KNIFE / CUTTING INSTRUMENT" ~
+                               "AGGRAVATED - KNIFE / CUTTING INSTRUMENT"))
+```
+Let's check whether that resolved the issue with IUCR 0263.
+```{r}
+crime |> 
+   distinct(iucr, primary_type, fbi_code, description) |>
+   filter(iucr=="0263")
+```
+
+A lot more to go so let's check on another IUCR code.
+```{r}
+crime |> 
+   distinct(iucr, primary_type, fbi_code, description, year) |>
+   filter(iucr=="0320") |>
+   arrange(desc(year))
+```
+Again we see some spelling changes. It is possible that spelling changes are driving all of these inconsistencies. 
+
+Do FBI codes change over time?  Let's check on that.
+```{r}
+crime |> 
+   distinct(iucr, fbi_code) |>
+   count(iucr) |>
+   filter(n > 1)
+```
+FBI codes look okay. There are `r n_distinct(crime$iucr)` unique IUCR codes and each one of them is linked to a single FBI code (the reverse is not true... some FBI codes include multiple IUCR codes).
+
+Is `primary_type` a problem?
+```{r}
+crime |> 
+   distinct(iucr, primary_type) |>
+   count(iucr) |>
+   filter(n > 1)
+```
+No. It looks like that one edit to criminal sexual assault was the only one that needed fixing there. So it is just `description` that needs attention.
+
+When dealing with IUCR 0263, I decided to use the spelling convention that was used most recently.  Let's see if we can find the most recent spelling convention for each IUCR code and use that to harmonize `description`. We are going to make our own lookup table from the existing data.
+
+```{r}
+#| label: iucrRecent
+iucrLookup <- crime |>
+   group_by(iucr) |>
+   filter(date == max(date)) |>
+   select(iucr, fbi_code, primary_type, description) |>
+   distinct() |>
+   ungroup()
+
+# are all IUCR codes unique?
+any(duplicated(iucrLookup$iucr))
+
+head(iucrLookup)
+```
+Let's see whether the edits generally make sense
+```{r}
+crime |>
+   select(iucr, description) |>
+   left_join(iucrLookup |>
+                select(iucr, description), 
+             by = "iucr", 
+             # add _recent to new columns
+             suffix = c("", "_recent")) |>
+   filter(description != description_recent) |>
+   distinct()
+```
+They generally look like inconsequential spelling changes. However, note that some of them indicate changes in statutes, such as changes in theft limits from \$300 to \$500.
+```{r}
+crime |>
+   select(iucr, description) |>
+   left_join(iucrLookup |>
+                select(iucr, description), 
+             by = "iucr", 
+             # add _recent to new columns
+             suffix = c("", "_recent")) |>
+   filter(description != description_recent &
+          grepl("\\$", description)) |>
+   distinct()
+```
+
+There are two routes to go here.
+
+1.  Use the lookup table to copy the most recent spelling conventions into the `crime` table
+2.  Delete `fbi_code`, `primary_type`, and `description` from `crime` and use `iucrLookup` whenever we need those details
+
+We are going to go with option 2.  One of the side benefits of this option is that it will reduce the size of the `crime` object in memory.  We can also drop `year` since that information is already in `date`. In total, this will free up `r crime |> select(fbi_code, primary_type, description, year) |> object.size() |> format(units = "MB")`.
+
+```{r}
+crime <- crime |>
+   select(-c(fbi_code, primary_type, description, year))
+```
+
+::: {.callout-note title="Exercises"}
+`r .exNum('What are the 10 most common crimes? Use \x60primary_type\x60')`
+
+`r .exNum('Which FBI code has the most IUCR codes associated with it? What are the primary types associated with that FBI code?')`
+
+`r .exNum('Which primary types result in the highest arrest rate? Give the top 10 primary types with at least 1000 incidents')`
+
+`r .exNum('Which \x60district\x60 has the most thefts?')`
+
+`r .exNum('Count the number of assaults since 2016 that have occurred on Fridays and Saturdays after 6pm. Report the assault counts by date, day of week, hour of the day, and year.')`
+:::
+
+
+## Coordinates
+
+Missing coordinates cannot be placed on a map. Implausible coordinates can place a Chicago incident in another state, near the equator, or at `(0, 0)`.  For some cities that I have worked with, they mark their missing coordinates as `(0, 0)`, at their city hall, and, in one case, Cinderella's Castle at Disney World. Let's see what happens in Chicago.
+
+By clicking on Google Maps with Chicago in view, you can get a general idea what sensible coordinates would be for Chicago. Longitude is generally between -87.95 and -87.50 and latitude is generally between 41.60 and 42.05.
+
+What are these records that are outside the Chicago area?
+```{r}
+crime |>
+   filter(!between(latitude, 41.60, 42.05) |
+          !between(longitude, -87.95, -87.50))
+crime |>
+   select(longitude, latitude) |>
+   filter(!between(latitude, 41.60, 42.05) |
+          !between(longitude, -87.95, -87.50)) |>
+   distinct()
+```
+Interesting. Over 100 cases are located outside Brandsville, Missouri, about 500 miles away from Chicago. From the addresses we can see that they have what seem to be Chicago addresses.  In a later lesson we will cover geocoding, where you can take addresses and look up their longitude and latitude. That would be the right thing to do here. I save the introduction of those skills later and for now just flag cases that are clearly outside of Chicago or have no coordinates at all.
+
+```{r}
+#| label: validCoordinates
+crime <- crime |>
+   mutate(valid_coordinates =
+             !is.na(latitude) &
+             !is.na(longitude) &
+             # put a generous bounding box around Chicago
+             between(latitude, 41.60, 42.05) &
+             between(longitude, -87.95, -87.50))
+
+crime |>
+   count(valid_coordinates) |>
+   mutate(percent = 100 * n / sum(n))
+
+crime |>
+   filter(valid_coordinates) |>
+   summarize(min_latitude = min(latitude, na.rm = TRUE),
+             max_latitude = max(latitude, na.rm = TRUE),
+             min_longitude = min(longitude, na.rm = TRUE),
+             max_longitude = max(longitude, na.rm = TRUE))
+```
+
+And let's do a quick check to see if these plotted points look like Chicago.
+```{r}
+#| label: fig-chicago-dot-plot
+#| fig-cap: "Basic plot of a sample of 10,000 Chicago crimes"
+crime |>
+   filter(valid_coordinates) |>
+   slice_sample(n = 10000) |>
+   ggplot(aes(x = longitude, y = latitude)) +
+   geom_point(size = 0.5, alpha = 0.5) +
+   coord_fixed() +
+   labs(x = "Longitude", y = "Latitude") +
+   theme_minimal()
+```
+
+::: {.callout-note title="Exercises"}
+`r .exNum('Plot the longitude and latitude of all "ASSAULT"s for Ward 22.')`
+
+`r .exNum('What is the most common (longitude,latitude) for assaults in Ward 22? Add that point to the plot as a larger red dot.')`
+:::
+
+Over many blocks of code we have run a lot of data cleanup steps to go from the original object we got from `fread()` to the cleaned up `crime` object we have now. Here is everything simplified to a single code block.
+```{r}
+#| eval: false
+crime <- fread(
+   "Crimes_-_2001_to_Present.csv.gz",
+   select = c("ID", "Case Number", "Date", "Block", "IUCR", 
+              "Primary Type", "Description", "Location Description", 
+              "Arrest", "Domestic", "Beat", "District", "Ward", 
+              "Community Area", "FBI Code", "Year",
+              "Latitude", "Longitude"),
+   col.names = c("id", "case_number", "date", "block", "iucr", 
+                 "primary_type","description", "location_description", 
+                 "arrest", "domestic", "beat", "district", "ward",
+                 "community_area", "fbi_code", "year", 
+                 "latitude", "longitude"),
+   colClasses = list(character = c("IUCR", "FBI Code", "Beat", "District", 
+                                   "Ward", "Community Area")),
+   na.strings = c("", "NA"),
+   showProgress = TRUE)
+
+crime <- crime |>
+   mutate(
+      datetime0 = mdy_hms(date, tz = "UTC"), # UTC ignores DST
+
+      # Correct records between 2am and 2:59am spring DST changes
+      datetime0 = if_else(date(datetime0) %in% datesSpringDST &
+                             hour(datetime0) == 2,
+                          datetime0 + hours(1),
+                          datetime0),
+
+      date = force_tz(datetime0, tzone = "America/Chicago"),
+
+      primary_type = replace_values(primary_type,
+         "CRIM SEXUAL ASSAULT" ~ "CRIMINAL SEXUAL ASSAULT"),
+
+      description = replace_values(description,
+         "AGGRAVATED: KNIFE/CUT INSTR" ~
+            "AGGRAVATED - KNIFE / CUTTING INSTRUMENT",
+         "AGGRAVATED: KNIFE / CUTTING INSTRUMENT" ~
+            "AGGRAVATED - KNIFE / CUTTING INSTRUMENT"),
+
+      valid_coordinates = !is.na(latitude) &
+                          !is.na(longitude) &
+                          between(latitude, 41.60, 42.05) &
+                          between(longitude, -87.95, -87.50)) |>
+   select(-datetime0) |>
+   relocate(date, .after = case_number)
+
+iucrLookup <- crime |>
+   group_by(iucr) |>
+   filter(date == max(date)) |>
+   select(iucr, fbi_code, primary_type, description) |>
+   distinct() |>
+   ungroup()
+
+crime <- crime |>
+   select(-fbi_code, -primary_type, -description, -year)
+```
+
+
+Now with our data cleaned up and our coordinates validated, we are ready to start mapping.
+
+
+# From incident records to a point map
+
+Let's start small by creating a leaflet map just showing assaults in Ward 22.
+
+```{r}
+#| label: fig-ward-22-assault-points
+#| fig-cap: "Reported assault locations in Chicago Ward 22"
+crime |>
+   filter(ward == 22 &
+             valid_coordinates) |>
+   semi_join(iucrLookup |>
+                filter(primary_type == "ASSAULT"),
+             by = "iucr") |>
+   leaflet() |>
+   setView(lng=-87.73, lat=41.83, # selected map's center
+           zoom=13) |>            # zoom in to "neighborhood" level
+   addTiles() |> # add the base street layer
+   addCircleMarkers(~longitude, ~latitude,
+                    radius=3, 
+                    stroke=FALSE,
+                    fillOpacity = 1)
+```
+Leaflet has placed dots all over the map for ward 22. With so many dots, it is rather difficult to determine where exactly there is a higher crime density. It seems that crime is simply everywhere in ward 22. 
+
+Instead of showing all the dots, we are going to explore ways to color and highlight maps to reveal areas of higher crime density. Let's start by examining assaults in 2026.
+```{r}
+#| label: fig-clustered-assault-point-map
+#| fig-cap: "Clustered map of reported assaults in Chicago, 2026"
+crime  |>
+   filter(valid_coordinates &
+             year(date) == 2026) |>
+   select(iucr, longitude, latitude) |>
+   semi_join(iucrLookup |>
+                filter(primary_type == "ASSAULT"),
+             by = "iucr") |>
+   leaflet() |>
+   addProviderTiles(providers$CartoDB.Positron) |>
+   setView(lng = -87.68, lat = 41.84, zoom = 10) |>
+   addCircleMarkers(
+      lng = ~longitude,
+      lat = ~latitude,
+      radius = 2,
+      stroke = FALSE,
+      fillOpacity = 0.25,
+      clusterOptions = markerClusterOptions())
+```
+
+The clustered point map is useful for inspecting records and zooming to individual incidents. Also note that this leaflet map used CartoDB Positron base map instead of the default OpenStreetMap tiles. The CartoDB tiles can be a bit more subtle and less visually distracting than the default OpenStreetMap tiles.
+
+::: {.callout-note title="Exercise"}
+`r .exNum('Create a point map for motor vehicle theft in 2024. Compare the unclustered (by removing \x60clusterOptions = markerClusterOptions()\x60) and clustered versions and explain what each version hides')`
+:::
+
+# Hexagonal tiles and hotspot maps
+
+One strategy for making a hotspot map is to chop up the Chicago map into a bunch of smaller tiles. For this we are going to overlay our leaflet map with hexagonal tiles. Then we will count how many dots land within each hexagonal tile and color the tile according to that count. Hexagonal bins are convenient because they produce smoother, more visually appealing density maps, especially when compared with square tiles. Each hexagon has a consistent distance to its neighbors and their geometry better approximates a circle, reducing distortion in how densities appear. This uniformity makes patterns in the underlying data easier to interpret, especially when mapping phenomena like crime incidents, where you want to highlight true spatial concentrations rather than artifacts of the grid shape. 
+
+This time we will make a hotspot map of all assaults in Chicago. First, we need to communicate to R that latitude and longitude are special geographic coordinates. Here we avoid saying too much about the `st_as_sf()` and the other functions from the `sf` package since we go into great detail about it in later parts of the course.
+
+We will use a special coordinate system, the Universal Transverse Mercator coordinate system, for the part of the globe sharing Chicago's longitude area (CRS 26916 = UTM zone 16N) to avoid distortion (because we are projecting points on a round earth to a two-dimensional screen). The problem with using latitude and longitude coordinates is that differences in coordinates are measured in degrees rather than meters. At the equator 0.01° longitude is about 1 kilometer, but 0.01° gets shorter and shorter as you move toward the earth’s poles. Therefore, all of our tiling and counting will be done in the UTM Zone 16N coordinate system that has distances measured in meters. After we have done all of our calculations, we will convert back to latitude and longitude to overlay our results on top of leaflet. 
+
+```{r}
+# convert to an sf object 
+#    tells R that Longitude and Latitude are special columns 
+sfAssaults <- crime |>
+   filter(valid_coordinates) |>
+   semi_join(iucrLookup |>
+                filter(primary_type == "ASSAULT"),
+             by = "iucr") |>
+   st_as_sf(coords = c("longitude", "latitude"), 
+            crs = 4326, # lat/long coordinate system (WGS 84) 
+            remove = FALSE) |> # don't remove the lat/long columns
+   st_transform(crs = 26916) # project to UTM 16N, Chicago
+```
+`sfAssaults` is now an `sf` object, which is a special type of data frame that can store geographic information. The `geometry` column contains the point locations of each assault in UTM coordinates.
+```{r}
+sfAssaults |>
+   head()
+```
+Next, we will create the set of hexagonal tiles that cover the assault locations. We need to set the size of the hexagons, specifically the distance between opposite edges of each hexagon. First, check what units of distance R will use with these data.
+```{r}
+st_crs(sfAssaults)$units
+```
+
+Confirming that the distance measurements are in meters, let's set the hexagon size to 0.5 km or 500 meters. After that, we can use `st_make_grid()` to make an R object (an `sf` object) that creates the hexagons and stores them in a convenient format. The cell width is an analytic choice. Small cells show local detail but produce unstable rates. Large cells are more stable but can conceal small hotspots. This is known as a scale or zoning problem. A hotspot can appear, disappear, or move when the grid changes.
+```{r}
+#| label: make-hexagons
+hex_width <- 500
+# create hexagonal tiles
+sfGrid <- 
+   st_make_grid(sfAssaults,
+                cellsize = hex_width,
+                square = FALSE) |> # prefer hexagons
+   st_as_sf() |>
+   rename(geometry = x)
+
+sfGrid
+```
+`sfGrid` is also like a regular data frame with one column containing polygon objects as each row's data element. There is also a header that gives some summary information like how many hexagons there are in `sfGrid` (`r nrow(sfGrid)`) and its coordinate system (NAD83 / UTM zone 16N). Let's check our work so far by displaying the hexagons over a leaflet map of Chicago, this time using the ESRI World Imagery base map.
+
+```{r}
+#| label: fig-chicago-hexagon-grid
+#| fig-cap: "A 500-meter hexagonal grid covering Chicago assault locations"
+leaflet() |>
+   addProviderTiles(providers$Esri.WorldImagery) |> 
+   # zoom=11-> tight city level view 
+   setView(lng =-87.8, lat = 41.85, zoom = 10) |> 
+   addPolygons( # convert coordinates back to lat/long (CRS 4326) 
+      data = sfGrid |> st_transform(crs=4326), 
+      fillOpacity = 0, # don't color in the hexagons 
+      color = "darkgray", # border of hexagons 
+      weight = 2, # border thickness 
+      opacity = 1) # border transparency
+```
+
+We are making progress. We have covered the map of Chicago with `r nrow(sfGrid)` hexagons. Some of our hexagons are tiling parts of Lake Michigan. We will filter those out later.  
+
+Now we need to count how many of the assaults land in each of these hexagonal tiles.  `st_intersects()` will figure out which points in `sfAssaults` land inside each hexagon and `lengths()` will count their number.  We will also compute the crime density (incidents per square kilometer per year), eliminate any hexagons with 0 assaults (like all those in Lake Michigan), and project coordinates back to latitude/longitude, which leaflet requires. 
+
+We will need to know the number of years of data we have so we can normalize results to a "per year" rate.
+```{r}
+nYears <- sfAssaults |>
+   st_drop_geometry() |> # ignore the geographic info
+   summarize(timespan = difftime(max(date, na.rm=TRUE), 
+                                 min(date, na.rm=TRUE), 
+                                 units = "days"),
+             timespan = as.numeric(timespan / 365.25)) |>
+   pull(timespan)
+nYears
+```
+`st_intersects()`, when used with polygon shapes (`sfGrid`) and points (`sfAssaults`), returns for each polygon a list of the indices of points that the polygon intersects. Here is what the results of `st_intersects()` look like for 10 hexagons plucked from the middle of Chicago. For some hexagons, the list is empty, signalling that no assaults landed in that hexagon. For other hexagons we see lists of points. These are the row numbers from `sfAssaults` of points that landed in that specific hexagonal tile.
+```{r}
+sfGrid |> 
+   slice(3480:3489) |> 
+   st_intersects(sfAssaults)
+```
+If we apply `lengths()` to this list it will return the number of points in each of these lists. 
+```{r}
+sfGrid |> 
+   slice(3480:3489) |> 
+   st_intersects(sfAssaults) |> 
+   lengths()
+```
+
+Now for all of our hexagons covering Chicago let's compute the number of assaults per km$^2$ per year. 
+```{r}
+sfGrid <- sfGrid |> 
+   # find which dots each hex intersects... 
+   mutate(nAssaults = geometry |> 
+             st_intersects(sfAssaults) |> 
+             lengths(), # ...and count them 
+          # get area in square kilometers 
+          areakm2 = as.numeric(st_area(geometry)) / 10^6, 
+          # compute incidents per km2 per year 
+          density = nAssaults / areakm2 / nYears) |> 
+   filter(nAssaults > 0) |> # drop those that are empty 
+   st_transform(crs=4326) # transform back to lat/long for leaflet 
+
+sfGrid
+```
+Now `sfGrid` has three new columns associating to each hexagon an assault count, the area of the hexagon (all should be identical), and the assault density.
+
+We want to break up that density into bins and assign a color to each bin. This way we can color-code each hexagon based on the assault density. `colorBin()` creates a function that will take a density value and return a color. The combination of `bins = 9` and `pretty = TRUE` will create some nice intervals for the different colors. Viridis is a family of color palettes that has been engineered to be perceptually uniform (equal steps in data values look like equal steps in color), colorblind-friendly, printer-friendly (maintains contrast in grayscale), and readable on screens and projectors. In its default direction, the viridis palette runs from dark purple for low values to yellow for high values. Therefore, the highest-density hexagons on this map will be the lightest and yellowest, while the lowest-density hexagons will be dark purple.
+```{r}
+pal <- colorBin("viridis", 
+                domain = sfGrid$density, 
+                bins = 9, # with pretty(), might not be exactly 9
+                pretty = TRUE) # choose "nice" breakpoints
+```
+So what is this `pal()` function? If we give `pal()` a number it will produce a color code. 
+```{r}
+pal(125)
+```
+`pal(125)` produces the color code `r pal(125)`, which gives the hexadecimal code for mixing the primary source colors red (`r pal(125) |> substring(2,3)`), green (`r pal(125) |> substring(4,5)`), and blue (`r pal(125) |> substring(6,7)`). That mix is like a deep indigo blue. When creating the hexagon overlay, each hexagon's density will be run through `pal()` which will determine how to color the hexagon. What breakpoints did `pal()` decide on? 
+```{r}
+pal |> attr("colorArgs")
+```
+
+The bins value shows that `pal()` will assign one color to 0-50, another color to 50-100, and so on up to the last bin 400-450. It also shows that if there happens to be any hexagons with missing values for density (there are in fact none), those hexagons will get colored with #808080, which is gray. 
+
+Let’s make our leaflet map!  This time I will use a dark base layer.
+```{r}
+#| label: fig-assault-hexagon-map
+#| fig-cap: "Reported assault density in 500-meter hexagons, Chicago"
+leaflet() |> 
+   addProviderTiles(providers$CartoDB.DarkMatterNoLabels) |> 
+   setView(lng =-87.8, lat = 41.85, zoom = 10) |> 
+   addPolygons( 
+      data = sfGrid, 
+      fillColor = ~pal(density), 
+      fillOpacity = 0.5, 
+      color = "", # no borders between hexagons 
+      # make popup box when hovering 
+      label = ~paste("Count:", 
+                     format(nAssaults, big.mark=","), 
+                     "<br>Density: ", 
+                     format(round(density,1), nsmall=1), 
+                     "/ km² / year") |> 
+         lapply(htmltools::HTML)) |> # signal HTML so <br> is linebreak
+   addLegend(position = "bottomright", 
+             pal = pal, 
+             values = sfGrid$density, 
+             title = "Incidents / km² / year", 
+             opacity = 0.7, 
+             labFormat = labelFormat()) # use pal() to figure out format
+```
+You can zoom in on specific neighborhoods or specific hexagons. You can also hover your mouse over a hexagon to see the assault density. 
+
+You can try to make your own color palettes, like
+```{r}
+#| label: fig-poor-color-palette
+#| fig-cap: "Reported assault density using a poorly differentiated green-to-pink palette"
+palGreg <- colorNumeric(
+   palette= c("springgreen","hotpink"), 
+   domain = c(0,450)) 
+
+leaflet() |> 
+   addTiles() |> 
+   setView(lng=-87.8, lat=41.85,zoom= 10) |> 
+   addPolygons(
+      data = sfGrid, 
+      fillColor=~palGreg(density), 
+      fillOpacity=0.5, 
+      color="darkgray", 
+      weight=0.5, 
+      opacity=0.8, 
+      label=~paste("Count:", 
+                   format(nAssaults, big.mark=","), 
+                   "<br>Density:", 
+                   format(round(density,1),nsmall=1), 
+                   "/km²/year") |> 
+         lapply(htmltools::HTML), 
+      highlightOptions = highlightOptions(color= "red", 
+                                          weight= 2, 
+                                          bringToFront= FALSE)) |>
+   addLegend(position="bottomright", 
+             pal=palGreg, 
+             values=sfGrid$density, 
+             title="Incidents/km²/year", 
+             opacity=0.7, 
+             labFormat=labelFormat())
+```
+Yikes! I have made awful color choices here. The gradation of the palette is not sufficiently varied for us to see where the hotspots are, except for the few hexagons colored hot pink. I find it best to rely on the built-in color palettes that have been more thoughtfully constructed.
+
+
+
+## A static, publication-friendly map
+
+While leaflet maps are more engaging, you will often need static maps for your reports.
+
+This map uses the magma palette in reverse. In its default direction, magma runs from nearly black for low values to pale yellow for high values. `direction = -1` reverses that mapping, making low densities light yellow and high densities dark purple. This keeps the highest hotspots from being confused with the white background outside the mapped hexagons.
+
+The square-root transformation changes how density values are assigned to positions along the color scale. Compared with a linear scale, taking the square root spreads low and moderate values farther apart while compressing differences among high values. This makes variation outside the very highest-density hexagons easier to see. It does not change the density values themselves.
+
+```{r}
+#| label: fig-hex-map
+#| fig-cap: "Reported assaults per square kilometer per year, Chicago"
+ggplot(sfGrid) +
+   geom_sf(aes(fill = density), color = NA) +
+   scale_fill_viridis_c(
+      option = "magma",
+      direction = -1, # light yellow low, dark purple high
+      # give more color resolution to low and moderate densities
+      transform = "sqrt",
+      name = "Assaults /\nkm² / year") + # \n = line feed
+   coord_sf(datum = NA) +
+   theme_void()
+```
+
+
+
+::: {.callout-note title="Exercise"}
+`r .exNum('Rebuild the hexagonal map with 250-meter and 1,000-meter cells. Describe which features persist and which depend on cell size')`
+:::
+
+# Smooth hotspot contours
+
+Hexagons make the aggregation areas visible. Kernel density estimation offers a smoothed version of the crime density.
+
+
+## Kernel density estimation
+
+The hexagonal tiles are rather blocky.  There is no smoothness to them where we would expect crime rates to be smoother.  Kernel density estimation (KDE) transforms a set of incident locations into a smoothed estimate of an incident rate, to highlight regions where incidents concentrate.  KDE places a smooth bump, called a *kernel*, over each point and adds the heights of the bumps together at a large grid of points. The resulting surface estimates incident intensity across space.
+
+Before applying KDE to a map, let's work through a one-dimensional example. Imagine a single street that is 6 kilometers long, with eight incidents at the locations marked below.
+
+```{r}
+#| label: fig-kde-street-incidents
+#| fig-cap: "Eight incident locations along a six-kilometer street"
+#| fig-height: 2.5
+x <- c(1.0, 1.8, 2.0, 2.7, 3.1, 3.9, 4.2, 5.0)
+
+plot(0, 0,
+     type = "n",
+     xlim = c(0, 6),
+     ylim = c(0, 1),
+     xlab = "Distance along street (km)",
+     ylab = "",
+     axes = FALSE)
+axis(1)
+rug(x, lwd = 2)
+points(x, rep(0, length(x)), pch = 19)
+```
+
+Place a bell-shaped curve over each incident. This example uses a normal
+distribution, although other kernel shapes are possible. The `bandwidth`
+controls how widely each incident is spread across nearby locations. Each
+kernel has an area of one, so the total area under all eight kernels is eight
+incidents. Rather than treat the incident as occurring at one specific point, the kernels kind of smudge the incident so that the weight of any one incident is spread over nearby areas.
+
+```{r}
+#| label: fig-kde-street-kernels
+#| fig-cap: "Normal kernels centered on eight incident locations"
+#| fig-height: 3.5
+h <- 0.35
+g <- seq(min(x) - 3 * h, max(x) + 3 * h, length.out = 1000)
+kernels <- sapply(x, function(xi) dnorm((g - xi) / h) / h)
+
+plot(0, 0,
+     type = "n",
+     xlim = c(0, 6),
+     ylim = c(0, 2.5),
+     xlab = "Distance along street (km)",
+     ylab = "Kernel height")
+rug(x, lwd = 2)
+points(x, rep(0, length(x)), pch = 19)
+
+apply(kernels, 2,
+      function(y) lines(g, y,
+                        col = rgb(0.2, 0.2, 0.2, 0.35),
+                        lwd = 1.5)) |>
+   invisible() # don't print any text, just draw lines
+```
+
+To estimate incident intensity at a particular location, add the heights of all eight kernels at that location. The translucent red points below show the eight contributions at the 2.5-kilometer marker (only four of them have non-negligible values). The solid red point shows their sum.
+
+```{r}
+#| label: fig-kde-street-one-location
+#| fig-cap: "Individual kernel contributions and their sum at the 2.5-kilometer marker"
+#| fig-height: 3.5
+plot(0, 0,
+     type = "n",
+     xlim = c(0, 6),
+     ylim = c(0, 2.5),
+     xlab = "Distance along street (km)",
+     ylab = "Incidents / km")
+rug(x, lwd = 2)
+points(x, rep(0, length(x)), pch = 19)
+
+apply(kernels, 2,
+      function(y) lines(g, y,
+                        col = rgb(0.2, 0.2, 0.2, 0.35),
+                        lwd = 1.5)) |>
+   invisible()
+
+kde_at_25 <- which.min(abs(g - 2.5))
+points(rep(2.5, length(x)),
+       kernels[kde_at_25, ],
+       col = rgb(1, 0, 0, 0.35),
+       pch = 19)
+points(2.5,
+       sum(kernels[kde_at_25, ]),
+       col = "red",
+       pch = 19)
+```
+
+At 2.5 kilometers, the estimated intensity is `r round(sum(kernels[kde_at_25, ]), 1)` incidents per kilometer. The units come from the kernels. Each kernel has an area of one incident and its horizontal axis is measured in kilometers.
+
+Repeat the calculation along the entire street to obtain the blue KDE curve.
+
+```{r}
+#| label: fig-kde-street-sum
+#| fig-cap: "The kernel density estimate obtained by summing the individual kernels"
+#| fig-height: 3.5
+kde <- rowSums(kernels)
+
+plot(0, 0,
+     type = "n",
+     xlim = c(0, 6),
+     ylim = c(0, 2.5),
+     xlab = "Distance along street (km)",
+     ylab = "Incidents / km")
+rug(x, lwd = 2)
+points(x, rep(0, length(x)), pch = 19)
+
+apply(kernels, 2,
+      function(y) lines(g, y,
+                        col = rgb(0.2, 0.2, 0.2, 0.25),
+                        lwd = 1.5)) |>
+   invisible()
+lines(g, kde, col = "#2C7BB6", lwd = 3)
+```
+
+Selecting a bandwidth requires judgment. A bandwidth that is too small
+produces an unstable, jagged estimate. A bandwidth that is too large smooths
+away potentially meaningful concentrations and can merge separate hotspots.
+The plot below compares three bandwidths using the same incidents.
+
+```{r}
+#| label: fig-kde-street-bandwidth
+#| fig-cap: "Kernel density estimates using three bandwidths"
+#| fig-height: 3.5
+plot(0, 0,
+     type = "n",
+     xlim = c(0, 6),
+     ylim = c(0, 4.5),
+     xlab = "Distance along street (km)",
+     ylab = "Incidents / km")
+rug(x, lwd = 2)
+points(x, rep(0, length(x)), pch = 19)
+
+bandwidths <- c(0.10, 0.35, 1.00)
+bandwidth_colors <- c("#E66101", "#2C7BB6", "#4DAF4A")
+
+for (j in seq_along(bandwidths)) 
+{
+   h_j <- bandwidths[j]
+   kernels_j <- sapply(x, function(xi) dnorm((g - xi) / h_j) / h_j)
+   lines(g,
+         rowSums(kernels_j),
+         col = bandwidth_colors[j],
+         lwd = 3)
+}
+
+legend("topright",
+       legend = paste0("h = ", format(bandwidths, nsmall = 2)),
+       fill = bandwidth_colors,
+       border = NA,
+       bty = "n",
+       title = "Bandwidth (km)")
+```
+
+The height of the KDE curve can be translated into a color. Here, each
+horizontal band represents a range of incident intensities and the color that
+would be assigned to that range.
+
+```{r}
+#| label: fig-kde-street-color-bands
+#| fig-cap: "Mapping ranges of estimated incident intensity to colors"
+#| fig-height: 3.5
+kde_breaks <- pretty(c(0, max(kde)), n = 5)
+pal_1d_kde <- colorBin(palette = "viridis",
+                       domain = kde,
+                       bins = kde_breaks)
+
+plot(0, 0,
+     type = "n",
+     xlim = c(0, 6),
+     ylim = range(kde_breaks),
+     xlab = "Distance along street (km)",
+     ylab = "Incidents / km")
+
+for (j in seq_len(length(kde_breaks) - 1)) 
+{
+   midpoint <- mean(kde_breaks[c(j, j + 1)])
+   rect(par()$usr[1], kde_breaks[j],
+        par()$usr[2], kde_breaks[j + 1],
+        col = adjustcolor(pal_1d_kde(midpoint), alpha.f = 0.5),
+        border = NA)
+}
+
+rug(x, lwd = 2)
+points(x, rep(0, length(x)), pch = 19)
+lines(g, kde, col = "#2C7BB6", lwd = 3)
+```
+These breaks are approximately equally spaced in the original incident-intensity units. There is no reason to stick with that spacing. A square-root transformation gives more color resolution to low and moderate values and less resolution to the high end of the scale. To make four bands that are equally spaced on a square-root scale, we create equally spaced values between zero and the square root of the maximum, then square those values to return the breakpoints to the original units. The resulting bands are narrower at the low end and wider at the high end.
+```{r}
+#| label: fig-kde-street-color-bands-sqrt
+#| fig-cap: "Mapping ranges of estimated incident intensity to colors, non-equal spacing"
+#| fig-height: 3.5
+kde_breaks <- (seq(0, sqrt(max(kde)), length = 5))^2
+pal_1d_kde <- colorBin(palette = "viridis",
+                       domain = kde,
+                       bins = kde_breaks)
+
+plot(0, 0,
+     type = "n",
+     xlim = c(0, 6),
+     ylim = range(kde_breaks),
+     xlab = "Distance along street (km)",
+     ylab = "Incidents / km")
+
+for (j in seq_len(length(kde_breaks) - 1)) 
+{
+   midpoint <- mean(kde_breaks[c(j, j + 1)])
+   rect(par()$usr[1], kde_breaks[j],
+        par()$usr[2], kde_breaks[j + 1],
+        col = adjustcolor(pal_1d_kde(midpoint), alpha.f = 0.5),
+        border = NA)
+}
+
+rug(x, lwd = 2)
+points(x, rep(0, length(x)), pch = 19)
+lines(g, kde, col = "#2C7BB6", lwd = 3)
+```
+
+
+Finally, remove the curve and color the street itself by the estimated incident
+intensity. With the default direction of the viridis palette used here, the
+lighter yellow and green stretches have the highest estimated intensities and
+are the one-dimensional equivalent of hotspots on a map. The dark purple
+stretches have the lowest estimated intensities.
+
+```{r}
+#| label: fig-kde-street-colored
+#| fig-cap: "A street segment colored by estimated incident intensity"
+#| fig-height: 3.5
+kde_groups <- cut(kde,
+                  breaks = kde_breaks,
+                  include.lowest = TRUE,
+                  right = TRUE)
+
+plot(0, 0,
+     type = "n",
+     xlim = c(0, 6),
+     ylim = c(-0.15, 0.5),
+     xlab = "Distance along street (km)",
+     ylab = "",
+     axes = FALSE)
+axis(1)
+
+segments(x0 = g[-length(g)],
+         y0 = 0,
+         x1 = g[-1],
+         y1 = 0,
+         col = pal_1d_kde(kde[-length(kde)]),
+         lwd = 12,
+         lend = "butt")
+rug(x, lwd = 2)
+points(x, rep(0, length(x)), pch = 19)
+
+kde_midpoints <- 0.5*(kde_breaks[-1] + kde_breaks[-length(kde_breaks)])
+
+legend("topright",
+       legend = levels(kde_groups),
+       fill = pal_1d_kde(kde_midpoints),
+       border = NA,
+       bty = "n",
+       title = "Incidents / km")
+```
+
+The two-dimensional calculation follows the same logic. Each incident receives
+a two-dimensional kernel, and the kernels are added across a grid of map
+locations. The resulting values are incident intensity per unit area instead
+of intensity per unit length.
+
+
+## KDE in R
+
+The `MASS` package provides a two-dimensional KDE function `kde2d()`. However, the `MASS` package also has a `select()` function that clashes with `dplyr`'s `select()` function. This makes it either easy to cause bugs or confusing why an apparently simple line of code does not work. So we will not run `library(MASS)` and just prefix any calls to `MASS` functions with `MASS::` to avoid problems completely. 
+
+We will also use the `isoband` package. An *isoline*, also called a contour line, connects locations where the estimated incident intensity equals one specified value. An *isoband* is the area between two isolines, where the estimated intensity falls between a lower and an upper value. We will use isobands because they produce polygons that we can fill with colors representing ranges of incident intensity.
+```{r}
+# for computing 2-dimensional kernel density estimates 
+#   prefer not to load it, MASS::select() clash with dplyr::select() 
+# library(MASS) 
+# for creating polygonal isobands
+library(isoband)
+```
+Here we use `MASS::bandwidth.nrd()` to select bandwidths, one for the x direction and one for the y direction. `kde2d()` will compute the KDE on a 200 x 200 grid of points.
+
+```{r}
+#| label: kde-calculation
+xy <- sfAssaults |>
+   st_coordinates() |>
+   data.frame()
+
+bandwidth <- c(
+   MASS::bandwidth.nrd(xy$X),
+   MASS::bandwidth.nrd(xy$Y))
+
+kdeAssaults <- MASS::kde2d(
+   x = xy$X, y = xy$Y,
+   n = 200,
+   h = bandwidth)
+```
+Stored in `kdeAssaults` is a component `z` that contains a probability density estimate. As we requested, `MASS::kde2d()` chopped the map of Chicago into a 200 by 200 grid and `z` contains the estimated crime density at those grid points. Those points are centered in a box with width and height equal to:
+```{r}
+# width in meters 
+diff(kdeAssaults$x[1:2])
+# height in meters 
+diff(kdeAssaults$y[1:2])
+```
+`z` is scaled so that `z` times the width times the height equals the fraction of expected crime incidents in that box. So `z` is like the fraction of crime incidents per square meter. If we multiply each value of `z` by the width and height of the boxes (which all have the same size) and add them up, we should get a number close to 1. 
+```{r}
+sum(kdeAssaults$z * diff(kdeAssaults$x[1:2]) * diff(kdeAssaults$y[1:2]))
+```
+If we multiply all the values of `z` by the total number of crime incidents, then rather than describing the fraction of incidents per square meter (a hard-to-understand quantity), we estimate the expected number of incidents per square meter. Multiply that by $10^6$ to convert square meters to square kilometers and divide by the number of years of data that we have so that we get an estimated number of crime incidents per km$^2$ per year, a measurement that describes the pace of incidents over space and time. 
+```{r}
+#| label: fig-kde-histogram
+#| fig-cap: "Histogram of estimated assault density per km² per year"
+# scale so that the units are incidents/km2/year 
+kdeAssaults$zKM2Year <- 
+   kdeAssaults$z * nrow(sfAssaults) * 10^6 / nYears 
+hist(kdeAssaults$zKM2Year, 
+     xlab = "Crime rate", 
+     ylab = "Number of points", 
+     main = "")
+```
+The histogram shows that a large number of areas have very low crime rates, but this histogram has a long right tail, meaning some parts of Chicago have high crime rates. Let's determine some nice breakpoints for our map. 
+```{r}
+breaks <- kdeAssaults$zKM2Year |> 
+   range() |> 
+   pretty(n=10) 
+breaks
+```
+Now we ask `isobands()` to construct a polygonal band for each adjacent pair of breakpoints. For example, the first band contains locations where `zKM2Year` falls between `breaks[1]` and `breaks[2]`. The boundaries of a band follow the isolines at its lower and upper values. Unlike an isoline, however, each object returned here represents an area rather than a curve.
+```{r}
+#| label: fig-kde-contours
+#| fig-cap: "Isobands for Chicago assault incident rate"
+contourAssaults <-
+   isobands(kdeAssaults$x, 
+            kdeAssaults$y, 
+            kdeAssaults$zKM2Year, 
+            levels_low = breaks[-length(breaks)], 
+            levels_high = breaks[-1]) |> 
+   iso_to_sfg() |> # convert to sf geometry object 
+   st_sfc(crs = 26916) |> # convert to sf data column 
+   st_sf(levels_low = breaks[-length(breaks)], # convert to sf object
+         levels_high = breaks[-1], 
+         geometry = _) |> 
+   st_transform(4326) 
+
+# show the result so far 
+contourAssaults |> 
+   slice(-1) |> # drop the outer edge 
+   st_geometry() |> 
+   plot()
+```
+This resembles elevation contours on a topographical map. Nested bands whose values increase toward the center identify local peaks in estimated crime intensity. The band values and colors tell us how high the estimated intensity is. The spacing between band boundaries tells us how quickly the estimate changes over space. Closely spaced boundaries indicate a steep change, while widely spaced boundaries indicate a gradual change. Closely spaced boundaries do not, by themselves, indicate a higher crime intensity.
+
+Let’s create a color palette to shade the isobands. Here magma is used in its default direction, so low-intensity bands are dark purple or nearly black and high-intensity bands are light yellow. The brightest areas on the resulting maps represent the highest estimated incident intensities.
+```{r}
+pal <- colorBin("magma",
+                domain = (contourAssaults$levels_low + 
+                             contourAssaults$levels_high) / 2,
+                bins = breaks,
+                pretty = FALSE)
+```
+Now we are ready to overlay a colored contour map on top of our Chicago leaflet map. Here I have added multiple basemaps and a control to allow switching between layers and toggling the contour layer on and off.
+```{r}
+#| label: fig-kde-map
+#| fig-cap: "Kernel density estimate of reported assaults per square kilometer per year, Chicago"
+leaflet() |> 
+   addProviderTiles(providers$Esri.WorldTopoMap, group="Topo") |>
+   addProviderTiles(providers$CartoDB.Positron,  group="Street") |> 
+   setView(lng=-87.8, lat=41.85,zoom= 10) |> 
+   addPolygons( 
+      data = contourAssaults, 
+      fillColor=~pal((levels_low + levels_high)/2), 
+      fillOpacity=0.4, 
+      color="#808080", #contour band edges 
+      weight=0.5, 
+      opacity=0.5, 
+      label=~paste0("Density: ", 
+                    format(levels_low, scientific=FALSE), "-",
+                    format(levels_high,scientific=FALSE)) |>
+         lapply(htmltools::HTML), 
+      highlightOptions = 
+         highlightOptions(weight=2, bringToFront= TRUE),
+      group = "Crime density") |> 
+   addLegend(
+      position="bottomright", 
+      pal=pal, 
+      values=(contourAssaults$levels_low + 
+                 contourAssaults$levels_high)/2, 
+      title="Incidents/km²/ year", opacity=0.7) |>
+   addLayersControl(
+      baseGroups = c("Topo", "Street"),
+      overlayGroups = "Crime density",
+      options = layersControlOptions(collapsed = FALSE))
+```
+The isobands have been created over the rectangular Chicago bounding box, which ends up looking a little strange, with areas highlighted in Lake Michigan. We are going to trim them using a hull around the observed assault locations. A convex hull is the smallest convex polygon that contains every point. It acts like a rubber band stretched around the outside points, so it cannot bend inward where the point cloud does. A concave hull is more like shrink-wrap. It still contains every input point, but it can bend inward to follow the point cloud more closely.
+
+`st_concave_hull()` works on each geometry separately. `st_combine()` first combines all the individual assault points into one multipoint geometry so that we get one hull around the entire point set. The [underlying GEOS algorithm](https://libgeos.org/doxygen/classgeos_1_1algorithm_1_1hull_1_1ConcaveHull.html) begins by making non-overlapping triangles with the points. The algorithm then works inward from the outside, removing eligible border triangles with long exposed edges while keeping the hull connected and retaining every point. The `ratio` argument controls the edge-length threshold for that removal. `ratio = 1` produces the convex hull. A `ratio = 0.2` puts the threshold 20\% of the way from the shortest edge to the longest edge. Border triangles with exposed edges longer than the threshold can be removed.
+
+This leaflet map shows the convex hull in gray and the tighter concave hull with `ratio = 0.2` in purple. A larger value such as 0.7 would produce a looser boundary closer to the convex hull. The 200-meter buffer in the code moves each boundary slightly outward so that we do not trim the KDE surface exactly at the outermost incident locations. We could use either hull to remove isobands from places where assaults do not occur.
+```{r}
+#| label: fig-assault-convex-concave-hulls
+#| fig-cap: "Convex and concave hulls surrounding reported assault locations"
+leaflet() |> 
+   addTiles() |> 
+   setView(lng =-87.8, lat = 41.85, zoom = 10) |> 
+   addPolygons( 
+      data = sfAssaults |> 
+         st_geometry() |> 
+         st_combine() |> 
+         st_convex_hull() |> 
+         st_buffer(200) |> # add a little extra at the edges
+         st_transform(crs = 4326), 
+      color = "#808080", 
+      weight = 0.5, 
+      opacity = 0.9) |> 
+   addPolygons(
+      data = sfAssaults |> 
+         st_geometry() |> 
+         st_combine() |> 
+         st_concave_hull(ratio=0.2) |> 
+         st_buffer(200) |> # add a little extra at the edges
+         st_transform(crs = 4326), 
+      color = "purple", 
+      weight = 0.5, 
+      opacity = 0.9, 
+      highlightOptions = 
+         highlightOptions(weight = 2, bringToFront = TRUE))
+```
+Also, let's make the hotspot map only highlight the hottest spots, those with a crime rate exceeding 80 incidents per km$^2$ per year. Zoom in on some of the brightest areas to see what is in these high assault rate areas.
+```{r}
+#| label: fig-highest-assault-hotspots
+#| fig-cap: "Highest-intensity reported assault hotspots clipped to the concave hull"
+legendMid <- (contourAssaults$levels_low + 
+                 contourAssaults$levels_high)/2 
+legendMid <- legendMid[legendMid> 80] 
+legendCol <- pal(legendMid) 
+legendLabs <- paste0(contourAssaults$levels_low, "-",
+                     contourAssaults$levels_high) 
+legendLabs <- legendLabs[contourAssaults$levels_low >=80]
+leaflet() |> 
+   addTiles()|> 
+   setView(lng=-87.8, lat= 41.85, zoom=10) |> 
+   addPolygons(
+      data= contourAssaults|> 
+         st_intersection(sfAssaults |> 
+                            st_geometry() |> 
+                            st_combine() |> 
+                            st_concave_hull(ratio=0.2) |> 
+                            st_buffer(200) |>
+                            st_transform(crs=4326)) |> 
+         filter(levels_low>= 80), # highlight just hottest spots
+      fillColor = ~pal((levels_low + levels_high)/2), 
+      fillOpacity= 0.4, 
+      color="#808080", 
+      weight= 0.5, 
+      opacity= 0.5, 
+      label=~paste0("Density:", 
+                    format(levels_low, scientific=FALSE), "-",
+                    format(levels_high, scientific=FALSE)),
+      highlightOptions= 
+         highlightOptions(weight=2, bringToFront= TRUE)) |> 
+   addLegend(
+      position="bottomright",
+      colors= legendCol,
+      labels= legendLabs, 
+      title="Incidents/km² /year", 
+      opacity= 0.7)
+```
+
+
+::: {.callout-note title="Exercise"}
+`r .exNum('Multiply the KDE bandwidth by 0.5 and by 2. Rebuild the contours and explain how the substantive story changes')`
+:::
+
+## Comparing hotspots over time
+
+Let's create hotspot maps with just motor vehicle theft, making a separate map for each year between 2018 and 2025. I make sure that the bandwidth, breaks, palette, and clipping boundary are the same for all of the maps.
+
+```{r}
+sfMVT <- crime |>
+   filter(valid_coordinates &
+             between(year(date), 2018, 2025)) |>
+   semi_join(iucrLookup |>
+                filter(primary_type == "MOTOR VEHICLE THEFT"),
+             by = "iucr") |>
+   select(longitude, latitude, date) |>
+   mutate(year = year(date)) |>
+   select(-date) |>
+   st_as_sf(coords = c("longitude", "latitude"), 
+            crs = 4326) |>
+   st_transform(crs = 26916)
+
+# select breaks, bandwidth, and palette based on 2023
+xy <- sfMVT |>
+   filter(year == 2023) |> # for just one year
+   st_coordinates() |>
+   data.frame()
+
+h <- c(MASS::bandwidth.nrd(xy$X), 
+       MASS::bandwidth.nrd(xy$Y))  
+
+breaks <- seq(0, 140, by=20)
+
+pal <- colorBin("viridis",
+                domain = (breaks[-length(breaks)]+breaks[-1])/2,
+                bins = breaks,
+                pretty = FALSE)
+
+# construct a legend containing only the displayed isobands
+legendLowMVT <- breaks[-length(breaks)]
+legendHighMVT <- breaks[-1]
+legendKeepMVT <- legendLowMVT >= 25
+legendColMVT <- pal(
+   ((legendLowMVT + legendHighMVT)/2)[legendKeepMVT])
+legendLabsMVT <- paste0(legendLowMVT, "-", legendHighMVT)[legendKeepMVT]
+```
+
+We then loop through the years 2018 to 2025, subsetting the data to one of those years at a time, and generate a hotspot map.
+
+```{r}
+#| label: fig-motor-vehicle-theft-hotspots-html
+#| fig-cap: "Annual motor vehicle theft hotspots in Chicago, 2018 through 2025"
+#| eval: !expr knitr::is_html_output()
+#| echo: !expr knitr::is_html_output()
+#| warning: false
+#| results: "asis"
+
+maps <- lapply(2018:2025, 
+function(year0) 
+{
+   message(paste("Mapping", year0))
+
+   xy <- sfMVT |>
+      filter(year == year0) |> # for just one year
+      st_coordinates() |>
+      data.frame()
+   kdeCarTheft <- MASS::kde2d(xy$X, xy$Y, n = 200, h = h)
+   
+   # no need to divide by year here... only one year of data
+   kdeCarTheft$zKM2Year <- kdeCarTheft$z * nrow(xy) * 10^6 
+   
+   contourCarTheft <- 
+      isobands(kdeCarTheft$x, 
+               kdeCarTheft$y, 
+               kdeCarTheft$zKM2Year,
+               levels_low  = breaks[-length(breaks)],
+               levels_high = breaks[-1]) |>
+      iso_to_sfg() |>
+      st_sfc(crs = 26916) |>
+      st_sf(levels_low  = breaks[-length(breaks)],
+            levels_high = breaks[-1],
+            geometry = _) |>
+      st_transform(4326) # back to lat/long
+   
+   mapYear <- leaflet() |>
+      addTiles() |>
+      setView(lng = -87.8, lat = 41.85, zoom = 10) |>
+      addPolygons(
+         data = contourCarTheft |>
+            st_intersection(sfMVT |> 
+                               st_geometry() |>
+                               st_combine() |>
+                               st_concave_hull(ratio=0.7) |>
+                               st_buffer(200) |>
+                               st_transform(crs = 4326)) |>
+            filter(levels_low >= 25), # highlight just the hottest spots
+         fillColor = ~pal((levels_low + levels_high)/2),
+         fillOpacity = 0.4,
+         color = "#808080",
+         weight = 0.5,
+         opacity = 0.5,
+         label = ~paste0("Density: ",
+                         format(levels_low,  scientific=FALSE), "-",
+                         format(levels_high, scientific=FALSE)) |>
+            lapply(htmltools::HTML),
+         highlightOptions = 
+            highlightOptions(weight = 2, bringToFront = TRUE)) |>
+      addLegend(
+         position = "bottomright",
+         colors = legendColMVT,
+         labels = legendLabsMVT,
+         title = paste(year0, "Incidents / km² / year"),
+         opacity = 0.7)
+   
+   # add a little space after each map
+   htmltools::div(style = "margin-bottom: 12px;", mapYear)
+})
+# generate HTML code for all the maps
+htmltools::tagList(maps)
+```
+
+```{r}
+#| label: fig-motor-vehicle-theft-hotspots-pdf
+#| fig-cap: "Annual motor vehicle theft hotspots in Chicago, 2018 through 2025"
+#| eval: !expr knitr::is_latex_output()
+#| echo: !expr knitr::is_latex_output()
+#| warning: false
+#| fig-show: hold       # <-- important for multiple widgets
+#| fig-width: 6
+#| out-width: 6in
+#| dpi: 200
+
+maps <- lapply(2018:2025, 
+function(year0) 
+{
+   message(paste("Mapping", year0))
+
+   xy <- sfMVT |>
+      filter(year == year0) |> # for just one year
+      st_coordinates() |>
+      data.frame()
+   kdeCarTheft <- MASS::kde2d(xy$X, xy$Y, n = 200, h = h)
+   
+   # no need to divide by year here... only one year of data
+   kdeCarTheft$zKM2Year <- kdeCarTheft$z * nrow(xy) * 10^6 
+   
+   contourCarTheft <- 
+      isobands(kdeCarTheft$x, 
+               kdeCarTheft$y, 
+               kdeCarTheft$zKM2Year,
+               levels_low  = breaks[-length(breaks)],
+               levels_high = breaks[-1]) |>
+      iso_to_sfg() |>
+      st_sfc(crs = 26916) |>
+      st_sf(levels_low  = breaks[-length(breaks)],
+            levels_high = breaks[-1],
+            geometry = _) |>
+      st_transform(4326) # back to lat/long
+   
+   leaflet() |>
+      addTiles() |>
+      setView(lng = -87.8, lat = 41.85, zoom = 10) |>
+      addPolygons(
+         data = contourCarTheft |>
+            st_intersection(sfMVT |> 
+                               st_geometry() |>
+                               st_combine() |>
+                               st_concave_hull(ratio=0.7) |>
+                               st_buffer(200) |>
+                               st_transform(crs = 4326)) |>
+            filter(levels_low >= 25), # highlight just the hottest spots
+         fillColor = ~pal((levels_low + levels_high)/2),
+         fillOpacity = 0.4,
+         color = "#808080",
+         weight = 0.5,
+         opacity = 0.5,
+         label = ~paste0("Density: ",
+                         format(levels_low,  scientific=FALSE), "-",
+                         format(levels_high, scientific=FALSE)) |>
+            lapply(htmltools::HTML),
+         highlightOptions = 
+            highlightOptions(weight = 2, bringToFront = TRUE)) |>
+      addLegend(
+         position = "bottomright",
+         colors = legendColMVT,
+         labels = legendLabsMVT,
+         title = paste(year0, "Incidents / km² / year"),
+         opacity = 0.7)
+})
+
+dir.create("figs", showWarnings = FALSE)
+
+yrs <- 2018:2025
+pngs <- character(length(maps))
+
+for (i in seq_along(maps)) {
+  htmlf <- tempfile(fileext = ".html")
+  pngf  <- file.path("figs", paste0("car-theft-",yrs[i],".png"))
+  htmlwidgets::saveWidget(maps[[i]], htmlf, selfcontained = TRUE)
+  webshot2::webshot(htmlf, pngf, vwidth = 1200, vheight = 900, zoom = 2)
+  pngs[i] <- pngf
+}
+
+knitr::include_graphics(pngs)
+```
+
+Car thefts spiked between 2022 and 2024.
+```{r}
+#| label: fig-motor-vehicle-theft-counts
+#| fig-cap: "Reported motor vehicle thefts by year in Chicago, 2018 through 2025"
+sfMVT |> 
+   count(year) |> 
+   plot(n~year, data=_,
+        xlab = "Year",
+        ylab = "Number of car thefts")
+```
+That spike was fueled by thefts of Kia and Hyundai vehicles, which lacked passive immobilizer antitheft devices as standard equipment and led to a social media trend describing how to steal Kia and Hyundai vehicles. 
+
+Many cities other than Chicago have accessible incident-level data. You can easily modify the code here to make a hotspot map for Philadelphia, Los Angeles, Seattle, San Francisco, Baltimore, Washington DC, and many others.
+
+
+::: {.callout-note title="Exercise"}
+`r .exNum('Create common-scale hex maps for motor vehicle theft in each year from 2020 through 2025.')`
+:::
+
+
+
+
+
+# Solutions to the exercises
+
+`r .exQ(1)`
+
+```{r}
+#| label: solution1
+crime |>
+   left_join(iucrLookup |>
+                select(iucr, primary_type),
+             by = "iucr") |>
+   count(primary_type) |>
+   arrange(desc(n)) |>
+   slice_head(n = 10)
+```
+
+`r .exQ(2)`
+
+```{r}
+iucrLookup |>
+   count(fbi_code, name = "n_iucr_codes") |>
+   arrange(desc(n_iucr_codes)) |>
+   slice_max(n_iucr_codes)
+
+iucrLookup |>
+   semi_join(iucrLookup |>
+                count(fbi_code, name = "n_iucr_codes") |>
+                arrange(desc(n_iucr_codes)) |>
+                slice_max(n_iucr_codes)) |>
+   distinct(fbi_code, primary_type)
+```
+
+`r .exQ(3)`
+
+```{r}
+crime |>
+   count(iucr, arrest, name = "crime_count") |>
+   left_join(iucrLookup |>
+                select(iucr, primary_type),
+             by = "iucr") |>
+   summarize(
+      incidents   = sum(crime_count),
+      arrests     = sum(crime_count[arrest == TRUE]),
+      arrest_rate = arrests / incidents,
+      .by = "primary_type") |>
+   filter(incidents >= 1000) |>
+   arrange(desc(arrest_rate)) |>
+   slice_head(n = 10)
+```
+
+`r .exQ(4)`
+
+```{r}
+crime |>
+   semi_join(iucrLookup |>
+                filter(primary_type == "THEFT"),
+             by = "iucr") |>
+   filter(!is.na(district)) |>
+   count(district, name = "thefts") |>
+   slice_max(thefts)
+```
+
+`r .exQ(5)`
+
+```{r}
+crime |>
+   semi_join(iucrLookup |>
+                filter(primary_type == "ASSAULT"),
+             by = "iucr") |>
+   mutate(calendar_date = date(date),
+          weekday = lubridate::wday(date, label = TRUE, abbr = FALSE),
+          hour = hour(date),
+          calendar_year = year(date)) |>
+   filter(calendar_year >= 2016,
+          weekday %in% c("Friday", "Saturday"),
+          hour >= 18) |>
+   count(calendar_year, calendar_date, weekday, hour,
+         name = "assaults") |>
+   arrange(calendar_date, hour)
+```
+
+`r .exQ(6)`
+
+```{r}
+#| label: fig-solution-ward-22-assaults
+#| fig-cap: "Reported assault locations in Chicago Ward 22"
+crime |>
+   filter(valid_coordinates & (ward == "22")) |>
+   semi_join(iucrLookup |>
+                filter(primary_type == "ASSAULT"),
+             by = "iucr") |>
+   ggplot(aes(x = longitude, y = latitude)) +
+   geom_point(size = 0.5, alpha = 0.5) +
+   coord_fixed() +
+   labs(x = "Longitude", y = "Latitude") +
+   theme_minimal()
+```
+
+`r .exQ(7)`
+
+```{r}
+#| label: fig-solution-common-assault-location
+#| fig-cap: "Most frequently repeated assault coordinates in Chicago Ward 22"
+most_common_location <- crime |>
+   filter(valid_coordinates & (ward == "22")) |>
+   semi_join(iucrLookup |>
+                filter(primary_type == "ASSAULT"),
+             by = "iucr") |>
+   count(longitude, latitude, name = "assaults") |>
+   slice_max(assaults)
+
+crime |>
+   filter(valid_coordinates & (ward == "22")) |>
+   semi_join(iucrLookup |>
+                filter(primary_type == "ASSAULT"),
+             by = "iucr") |>
+ggplot(aes(x = longitude, y = latitude)) +
+   geom_point(size  = 0.5, alpha = 0.5) +
+   geom_point(data  = most_common_location,
+              color = "red",
+              size  = 4) +
+   coord_fixed() +
+   labs(x = "Longitude", y = "Latitude") +
+   theme_minimal()
+```
+
+`r .exQ(8)`
+
+```{r}
+#| label: fig-solution-vehicle-theft-point-map1
+#| fig-cap: "Unclustered motor vehicle theft point maps, Chicago, 2024"
+vehicle_theft <- crime |>
+   filter(valid_coordinates & (year(date) == 2024)) |>
+   semi_join(iucrLookup |>
+                filter(primary_type == "MOTOR VEHICLE THEFT"),
+             by = "iucr")
+
+vehicle_theft_map <- leaflet(vehicle_theft) |>
+   addProviderTiles(providers$CartoDB.Positron) |>
+   setView(lng = -87.68, lat = 41.84, zoom = 10)
+
+vehicle_theft_map |>
+   addCircleMarkers(lng = ~longitude,
+                    lat = ~latitude,
+                    radius = 2,
+                    stroke = FALSE,
+                    fillOpacity = 0.25)
+```
+
+```{r}
+#| label: fig-solution-vehicle-theft-point-map2
+#| fig-cap: "Clustered motor vehicle theft point maps, Chicago, 2026"
+vehicle_theft_map |>
+   addCircleMarkers(lng = ~longitude,
+                    lat = ~latitude,
+                    radius = 2,
+                    stroke = FALSE,
+                    fillOpacity = 0.25,
+                    clusterOptions = markerClusterOptions())
+```
+
+The unclustered map preserves individual locations, but overlapping markers hide how many incidents occur in dense areas. The clustered map summarizes nearby markers and is easier to navigate, but the cluster boundaries and counts change with zoom.
+
+`r .exQ(9)`
+
+Create both grids from the same assault points and calculate density in the
+same units. The shared color scale makes the two resolutions directly
+comparable.
+
+```{r}
+#| label: fig-solution-assault-hexagon-sizes
+#| fig-cap: "Reported assault density using 250-meter and 1,000-meter hexagons"
+#| fig-width: 10
+#| fig-height: 5
+hexWidths <- c("250-meter hexagons" = 250,
+               "1,000-meter hexagons" = 1000)
+
+solutionHexGrids <- lapply(seq_along(hexWidths),
+   function(i)
+   {
+      gridGeometry <- st_make_grid(sfAssaults,
+         cellsize = hexWidths[i],
+         square = FALSE)
+
+      st_sf(geometry = gridGeometry) |>
+         mutate(
+            nAssaults = lengths(st_intersects(geometry, sfAssaults)),
+            areaKM2 = as.numeric(st_area(geometry)) / 10^6,
+            density = nAssaults / areaKM2 / nYears,
+            hex_width = names(hexWidths)[i]) |>
+         filter(nAssaults > 0)
+   }) |>
+   do.call(rbind, args = _) |>
+   mutate(
+      hex_width = factor(
+         hex_width,
+         levels = names(hexWidths)))
+
+ggplot(solutionHexGrids) +
+   geom_sf(aes(fill = density), color = NA) +
+   scale_fill_viridis_c(
+      option = "magma",
+      direction = -1,
+      transform = "sqrt",
+      name = "Assaults /\nkm² / year") +
+   facet_wrap(~hex_width, nrow = 1) +
+   coord_sf(datum = NA) +
+   theme_void()
+```
+
+The 250-meter hexagons reveal smaller concentrations and greater local
+variation, but isolated high-density cells may be sensitive to individual
+incidents. The 1,000-meter hexagons average over larger areas, creating a
+smoother map that can merge nearby concentrations or hide narrow features.
+Hotspots visible at both resolutions are less dependent on the chosen cell
+size.
+
+`r .exQ(10)`
+
+To isolate the effect of the bandwidth, keep the evaluation grid, contour
+breaks, clipping boundary, and color scale the same in all three maps. Only
+the bandwidth changes.
+
+```{r}
+#| label: fig-solution-kde-bandwidth
+#| fig-cap: "Assault hotspot contours using half, original, and double bandwidths"
+#| fig-width: 12
+#| fig-height: 4
+#| warning: false
+bandwidthValues <- list("Half bandwidth"     = bandwidth * 0.5,
+                        "Original bandwidth" = bandwidth,
+                        "Double bandwidth"   = bandwidth * 2)
+
+xyAssaults <- sfAssaults |>
+   st_coordinates() |>
+   data.frame()
+
+kdeBandwidth <- lapply(bandwidthValues,
+   function(bandwidth0)
+   {
+      kde0 <- MASS::kde2d(
+         x = xyAssaults$X,
+         y = xyAssaults$Y,
+         n = 200,
+         h = bandwidth0)
+
+      kde0$zKM2Year <- kde0$z * nrow(sfAssaults) * 10^6 / nYears
+      kde0
+   })
+
+# Use common breaks so that the colors are comparable across maps
+bandwidthBreaks <- pretty(
+   c(0, max(vapply(kdeBandwidth,
+                   function(kde0) max(kde0$zKM2Year),
+                   numeric(1)))),
+   n = 10)
+
+bandwidthContours <- Map(
+   function(kde0, bandwidthLabel)
+   {
+      isobands(
+         kde0$x,
+         kde0$y,
+         kde0$zKM2Year,
+         levels_low = bandwidthBreaks[-length(bandwidthBreaks)],
+         levels_high = bandwidthBreaks[-1]) |>
+         iso_to_sfg() |>
+         st_sfc(crs = 26916) |>
+         st_sf(
+            levels_low = bandwidthBreaks[-length(bandwidthBreaks)],
+            levels_high = bandwidthBreaks[-1],
+            bandwidth = bandwidthLabel,
+            geometry = _)
+   },
+   kdeBandwidth,
+   names(kdeBandwidth)) |>
+   do.call(rbind, args = _)
+
+assaultHull <- sfAssaults |>
+   st_geometry() |>
+   st_combine() |>
+   st_concave_hull(ratio = 0.2) |>
+   st_buffer(200)
+
+bandwidthContours <- bandwidthContours |>
+   st_intersection(assaultHull) |>
+   mutate(
+      density = (levels_low + levels_high) / 2,
+      bandwidth = factor(
+         bandwidth,
+         levels = names(bandwidthValues)))
+
+bandwidthContours <-
+   bandwidthContours[!st_is_empty(bandwidthContours), ]
+
+ggplot(bandwidthContours) +
+   geom_sf(aes(fill = density), color = NA) +
+   scale_fill_viridis_c(
+      option = "magma",
+      direction = -1,
+      name = "Assaults /\nkm² / year") +
+   facet_wrap(~bandwidth, nrow = 1) +
+   coord_sf(datum = NA) +
+   theme_void()
+```
+
+The half-bandwidth map contains more numerous, smaller peaks and sharper
+changes between neighboring areas. Some of those details may reflect real
+local concentrations, while others may be noise. Doubling the bandwidth
+produces broader regions with lower, more gradual peaks and can merge nearby
+hotspots. Concentrations that remain visible under all three bandwidths are
+less dependent on this modeling choice.
+
+`r .exQ(11)`
+
+```{r}
+#| label: fig-solution-vehicle-theft-hexagons
+#| fig-cap: "Annual motor vehicle theft density on a common hexagonal grid"
+vehicle_theft_sf <- crime |>
+   filter(valid_coordinates & 
+             (year(date) %in% 2020:2025)) |>
+   semi_join(iucrLookup |>
+                filter(primary_type == "MOTOR VEHICLE THEFT"),
+             by = "iucr") |>
+   st_as_sf(coords = c("longitude", "latitude"),
+            crs = 4326,
+            remove = FALSE) |>
+   st_transform(26916)
+
+vehicle_hex_geometry <- 
+   st_make_grid(vehicle_theft_sf,
+                cellsize = 500,
+                square = FALSE)
+
+vehicle_grid <- st_sf(
+   hex_id = seq_along(vehicle_hex_geometry),
+   geometry = vehicle_hex_geometry)
+
+vehicle_grid_year <- lapply(2020:2025,
+   function(year_i) {
+      points_i <- vehicle_theft_sf |>
+         filter(year(date) == year_i)
+
+      vehicle_grid |>
+         select(hex_id, geometry) |>
+         mutate(
+            year = year_i,
+            n_thefts = lengths(st_intersects(geometry, points_i)),
+            area_km2 = as.numeric(st_area(geometry)) / 10^6,
+            density = n_thefts / area_km2)
+      }) |>
+   bind_rows()
+
+ggplot(vehicle_grid_year) +
+   geom_sf(aes(fill = density), color = NA) +
+   scale_fill_viridis_c(
+      option = "magma",
+      trans = "sqrt",
+      limits = c(0, max(vehicle_grid_year$density))) +
+   facet_wrap(~year) +
+   coord_sf(datum = NA) +
+   theme_void()
+```
