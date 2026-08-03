@@ -90,6 +90,7 @@ Here I have wrapped `scan()` inside `try()`. More on this later. Briefly, this `
 ```{r read0704wTry}
 #| message: false
 library(dplyr)
+library(tidyr)
 repeat
 {
    a <- try(scan("https://www.the-numbers.com/box-office-chart/daily/2026/07/04",
@@ -647,6 +648,8 @@ head(dCrimeMovie)
 
 Here is a first test to see the relationship between movie gross and crime counts.
 ```{r}
+#| label: fig-crime-movie-gross
+#| fig-cap: "Daily movie ticket revenue and reported crime on Friday and Saturday evenings. Red points indicate dates during the COVID-19 pandemic period."
 plot(crimeCount~movieGross, data=dCrimeMovie)
 
 # which points are in 2020 & 2021?
@@ -692,6 +695,8 @@ The effect is still positive (more movie tickets is associated with more reporte
 
 Here's the model fit.
 ```{r}
+#| label: fig-crime-movie-model
+#| fig-cap: "Daily movie ticket revenue and reported crime with the fitted quasi-Poisson model after excluding the COVID-19 pandemic period. Red points indicate dates during the pandemic period."
 plot(crimeCount~movieGross, data=dCrimeMovie)
 
 # which points are in 2020 & 2021?
@@ -736,10 +741,14 @@ head(dCrimeMovie)
 ```
 We are looking for days where movie sales are much bigger than 1 week earlier.
 ```{r}
+#| label: fig-daily-movie-gross
+#| fig-cap: "Distribution of daily movie ticket revenue on Friday and Saturday evenings."
 boxplot(dCrimeMovie$movieGross1, 
         ylab="Daily gross (millions of $)")
 ```
 ```{r}
+#| label: fig-weekly-movie-gross-change
+#| fig-cap: "Percentage change in daily movie ticket revenue relative to one week earlier."
 dCrimeMovie <- dCrimeMovie |>
    mutate(pctgain = 100*(movieGross1-movieGross0)/movieGross0)
 
@@ -758,6 +767,8 @@ head(jumpMovies)
 
 Is there a hint that crime counts are different on big movie days?
 ```{r}
+#| label: fig-big-movie-crime-ratio
+#| fig-cap: "Ratio of reported crime counts on big movie days to counts one week earlier."
 hist(jumpMovies$crimeCount1/jumpMovies$crimeCount0, 
      breaks=15,
      main = "", xlab="Ratio of crime counts (this week / last week)")
