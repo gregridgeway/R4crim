@@ -6,8 +6,18 @@
 NCVS20*
 UCR2012
 Crimes_-_2001_to_Present*
-/09_shapefiles_and_data/LAPD crime data 2010-2019.csv
-/09_shapefiles_and_data/LAPD crime data 2020-present.csv
-
+/09_shapefiles_and_data/LAPD crime data 2019.csv.gz
+/09_shapefiles_and_data/LAPD crime data 2010-2019.csv.gz
+/09_shapefiles_and_data/LAPD crime data 2020-2024.csv.gz
 /.quarto/
 **/*.quarto_ipynb
+/08_PPD_shootings_extracting_from_text_geocoding_files/
+/09_Working_with_geographic_data_files/
+ms13.kml
+screenshot.png
+screenshot2.png
+/NIBRS/nibrs2025.db
+/NIBRS/nibrs-2025.zip
+movieData.RData
+dataChicagoCrime.RData
+PPDOIS.RData
