@@ -36,9 +36,9 @@ bibliography: G:/My Drive/docs/Greg/articles/mybib.bib
 ---
 
 <!-- In terminal -->
-<!-- quarto render 11_Working_with_geographic_data.qmd -->
+<!-- quarto render 09_Working_with_geographic_data.qmd -->
 
-<!-- git commit 11_* -m "commit message" -->
+<!-- git commit 09_* -m "commit message" -->
 <!-- git status -->
 <!-- git push -->
 
@@ -87,13 +87,13 @@ library(lubridate)
 ```
 All of the spatial functions in the `sf` package have a prefix `st_` (spatial type). We will first read in `allinjunction.shp`, a shapefile containing the geographic definition of Los Angeles gang injunctions. You should have a collection of four files related to `allinjunctions`, a .dbf file, a .prj file, a .shx file, and a .shp file. Even though the `st_read()` function appears to just ask for the .shp file, you need to have all four files in the same folder.
 ```{r} 
-mapSZ <- st_read("11_shapefiles_and_data/allinjunctions.shp")
+mapSZ <- st_read("09_shapefiles_and_data/allinjunctions.shp")
 ```
 Let's take a look at what we have. `mapSZ` has a lot of data packed into it that we will explore. To make the plot we need to ask R to just extract the geometry.
 ```{r} 
 #| label: fig-mapGangInjunctions
 #| fig-cap: Map of Los Angeles gang injunctions
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
 mapSZ |>
    st_geometry() |>
@@ -129,7 +129,7 @@ Let's highlight the first injunction in our map. We can use `filter()` to select
 ```{r}
 #| label: fig-mapGangInjunctionsRedHighlight
 #| fig-cap: Map of Los Angeles gang injunctions, PC027254 highlighted in red
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
 mapSZ |>
    st_geometry() |>
@@ -152,22 +152,22 @@ mapSZ <- mapSZ |>
           startDate = pmin(Pre_Date, Perm_Date, na.rm=TRUE)) |>
    # some start dates I looked up in court records
    #   https://www.lacourt.ca.gov/pages/lp/access-a-case/tp/find-case-information/cp/os-civil-case-access
-   mutate(startDate=case_match(case_no,
+   mutate(startDate=recode_values(case_no,
             "BC415694" ~ ymd("2009-06-12"),
             "BC435316" ~ ymd("2011-04-19"),
             "BC175684" ~ ymd("1998-11-10"), # dismissed 2001/12/14
             "BC190334" ~ ymd("1998-05-01"), # dismissed 2001/03/02
-            "VC024170" ~ NA, # never granted/enforced
+            "VC024170" ~ as.Date(NA), # never granted/enforced
             "BC399741" ~ ymd("2008-10-10"),
-            "BC187039" ~ NA, # never granted
-            .default=startDate))
+            "BC187039" ~ as.Date(NA), # never granted
+            default=startDate))
 ```
 
 Now let's highlight the injunctions before 2000 in red, those between 2000 and 2010 in green, and those after 2010 in blue. Since many of the polygons overlap, we are going to make the colors a little transparent so that we can see the overlap.
 ```{r}
 #| label: fig-mapGangInjunctionsByDecade
 #| fig-cap: Map of Los Angeles gang injunctions. Those initiated prior to 2000 are in red, those initiated between 2000 and 2010 are in green, and those initiated after 2010 are in blue
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
 mapSZ |>
    mutate(period = cut(year(startDate),
@@ -184,7 +184,7 @@ When we loaded up the `sf` package, we also gained access to the GEOS library of
 ```{r}
 #| label: fig-mapGangInjunctionsUnion
 #| fig-cap: Map of Los Angeles gang injunctions after applying `st_union()`
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
 mapSZunion <- st_union(mapSZ)
 mapSZunion |>
@@ -202,7 +202,7 @@ Let's draw a polygon defining the area of Los Angeles that is within 1000 feet o
 ```{r}
 #| label: fig-mapGangInjunctionsUnion1000Buffer
 #| fig-cap: A 1000-foot buffer around the Los Angeles gang injunctions
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
 
 # check units
@@ -222,7 +222,7 @@ Previously we had to clean up some typos on the injunction dates data. The data 
 ```{r}
 #| label: fig-mapGangInjunctionMS13
 #| fig-cap: Map of MS13 gang injunction, Case BC311766
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
 mapSZms13 <- mapSZ |>
    filter(case_no=="BC311766")
@@ -235,7 +235,7 @@ The injunction has two mutually exclusive polygons that define the injunction. B
 ```{r}
 #| label: fig-mapGangInjunctionMS13artifactsColored
 #| fig-cap: Map of MS13 gang injunction with artifacts highlighted
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
 mapSZms13
 # rows 1 & 3 seem to have the largest AREA
@@ -244,7 +244,7 @@ plot(st_geometry(mapSZms13),
      lwd    = c(3,1,3,1))
 ```
 
-The Los Angeles City Attorney's Office had an [injunction map](11_shapefiles_and_data/Injunction-Map.pdf) posted on its website that I have archived so we can see what the correct shape is supposed to be. Let's clear out the weird artifacts to repair the gang injunction geometry. We can use `st_union()` to combine all the polygons together.
+The Los Angeles City Attorney's Office had an [injunction map](09_shapefiles_and_data/Injunction-Map.pdf) posted on its website that I have archived so we can see what the correct shape is supposed to be. Let's clear out the weird artifacts to repair the gang injunction geometry. We can use `st_union()` to combine all the polygons together.
 
 ```{r}
 a <- st_union(mapSZms13)
@@ -263,7 +263,7 @@ Now let's plot the final MS13 gang injunction safety zone and color in a 500-foo
 ```{r}
 #| label: fig-mapMS13500buffer
 #| fig-cap: Map of MS13 gang injunction with a 500-foot buffer
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
 #| warning: false
 mapSZms13 |>
@@ -295,13 +295,13 @@ mapSZmapBuf |>
 
 The US Census Bureau provides numerous useful geographic data files. We will use their TIGER files to get a map of the City of Los Angeles and we will get the census tracts that intersect with the city. Once you know an area's census tract, you can obtain data on the population of the area. All of the TIGER files are available at [https://www.census.gov/cgi-bin/geo/shapefiles/index.php](https://www.census.gov/cgi-bin/geo/shapefiles/index.php).
 
-First, we will extract an outline of the city. The file `tl_2019_06_place.shp` file is a TIGER line file, created in 2019, for state number 06 (California is 6th in alphabetical order), and contains all of the places (cities and towns). Here is the entire state.
+First, we will extract an outline of the city. The file `tl_2010_06_place.shp` file is a TIGER line file, created in 2010, for state number 06 (California is 6th in alphabetical order), and contains all of the places (cities and towns). Here is the entire state.
 ```{r}
 #| label: fig-mapCAplaces
 #| fig-cap: Map of all cities and towns in California
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
-mapCAplaces <- st_read("11_shapefiles_and_data/tl_2019_06_place.shp")
+mapCAplaces <- st_read("09_shapefiles_and_data/tl_2010_06_place10.shp")
 mapCAplaces |>
    st_geometry() |>
    plot()
@@ -311,14 +311,15 @@ The `tigris` package simplifies the process of navigating the Census website, lo
 #| message: false
 library(tigris)
 options(tigris_use_cache = TRUE) # avoids repeated downloads of same file
-mapCAplaces <- places(state="CA", year=2019, class="sf")
+# tigris does not have places before 2011
+mapCAplaces <- places(state="CA", year=2011, class="sf")
 ```
 
 And here is just the part of that shapefile containing Los Angeles.
 ```{r}
 #| label: fig-mapLosAngeles
 #| fig-cap: Map of of the border of Los Angeles, California
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
 mapLA <- mapCAplaces |>
    filter(NAMELSAD=="Los Angeles city")
@@ -331,14 +332,16 @@ Now let's load in the census tracts for all of California.
 ```{r}
 #| message: false
 # approach using tigris
-mapCens <- tracts(state="CA", year=2019, class="sf")
+mapCens <- tracts(state="CA", year=2010, class="sf")
 # or if you have it local
-# mapCens <- st_read("11_shapefiles_and_data/tl_2019_06_tract.shp")
+# mapCens <- st_read("09_shapefiles_and_data/tl_2010_06037_tract10.shp")
 ```
 
 `mapCens` contains polygons for all census tracts in California. That is a lot more than we need. We just need the ones that overlap with Los Angeles. `st_intersects()` can help us determine which census tracts are in Los Angeles.
 ```{r}
-st_intersects(mapCens, mapLA)
+mapCens |>
+   slice(6300:6309) |> # pick out some near LA
+   st_intersects(mapLA)
 ```
 The resulting object has the same length as the number of census tracts in `mapCens`. The value of each component is the index of `st_intersects()` second argument that it intersects. In this example, `mapLA` is a single object so `st_intersects()` is either going to be a 1 or empty.
 
@@ -364,7 +367,7 @@ mapCens$inLA <- lengths(a) > 0
 ```
 Equivalently, we could have asked `st_intersects()` to create a list of census tracts that intersect with `mapLA`, by reversing `mapLA` and `mapCens` in `st_intersects()`.
 ```{r}
-a <- st_intersects(mapLA, mapCens)
+a <- mapLA |> st_intersects(mapCens)
 # should equal 1, there's only one shape in mapLA
 length(a)
 # save the indices of census tracts that intersect with mapLA
@@ -379,7 +382,7 @@ Let's check that the census tracts with `TRUE` for `inLA` actually intersect Los
 ```{r}
 #| label: fig-mapLAtracts
 #| fig-cap: Map of all census tracts that overlap Los Angeles
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
 mapCens <- mapCens |>
    filter(inLA)
@@ -393,13 +396,13 @@ mapLA |>
 
 Which census tracts cover the MS13 safety zone?
 ```{r}
-st_intersects(mapSZms13, mapCens)
+mapSZms13 |> st_intersects(mapCens)
 ```
 
 ```{r}
 #| label: fig-mapMS13tracts
 #| fig-cap: Map of all census tracts that overlap the MS13 injunction
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
 a <- mapSZms13 |> 
    st_intersects(mapCens) |>
@@ -429,21 +432,37 @@ First, let's load the `jsonlite` library.
 #| message: false
 library(jsonlite)
 ```
+
+The Census Data API requires a free API key. You can request one from the [Census API key signup page](https://api.census.gov/data/key_signup.html). Do not put the key directly in your script. One option is to run `tidycensus::census_api_key("YOUR KEY", install=TRUE)` once and then restart R. This stores the key in an environment variable named `CENSUS_API_KEY`, where both `tidycensus` and the examples below can retrieve it. If you do not want to restart R right now you can run `Sys.setenv(CENSUS_API_KEY="YOUR_KEY")` to set the environment variable for this session.
+
 Here is how you can access the ACS data on the total population of the United States in 2010 
 ```{r}
-fromJSON("https://api.census.gov/data/2010/acs/acs5?get=NAME,B01001_001E&for=us:*")
+#| label: acsTotalPopulation
+censusKey <- Sys.getenv("CENSUS_API_KEY")
+if(!nzchar(censusKey))
+{
+   stop("Set CENSUS_API_KEY before running the Census API examples")
+}
+
+fromJSON(paste0(
+   "https://api.census.gov/data/2010/acs/acs5?get=NAME,B01001_001E&for=us:*",
+   "&key=", censusKey))
 ```
 Let's deconstruct this URL. First, we are accessing data from the 2010 ACS data using `https://api.census.gov/data/2010/acs/`. Second, we are using the data from the ACS sample collected over the last five years to estimate the total population... that is the `acs5` part. Third, we are accessing variable `B01001_001E`, which contains an estimate (the E at the end is for estimate) of the number of people in the United States. This we needed to track down, but the [Social Explorer website](https://find.library.upenn.edu/catalog/9941110333503681?hld_id=61468399770003681) makes this easier. Navigate to Social Explorer through the Penn Library to gain full access. Lastly, we asked `for=us:*`, meaning for the entire United States.
 
 If we want the total number of people in specific census tracts, then we can make this request.
 ```{r}
-fromJSON("https://api.census.gov/data/2010/acs/acs5?get=B01001_001E&for=tract:204920,205110&in=state:06+county:037")
+fromJSON(paste0(
+   "https://api.census.gov/data/2010/acs/acs5?get=B01001_001E&for=tract:204920,205110&in=state:06+county:037",
+   "&key=", censusKey))
 ```
 Here we have requested population data (variable `B01001_001E`) for two specific census tracts (204920 and 205110)  from California (state 06) in Los Angeles County (county 037).
 
 If we want the total population in each tract in Los Angeles County, just change the tract list to an *.
 ```{r}
-fromJSON("https://api.census.gov/data/2010/acs/acs5?get=B01001_001E&for=tract:*&in=state:06+county:037") |>
+fromJSON(paste0(
+   "https://api.census.gov/data/2010/acs/acs5?get=B01001_001E&for=tract:*&in=state:06+county:037",
+   "&key=", censusKey)) |>
    # over 2000 census tracts in LA County... show  first 10
    head()
 ```
@@ -451,7 +470,7 @@ Many more examples are posted at the [Census API website](https://api.census.gov
 
 Now let's get something more complete that we can merge into our geographic data. For each census tract in Los Angeles County, we will extract the total population (`B03002_001`), the number of non-Hispanic white residents (`B03002_003`), non-Hispanic black residents (`B03002_004`), and Hispanic residents (`B03002_012`). 
 
-We could craft a JSON query to pull these data. However, the `tidycensus` package provides a handy set of tools that wrap around these JSON API calls. If you expect to hit the Census API a lot, then you need to create an account and get a Census API key. For the volume of requests we will do here (less than 500 per day), it is not necessary. Here we get ACS data on race using `get_acs()`.
+We could craft a JSON query to pull these data. However, the `tidycensus` package provides a handy set of tools that wrap around these JSON API calls. Since we stored the Census API key in `CENSUS_API_KEY`, `get_acs()` can use it without displaying the key in our code. Here we get ACS data on race using `get_acs()`.
 ```{r}
 library(tidycensus)
 dataRace <- 
@@ -470,11 +489,11 @@ With `show_call = TRUE` I have asked `get_acs()` to reveal the JSON query it use
 ```{r}
 dataRace <- dataRace |>
    select(GEOID, variable, estimate) |>
-   mutate(race = case_match(variable,
-               "B03002_001" ~ "total",
-               "B03002_003" ~ "white",
-               "B03002_004" ~ "black",
-               "B03002_012" ~ "hisp")) |>
+   mutate(race = recode_values(variable,
+                               "B03002_001" ~ "total",
+                               "B03002_003" ~ "white",
+                               "B03002_004" ~ "black",
+                               "B03002_012" ~ "hisp")) |>
    select(-variable) |>
    pivot_wider(names_from = race,
                values_from = estimate,
@@ -486,13 +505,13 @@ Now we have a data frame that links the census tract numbers to populations and 
 ```{r}
 #| label: fig-ggplotMS13PctHisp
 #| fig-cap: Percentage of Hispanic residents in census tracts overlapping the MS13 gang injunction safety zones
-#| out.width: "100%"
+#| out_width: "100%"
 #| fig-height: 5
 library(ggplot2)
 # match tract IDs and merge in % hispanic
 mapCens |>
    # merge in race data
-   left_join(dataRace, join_by(GEOID==GEOID)) |>
+   left_join(dataRace, join_by(GEOID10==GEOID)) |>
    mutate(pctHisp = if_else(total>0 & !is.na(hisp), hisp/total, 0),
           # choose a shade of gray
           colGray = gray(pctHisp),
@@ -526,19 +545,22 @@ mapCens |>
 
 # Working with point data using Los Angeles crime data
 
-The Los Angeles Police Department (LAPD) posts all of its crime data at Los Angeles' open data portal. We are interested in the 2010-2019 crime data held in the [2010-2019 crime data file](https://data.lacity.org/Public-Safety/Crime-Data-from-2010-to-2019/63jg-8b9z). We are also interested in the crime data for [2020 to the present](https://data.lacity.org/Public-Safety/Crime-Data-from-2020-to-Present/2nrs-mtv8), which LAPD posts separately.
+The Los Angeles Police Department (LAPD) posts all of its crime data at Los Angeles' open data portal. We are interested in the 2010-2019 crime data held in the [2010-2019 crime data file](https://data.lacity.org/Public-Safety/Crime-Data-from-2010-to-2019/63jg-8b9z). We are also interested in the crime data for [2020 to 2024](https://data.lacity.org/Public-Safety/Crime-Data-from-2020-to-2024/2nrs-mtv8), which LAPD posts separately.
 
 There are several ways we could go about retrieving the data. One method is to ask R to download the data to our computer and then use `read.csv()` to import it. Conveniently, the Los Angeles open data portal allows "SoQL" queries, meaning that we can use SQL-like where clauses. By default, SoQL will limit the result to 1,000 rows, so I have modified the limit to 5 million, more than enough to get all the 2019 crime data. Here I demonstrate retrieving just the 2019 crime incidents.
 
 ```{r}
 #| label: loadLAcrimeData1
 # Method #1
-if(!file.exists("11_shapefiles_and_data/LAPD crime data 2019.csv"))
+if(!file.exists("09_shapefiles_and_data/LAPD crime data 2019.csv.gz"))
 {
    download.file("https://data.lacity.org/resource/63jg-8b9z.csv?$where=date_extract_y(date_occ)=2019&$limit=5000000",
-                 destfile = "11_shapefiles_and_data/LAPD crime data 2019.csv")
+                 destfile = "09_shapefiles_and_data/LAPD crime data 2019.csv")
+   
+   R.utils::gzip("09_shapefiles_and_data/LAPD crime data 2019.csv",
+                 remove = TRUE, overwrite = TRUE)
 }
-dataCrime <- read.csv("11_shapefiles_and_data/LAPD crime data 2019.csv",
+dataCrime <- read.csv("09_shapefiles_and_data/LAPD crime data 2019.csv.gz",
                       as.is=TRUE)
 
 # check data range
@@ -564,32 +586,42 @@ dim(dataCrime)
 head(dataCrime, 3)
 ```
 
-Let's download all 2010-2019 data as well as the 2020-present data so that we can explore changes in crime over time.
+Let's download all 2010-2019 data as well as the 2020-2024 data so that we can explore changes in crime over time.
 ```{r}
 #| label: loadLAcrimeData3
 #| message: false
 #| cache: true
-# get the 2010-2019 data
 options(timeout = 600) # ten minutes
-if(!file.exists("11_shapefiles_and_data/LAPD crime data 2010-2019.csv"))
+
+# get the 2010-2019 data
+if(!file.exists("09_shapefiles_and_data/LAPD crime data 2010-2019.csv.gz"))
 {
    download.file("https://data.lacity.org/resource/63jg-8b9z.csv?$limit=5000000",
-                 destfile = "11_shapefiles_and_data/LAPD crime data 2010-2019.csv",
+                 destfile = "09_shapefiles_and_data/LAPD crime data 2010-2019.csv",
                  quiet=TRUE)
+   
+   R.utils::gzip("09_shapefiles_and_data/LAPD crime data 2010-2019.csv",
+              remove = TRUE, overwrite = TRUE)
 }
-# get the 2020-present data
-if(!file.exists("11_shapefiles_and_data/LAPD crime data 2020-present.csv"))
+
+# get the 2020-2024 data
+if(!file.exists("09_shapefiles_and_data/LAPD crime data 2020-2024.csv.gz"))
 {
    download.file("https://data.lacity.org/resource/2nrs-mtv8.csv?$limit=5000000",
-                 destfile = "11_shapefiles_and_data/LAPD crime data 2020-present.csv",
+                 destfile = "09_shapefiles_and_data/LAPD crime data 2020-2024.csv",
                  quiet=TRUE)
+   
+   R.utils::gzip("09_shapefiles_and_data/LAPD crime data 2020-2024.csv",
+              remove = TRUE, overwrite = TRUE)
 }
-# combine 2010-2019 data and 2020-present data
+
+# combine 2010-2019 data and 2020-2024 data
 dataCrime <- 
-   read.csv("11_shapefiles_and_data/LAPD crime data 2010-2019.csv",
+   read.csv("09_shapefiles_and_data/LAPD crime data 2010-2019.csv.gz",
             as.is=TRUE) |>
-   bind_rows(read.csv("11_shapefiles_and_data/LAPD crime data 2020-present.csv",
-                      as.is=TRUE))
+   bind_rows(
+      read.csv("09_shapefiles_and_data/LAPD crime data 2020-2024.csv.gz",
+               as.is=TRUE))
 ```
 
 Like always, let's check the size and peek at the first three rows to see what we have.
@@ -597,10 +629,10 @@ Like always, let's check the size and peek at the first three rows to see what w
 nrow(dataCrime)
 dataCrime |> head(3)
 ```
-It is also a good idea to check counts over time and over places. Note that there are some strange anomolies, like areas 19, 20, 21 in 2015 followed by very large jumps in 2016. Looks like 2015 and 2016 data were miscoded for these areas in these years.
+It is also a good idea to check counts over time and over places. Note that there are some strange anomalies, like areas 18, 19, 20, 21 in 2015 followed by very large jumps in 2016. Looks like 2015 and 2016 data were miscoded for these areas in these years.
 ```{r}
 dataCrime |> 
-   count(year=year(mdy_hms(date_occ)),area) |> 
+   count(year=year(ymd_hms(date_occ)),area) |> 
    pivot_wider(names_from=year,values_from=n) |> 
    print(n=Inf, width=Inf)
 ```
@@ -626,13 +658,13 @@ Let's now identify which crimes occurred within one mile of the MS13 injunction.
 ```{r}
 #| label: fig-ggplotLACrimeData
 #| fig-cap: Plot of Los Angeles crime locations near the MS13 gang injunction safety zones
-#| out.width: "100%"
+#| out_width: "100%"
 #| fig-height: 5
 #| warning: false
 #| cache: TRUE
 
 mapMS13mileBuffer <- mapSZms13 |> st_buffer(5280)
-bboxMS13 <- st_bbox(mapMS13mileBuffer)
+bboxMS13          <- st_bbox(mapMS13mileBuffer)
 
 ggplot() +
    geom_point(data = dataCrime |> 
@@ -698,7 +730,7 @@ Let's check that all the crimes are correctly labeled with a map.
 ```{r}
 #| label: fig-ggplotLACrimeDataMS13
 #| fig-cap: Plot of MS13 safety zone with a one-mile buffer and Los Angeles crime locations
-#| out.width: "100%"
+#| out_width: "100%"
 #| fig-height: 5
 #| fig-format: png
 #| warning: false
@@ -753,7 +785,6 @@ mapA <- st_sf(place2=c("SZ","buffer","outside"),
 plot(mapA, main="")
 dataCrimeMS13 <- dataCrimeMS13 |> st_join(mapA)
 ```
-
 `st_join()` will add a new column `place2` to the `dataCrimeMS13` data frame containing the label of the polygon in which it landed. Indeed, `dataCrimeMS13` now has a `place2` column categorizing the incident location.
 ```{r}
 dataCrimeMS13 |> head(3)
@@ -769,7 +800,7 @@ Does crime behave differently inside the safety zone compared with the areas bey
 ```{r}
 #| label: fig-ggplotRelativeTrends
 #| fig-cap: Trends in crime relative to their average
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
 #| warning: false
 #| cache: TRUE
@@ -779,7 +810,6 @@ dataCrimeMS13 <- dataCrimeMS13 |>
 # count the number of crimes by year and area
 a <- dataCrimeMS13 |>
    st_drop_geometry() |>
-   filter(year(date_occ) < 2025) |>
    count(place1, year=year(date_occ)) |>
    group_by(place1) |>
    # normalize to the average crime count over the period
@@ -796,7 +826,29 @@ ggplot(a, aes(x=year, y=relativeN, color=place1)) +
   labs(y = "Number of crimes relative to the average", color = "Location") +
   theme_minimal()
 ```
-For the most part the crime trends look the same. However, in which years do we see some large differences? The large dip and spike are in 2015 and 2016. Remember when loading the crime data we noticed that 2015 and 2016 data looked miscoded in areas 19, 20, and 21.
+For the most part the crime trends look the same. However, in which years do we see some large differences? The large dip and spike are in 2015 and 2016. Remember when loading the crime data we noticed that 2015 and 2016 data looked miscoded in areas 18, 19, 20, and 21.
+```{r}
+#| label: fig-ggplotRelativeTrendsDrop
+#| fig-cap: Trends in crime relative to their average (dropping areas 18, 19, 20, 21)
+#| out-width: "100%"
+#| fig-height: 5
+#| warning: false
+#| cache: TRUE
+a <- dataCrimeMS13 |>
+   filter(area %notin% c(18,19,20,21)) |>
+   st_drop_geometry() |>
+   count(place1, year=year(date_occ)) |>
+   group_by(place1) |>
+   mutate(relativeN = n/mean(n)) |>
+   ungroup()
+
+ggplot(a, aes(x=year, y=relativeN, color=place1)) +
+  geom_line(linewidth = 2) +
+  scale_color_manual(values = c(SZ="red", buffer="blue", outside="green")) +
+  labs(y = "Number of crimes relative to the average", color = "Location") +
+  theme_minimal()
+```
+
 
 ## Exercises
 `r .exNum('How many 2019 crimes occurred inside safety zones?')`
@@ -824,7 +876,7 @@ Now we can see that `a` has two distinct polygons. The second row corresponds to
 ```{r}
 #| label: fig-MS13s
 #| fig-cap: Southern polygon from the MS13 safety zone
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
 
 # which one is further south?
@@ -849,7 +901,7 @@ Using `st_cast()` is the most direct method. However, sometimes the shapes are m
 ```{r}
 #| label: fig-MS13all
 #| fig-cap: Both polygons marking the MS13 safety zone
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
 mapSZms13 |>
    st_geometry() |>
@@ -861,7 +913,7 @@ Next, run `boxXY <- locator()`. In the top left of the plot window you will see 
 #| echo: false
 #| label: fig-MS13locatorBox
 #| fig-cap: Points selected with `locator()` to extract southern polygon
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
 boxXY <- list(x=c(6465406,6472950,6482201,6479978,6466041),
               y=c(1847679,1849148,1846845,1839619,1839818))
@@ -879,7 +931,7 @@ Yours will almost certainly look different and may even have more elements. Chec
 ```{r}
 #| label: fig-MS13locatorBox2
 #| fig-cap: Polygon formed from `locator()`
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
 # Make the end of the box reconnect back to the beginning
 boxXY$x <- c(boxXY$x, boxXY$x[1])
@@ -915,7 +967,7 @@ The text looks correct, so now we convert it to a simple features object, making
 ```{r}
 #| label: fig-MS13sWKT
 #| fig-cap: Polygon from `locator()` constructed from WKT
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
 boxTemp <- st_as_sfc(boxTemp,
                      crs=st_crs(mapSZms13))
@@ -931,7 +983,7 @@ That was the WKT method. Let's try the `st_polygon()` method. `st_polygon()` tak
 ```{r}
 #| label: fig-MS13sstpolygon
 #| fig-cap: Polygon from `locator()` constructed using `st_polygon()`
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
 boxTemp <- cbind(boxXY$x, boxXY$y) |>
    list() |>
@@ -950,7 +1002,7 @@ Now the only reason we did this process of creating `boxTemp` is so that we coul
 ```{r}
 #| label: fig-MS13sFinal
 #| fig-cap: Final selection of southern MS13 safety zone
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
 mapSZms13s <- mapSZms13 |> 
    st_intersection(boxTemp)
@@ -975,7 +1027,7 @@ mapLAstreet <- roads(state="CA",
 If you would rather work from a shapefile stored locally on your computer, the file to use is `tl_2019_06037_roads.shp`. The naming convention says that this is a TIGER line file, from 2019, for state 06 (California), for county 037 (Los Angeles County), containing roads. Los Angeles County is large and this file has over 135,000 street segments. It can take a little while to load and project.
 ```{r}
 #| eval: false
-mapLAstreet <- st_read("11_shapefiles_and_data/tl_2019_06037_roads.shp")
+mapLAstreet <- st_read("09_shapefiles_and_data/tl_2019_06037_roads.shp")
 ```
 Regardless of the method, we then need to make sure we use the same projection for the streets as the injunction map.
 ```{r}
@@ -1012,7 +1064,7 @@ Let's take a look at the streets.
 ```{r}
 #| label: fig-MS13streets
 #| fig-cap: Streets that intersect the southern MS13 safety zone
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
 
 mapMS13street |> 
@@ -1026,7 +1078,7 @@ mapSZms13s |>
 ```{r}
 #| label: fig-MS13streetsCrop
 #| fig-cap: Streets that intersect the southern MS13 safety zone, cropped to safety zone bounding box
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
 #| warning: false
 
@@ -1048,7 +1100,7 @@ Now we have our safety zone and the streets that run through the safety zone. Le
 ```{r}
 #| label: fig-MS13sStreetFinal
 #| fig-cap: Street map through the southern MS13  safety zone
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
 #| warning: false
 
@@ -1103,7 +1155,7 @@ Wilshire Blvd is a major street that runs from the Pacific Ocean to downtown Los
 ```{r}
 #| label: fig-MS13Wilshire
 #| fig-cap: Street map in southern MS13 safety zone, Wilshire Blvd highlighted in green
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
 
 mapMS13street |> st_geometry() |> plot()
@@ -1125,7 +1177,7 @@ We are going to count how many crimes occurred within 100 feet of Wilshire Blvd.
 ```{r}
 #| label: fig-MS13WilshireCrime
 #| fig-cap: Crime locations on Wilshire Blvd
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
 #| warning: false
 
@@ -1168,7 +1220,7 @@ In the previous method we created a 100-foot buffer and then asked which crimes 
 ```{r}
 #| label: fig-MS13WilshireCrimeDist
 #| fig-cap: Crime locations on Wilshire Blvd, computed using `st_distance()`
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
 
 # explore st_distance() with first 10 incidents
@@ -1185,6 +1237,7 @@ mapWilbuffer |>
 mapSZms13s |>
    st_geometry() |>
    plot(border="red", lwd=3, add=TRUE)
+
 dataCrimeMS13 |>
    # include only those within 100 feet of Wilshire Blvd
    filter(as.numeric(st_distance(geometry, mapWilshire)) < 100) |>
@@ -1204,7 +1257,7 @@ First, let's subset our crime data so we just have crimes that fall into the MS1
 ```{r}
 #| label: fig-MS13CrimeLocations
 #| fig-cap: Crime locations in southern MS13 safety zone
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
 #| warning: false
 
@@ -1231,7 +1284,7 @@ dim(d) # row for each crime, column for each street
 ```{r}
 #| label: fig-MS13ExampleClosest
 #| fig-cap: Example crime location checking its nearest street
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
 
 # for each row (crime) find out which column (street)
@@ -1255,6 +1308,7 @@ for(i in 1:nrow(mapMS13street))
         labels = mapMS13street$FULLNAME[i], 
         srt = mapMS13street$ang[i], cex = 0.6)
 }
+
 dataCrimeMS13s |>
    head(1) |>
    st_geometry() |>
@@ -1270,7 +1324,7 @@ table(mapMS13street$FULLNAME[iClose]) |>
 
 # or, just using the addresses
 dataCrimeMS13s$location |>
-   gsub("^[0-9]+ ", "", ) |>
+   gsub("^[0-9]+ ", "", x=_) |>
    gsub(" * ", " ", x=_) |>
    table() |>
    sort() |>
@@ -1299,7 +1353,7 @@ Hints:
 ```{r}
 #| label: fig-RFKschool
 #| fig-cap: Boundaries of the RFK school
-#| out.width: "100%"
+#| out-width: "100%"
 #| fig-height: 5
 
 a <- mapLAstreet |>
@@ -1372,7 +1426,7 @@ mapSZ |>
 
 ```{r}
 #| fig-height: 5
-#| out.width: "100%"
+#| out-width: "100%"
 mapSZ |>
    st_geometry() |>
    plot()
@@ -1402,7 +1456,7 @@ mapSZ |>
 ```{r}
 #| warning: false
 #| fig-height: 5
-#| out.width: "100%"
+#| out-width: "100%"
 mapSZ |>
    slice(c(30,51)) |>
    st_geometry() |>
@@ -1432,7 +1486,7 @@ mapSZ |>
 
 ```{r}
 #| fig-height: 5
-#| out.width: "100%"
+#| out-width: "100%"
 mapCens |>
    st_filter(mapSZms13 |>
                 st_buffer(dist=-200)) |>
@@ -1457,7 +1511,7 @@ mapCens <- mapCens |>
 
 ```{r}
 #| fig-height: 5
-#| out.width: "100%"
+#| out-width: "100%"
 mapCens |> 
    st_filter(mapSZms13 |> st_buffer(dist=-50)) |>
    st_geometry() |>
@@ -1474,7 +1528,7 @@ mapSZms13 |>
 
 ```{r}
 #| fig-height: 5
-#| out.width: "100%"
+#| out-width: "100%"
 # get total population for each census tract
 dataRes <- get_acs(geography = "tract",
                    variables = "B01001_001E",
@@ -1487,7 +1541,7 @@ dataRes <- get_acs(geography = "tract",
    rename(pop = estimate)
 # merge total population into census map
 mapCens <- mapCens |>
-   left_join(dataRes, join_by(GEOID))
+   left_join(dataRes, join_by(GEOID10==GEOID))
 
 # census tracts within 1 mile of safety zone #51
 mapCensMS13 <- mapCens |>
@@ -1530,10 +1584,9 @@ nSZcrimes
 
 ```{r}
 #| message: false
-library(units)
 # use set_units() to convert to square miles
 #   equivalent to multiplying by 5280^2
-set_units(nSZcrimes / st_area(st_union(mapSZ)), value="1/mile^2")
+units::set_units(nSZcrimes / st_area(st_union(mapSZ)), value="1/mile^2")
 ```
 
 `r .exQ(12)`
@@ -1550,7 +1603,7 @@ nBufCrimes <- dataCrime |>
    st_filter(mapBuf) |>
    nrow()
 nBufCrimes
-set_units(nBufCrimes / st_area(mapBuf), value="1/mile^2")
+units::set_units(nBufCrimes / st_area(mapBuf), value="1/mile^2")
 ```
 
 `r .exQ(13)`
@@ -1576,7 +1629,7 @@ mapMS13street |>
 
 ```{r}
 #| fig-height: 5
-#| out.width: "100%"
+#| out-width: "100%"
 mapMetro <- mapLAstreet |>
    filter(FULLNAME %in% c("S Western Ave","S Normandie Ave",
                           "S Vermont Ave","S Alvarado St")) |>
