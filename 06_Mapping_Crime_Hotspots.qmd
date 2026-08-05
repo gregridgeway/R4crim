@@ -138,7 +138,7 @@ download.file(
 Just how big is this file?
 ```{r}
 file.info("Crimes_-_2001_to_Present.csv") |>
-   transmute(size_gb = size / 10^9)  # transmute = mutate + select
+   mutate(size_gb = size / 10^9, .keep = "none") # .keep drops other columns
 ```
 
 You can save space by compressing the file.
@@ -152,7 +152,7 @@ R.utils::gzip("Crimes_-_2001_to_Present.csv",
 
 ```{r}
 file.info("Crimes_-_2001_to_Present.csv.gz") |>
-   transmute(size_gb = size / 10^9)
+   mutate(size_gb = size / 10^9, .keep = "none")
 ```
 
 
