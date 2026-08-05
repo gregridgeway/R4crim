@@ -37,9 +37,9 @@ bibliography: G:/My Drive/docs/Greg/articles/mybib.bib
 
 
 <!-- In terminal -->
-<!-- quarto render 10_PPD_shootings_extracting_from_text_geocoding.qmd -->
+<!-- quarto render 08_PPD_shootings_extracting_from_text_geocoding.qmd -->
 
-<!-- git commit 10_* -m "commit message" -->
+<!-- git commit 08_* -m "commit message" -->
 <!-- git status -->
 <!-- git push -->
 
@@ -93,7 +93,7 @@ library(tidyr)
 library(foreach)
 
 library(chromote) # steer Chrome from R
-library(rvest)    # helpful webscraping tools
+library(rvest)    # helpful web scraping tools
 library(purrr)    # for pluck()
 ```
 
@@ -113,7 +113,7 @@ a[i] |> substring(1, 500)
 iStart <- gregexpr("<tbody>",  a[i]) |> unlist()
 a[i] |> substring(iStart, iStart+500)
 ```
-Buried in the HTML code are the entries in the table. Even though all the information does not appear on the main webpage, it is in the HTML. This is not always the case. Some pages dynamically generate information as the user interacts with a page and the page elements. We are going to use this as an opportunity to learn more advanced webscraping methods.
+Buried in the HTML code are the entries in the table. Even though all the information does not appear on the main webpage, it is in the HTML. This is not always the case. Some pages dynamically generate information as the user interacts with a page and the page elements. We are going to use this as an opportunity to learn more advanced web scraping methods.
 
 Instead of using `scan()`, we are going to use the `chromote` package to open a hidden Chrome browser that we can control remotely from R. For this to work you do need to have a [Chrome browser](https://www.google.com/chrome/) installed on your computer. From R, we can simulate user actions, like typing a URL in the address bar, selecting elements on the page, and clicking buttons. 
 
@@ -341,10 +341,11 @@ Now we are ready to read in all the incidents' details.
 ```{r}
 #| label: scrapeOISdetails
 #| cache: true
+#| message: false
 ois$text <- NA
 for(i in 1:nrow(ois))
 {
-   # message(paste0("Incident: ",i))
+   message(paste0("Incident: ",i))
    a <- try( read_html(ois$url[i]) )
    
    if(inherits(a, "try-error"))
@@ -433,7 +434,7 @@ That is a good sign!
 
 Our OIS data frame has the address for every incident, but to be more useful we really need the geographic coordinates. If we had the coordinates, then we could put them on a map, tabulate how many incidents occur within an area, calculate distances, and answer questions about the geography of these data.
 
-Geocoding is the process of converting a text description of a location (typically an address or intersection) to obtain geographic coordinates (often longitude/latitude, but other coordinate systems are also possible). Google Maps currently reigns supreme in this area. Google Maps understands very general descriptions of locations. You can ask for the coordinates of something like "chipotle near UPenn" and it will understand that "UPenn" means the University of Pennsylvania and that "chipotle" is the burrito chain. Unfortunately, as of June 2018 Google Maps requires a credit card in order to access its geocoding service. Previously, anyone could geocode up to 2,500 locations per day without needing to register.
+Geocoding is the process of converting a text description of a location (typically an address or intersection) to obtain geographic coordinates (often longitude/latitude, but other coordinate systems are also possible). Google Maps currently reigns supreme in this area. Google Maps understands very general descriptions of locations. You can ask for the coordinates of something like "chipotle near UPenn" and it will understand that "UPenn" means the University of Pennsylvania and that "chipotle" is the burrito chain. Google Maps requires a credit card in order to access its geocoding service.
 
 We will use the ArcGIS geocoder to get the coordinates of every location. Many web data sources use a standardized language for providing data. JSON (JavaScript Object Notation) is quite common and ArcGIS uses JSON. 
 
@@ -453,7 +454,7 @@ if (knitr::is_html_output())
 }
 ```
 
-You can see the address for Penn's McNeil Building embedded in this URL. Spaces need to be replaced with `%20` (the space character has ASCII code 20). Let's see what data we get back from this URL.
+You can see the address for Penn's McNeil Building embedded in this URL. Spaces need to be replaced with `%20` (20 is the hexadecimal ASCII code for the space character). Let's see what data we get back from this URL.
 
 ```{r}
 scan("https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&singleLine=38th%20and%20Walnut,%20Philadelphia,%20PA&outFields=Match_addr,Addr_type",
@@ -501,7 +502,7 @@ leaflet(width = 1200, height = 800) |>
    addCircleMarkers(lng=gcPenn$lon, 
                     lat=gcPenn$lat)
 ```
-`leaflet()` prepares the mapping process (the `width` and `height` do not have to be set, by I needed to for these notes). `addTiles()` pulls in the relevant map image (buildings and streets). Generally, you can use `addTiles()` with no other arguments. I regularly recompile these notes which hits the OpenStreetMap server a little too much, so I have to rely on a different map provider that can better handle the load of requests. `setView()` takes the longitude and latitude from our `gcPenn` object, sets that as the center of the map, and zooms in to level "18," which is a fairly close zoom of about one block. `addCircleMarkers()` creates a circle at the selected point.
+`leaflet()` prepares the mapping process (the `width` and `height` do not have to be set, butI needed to for these notes). `addTiles()` pulls in the relevant map image (buildings and streets). Generally, you can use `addTiles()` with no other arguments. I regularly recompile these notes which hits the OpenStreetMap server a little too much, so I have to rely on a different map provider that can better handle the load of requests. `setView()` takes the longitude and latitude from our `gcPenn` object, sets that as the center of the map, and zooms in to level "18," which is a fairly close zoom of about one block. `addCircleMarkers()` creates a circle at the selected point.
 
 We are almost ready to throw all of our addresses at the geocoder, but let's first make sure the addresses look okay. Several locations have `&` where the ArcGIS geocoder wants `and`.
 
@@ -532,7 +533,7 @@ ois |>
   filter(grepl("[Ww]ithheld", location)) |>
   pull(text)
 ```
-The text of OIS 16-18 gives a nearby address (3250 Wellington Street). We will drop incident 16-26, since it is not really a police shooting. 
+The text of OIS 16-18 gives a nearby address (3250 Wellington Street). We will drop incident 16-26, since it is not really a police shooting (off-duty officer shot his son). 
 
 Several other incidents have quirky addresses.
 ```{r}
@@ -540,20 +541,21 @@ ois |>
   filter(id %in% c("16-30","16-10","17-08")) |>
   select(id, location, text)
 ```
-Reading the details of the incidents, we can come up with reasonable fixes to the addresses. OIS 17-08 is not a PPD shooting incident. Some PPD officers were present when New Castle County (Delaware) police officers shot someone. Let's drop this incident. The remaining incidents we can edit based on the contents of the OIS description. We will also tack on ", Philadelphia, PA" to the end of each location to improve geocoding accuracy.
+Reading the details of the incidents, we can come up with reasonable fixes to the addresses. OIS 17-08 is a PPD shooting incident. PPD shot at a suspect in Philadelphia at 5600 Whitby Avenue then drove to New Castle County (Delaware) where a New Castle County shot the suspect. Let's fix this address. The remaining incidents we can edit based on the contents of the OIS description. We will also tack on ", Philadelphia, PA" to the end of each location to improve geocoding accuracy.
 ```{r}
 ois <- ois |>
-  filter(id != "17-08" &    # not a PPD shooting
-         id != "16-26") |>  # not really a police shooting
-  mutate(location = case_match(id,
-           "16-18" ~ "3250 Wellington Street",
-           # two locations, let's use the first one
-           "16-10" ~ "5750 N. Broad Street",
-           # pick the location where the police shooting occurred
-           "16-30" ~ "4850 Sansom Street",
-           .default=location),
-         location = # add the city
-           paste0(location,", Philadelphia, PA"))
+   filter(id != "16-26") |>  # not really a police shooting
+   mutate(location = recode_values(id,
+      "16-18" ~ "3250 Wellington Street",
+      # two locations, let's use the first one
+      "16-10" ~ "5750 N. Broad Street",
+      # pick the location where the police shooting occurred
+      "16-30" ~ "4850 Sansom Street",
+      # the Philly location
+      "17-08" ~ "5600 Whitby Avenue",
+      default = location),
+      location = # add the city
+         paste0(location,", Philadelphia, PA"))
 ``` 
 Let's test out the process for just the first location. The code here shows how you can extract each bit of information that we want from geocoding an address: the coordinates (long,lat), the specific address that the geocoding service translated our requested address to, a quality-of-match score, and location type (e.g. StreetInt, PointAddress, StreetAddress).
 ```{r}
@@ -570,18 +572,22 @@ With that we are ready to run all of our addresses through the ArcGIS geocoder. 
 
 ```{r geocodeLocations}
 #| cache: true
+#| message: false
 # takes about 3 minutes
-geoInfo <- foreach(i=1:nrow(ois), .combine=bind_rows) %do%
+geoInfo <- vector("list", nrow(ois))
+for(i in 1:nrow(ois))
 {
-  # message(paste0("#", i, " Address: ", ois$location[i]))
+  message(paste0("#", i, " Address: ", ois$location[i]))
   a <- geocodeARCGIS(ois$location[i])
 
-  data.frame(lon       = a$candidates$location$x[1],
-             lat       = a$candidates$location$y[1],
-             addrmatch = a$candidates$address[1],
-             score     = a$candidates$score[1],
-             addrtype  = a$candidates$attributes$Addr_type[1])
+  geoInfo[[i]] <-
+     data.frame(lon       = a$candidates$location$x[1],
+                lat       = a$candidates$location$y[1],
+                addrmatch = a$candidates$address[1],
+                score     = a$candidates$score[1],
+                addrtype  = a$candidates$attributes$Addr_type[1])
 }
+geoInfo <- geoInfo |> bind_rows()
 ois <- ois |> bind_cols(geoInfo)
 ```
 
@@ -592,7 +598,7 @@ stem(ois$lon)
 ```
 All the points have latitude around 39 and 40 and longitude around -75. That is a good sign! 
 
-Let's check the "address type". We should worry about addresses geocode to a "StreetName." That means the incident got geocoded to, say, "Market Street" but we are not sure where along Market Street the incident actually occurred. The geocoder most likely placed the incident at the midpoint of the street.
+Let's check the "address type". We should worry about addresses geocoded to a "StreetName." That means the incident got geocoded to, say, "Market Street" but we are not sure where along Market Street the incident actually occurred. The geocoder most likely placed the incident at the midpoint of the street.
 ```{r}
 ois |> count(addrtype)
 ois |> 
@@ -663,21 +669,21 @@ ois |>
 Let's record these fixes.
 ```{r}
 ois <- ois |>
-  mutate(lat = case_match(id,
-                          "21-14" ~ 39.975984,
-                          "25-01" ~ 39.99711,
-                          .default = lat),
-         lon = case_match(id,
-                          "21-14" ~ -75.203309,
-                          "25-01" ~ -75.20474,
-                          .default = lon))
+   mutate(lat = recode_values(id,
+                              "21-14" ~ 39.975984,
+                              "25-01" ~ 39.99711,
+                              default = lat),
+          lon = recode_values(id,
+                              "21-14" ~ -75.203309,
+                              "25-01" ~ -75.20474,
+                              default = lon))
 ```
 
 Here's a map of all of the incidents. For each incident I have added some pop-up text so that if you click on an incident it will show you the location of the incident and the text describing the incident.
 ```{r}
 #| label: fig-leafletAllOISs
 #| message: false
-#| fig.cap: "All Philadelphia Officer-involved Shootings"
+#| fig-cap: "All Philadelphia Officer-involved Shootings"
 ois |>
    leaflet(width = 1200, height = 800) |>
    addTiles(
@@ -696,13 +702,13 @@ ois |>
 
 # Working with shapefiles and coordinate systems
 
-The Philadelphia Police Department divides the city into Police Service Areas (PSAs). The city provides a _shapefile_, a file containing geographic data, that describes the boundaries of the PSAs at Philadelphia's [open data site](https://www.opendataphilly.org/dataset/police-service-areas). R can read these files using the `st_read()` function provided in the `sf` (simple features) package. Even though `st_read()` appears to only be accessing `Boundaries_PSA.shp`, you should have all of the `Boundaries_PSA` files in your `10_shapefiles_and_data` folder. The other files have information that `st_read()` needs, like the coordinate system stored in `Boundaries_PSA.prj`. If you do not have all `Boundaries_PSA` files in your folder, then in a few lines you will get errors like "the sfc object should have crs set," meaning that the Coordinate Reference System (CRS) is missing.
+The Philadelphia Police Department divides the city into Police Service Areas (PSAs). The city provides a _shapefile_, a file containing geographic data, that describes the boundaries of the PSAs at Philadelphia's [open data site](https://www.opendataphilly.org/dataset/police-service-areas). R can read these files using the `st_read()` function provided in the `sf` (simple features) package. Even though `st_read()` appears to only be accessing `Boundaries_PSA.shp`, you should have all of the `Boundaries_PSA` files in your `08_shapefiles_and_data` folder. The other files have information that `st_read()` needs, like the coordinate system stored in `Boundaries_PSA.prj`. If you do not have all `Boundaries_PSA` files in your folder, then in a few lines you will get errors like "the sfc object should have crs set," meaning that the Coordinate Reference System (CRS) is missing.
 ```{r}
 #| message: false
 library(sf)
-PPDmap <- st_read("10_shapefiles_and_data/Boundaries_PSA.shp")
+PPDmap <- st_read("08_shapefiles_and_data/Boundaries_PSA.shp")
 ```
-You can also get the same PSA boundaries using geoJSON.
+You can also get the same PSA boundaries using geoJSON, but note that the .shp file has capitalized column names and the geoJSON version has lowercase column names.
 ```{r}
 library(geojsonsf)
 PPDmap <- geojson_sf("https://opendata.arcgis.com/datasets/8dc58605f9dd484295c7d065694cdc0f_0.geojson")
@@ -746,7 +752,7 @@ text(a[,1], a[,2], PPDmap$psa_num, cex=0.5)
 a <- st_coordinates(PPDmap$geometry[1])
 lines(a[,1], a[,2], col="red", lwd=3)
 ```
-So this highlighted in red PSA `r PPDmap$psa_num[1]`.
+This highlights PSA `r PPDmap$psa_num[1]` in red.
 
 We can also overlay a leaflet map with the `PPDmap` object.
 ```{r}
@@ -769,7 +775,7 @@ Geographic datasets that describe locations on the surface of the earth have a "
 ```{r}
 st_crs(PPDmap)
 ```
-The coordinate system used to describe the PPD boundaries is the World Geodetic System 1984 (WGS84) maintained by the United States National Geospatial-Intelligence Agency, one of several standards to aid in navigation and geography. The European Petroleum Survey Group (EPSG) maintains a catalog of different coordinate systems (should be no surprise that oil exploration has driven the development of high quality geolocation standards). They have assigned the standard longitude/latitude coordinate system to be [EPSG4326](http://spatialreference.org/ref/epsg/4326/). You can find the full collection of coordinate systems at [spatialreference.org](http://spatialreference.org/ref/epsg/). You can see in the output above a reference to EPSG 4326.
+The coordinate system used to describe the PPD boundaries is the World Geodetic System 1984 (WGS84) maintained by the United States National Geospatial-Intelligence Agency, one of several standards to aid in navigation and geography. The European Petroleum Survey Group (EPSG) developed a catalog of different coordinate reference systems (should be no surprise that oil exploration has driven the development of high quality geolocation standards). They have assigned the standard longitude/latitude coordinate system to be [EPSG4326](http://spatialreference.org/ref/epsg/4326/). You can find the full collection of coordinate systems at [spatialreference.org](http://spatialreference.org/ref/epsg/). You can see in the output above a reference to EPSG 4326.
 
 Many of us are comfortable with the longitude/latitude angular coordinate systems. However, the distance covered by a degree of longitude shrinks as you move towards the poles and only equals the distance covered by a degree of latitude at the equator. In addition, the earth is not very spherical so the coordinate system used for computing distances on the earth surface might need to depend on where you are on the earth surface. 
 
@@ -783,7 +789,7 @@ The CRS now indicates that this is a Mercator projection with distance measured 
 PPDmap <- st_transform(PPDmap, crs=2272)
 st_crs(PPDmap)
 ```
-This coordinate system is the Lambert Conic Conformal (LCC). This particular projection of the `PPDmap` is tuned to provide good precision for the southern part of Pennsylvania (note the parallel coordinates are at the latitude of southern Pennsylvania and the meridian is a little west of Philadelphia) and distances are measured in feet (note the `LENGTHUNIT["US survey foot",0.304800609601219]` tag in the CRS description).
+This coordinate system is the Lambert Conformal Conic (LCC). This particular projection of the `PPDmap` is tuned to provide good precision for the southern part of Pennsylvania (note the parallel coordinates are at the latitude of southern Pennsylvania and the meridian is a little west of Philadelphia) and distances are measured in feet (note the `LENGTHUNIT["US survey foot",0.304800609601219]` tag in the CRS description).
 
 Let's transform back to longitude/latitude. It really is best to work using a different coordinate system, but I'm going to stick with longitude/latitude so that the values make a little more sense to us.
 ```{r}
@@ -802,9 +808,9 @@ To make the dots a little transparent, I have used the `rgb()` function with whi
 
 ## Spatial joins
 
-A _spatial join_ is the process of linking two data sources by their geography. For the case of the OIS data, we want to know how many OISs occurred in each PSA. To do this we need to drop each OIS point location into the PSA polygons and have R tell us in which polygon did each OIS land.
+A _spatial join_ is the process of linking two data sources by their geography. For the case of the OIS data, we want to know how many OISs occurred in each PSA. To do this we need to drop each OIS point location into the PSA polygons and have R tell us which polygon contains each OIS.
 
-First we need to convert our `ois` data frame to an `sf` object, communicating to R that the `lon` and `lat` columns are special. At this stage we also have to communicate in what coordinate system are the `lon` and `lat` values. `st_as_sf()` converts an R object into an `sf` object.
+First we need to convert our `ois` data frame to an `sf` object, communicating to R that the `lon` and `lat` columns are special. At this stage we also have to communicate which coordinate system the `lon` and `lat` values use. `st_as_sf()` converts an R object into an `sf` object.
 ```{r}
 ois <- st_as_sf(ois, 
                 coords=c("lon","lat"),
@@ -939,9 +945,9 @@ PPDmap |>
 b <- st_coordinates(st_centroid(PPDmap))
 text(b[,1], b[,2], PPDmap$nShoot, cex=0.7)
 ```
-Those PSAs with the least shootings are a very pale yellow. As we examine PSAs with a greater number of OISs, their colors get redder and redder.
+Those PSAs with the fewest shootings are a very pale yellow. As we examine PSAs with a greater number of OISs, their colors get redder and redder.
 
-`sf` objects have their own default plotting method to accomplish these kind of "heat maps." The default palette is generated with `sf.colors()`.
+`sf` objects have their own default plotting method to accomplish these kinds of "heat maps." The default palette is generated with `sf.colors()`.
 ```{r}
 #| label: fig-OIScountHistsf1
 #| fig-cap: "PSAs color-coded by number of OIS incidents, default `sf` colors"
@@ -997,15 +1003,247 @@ PPDmap |>
       attribution = '© MapTiler © OpenStreetMap contributors')
 ```
 
-# Summary
-We started with just a web page linking to a collection of text descriptions. We used a variety of webscraping and regular expressions to extract everything we could from the web page tables. We had R "read" the text descriptions to extract the dates. We geocoded the incidents so that we could put them on a map. Finally, we tabulated by PSA the number of OISs and mapped those as well.
+# Using a large language model to extract information from text
 
-If you have worked through all of this, then I would recommend that you save your objects, using `save(ois, PSAlookup, file="PPDOIS.RData")`. That way you will not have to scrape everything off the web again or redo any geocoding.
+We have studied all the readily available structured data about the OIS incidents. However, we barely made use of the text of the incident reports... aside from using some regular expressions to extract the dates. For example, we might want to know
+
+1.  Was the suspect armed?
+2.  Had the suspect harmed or threatened to harm someone?
+3.  Did police gunfire strike a person, a dog, or no one?
+4.  If a person was shot, was that person transported to the hospital for treatment of the shooting?
+5.  To which hospital were they transported?
+
+We could try to use regular expressions to extract this information from the text, but the descriptions are not standardized and there are many ways to express the same fact. The standard practice for decades has been to read (or hire people to read) all the reports and code the information into structured data fields. This is expensive and time-consuming. A large language model (LLM) can read the text and extract the information for us.
+
+In this section, we are going to use the OpenAI API to send the text of each OIS description to a large language model and ask it to extract structured information. The model will return a JSON object with the requested fields. We will then combine all of these JSON objects into a data frame for analysis. It can make mistakes... and humans do too. I read all of these reports and recorded my answers and compared them to the LLM. I found a couple that the LLM got wrong, but it also found one that I got wrong. Depending on your tolerance for errors, you may want to have a human review the LLM's output. The LLM can also provide a short excerpt from the text that supports its coding decision. This is useful for quality control and for training a human reviewer.
+
+The method I will show you here is not free. You need to create an account on the OpenAI Developer Platform and obtain an API key. You need to give a credit card and you will be billed for each request you make to the API. The cost is based on the model you use and the number of tokens in your request and response (tokens are units of text, often a word or part of a word). You can find the current pricing on the OpenAI website. You should also be aware that the API is rate-limited, meaning you can only make a certain number of requests per minute. You can find the current rate limits on the OpenAI website. That said, the cost of this exercise for me was a few cents. If you decide to get an API key, be sure to set a spend limit. There are some bugs that will end up repeatedly sending requests to the API and you can end up with a large bill if you do not set a limit.
+
+::: {.callout-warning title="Expect the API to change"}
+LLM APIs, available models, prices, rate limits, request fields, and response formats change frequently. The code below follows the OpenAI Responses API at the time these notes were written. Check the [current OpenAI API documentation](https://developers.openai.com/api/docs/) and [current model list](https://developers.openai.com/api/docs/models) before using it. You may need to change the model name or modify the request and response-processing code as standards and protocols develop. Never assume that an old classroom example is still the least expensive or currently recommended approach.
+:::
+
+Do not send sensitive or protected data to this OpenAI API. If you have sensitive data, then you can install a local LLM on your own computer to process the data, but they do require a lot of computing power to run locally. Some organizations (like Penn) do have local LLMs that are HIPAA compliant that do not send any data outside of the organization's computers.
+
+## Acquire and protect an API key
+
+OpenAI API use requires an account on the [OpenAI Developer Platform](https://platform.openai.com/). API billing is separate from a ChatGPT subscription. After creating an account, create a secret key on the [API keys page](https://platform.openai.com/api-keys). If the platform offers key permissions, give the key only the permissions needed for this exercise. A key is shown in full only when it is created, so copy it to a secure location at that time. Treat an API key like a password. Do not paste it into an R script, a Quarto file, an email, a chat message, or a file tracked by Git. If a key is exposed, delete it on the API keys page and create a replacement.
+
+While you can paste your API key directly into your script, I recommend you store the key in your user-level `.Renviron` file. This file is outside the class project and R reads it when a new session starts. Run the following command in the R console.
+
+Not sure where your .Renviron file is? Run `path.expand("~/.Renviron")` in the R console.
+```{r}
+path.expand("~/.Renviron")
+```
+Now edit the file.
+```{r}
+#| eval: false
+file.edit(path.expand("~/.Renviron"))
+```
+Add one line to that file, replacing the example text with the key you copied.
+```text
+OPENAI_API_KEY=replace_with_your_secret_key
+```
+Save the file and restart R. Load the key into an object when the script needs it. Assigning the result does not display the key in the console, but it will show up in your Environment pane or if you run `openaiKey` at the console. You can also check that the key is present with `Sys.getenv("OPENAI_API_KEY")`. If you see an empty string, check your `.Renviron` file and restart R.
+```{r}
+openaiKey <- Sys.getenv("OPENAI_API_KEY")
+
+if (!nzchar(openaiKey))
+   stop("OPENAI_API_KEY was not found. Check .Renviron and restart R")
+```
+
+You can also set your API key directly in the console with
+```{r}
+#| eval: false
+Sys.setenv(OPENAI_API_KEY="your_very_secret_API_key")
+```
+
+## Ask the model for structured data
+
+We will use the [Responses API](https://developers.openai.com/api/docs/guides/text) through `httr2`. The request sends one OIS description to the LLM and will return a structured response. The `who` field distinguishes incidents in which police gunfire struck a person, struck a dog, or struck no one. This helps prevent us from coding a person as transported because of a police shooting when officers missed and the person was transported for an unrelated reason.
+
+```{r}
+library(httr2)
+
+extractOIS <- function(description,
+                       model = "gpt-5.6-luna")
+{
+   outputSchema <- list(
+      type = "object",
+      properties = list(
+         who = list(
+            type = "string",
+            enum = c("person", "dog", "no one"),
+            description = paste(
+               "Who was struck by police gunfire. Code person if at least",
+               "one person was struck, dog if a dog but no person was struck,",
+               "and no one if neither a person nor a dog was struck")),
+         transported = list(
+            type = "string",
+            enum = c("yes", "no", "unknown"),
+            description = paste(
+               "Whether a person struck by police gunfire was transported",
+               "for treatment of that shooting")),
+         hospital = list(
+            type = "string",
+            description = paste(
+               "Hospital name stated in the description,",
+               "not transported, or unknown")),
+         evidence = list(
+            type = "string",
+            description = paste(
+               "A short excerpt supporting the coding,",
+               "or an empty string when there is no evidence"))
+      ),
+      required = c("who", "transported", "hospital", "evidence"),
+      additionalProperties = FALSE)
+
+   prompt <- paste(
+      "Code this police narrative for research.",
+      "Use only information explicitly stated in the narrative.",
+      "Do not infer a hospital from geography.",
+      "For who, code person if police gunfire struck at least one person,",
+      "dog if it struck a dog but no person, and no one if officers missed",
+      "or neither a person nor a dog was struck.",
+      "Code transported as yes only when a person struck by police gunfire",
+      "was transported for treatment of that shooting.",
+      "Code transported as no when who is dog or no one, or when the narrative",
+      "explicitly says the person who was shot was not transported.",
+      "Code transported as unknown when a person was struck but the narrative",
+      "does not establish whether that person was transported for treatment.",
+      "Do not comment on other victims or police officers injured",
+      "or transported to the hospital",
+      "Narrative:", description)
+
+   response <- request("https://api.openai.com/v1/responses") |>
+      req_auth_bearer_token(openaiKey) |>
+      req_body_json(list(
+         model = model,
+         input = prompt,
+         store = FALSE,
+         text = list(
+            format = list(
+               type = "json_schema",
+               name = "ois_text_extraction",
+               strict = TRUE,
+               schema = outputSchema)))) |>
+      req_perform() |>
+      resp_body_json(simplifyVector = FALSE)
+
+   messageItem <- response$output |>
+      keep(\(x) identical(x$type, "message")) |>
+      pluck(1)
+
+   outputText <- messageItem$content |>
+      keep(\(x) identical(x$type, "output_text")) |>
+      pluck(1, "text")
+
+   fromJSON(outputText)
+}
+```
+
+The API key is placed in the HTTP authorization header by `req_auth_bearer_token()`. It is never stored in the script or included in the request body. `store = FALSE` asks the API not to retain the response for later retrieval through the API.
+
+Let's test the function on one incident before processing many records.
+```{r}
+testDescription <- ois |>
+   filter(id == "23-23") |>
+   pull(text)
+
+extractOIS(testDescription)
+```
+
+Next, run a small pilot. The list column `llmResult` holds one structured response per description, and `unnest_wider()` expands those responses into ordinary columns.
+```{r}
+oisPilot <- ois |>
+   filter(year(date) == 2026) |>
+   slice_head(n=3) |>
+   # map applies the extractOIS() function to each value of text
+   mutate(llmResult = map(text, extractOIS)) |>
+   # map packs four columns in one... separate them
+   unnest_wider(llmResult)
+
+oisPilot |>
+   select(id, who, transported, hospital, evidence)
+```
+Let's read the three original descriptions and compare them with the proposed codes and evidence. Refine the prompt if the coding rule is ambiguous or the results are inconsistent.
+```{r}
+ois |>
+   st_drop_geometry() |>
+   filter(id %in% oisPilot$id) |>
+   select(id, text)
+```
+
+Now let's run it on all of the OIS descriptions.
+```{r}
+#| cache: true
+ois <- ois |>
+   mutate(llmResult = map(text, extractOIS)) |>
+   unnest_wider(llmResult)
+```
+OpenAI tells me that analyzing all of these descriptions cost $0.04. Let's check the results.
+```{r}
+ois |>
+   select(id, who, transported, hospital, evidence) |>
+   head(5) |>
+   data.frame()
+```
+And save our work so we do not need to run that again.
+```{r}
+save(ois, PSAlookup, file="PPDOIS.RData")
+```
+
+Some tips:
+
+1.  Start with a small pilot
+2.  Check that it is answering your questions correctly
+3.  Inspect usage in the OpenAI developer dashboard
+4.  Save completed results locally to avoid rerunning calls unnecessarily
+
+
+# Summary
+We started with just a web page linking to a collection of text descriptions. We used a variety of web scraping and regular expressions to extract everything we could from the web page tables. We had R "read" the text descriptions to extract the dates and used a large language model to propose structured codes from narrative text. We geocoded the incidents so that we could put them on a map. Finally, we tabulated by PSA the number of OISs and mapped those as well.
+
+If you have worked through all of this, then I would recommend that you save your objects, using `save(ois, PSAlookup, file="PPDOIS.RData")`. That way you will not have to scrape everything off the web again or redo any geocoding or rerun everything through the LLM.
 
 # Exercises
 `r .exNum('Revisit the geocoding section discussing geocoding errors. Examine the OISs that have not been geocoded to specific locations. Fix their addresses and redo the geocoding of these OISs to improve the accuracy of the data.')`
 
-`r .exNum('Identify officer-involved shootings that resulted in the offender being transported to the Hospital at the University of Pennsylvania. Create a map marking the location of HUP, the location of officer-involved shootings resulting in the offender being transported to HUP, and the locations of all other shootings.')`
+`r .exNum('Identify officer-involved shootings that resulted in the suspect being transported to the Hospital at the University of Pennsylvania. Create a map marking the location of HUP, the location of officer-involved shootings resulting in the suspect being transported to HUP, and the locations of all other shootings.')`
 
-`r .exNum('For each shooting determine which hospital treated the offender. Use \x60st_distance()\x60 to determine what percentage of those shot in an OIS went to the closest hospital.')`
+`r .exNum('For each shooting determine which hospital treated the suspect. Use \x60st_distance()\x60 to determine what percentage of those shot in an OIS went to the closest hospital.')`
 
+`r .exNum('Use the LLM extraction function on ten OIS descriptions. Manually code the same descriptions, compare your codes with the model outputs, and describe every disagreement.')`
+
+
+# An alternative way to obtain the PPD data
+
+At the beginning of these notes, we used `chromote` to work with the live DOM, move through the pages of the OIS table, and collect the incident data. Learning that approach is important. Many websites use JavaScript to request data only after a page has loaded or after a user clicks a button. In those cases, the complete dataset is not present in the static HTML returned by the server, so `scan()` or `read_html()` cannot retrieve it by itself. A browser automation tool such as `chromote` lets R interact with the page after JavaScript has run.
+
+It turns out that the current version of the PPD website does include all of the OIS records in the static HTML. JavaScript uses the DataTables library to display only 25 rows at a time in the browser, but the server has already sent every row. This means that, for this particular website, we can obtain the entire table with one call to `read_html()` without opening a hidden browser or clicking the Next button.
+
+```{r}
+oisTableDirect <- 
+   read_html("https://www.phillypolice.com/accountability/ois/") |>
+   html_element("table#data-table-ois")
+
+oisDirect <- oisTableDirect |>
+   html_table() |>
+   mutate(url = oisTableDirect |>
+             html_elements("tbody a") |>
+             html_attr("href")) |>
+   select(-Year) |>
+   rename(id        = Title,
+          location  = Location,
+          subInjury = `Subject Injury`,
+          subArrest = `Subject Arrested`,
+          offInjury = `Officer Injury`,
+          text      = `OIS Content`)
+
+dim(oisDirect)
+head(oisDirect)
+```
+
+The `OIS Content` column already contains the incident narratives, so this approach also avoids visiting every individual incident page. The URLs remain useful if we want to inspect those pages or verify particular records.
+
+This shortcut depends entirely on how the PPD has implemented its website. Another site might show a similar paginated table while loading each page of records from a server only when the user requests it. The PPD could also redesign this page in the future. A useful first step in any web scraping project is therefore to inspect the static HTML with `read_html()`. If the desired data are present, extract them directly. If they are created or retrieved only after JavaScript runs, use `chromote` or another browser automation tool to work with the live DOM.
