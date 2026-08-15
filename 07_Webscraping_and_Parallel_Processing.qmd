@@ -254,7 +254,8 @@ results <- vector("list", length(dates2scrape))
 On iteration `i` of our for loop we will store that day's movie data frame in `results[[i]]`. The following for loop can take several minutes to run and its speed will depend on your network connection and how responsive the web site is. Before running the entire for loop, it may be a good idea to temporarily set the dates to a short period of time (e.g., a month or two) just to verify that your code is functioning properly. Once you have concluded that the code is doing what you want it to do, you can set the dates so that the for loop runs for the entire analysis period.
 
 This loop takes about an hour to pull all the data.
-```{r webscraping}
+```{r}
+#| label: webscraping
 #| message: false
 #| results: hide
 #| cache: true
@@ -885,4 +886,29 @@ foreach(iDate = 1:17,
 
    return(data0)
 }
+```
+
+
+`r .exQ(3)`
+```{r}
+dCrimeMovieWeekdays <- crime |>
+   filter(wday(date, week_start = 1) <= 5 &
+             hour(date) >= 18) |>
+   mutate(date = date(date)) |>
+   count(date, name = "crimeCount") |>
+   inner_join(movieData |>
+                 summarize(movieGross = sum(grossAdj) / 10^6,
+                           .by = "date"),
+              by = "date")
+
+glmWeekdays <- dCrimeMovieWeekdays |>
+   filter(!between(date, ymd("2020-03-15"), ymd("2021-05-01"))) |>
+   glm(crimeCount ~ movieGross,
+       family = quasipoisson,
+       data = _)
+
+summary(glmWeekdays)
+
+# Convert the movieGross coefficient to percent change per $1 million
+100 * (exp(coef(glmWeekdays)["movieGross"]) - 1)
 ```
