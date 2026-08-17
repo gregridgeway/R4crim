@@ -8,7 +8,7 @@ date: "`r format(Sys.time(), '%B %d, %Y')`"
 format:
   html:
     theme: 
-      dark: darkly
+      dark: [darkly, dark.scss]
       light: default
     toc: true
     html-math-method: mathjax
@@ -1095,59 +1095,116 @@ mapMS13street <- mapMS13street |>
    st_crop(mapSZms13s)
 ```
 
-Now we have our safety zone and the streets that run through the safety zone. Let's put some street names over the map so we can read it more like a street map. It is hard to do this perfectly, but the following steps will work for our purposes. For each street segment we want to select a point on the street, near or inside the safety zone where we will put the label. We will use `st_line_sample()` with `sample=0.5` to select a point in the middle of the line (`mid_X`, `mid_Y`). Some streets run north/south, others east/west, and others diagonally. So, we need to figure out an angle for the label too. I will also find another point (`p_lo_X`, `p_lo_Y`) a little before the point where we will place the label. The slope of the line connecting the two points `p_lo` and `mid` can give us the angle of the street at that point (has it been a while since you have used the [inverse tangent function](https://www.khanacademy.org/math/precalculus/x9e81a4f98389efdf:trig/x9e81a4f98389efdf:inverse-trig/v/inverse-trig-functions-arctan)?)
+Cropping can shorten or split geographic features. The warning produced by `st_crop()` reminds us that attributes describing the original geometry, such as a previously calculated street length, might no longer be correct. Attributes such as the street name and road classification remain appropriate for the cropped segment.
+
+Now we have our safety zone and the streets that run through it. We would like to add street names so that the result looks more like a familiar street map. Before calculating positions for those labels, we need to inspect the geometry types in `mapMS13street`.
+
+```{r}
+mapMS13street |>
+   st_geometry_type() |>
+   table()
+```
+
+Nearly every row is stored as a `LINESTRING`, which is a single connected line. One row is stored as a `MULTILINESTRING`, meaning that one row contains more than one line component. In this case, the separate components represent the two sides of a divided road. Let's highlight this feature on the street map.
+
+```{r}
+#| label: fig-MS13streetMultipart
+#| fig-cap: Multipart street feature highlighted in green
+#| out-width: "100%"
+#| fig-height: 5
+
+mapMS13multiStreet <- mapMS13street |>
+   filter(st_geometry_type(geometry) == "MULTILINESTRING")
+
+mapMS13street |>
+   st_geometry() |>
+   plot(col="grey70")
+mapMS13multiStreet |>
+   st_geometry() |>
+   plot(add=TRUE, col="green", lwd=3)
+```
+
+Our next step will use `st_line_sample()`, which expects each input geometry to be a `LINESTRING`. We need each component of the `MULTILINESTRING` to have its own row. The two-stage cast below first makes the geometry column homogeneous by representing every street as a `MULTILINESTRING`. A regular `LINESTRING` simply becomes a one-component `MULTILINESTRING`. The second cast converts the components back to `LINESTRING` objects. One-component streets still produce one row, while a multipart street produces one row for each component. Skipping the first cast makes R pick only the first component of a `MULTLINESTRING`.
+
+```{r}
+#| label: fig-MS13streetMultipartSplit
+#| fig-cap: Multipart street feature split into two LINESTRING rows
+#| out-width: "100%"
+#| fig-height: 5
+
+mapMS13multiStreetLines <- mapMS13multiStreet |>
+   st_cast("MULTILINESTRING") |>
+   st_cast("LINESTRING", warn=FALSE)
+
+mapMS13street |>
+   st_geometry() |>
+   plot(col="grey70")
+mapMS13multiStreetLines |>
+   st_geometry() |>
+   plot(add=TRUE, col=c("#FFB000", "#6A3D9A"), lwd=3)
+```
+
+The two colors in @fig-MS13streetMultipartSplit show that the original row contained two separate line components. We can now apply the same two-stage cast to the entire street map. The second cast repeats the street attributes when it creates a new row. That is appropriate here because both components have the same street name and road classification.
+
+```{r}
+mapMS13street <- mapMS13street |>
+   filter(!is.na(FULLNAME)) |>
+   # Create a homogeneous geometry column
+   st_cast("MULTILINESTRING") |>
+   # Break true multilines into separate rows
+   st_cast("LINESTRING", warn=FALSE)
+
+mapMS13street |>
+   st_geometry_type() |>
+   table()
+```
+
+Now every row contains a `LINESTRING`, so we are ready to calculate the label positions. For each street segment, `st_line_sample()` with `sample=0.5` selects a point halfway along the line. This point supplies the coordinates `mid_X` and `mid_Y`, where we will place the street name. We also select a second point just before the midpoint, using `sample=0.5-delta`. The angle of the line connecting these two nearby points tells us how to rotate the label so that it follows the street. We calculate that angle with the [inverse tangent function](https://www.khanacademy.org/math/precalculus/x9e81a4f98389efdf:trig/x9e81a4f98389efdf:inverse-trig/v/inverse-trig-functions-arctan).
 
 ```{r}
 #| label: fig-MS13sStreetFinal
-#| fig-cap: Street map through the southern MS13  safety zone
+#| fig-cap: Labeled street map through the southern MS13 safety zone
 #| out-width: "100%"
 #| fig-height: 5
-#| warning: false
-
-# save geometry column
-g <- mapMS13street |>
-   filter(!is.na(FULLNAME)) |>
-   st_geometry()   
 
 delta <- 0.001
+
 mapMS13street <- mapMS13street |>
-   filter(!is.na(FULLNAME)) |>
    mutate(mid = geometry |>
-             st_cast("LINESTRING") |>
-             st_line_sample(sample = 0.5) |> 
+             st_line_sample(sample=0.5) |>
              st_cast("POINT") |>
              st_coordinates() |>
              data.frame(),
-          p_lo =  geometry |>
-             st_cast("LINESTRING") |>
-             st_line_sample(sample = 0.5-delta) |> 
+          p_lo = geometry |>
+             st_line_sample(sample=0.5-delta) |>
              st_cast("POINT") |>
              st_coordinates() |>
              data.frame()) |>
-   unnest_wider(mid,  names_sep="_") |> # separate into X & Y columns
+   # Separate each data frame column into X and Y columns
+   unnest_wider(mid, names_sep="_") |>
    unnest_wider(p_lo, names_sep="_") |>
-   # convert the slope of the street to the angle
-   mutate(ang = atan2(mid_Y - p_lo_Y, mid_X - p_lo_X) * 180 / pi,
-          # want -90 to 90 only, flip any upside down angles
-          ang = if_else(abs(ang) > 90,
-                        ang - sign(ang)*180,
+   # Convert the slope of the street to an angle in degrees
+   mutate(ang = atan2(mid_Y-p_lo_Y, mid_X-p_lo_X)*180/pi,
+          # Keep labels upright by restricting angles to -90 through 90
+          ang = if_else(abs(ang)>90,
+                        ang-sign(ang)*180,
                         ang)) |>
-   st_as_sf(crs = st_crs(mapMS13street)) |>
-   mutate(geometry = g) 
+   # unnest_wider() drops the sf class
+   st_as_sf(sf_column_name="geometry", crs=st_crs(mapSZ))
 
 mapMS13street |>
-   st_geometry() |> 
+   st_geometry() |>
    plot()
 mapSZms13s |>
    st_geometry() |>
-   plot(border = "red", lwd = 3, add = TRUE)
+   plot(border="red", lwd=3, add=TRUE)
 for(i in 1:nrow(mapMS13street))
 {
-   text(mapMS13street$mid_X[i], 
-        mapMS13street$mid_Y[i], 
-        labels = mapMS13street$FULLNAME[i], 
-        srt = mapMS13street$ang[i], 
-        cex = 0.6)
+   text(mapMS13street$mid_X[i],
+        mapMS13street$mid_Y[i],
+        labels=mapMS13street$FULLNAME[i],
+        srt=mapMS13street$ang[i],
+        cex=0.6)
 }
 ```
 
