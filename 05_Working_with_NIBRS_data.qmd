@@ -99,7 +99,7 @@ rebuildDB <- TRUE
 # find out what files are packed inside the zip file
 unzip("NIBRS/nibrs-2025.zip", list = TRUE)
 # create a connection to the compressed data file
-con <- unz("NIBRS/nibrs-2025.zip", "2025_NIBRS_NATIONAL_MASTER_FILE.txt")
+con <- unz("NIBRS/nibrs-2025.zip", "nibrs-2025.txt")
 # read first 5 lines
 scan(con, nlines=5, what="", sep="\n")
 ```
@@ -211,7 +211,7 @@ for (tbl in unlist(seg_tables)) {
 }
 
 infile <- unz("NIBRS/nibrs-2025.zip", 
-              "2025_NIBRS_NATIONAL_MASTER_FILE.txt",
+              "nibrs-2025.txt",
               open = "r") # keep open for reading
 dbBegin(con)  # open one transaction for the entire load
 linesRead <- 0
