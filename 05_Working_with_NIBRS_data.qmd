@@ -99,9 +99,10 @@ rebuildDB <- TRUE
 # find out what files are packed inside the zip file
 unzip("NIBRS/nibrs-2025.zip", list = TRUE)
 # create a connection to the compressed data file
-con <- unz("NIBRS/nibrs-2025.zip", "nibrs-2025.txt")
+zipConnection <- unz("NIBRS/nibrs-2025.zip", "nibrs-2025.txt")
 # read first 5 lines
-scan(con, nlines=5, what="", sep="\n")
+scan(zipConnection, nlines=5, what="", sep="\n")
+close(zipConnection)
 ```
 
 As you can see, the data are not pretty. These data are in "fixed-width format." Rather than separating each field with a delimiter such as a comma or tab, fixed-width data place all fields side by side. This legacy format has some benefits. First, there is no need to store delimiters. This matters less today because storage is inexpensive, but delimiters in a dataset this size would require about 1 GB just to store commas. Instead, the data come with a separate file that describes which positions correspond to each field. The following table shows the first five fields of the NIBRS offense segment in the included `NIBRS Records Description updated.xlsx` file.
