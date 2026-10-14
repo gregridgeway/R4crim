@@ -327,6 +327,31 @@ dataExt <- dataExt |>
   filter(is.na(V4022) | V4022!="(1) Outside U.S.")
 ```
 
+There is also an important labeling error in `V4021B`, the time of day when the victimization occurred. Here is the variable as it appears in the extract file.
+```{r}
+table(dataExt$V4021B)
+```
+
+The original questionnaire uses the unambiguous terms "12 noon" and "12 midnight" (@fig-ncvs-incident-time). The extract file instead labels noon as 12 a.m. and midnight as 12 p.m. The numeric response codes are correct. Only the four factor labels that meet at noon or midnight are wrong.
+
+![Question 6 in the NCVS-2 Crime Incident Report. Source: *National Crime Victimization Survey, 2022 User Guide*, p. 131.](figs/ncvs-incident-time-questionnaire.png){#fig-ncvs-incident-time width=90%}
+
+We can repair the labels with `replace_values()`. Code 2 begins after noon and code 7 begins after midnight, while codes 1 and 6 end at those same boundaries. Since `V4021B` is a factor and the corrected labels are new factor levels, we first convert it to character and then convert the result back to a factor.
+```{r}
+dataExt <- dataExt |>
+  mutate(V4021B = V4021B |>
+    as.character() |>
+    replace_values(
+      "(01) Aft 6am-12am" ~ "(01) Aft 6am-12pm",
+      "(02) Aft 12am-3pm" ~ "(02) Aft 12pm-3pm",
+      "(06) Aft 9pm-12pm" ~ "(06) Aft 9pm-12am",
+      "(07) Aft 12pm-6am" ~ "(07) Aft 12am-6am"
+    ) |>
+    factor())
+
+table(dataExt$V4021B)
+```
+
 # Sampling weights
 
 A sampling weight tells us how many units in the population a sampled record represents. The NCVS interviews a sample of U.S. households and people, so one record in the data may represent hundreds or thousands of victimizations in the population. To estimate a national total, we sum the weights rather than count the rows. To estimate a percentage, we sum the weights for records with the feature of interest and divide by the sum of all the relevant weights. The weights account for the sample design, adjust for nonresponse, and calibrate the sample to known population totals.
