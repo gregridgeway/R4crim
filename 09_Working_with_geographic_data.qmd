@@ -541,7 +541,7 @@ mapCens |>
 
 `r .exNum('Add the polygon with your injunction zone')`
 
-`r .exNum('Add other injunction zones that intersect with your map')`
+`r .exNum('Add other injunction zones that intersect the one-mile buffer around your selected zone')`
 
 # Working with point data using Los Angeles crime data
 
@@ -631,7 +631,7 @@ dataCrime |> head(3)
 ```
 It is also a good idea to check counts over time and over places. Note that there are some strange anomalies, like areas 18, 19, 20, 21 in 2015 followed by very large jumps in 2016. Looks like 2015 and 2016 data were miscoded for these areas in these years.
 ```{r}
-dataCrime |> 
+dataCrime |>
    count(year=year(ymd_hms(date_occ)),area) |> 
    pivot_wider(names_from=year,values_from=n) |> 
    print(n=Inf, width=Inf)
@@ -654,7 +654,7 @@ dataCrime <- dataCrime |>
    st_transform(st_crs(mapSZms13))
 ```
 
-Let's now identify which crimes occurred within one mile of the MS13 injunction. I did some checking and noted that LAPD areas 1, 2, 3, 6, 7, 11, and 20 intersected with the MS13 safety zone, so I picked out just those crimes and plotted them each in different colors.
+Let's make an exploratory map of crimes near the MS13 injunction. To avoid plotting every crime in Los Angeles, we will use the rectangular bounding box of a one-mile buffer around the safety zone. The colors identify the LAPD area associated with each incident.
 ```{r}
 #| label: fig-ggplotLACrimeData
 #| fig-cap: Plot of Los Angeles crime locations near the MS13 gang injunction safety zones
@@ -668,7 +668,6 @@ bboxMS13          <- st_bbox(mapMS13mileBuffer)
 
 ggplot() +
    geom_point(data = dataCrime |> 
-                 filter(area %in% c(1,2,3,6,7,11,20)) |>
                  mutate(X = st_coordinates(geometry)[,"X"],
                         Y = st_coordinates(geometry)[,"Y"]) |>
                  st_drop_geometry() |>
@@ -687,43 +686,34 @@ ggplot() +
            color     = "red", 
            linewidth = 1) +
    scale_color_viridis_d(option = "D", name = "Area") +
-   # crop to area near MS13 safety zone
-   coord_sf(xlim = c(bboxMS13$xmin, bboxMS13$xmax), 
-            ylim = c(bboxMS13$ymin, bboxMS13$ymax), 
-            expand = FALSE) +
    # larger points in the legend
    guides(color = guide_legend(override.aes = list(size = 4))) +
    theme_minimal() +
    labs(x = NULL, y = NULL)
 ```
 
-A very useful operation is to find out which crimes occurred inside, near, or farther outside an area. We will figure out which crimes occurred inside the safety zone, in a one-mile buffer around the safety zone, or more than a mile away from the safety zone. We will filter to just those crimes that occurred in areas near the MS13 safety zone. This step is not essential, but it can save some computer time. There is no need for R to try to figure out if crimes in LAPD Area 4 fell inside the MS13 safety zone. All of those crimes are much more than a mile from the safety zone.
-```{r}
-# just get those crimes in areas near the MS13 safety zone
-dataCrimeMS13 <- dataCrime |>
-   filter(area %in% c(1,2,3,6,7,11,20))
-```
+A very useful operation is to find out which crimes occurred inside, near, or farther outside an area. We will figure out which crimes occurred inside the safety zone, in a one-mile buffer around the safety zone, or more than a mile away from the safety zone.
 
-We are going to use two different methods so you learn about different ways of solving these problems. The first method will use the now familiar `st_intersects()` function. In our `dataCrimeMS13` data frame we are going to make a new column that labels whether a crime is inside the injunction safety zone (SZ), within a one-mile buffer around the safety zone (buffer), or beyond the buffer (outside).
+We are going to use two different methods so you learn about different ways of solving these problems. The first method will use the now familiar `st_intersects()` function. In our `dataCrime` data frame we are going to make a new column that labels whether a crime is inside the injunction safety zone (SZ), within a one-mile buffer around the safety zone (buffer), or beyond the buffer (outside).
 ```{r}
 #| warning: false
 # create a variable to label the crime's location
-iSZ <- mapSZms13 |> st_intersects(dataCrimeMS13) |> unlist()
+iSZ <- mapSZms13 |> st_intersects(dataCrime) |> unlist()
 iBuff <- mapSZms13 |> 
    st_buffer(dist=5280) |>
    st_difference(mapSZms13) |>
-   st_intersects(dataCrimeMS13) |>
+   st_intersects(dataCrime) |>
    unlist()
 
-dataCrimeMS13 <- dataCrimeMS13 |>
+dataCrime <- dataCrime |>
    mutate(place1 = case_when(
       row_number() %in% iSZ   ~ "SZ",
       row_number() %in% iBuff ~ "buffer",
       .default = "outside"))
 ```
-Now `dataCrimeMS13` has a new column `place1` categorizing the location of the incident relative to the MS13 gang injunction safety zone.
+Now `dataCrime` has a new column `place1` categorizing the location of the incident relative to the MS13 gang injunction safety zone.
 ```{r}
-head(dataCrimeMS13, 3)
+head(dataCrime, 3)
 ```
 
 Let's check that all the crimes are correctly labeled with a map.
@@ -744,18 +734,16 @@ ggplot() +
            fill = NA, 
            color = "red", 
            linewidth = 3) +
-   geom_sf(data = dataCrimeMS13 |>
-              # filter to points in bounding box
-              st_filter(st_as_sfc(bboxMS13)),
+   geom_sf(data = dataCrime |>
+              # filter to points near bounding box
+              st_filter(st_as_sfc(bboxMS13) |>
+                           st_buffer(dist=5280)),
            aes(color = place1),
            shape = 16, 
            size = 0.3, 
            alpha = 0.7) +
    scale_color_manual(values = c(SZ="red", buffer="blue", outside= "green"),
                       name   = "Location") +
-   coord_sf(xlim = c(bboxMS13$xmin, bboxMS13$xmax), 
-            ylim = c(bboxMS13$ymin, bboxMS13$ymax),
-            expand = FALSE) +
    theme_minimal() +
    guides(color = guide_legend(override.aes = list(size = 4))) +
    labs(x = NULL, y = NULL)
@@ -783,15 +771,15 @@ mapA <- c(# inside safety zone
 mapA <- st_sf(place2=c("SZ","buffer","outside"),
               geom=mapA)
 plot(mapA, main="")
-dataCrimeMS13 <- dataCrimeMS13 |> st_join(mapA)
+dataCrime <- dataCrime |> st_join(mapA)
 ```
-`st_join()` will add a new column `place2` to the `dataCrimeMS13` data frame containing the label of the polygon in which it landed. Indeed, `dataCrimeMS13` now has a `place2` column categorizing the incident location.
+`st_join()` will add a new column `place2` to the `dataCrime` data frame containing the label of the polygon in which it landed. Indeed, `dataCrime` now has a `place2` column categorizing the incident location.
 ```{r}
-dataCrimeMS13 |> head(3)
+dataCrime |> head(3)
 ```
 And we can confirm that both methods produce the same results.
 ```{r}
-dataCrimeMS13 |>
+dataCrime |>
    count(place1, place2) |>
    st_drop_geometry()
 ```
@@ -804,11 +792,11 @@ Does crime behave differently inside the safety zone compared with the areas bey
 #| fig-height: 5
 #| warning: false
 #| cache: TRUE
-dataCrimeMS13 <- dataCrimeMS13 |>
+dataCrime <- dataCrime |>
    mutate(date_occ = date_occ |> ymd_hms())
 
 # count the number of crimes by year and area
-a <- dataCrimeMS13 |>
+a <- dataCrime |>
    st_drop_geometry() |>
    count(place1, year=year(date_occ)) |>
    group_by(place1) |>
@@ -834,7 +822,7 @@ For the most part the crime trends look the same. However, in which years do we 
 #| fig-height: 5
 #| warning: false
 #| cache: TRUE
-a <- dataCrimeMS13 |>
+a <- dataCrime |>
    filter(area %notin% c(18,19,20,21)) |>
    st_drop_geometry() |>
    count(place1, year=year(date_occ)) |>
@@ -853,9 +841,9 @@ ggplot(a, aes(x=year, y=relativeN, color=place1)) +
 ## Exercises
 `r .exNum('How many 2019 crimes occurred inside safety zones?')`
 
-`r .exNum('How many crimes per square mile inside safety zones? (Hint 1: use \x60st_area()\x60 for area)')`
+`r .exNum('How many 2019 crimes occurred per square mile inside safety zones? (Hint 1: use \x60st_area()\x60 for area)')`
 
-`r .exNum('How many crimes per square mile outside the safety zone, but within 1 mile of a safety zone')`
+`r .exNum('How many 2019 crimes occurred per square mile outside safety zones but within 1 mile of a safety zone')`
 
 
 # Creating new geographic objects
@@ -1243,7 +1231,7 @@ mapWilbuffer <- mapWilshire |>
    st_buffer(dist=100) |>
    st_intersection(mapSZms13s)
 
-dataCrimeMS13 <- dataCrimeMS13 |>
+dataCrime <- dataCrime |>
    mutate(inWilbuf = lengths(st_intersects(geometry, mapWilbuffer)) > 0)
 
 mapMS13street |> st_geometry() |> plot()
@@ -1257,7 +1245,7 @@ for(i in 1:nrow(mapMS13street))
 mapWilbuffer |> st_geometry() |> plot(col="green", lwd=3, add=TRUE)
 
 # add crime locations
-dataCrimeMS13 |>
+dataCrime |>
    filter(inWilbuf) |>
    st_geometry() |>
    plot(col="blue", add=TRUE, pch=16, cex=0.5)
@@ -1265,7 +1253,7 @@ dataCrimeMS13 |>
 
 And what are the most common crime types along Wilshire Blvd?
 ```{r}
-dataCrimeMS13 |>
+dataCrime |>
    st_drop_geometry() |>
    filter(inWilbuf) |>
    count(crm_cd_desc) |>
@@ -1281,7 +1269,7 @@ In the previous method we created a 100-foot buffer and then asked which crimes 
 #| fig-height: 5
 
 # explore st_distance() with first 10 incidents
-dataCrimeMS13 |> 
+dataCrime |>
    head(10) |>
    st_distance(mapWilshire)
 
@@ -1295,7 +1283,7 @@ mapSZms13s |>
    st_geometry() |>
    plot(border="red", lwd=3, add=TRUE)
 
-dataCrimeMS13 |>
+dataCrime |>
    # include only those within 100 feet of Wilshire Blvd
    filter(as.numeric(st_distance(geometry, mapWilshire)) < 100) |>
    st_geometry() |>
@@ -1318,7 +1306,7 @@ First, let's subset our crime data so we just have crimes that fall into the MS1
 #| fig-height: 5
 #| warning: false
 
-dataCrimeMS13s <- dataCrimeMS13 |>
+dataCrimeMS13s <- dataCrime |>
    st_filter(mapSZms13s)
 
 mapMS13street |>
@@ -1404,12 +1392,12 @@ mapMetro <- mapLAstreet |>
                       filter(FULLNAME=="Wilshire Blvd"))
 ```
 
-`r .exNum('RFK Community Schools occupy the site between S Mariposa Ave and S Catalina St and W 8th St and Wilshire Blvd. How many crimes occurred within 500 feet of the RFK School?')` The RFK Schools occupies the site of the Ambassador Hotel where Robert F. Kennedy was assassinated on June 5, 1968. Trump Wilshire Associates bought it in 1989, followed by a decade long fight with the Los Angeles School District who wished to take the site by eminent domain. The schools opened in 2011.)
+`r .exNum('RFK Community Schools occupy the site between S Mariposa Ave and S Catalina St and W 8th St and Wilshire Blvd. How many crimes occurred within 500 feet of the RFK Community Schools?')` The RFK Community Schools occupy the site of the Ambassador Hotel where Robert F. Kennedy was assassinated on June 5, 1968. Trump Wilshire Associates bought it in 1989, followed by a decade-long fight with the Los Angeles Unified School District, which sought to take the site by eminent domain. The schools opened in 2011.
 
 Hints:
 ```{r}
 #| label: fig-RFKschool
-#| fig-cap: Boundaries of the RFK school
+#| fig-cap: Boundaries of the RFK Community Schools site
 #| out-width: "100%"
 #| fig-height: 5
 
@@ -1470,7 +1458,7 @@ mapSZ |>
    summarize(iMin = which.min(area),
              iMax = which.max(area))
 
-# or a more complete solution that combines areas by case number
+# alternatively, combine polygons to compare injunction cases
 mapSZ |>
    group_by(case_no) |>
    summarize(area = st_area(st_union(geometry))) |>
@@ -1586,44 +1574,38 @@ mapSZms13 |>
 ```{r}
 #| fig-height: 5
 #| out-width: "100%"
-# get total population for each census tract
-dataRes <- get_acs(geography = "tract",
-                   variables = "B01001_001E",
-                   state     = "CA",
-                   county    = "Los Angeles",
-                   year      = 2019,
-                   survey    = "acs5",
-                   cache_table = TRUE) |>
-   select(GEOID, estimate) |>
-   rename(pop = estimate)
-# merge total population into census map
-mapCens <- mapCens |>
-   left_join(dataRes, join_by(GEOID10==GEOID))
-
-# census tracts within 1 mile of safety zone #51
-mapCensMS13 <- mapCens |>
+# select Los Angeles census tracts within one mile of safety zone 51
+mapCens |>
    st_filter(mapSZ |>
                 slice(51) |>
-                st_buffer(dist=5280))
-
-ggplot() +
-  geom_sf(data = mapCensMS13, 
-          fill = NA, 
-          color = "grey60", 
-          linewidth = 0.2) +
-  geom_sf_text(data = mapCensMS13,
-               aes(label = pop),
-               # function for selecting label points
-               fun.geometry = st_point_on_surface,
-               size = 2.5, 
-               color = "black", 
-               check_overlap = TRUE) +
-  geom_sf(data = mapSZ |> slice(51), 
-          fill = NA, 
-          color = "red", 
-          linewidth = 1) +
-  labs(x = NULL, y = NULL) +
-  theme_minimal()
+                st_buffer(dist=5280)) |>
+   left_join(dataRace, join_by(GEOID10==GEOID)) |>
+   mutate(pctNonWhite = if_else(total>0 & !is.na(white),
+                                (total-white)/total,
+                                NA_real_)) |>
+   ggplot() +
+   geom_sf(aes(fill=pctNonWhite),
+           color="white",
+           linewidth=0.2) +
+   geom_sf(data=mapSZ |>
+                    slice(-51) |>
+                    st_filter(mapSZ |>
+                                 slice(51) |>
+                                 st_buffer(dist=5280)),
+           fill=NA,
+           color="darkgreen",
+           linewidth=0.8) +
+   geom_sf(data=mapSZ |>
+                    slice(51),
+           fill=NA,
+           color="red",
+           linewidth=1.2) +
+   scale_fill_viridis_c(labels=scales::label_percent(),
+                        na.value="grey80") +
+   labs(fill="Non-white",
+        x=NULL,
+        y=NULL) +
+   theme_minimal()
 ```
 
 `r .exQ(10)`
@@ -1667,6 +1649,7 @@ units::set_units(nBufCrimes / st_area(mapBuf), value="1/mile^2")
 
 ```{r}
 #| warning: false
+# South Vermont Avenue
 mapMS13street |>
    filter(FULLNAME=="S Vermont Ave") |>
    st_buffer(dist=100) |>
@@ -1674,6 +1657,7 @@ mapMS13street |>
    st_intersects(dataCrime) |>
    lengths()
 
+# Wilshire Boulevard
 mapMS13street |>
    filter(FULLNAME=="Wilshire Blvd") |>
    st_buffer(dist=100) |>
@@ -1722,6 +1706,7 @@ mapMetro |>
    lengths()
 
 # or
+#   note sum() would double count if buffers overlap
 mapMetro |>
    st_buffer(dist=500) |>
    st_intersects(dataCrime) |>
