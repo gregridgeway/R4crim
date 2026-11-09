@@ -574,7 +574,6 @@ head(dataCrime, 3)
 Alternatively, we can just skip the download and ask R to directly read in the data from the Los Angeles data portal. The only downside to this is if you mess up your data, then you will need to download it all over again, which can be slow.
 ```{r}
 #| label: loadLAcrimeData2
-#| cache: true
 # Method #2
 dataCrime <- read.csv("https://data.lacity.org/resource/63jg-8b9z.csv?$where=date_extract_y(date_occ)=2019&$limit=5000000",
                       as.is=TRUE) # don't convert strings to other types (e.g. logical)
@@ -590,7 +589,6 @@ Let's download all 2010-2019 data as well as the 2020-2024 data so that we can e
 ```{r}
 #| label: loadLAcrimeData3
 #| message: false
-#| cache: true
 options(timeout = 600) # ten minutes
 
 # get the 2010-2019 data
@@ -661,7 +659,6 @@ Let's make an exploratory map of crimes near the MS13 injunction. To avoid plott
 #| out_width: "100%"
 #| fig-height: 5
 #| warning: false
-#| cache: TRUE
 
 mapMS13mileBuffer <- mapSZms13 |> st_buffer(5280)
 bboxMS13          <- st_bbox(mapMS13mileBuffer)
@@ -724,7 +721,6 @@ Let's check that all the crimes are correctly labeled with a map.
 #| fig-height: 5
 #| fig-format: png
 #| warning: false
-#| cache: TRUE
 ggplot() +
    geom_sf(data = mapSZms13 |>
               st_buffer(dist=5280),       
@@ -791,7 +787,6 @@ Does crime behave differently inside the safety zone compared with the areas bey
 #| out-width: "100%"
 #| fig-height: 5
 #| warning: false
-#| cache: TRUE
 dataCrime <- dataCrime |>
    mutate(date_occ = date_occ |> ymd_hms())
 
@@ -821,7 +816,6 @@ For the most part the crime trends look the same. However, in which years do we 
 #| out-width: "100%"
 #| fig-height: 5
 #| warning: false
-#| cache: TRUE
 a <- dataCrime |>
    filter(area %notin% c(18,19,20,21)) |>
    st_drop_geometry() |>
